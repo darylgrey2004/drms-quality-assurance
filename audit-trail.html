@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Audit Trail</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/audit-trail.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail (active) -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (audit trail) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Audit Trail</h1>
+                <p class="text-sm text-gray-500 mt-1">Complete system activity log with version history and user actions</p>
+            </div>
+
+            <!-- audit stats cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Total Events</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">1,284</div>
+                        </div>
+                        <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📋</span>
+                    </div>
+                    <div class="text-xs text-green-600 mt-2">+124 this week</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Document Actions</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">847</div>
+                        </div>
+                        <span class="bg-blue-100 text-blue-700 p-2 rounded-lg">📄</span>
+                    </div>
+                    <div class="text-xs text-blue-600 mt-2">66% of total</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">User Actions</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">312</div>
+                        </div>
+                        <span class="bg-green-100 text-green-700 p-2 rounded-lg">👥</span>
+                    </div>
+                    <div class="text-xs text-green-600 mt-2">24% of total</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">System Events</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">125</div>
+                        </div>
+                        <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">⚙️</span>
+                    </div>
+                    <div class="text-xs text-purple-600 mt-2">10% of total</div>
+                </div>
+            </div>
+
+            <!-- audit filters -->
+            <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                            <input type="text" id="searchAudit" placeholder="Search by user, action, document, or details..." 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <select id="actionTypeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Actions</option>
+                            <option value="upload">Upload</option>
+                            <option value="validate">Validate</option>
+                            <option value="approve">Approve</option>
+                            <option value="reject">Reject</option>
+                            <option value="lock">Lock</option>
+                            <option value="edit">Edit</option>
+                            <option value="delete">Delete</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                        </select>
+                        <select id="userFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Users</option>
+                            <option value="santos">Dr. Santos</option>
+                            <option value="garcia">Prof. Garcia</option>
+                            <option value="cruz">Dean Cruz</option>
+                            <option value="reyes">Dr. Reyes</option>
+                            <option value="mendoza">Prof. Mendoza</option>
+                            <option value="qa">QA Office</option>
+                        </select>
+                        <select id="dateRangeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <button id="exportAuditBtn" class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors flex items-center">
+                            <span class="mr-2">📥</span> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- timeline view toggle -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex gap-2 border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="px-4 py-2 bg-teal-700 text-white text-sm font-medium view-toggle active-view" data-view="list">
+                        📋 List View
+                    </button>
+                    <button class="px-4 py-2 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium view-toggle" data-view="timeline">
+                        📅 Timeline
+                    </button>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <span id="eventCount">Showing 24 events</span>
+                </div>
+            </div>
+
+            <!-- list view (default) -->
+            <div id="listView" class="block">
+                <!-- audit table -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                    <th class="text-left py-3 px-2">Timestamp</th>
+                                    <th class="text-left py-3 px-2">User</th>
+                                    <th class="text-left py-3 px-2">Action</th>
+                                    <th class="text-left py-3 px-2">Document / Item</th>
+                                    <th class="text-left py-3 px-2">Category</th>
+                                    <th class="text-left py-3 px-2">Version</th>
+                                    <th class="text-left py-3 px-2">IP Address</th>
+                                    <th class="text-left py-3 px-2">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody" class="divide-y divide-gray-100">
+                                <!-- Today's events -->
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-27 09:30:45</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">AS</span>
+                                            <span>Dr. Santos</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Approve</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">QMS Manual v3.2</td>
+                                    <td class="py-3 px-2 text-gray-600">ISO 9001:2015</td>
+                                    <td class="py-3 px-2 text-gray-600">v3.2</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.45</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="1">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-27 08:15:22</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">PG</span>
+                                            <span>Prof. Garcia</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Upload</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Curriculum Framework</td>
+                                    <td class="py-3 px-2 text-gray-600">AACCUP</td>
+                                    <td class="py-3 px-2 text-gray-600">v1.0</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.102</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="2">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Yesterday's events -->
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-26 16:45:10</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">DC</span>
+                                            <span>Dean Cruz</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">Comment</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Faculty Profiles</td>
+                                    <td class="py-3 px-2 text-gray-600">AACCUP</td>
+                                    <td class="py-3 px-2 text-gray-600">v2.1</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.78</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="3">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-26 14:20:05</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">DR</span>
+                                            <span>Dr. Reyes</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Validate</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Research Output 2025</td>
+                                    <td class="py-3 px-2 text-gray-600">COE</td>
+                                    <td class="py-3 px-2 text-gray-600">v0.3</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.34</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="4">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-26 11:05:33</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-700 text-xs font-bold">QO</span>
+                                            <span>QA Office</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Flag</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Audit Report Q4</td>
+                                    <td class="py-3 px-2 text-gray-600">ISO</td>
+                                    <td class="py-3 px-2 text-gray-600">v1.5</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.200</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="5">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- This week's events -->
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-25 15:30:18</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">PM</span>
+                                            <span>Prof. Mendoza</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Upload</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Extension Impact Assessment</td>
+                                    <td class="py-3 px-2 text-gray-600">COE</td>
+                                    <td class="py-3 px-2 text-gray-600">v1.1</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.156</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="6">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-25 10:12:45</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 text-xs font-bold">AS</span>
+                                            <span>Dr. Santos</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Lock</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">QMS Manual v3.1</td>
+                                    <td class="py-3 px-2 text-gray-600">ISO</td>
+                                    <td class="py-3 px-2 text-gray-600">v3.1</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.45</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="7">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-24 09:45:12</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 text-xs font-bold">SY</span>
+                                            <span>System</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">Backup</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">Database Backup</td>
+                                    <td class="py-3 px-2 text-gray-600">System</td>
+                                    <td class="py-3 px-2 text-gray-600">-</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">localhost</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="8">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Login events -->
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-24 08:30:00</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">DC</span>
+                                            <span>Dean Cruz</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Login</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">User Session</td>
+                                    <td class="py-3 px-2 text-gray-600">Authentication</td>
+                                    <td class="py-3 px-2 text-gray-600">-</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.78</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="9">👁️</button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="audit-row hover:bg-gray-50">
+                                    <td class="py-3 px-2 text-gray-600 whitespace-nowrap">2026-02-23 17:20:45</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">PG</span>
+                                            <span>Prof. Garcia</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-2"><span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Logout</span></td>
+                                    <td class="py-3 px-2 font-medium text-gray-800">User Session</td>
+                                    <td class="py-3 px-2 text-gray-600">Authentication</td>
+                                    <td class="py-3 px-2 text-gray-600">-</td>
+                                    <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.102</td>
+                                    <td class="py-3 px-2">
+                                        <button class="text-teal-600 hover:text-teal-800 view-details" data-id="10">👁️</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- timeline view (hidden by default) -->
+            <div id="timelineView" class="hidden">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="space-y-6">
+                        <!-- Today -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>
+                                Today, February 27, 2026
+                            </h3>
+                            <div class="space-y-3 pl-4">
+                                <div class="flex items-start gap-3 border-l-2 border-teal-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">09:30</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Dr. Santos</span> approved <span class="font-medium text-gray-800">QMS Manual v3.2</span></p>
+                                        <p class="text-xs text-gray-400">ISO 9001:2015 · IP: 192.168.1.45</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 border-l-2 border-blue-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">08:15</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded <span class="font-medium text-gray-800">Curriculum Framework v1.0</span></p>
+                                        <p class="text-xs text-gray-400">AACCUP Area II · IP: 192.168.1.102</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Yesterday -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                Yesterday, February 26, 2026
+                            </h3>
+                            <div class="space-y-3 pl-4">
+                                <div class="flex items-start gap-3 border-l-2 border-amber-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">16:45</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Dean Cruz</span> commented on <span class="font-medium text-gray-800">Faculty Profiles v2.1</span></p>
+                                        <p class="text-xs text-gray-400">AACCUP Area III · IP: 192.168.1.78</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 border-l-2 border-purple-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">14:20</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Dr. Reyes</span> validated <span class="font-medium text-gray-800">Research Output 2025 v0.3</span></p>
+                                        <p class="text-xs text-gray-400">COE Indicator 2 · IP: 192.168.1.34</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 border-l-2 border-red-200 pl-4">
+                                    <span class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-700 text-xs font-bold">11:05</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">QA Office</span> flagged <span class="font-medium text-gray-800">Audit Report Q4 v1.5</span></p>
+                                        <p class="text-xs text-gray-400">ISO Clause 9 · IP: 192.168.1.200</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- February 25 -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                February 25, 2026
+                            </h3>
+                            <div class="space-y-3 pl-4">
+                                <div class="flex items-start gap-3 border-l-2 border-green-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">15:30</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Prof. Mendoza</span> uploaded <span class="font-medium text-gray-800">Extension Impact Assessment v1.1</span></p>
+                                        <p class="text-xs text-gray-400">COE Indicator 3 · IP: 192.168.1.156</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 border-l-2 border-teal-200 pl-4">
+                                    <span class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">10:12</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Dr. Santos</span> locked <span class="font-medium text-gray-800">QMS Manual v3.1</span></p>
+                                        <p class="text-xs text-gray-400">ISO 9001:2015 · IP: 192.168.1.45</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- February 24 -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+                                February 24, 2026
+                            </h3>
+                            <div class="space-y-3 pl-4">
+                                <div class="flex items-start gap-3 border-l-2 border-gray-200 pl-4 pb-2">
+                                    <span class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 text-xs font-bold">09:45</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">System</span> performed <span class="font-medium text-gray-800">database backup</span></p>
+                                        <p class="text-xs text-gray-400">System maintenance</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3 border-l-2 border-blue-200 pl-4">
+                                    <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">08:30</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Dean Cruz</span> logged in</p>
+                                        <p class="text-xs text-gray-400">IP: 192.168.1.78</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- February 23 -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                                February 23, 2026
+                            </h3>
+                            <div class="space-y-3 pl-4">
+                                <div class="flex items-start gap-3 border-l-2 border-indigo-200 pl-4">
+                                    <span class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 text-xs font-bold">17:20</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-medium">Prof. Garcia</span> logged out</p>
+                                        <p class="text-xs text-gray-400">IP: 192.168.1.102</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-500">Showing 1 to 10 of 1,284 events</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
+                    <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">4</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+
+            <!-- version history summary -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <h3 class="font-semibold text-gray-800 text-lg mb-3">Version History Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Total versions tracked:</span>
+                            <span class="font-medium text-gray-800">2,456</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Documents with multiple versions:</span>
+                            <span class="font-medium text-gray-800">342</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Average versions per document:</span>
+                            <span class="font-medium text-gray-800">2.9</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Most active document:</span>
+                            <span class="font-medium text-gray-800">QMS Manual (8 versions)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <h3 class="font-semibold text-gray-800 text-lg mb-3">Audit Trail Integrity</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span class="text-sm text-gray-600">All logs are tamper-proof and timestamped</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span class="text-sm text-gray-600">Daily backups maintained for 90 days</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span class="text-sm text-gray-600">IP addresses and user agents logged</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <p class="text-xs text-gray-400">Last audit log verification: Feb 27, 2026 03:00 AM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/audit-trail.js"></script>
+</body>
+</html>

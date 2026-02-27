@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Dashboard</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/homepage.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard (active) -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (dashboard) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row: Dashboard title + breadcrumb -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Dashboard</h1>
+                    <p class="text-sm text-gray-500 mt-1">College of Teacher Education · Quality Assurance</p>
+                </div>
+                <!-- optional profile / date -->
+                <div class="bg-white rounded-full px-4 py-2 text-sm shadow-sm text-gray-600 border">
+                    26 Feb 2026 · <span class="text-teal-700">QA cycle 1</span>
+                </div>
+            </div>
+
+            <!-- KPI cards (first row) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <!-- total documents -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <span class="text-gray-500 text-sm">TOTAL DOCUMENTS</span>
+                        <span class="text-teal-600 text-xl">📄</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 mt-2">847</div>
+                    <div class="text-xs text-teal-600 mt-1">+12 this month</div>
+                </div>
+                <!-- approved -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 text-sm">APPROVED</span>
+                        <span class="text-green-600 text-xl">✅</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 mt-2">692</div>
+                    <div class="text-xs text-green-600 mt-1">81.7% approval rate</div>
+                </div>
+                <!-- pending review -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 text-sm">PENDING REVIEW</span>
+                        <span class="text-amber-600 text-xl">⏳</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 mt-2">38</div>
+                    <div class="text-xs text-amber-600 mt-1">5 urgent</div>
+                </div>
+                <!-- expiring soon -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500 text-sm">EXPIRING SOON</span>
+                        <span class="text-rose-600 text-xl">⚠️</span>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 mt-2">14</div>
+                    <div class="text-xs text-rose-600 mt-1">Within 30 days</div>
+                </div>
+            </div>
+
+            <!-- second row: compliance bars (ISO, AACCUP, COE) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
+                <!-- ISO card -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">ISO 9001:2015</span>
+                        <span class="text-sm font-semibold text-teal-700">92%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">166 of 180 documents verified</div>
+                </div>
+                <!-- AACCUP card -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">AACCUP Areas I-X</span>
+                        <span class="text-sm font-semibold text-amber-700">78%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">328 of 420 documents verified</div>
+                </div>
+                <!-- COE card -->
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">COE Indicators</span>
+                        <span class="text-sm font-semibold text-indigo-700">85%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-indigo-500 h-2 rounded-full" style="width:85%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">210 of 247 documents verified</div>
+                </div>
+            </div>
+
+            <!-- Recent Documents + Quick Actions row (two columns) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- left: Recent Documents table (span 2) -->
+                <div class="lg:col-span-2 bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-semibold text-gray-800 text-lg">Recent Documents</h2>
+                        <a href="documents.html" class="text-sm text-teal-700 hover:text-teal-800 font-medium">View All →</a>
+                    </div>
+
+                    <!-- table header (minimal) -->
+                    <div class="grid grid-cols-12 text-xs font-medium text-gray-500 pb-2 border-b border-gray-100">
+                        <div class="col-span-4">DOCUMENT</div>
+                        <div class="col-span-2">CATEGORY</div>
+                        <div class="col-span-2">AREA / CLAUSE</div>
+                        <div class="col-span-1">STATUS</div>
+                        <div class="col-span-1">VERSION</div>
+                        <div class="col-span-2">ACTIONS</div>
+                    </div>
+
+                    <!-- document rows -->
+                    <div class="divide-y divide-gray-100">
+                        <!-- Row 1: QMS Manual -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Quality Management System Manual</div>
+                                <div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
+                            <div class="col-span-2 text-gray-600">Clause 4 - Context</div>
+                            <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                            <div class="col-span-1 text-gray-600">v3.2</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                        <!-- Row 2: Curriculum Dev -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Curriculum Development Framework</div>
+                                <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">AACCUP</div>
+                            <div class="col-span-2 text-gray-600">Area II - Faculty</div>
+                            <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
+                            <div class="col-span-1 text-gray-600">v1.0</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                        <!-- Row 3: Research Output -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
+                                <div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">COE</div>
+                            <div class="col-span-2 text-gray-600">Research & Extension</div>
+                            <div class="col-span-1"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></div>
+                            <div class="col-span-1 text-gray-600">v0.3</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                        <!-- Row 4: Faculty Profile -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Faculty Profile and Qualifications</div>
+                                <div class="text-xs text-gray-400">by Dean Cruz · 2026-01-10</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">AACCUP</div>
+                            <div class="col-span-2 text-gray-600">Area III - Curriculum</div>
+                            <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                            <div class="col-span-1 text-gray-600">v2.1</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                        <!-- Row 5: Internal Audit Report -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Internal Audit Report Q4 2025</div>
+                                <div class="text-xs text-gray-400">by QA Office · 2025-12-01</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
+                            <div class="col-span-2 text-gray-600">Clause 9 - Evaluation</div>
+                            <div class="col-span-1"><span class="badge-expired px-2 py-1 rounded-full text-xs">Expired</span></div>
+                            <div class="col-span-1 text-gray-600">v1.5</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                        <!-- Row 6: Extension Program -->
+                        <div class="grid grid-cols-12 py-3 text-sm items-center">
+                            <div class="col-span-4">
+                                <div class="font-medium text-gray-800">Extension Program Impact Assessment</div>
+                                <div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div>
+                            </div>
+                            <div class="col-span-2 text-gray-600">COE</div>
+                            <div class="col-span-2 text-gray-600">Community Extension</div>
+                            <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
+                            <div class="col-span-1 text-gray-600">v1.1</div>
+                            <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                                <button class="hover:underline">👁️</button>
+                                <button class="hover:underline">📎</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- right column: Quick Actions + Recent Activity -->
+                <div class="space-y-6">
+                    <!-- Quick actions card (with links to actual pages) -->
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h2 class="font-semibold text-gray-800 text-lg mb-3">Quick Actions</h2>
+                        <div class="space-y-2">
+                            <a href="upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📤</span>
+                                <div><div class="font-medium text-sm">Upload Document</div><div class="text-xs text-gray-400">Add new QA records</div></div>
+                            </a>
+                            <a href="evidence-map.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">🗺️</span>
+                                <div><div class="font-medium text-sm">Map Evidence</div><div class="text-xs text-gray-400">Link to standards</div></div>
+                            </a>
+                            <a href="reports.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📊</span>
+                                <div><div class="font-medium text-sm">Generate Report</div><div class="text-xs text-gray-400">Completeness reports</div></div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Recent activity card -->
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h2 class="font-semibold text-gray-800 text-lg mb-3">Recent Activity</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
+                                <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-800 text-xs font-bold">D</span>
+                                <div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved QMS Manual v3.2</p><p class="text-xs text-gray-400">2h ago</p></div>
+                            </div>
+                            <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
+                                <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-800 text-xs font-bold">P</span>
+                                <div><p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded Curriculum Framework</p><p class="text-xs text-gray-400">4h ago</p></div>
+                            </div>
+                            <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
+                                <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-800 text-xs font-bold">D</span>
+                                <div><p class="text-sm"><span class="font-medium">Dean Cruz</span> commented on Faculty Profiles</p><p class="text-xs text-gray-400">6h ago</p></div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-rose-100 rounded-full flex items-center justify-center text-rose-800 text-xs font-bold">Q</span>
+                                <div><p class="text-sm"><span class="font-medium">QA Office</span> flagged Audit Report Q4</p><p class="text-xs text-gray-400">1d ago</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/homepage.js"></script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Users</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/users.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users (active) -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (users) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">User Management</h1>
+                <p class="text-sm text-gray-500 mt-1">Manage system users and role-based access control</p>
+            </div>
+
+            <!-- user stats cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Total Users</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">24</div>
+                        </div>
+                        <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">👥</span>
+                    </div>
+                    <div class="text-xs text-green-600 mt-2">+3 this month</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Active</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">22</div>
+                        </div>
+                        <span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span>
+                    </div>
+                    <div class="text-xs text-green-600 mt-2">92% active rate</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Pending</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">2</div>
+                        </div>
+                        <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
+                    </div>
+                    <div class="text-xs text-amber-600 mt-2">Awaiting approval</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-500 text-sm">Roles</span>
+                            <div class="text-3xl font-bold text-gray-800 mt-2">6</div>
+                        </div>
+                        <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">🔐</span>
+                    </div>
+                    <div class="text-xs text-purple-600 mt-2">RBAC enabled</div>
+                </div>
+            </div>
+
+            <!-- user filters and actions -->
+            <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                            <input type="text" id="searchUsers" placeholder="Search by name, email, or role..." 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Roles</option>
+                            <option value="admin">Administrator</option>
+                            <option value="dean">Dean</option>
+                            <option value="qa-coordinator">QA Coordinator</option>
+                            <option value="area-chair">Area Chair / Program Head</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="evaluator">External Evaluator</option>
+                        </select>
+                        <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <button id="addUserBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors flex items-center">
+                            <span class="mr-2">➕</span> Add User
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- users table -->
+            <div class="bg-white rounded-xl p-5 stat-card">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                <th class="text-left py-3 px-2">User</th>
+                                <th class="text-left py-3 px-2">Email</th>
+                                <th class="text-left py-3 px-2">Role</th>
+                                <th class="text-left py-3 px-2">Department</th>
+                                <th class="text-left py-3 px-2">Status</th>
+                                <th class="text-left py-3 px-2">Last Active</th>
+                                <th class="text-left py-3 px-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                            <!-- Admin -->
+                            <tr class="user-row" data-role="admin" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold">JD</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Dr. Juan Dela Cruz</div>
+                                            <div class="text-xs text-gray-400">Administrator</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">juan.delacruz@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Administrator</span></td>
+                                <td class="py-3 px-2 text-gray-600">QA Office</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Today 09:30 AM</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="1">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="1">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="1">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Dean -->
+                            <tr class="user-row" data-role="dean" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold">MC</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Dr. Maria Cruz</div>
+                                            <div class="text-xs text-gray-400">Dean</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">maria.cruz@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Dean</span></td>
+                                <td class="py-3 px-2 text-gray-600">College of Teacher Education</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Yesterday 04:15 PM</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="2">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="2">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="2">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- QA Coordinator -->
+                            <tr class="user-row" data-role="qa-coordinator" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">AS</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Dr. Ana Santos</div>
+                                            <div class="text-xs text-gray-400">QA Coordinator</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">ana.santos@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">QA Coordinator</span></td>
+                                <td class="py-3 px-2 text-gray-600">Quality Assurance Office</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Today 11:20 AM</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="3">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="3">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="3">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Area Chair / Program Head -->
+                            <tr class="user-row" data-role="area-chair" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold">RG</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Dr. Roberto Gomez</div>
+                                            <div class="text-xs text-gray-400">Program Head - Elementary Ed</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">roberto.gomez@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">Program Head</span></td>
+                                <td class="py-3 px-2 text-gray-600">Elementary Education</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Feb 26, 2026</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="4">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="4">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="4">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Faculty 1 -->
+                            <tr class="user-row" data-role="faculty" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold">MR</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Prof. Maria Reyes</div>
+                                            <div class="text-xs text-gray-400">Faculty</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">maria.reyes@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">Faculty</span></td>
+                                <td class="py-3 px-2 text-gray-600">Science Education</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Feb 26, 2026</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="5">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="5">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="5">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Faculty 2 -->
+                            <tr class="user-row" data-role="faculty" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold">JL</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Prof. Jose Lim</div>
+                                            <div class="text-xs text-gray-400">Faculty</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">jose.lim@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">Faculty</span></td>
+                                <td class="py-3 px-2 text-gray-600">Mathematics Education</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Feb 25, 2026</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="6">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="6">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="6">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- External Evaluator -->
+                            <tr class="user-row" data-role="evaluator" data-status="active">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold">EV</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Dr. Emma Villanueva</div>
+                                            <div class="text-xs text-gray-400">External Evaluator</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">emma.villanueva@external.org</td>
+                                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">External Evaluator</span></td>
+                                <td class="py-3 px-2 text-gray-600">CHED</td>
+                                <td class="py-3 px-2"><span class="badge-approved px-2 py-1 rounded-full text-xs">Active</span></td>
+                                <td class="py-3 px-2 text-gray-400">Feb 20, 2026</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="7">✏️</button>
+                                        <button class="text-gray-500 hover:text-gray-700 view-user" data-id="7">👁️</button>
+                                        <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="7">🔒</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Pending User -->
+                            <tr class="user-row" data-role="faculty" data-status="pending">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold">PT</span>
+                                        <div>
+                                            <div class="font-medium text-gray-800">Prof. Pedro Tan</div>
+                                            <div class="text-xs text-gray-400">Faculty (Pending)</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-600">pedro.tan@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">Faculty</span></td>
+                                <td class="py-3 px-2 text-gray-600">Social Studies</td>
+                                <td class="py-3 px-2"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
+                                <td class="py-3 px-2 text-gray-400">Never</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 approve-user" data-id="8">✓ Approve</button>
+                                        <button class="text-red-500 hover:text-red-700 reject-user" data-id="8">✕</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Inactive User -->
+                            <tr class="user-row" data-role="faculty" data-status="inactive">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold">LF</span>
+                                        <div>
+                                            <div class="font-medium text-gray-500">Dr. Luz Fernandez</div>
+                                            <div class="text-xs text-gray-400">Faculty (On Leave)</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 text-gray-500">luz.fernandez@cte.edu</td>
+                                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full">Faculty</span></td>
+                                <td class="py-3 px-2 text-gray-500">Language Education</td>
+                                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs">Inactive</span></td>
+                                <td class="py-3 px-2 text-gray-400">Jan 15, 2026</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex gap-2">
+                                        <button class="text-teal-600 hover:text-teal-800 reactivate-user" data-id="9">🔄 Reactivate</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-500">Showing 1 to 9 of 24 users</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
+                    <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+
+            <!-- role permissions summary -->
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3">Role-Based Access Control</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                            Administrator
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">Full system access, user management, audit logs</p>
+                        <div class="text-xs text-gray-400">1 active user</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                            Dean
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">Final approval, reports, user oversight</p>
+                        <div class="text-xs text-gray-400">1 active user</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            QA Coordinator
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">Document validation, workflow management, reports</p>
+                        <div class="text-xs text-gray-400">1 active user</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                            Area Chair / Program Head
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">Area-specific document management, initial approval</p>
+                        <div class="text-xs text-gray-400">3 active users</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                            Faculty
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">Upload documents, view assigned records</p>
+                        <div class="text-xs text-gray-400">15 active, 2 pending</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 stat-card">
+                        <h3 class="font-medium text-gray-800 mb-2 flex items-center">
+                            <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+                            External Evaluator
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">View-only access for accreditation visits</p>
+                        <div class="text-xs text-gray-400">1 active user</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- invite user section -->
+            <div class="mt-6 bg-white rounded-xl p-5 stat-card">
+                <h3 class="font-semibold text-gray-800 text-lg mb-3">Invite New User</h3>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="email" id="inviteEmail" placeholder="Email address" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div class="w-full md:w-48">
+                        <select id="inviteRole" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="faculty">Faculty</option>
+                            <option value="area-chair">Area Chair / Program Head</option>
+                            <option value="qa-coordinator">QA Coordinator</option>
+                            <option value="evaluator">External Evaluator</option>
+                        </select>
+                    </div>
+                    <button id="sendInviteBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">
+                        Send Invitation
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">An email will be sent with login instructions and role-based access setup.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/users.js"></script>
+</body>
+</html>

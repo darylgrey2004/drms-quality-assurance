@@ -1,0 +1,178 @@
+/* css/upload.css */
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* custom navy/teal palette (consistent with homepage) */
+.bg-navy-sidebar {
+    background-color: #0c2538;
+}
+
+.bg-navy-deep {
+    background-color: #0b1f33;
+}
+
+.text-teal-logo {
+    color: #5ee0d0;
+}
+
+.border-teal-light {
+    border-color: #2aa79b33;
+}
+
+/* hover effect for nav items */
+.hover-nav:hover {
+    background-color: #1f4e5e;
+    color: white;
+}
+
+/* active navigation item */
+.active-nav {
+    background-color: #1a4450;
+    border-left: 4px solid #2aa79b;
+}
+
+/* stat card styles (consistent) */
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* utility classes */
+.text-teal-300 {
+    color: #5eead4;
+}
+
+.text-teal-300\/70 {
+    color: rgba(94, 234, 212, 0.7);
+}
+
+.bg-teal-800\/40 {
+    background-color: rgba(17, 94, 89, 0.4);
+}
+
+.border-teal-400 {
+    border-color: #2dd4bf;
+}
+
+/* hover states */
+.hover\:bg-teal-50:hover {
+    background-color: #f0fdfa;
+}
+
+.hover\:text-teal-800:hover {
+    color: #115e59;
+}
+
+/* transitions */
+.transition {
+    transition: all 0.2s ease;
+}
+
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* focus states */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    ring: 2px solid #14b8a6;
+}
+
+/* file drop zone - full width fix */
+#dropZone {
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#dropZone:hover {
+    border-color: #14b8a6;
+    background-color: #f0fdfa;
+}
+
+/* form element styling - ensure full width */
+input[type="text"], 
+input[type="date"], 
+select, 
+textarea,
+#dropZone,
+#fileInfo,
+#uploadForm,
+#uploadForm > div,
+.grid,
+.space-y-4 > div {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ensure grid children take full width */
+.grid > div {
+    min-width: 0; /* prevents grid overflow */
+    width: 100%;
+}
+
+input[type="text"]:focus, 
+input[type="date"]:focus, 
+select:focus, 
+textarea:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
+}
+
+/* radio button styling */
+input[type="radio"] {
+    accent-color: #0f766e;
+}
+
+/* button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+/* cancel button */
+#cancelBtn {
+    transition: all 0.2s ease;
+}
+
+#cancelBtn:hover {
+    background-color: #f9fafb;
+}
+
+/* ensure main content area allows full width */
+main.flex-1 {
+    width: calc(100% - 18rem); /* sidebar is w-72 = 18rem */
+    max-width: calc(100% - 18rem);
+}
+
+/* form card full width */
+.bg-white.rounded-xl.p-6.stat-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* remove any max-width constraints */
+.max-w-4xl {
+    max-width: none !important;
+}

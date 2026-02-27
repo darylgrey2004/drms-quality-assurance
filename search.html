@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Search</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/search.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search (active) -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (search) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Search Documents</h1>
+                <p class="text-sm text-gray-500 mt-1">Find QA records across ISO, AACCUP, and COE standards</p>
+            </div>
+
+            <!-- advanced search panel -->
+            <div class="bg-white rounded-xl p-6 stat-card mb-6">
+                <form id="searchForm" class="space-y-4">
+                    <!-- main search bar -->
+                    <div>
+                        <label for="mainSearch" class="block text-sm font-medium text-gray-700 mb-1">Search keywords</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+                            <input type="text" id="mainSearch" placeholder="Search by title, author, content, or keywords..." 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+
+                    <!-- filter row 1 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="filterCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="filterCategory" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Categories</option>
+                                <option value="iso">ISO 9001:2015</option>
+                                <option value="aaccup">AACCUP</option>
+                                <option value="coe">COE</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterStatus" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="filterStatus" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Statuses</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending Review</option>
+                                <option value="draft">Draft</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterArea" class="block text-sm font-medium text-gray-700 mb-1">Area / Clause</label>
+                            <select id="filterArea" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Areas</option>
+                                <option value="clause4">Clause 4 - Context</option>
+                                <option value="clause5">Clause 5 - Leadership</option>
+                                <option value="clause6">Clause 6 - Planning</option>
+                                <option value="clause7">Clause 7 - Support</option>
+                                <option value="clause8">Clause 8 - Operation</option>
+                                <option value="clause9">Clause 9 - Evaluation</option>
+                                <option value="clause10">Clause 10 - Improvement</option>
+                                <option value="area1">Area I - VMGO</option>
+                                <option value="area2">Area II - Faculty</option>
+                                <option value="area3">Area III - Curriculum</option>
+                                <option value="area4">Area IV - Students</option>
+                                <option value="area5">Area V - Research</option>
+                                <option value="area6">Area VI - Extension</option>
+                                <option value="indicator1">Indicator 1 - Teaching</option>
+                                <option value="indicator2">Indicator 2 - Research</option>
+                                <option value="indicator3">Indicator 3 - Extension</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- filter row 2 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="filterAuthor" class="block text-sm font-medium text-gray-700 mb-1">Author / Uploader</label>
+                            <input type="text" id="filterAuthor" placeholder="e.g., Dr. Santos" 
+                                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label for="filterDateFrom" class="block text-sm font-medium text-gray-700 mb-1">Date from</label>
+                            <input type="date" id="filterDateFrom" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label for="filterDateTo" class="block text-sm font-medium text-gray-700 mb-1">Date to</label>
+                            <input type="date" id="filterDateTo" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+
+                    <!-- filter row 3 - version and keywords -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="filterVersion" class="block text-sm font-medium text-gray-700 mb-1">Version</label>
+                            <input type="text" id="filterVersion" placeholder="e.g., v1.0, v2, draft" 
+                                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label for="filterKeyword" class="block text-sm font-medium text-gray-700 mb-1">Additional keywords</label>
+                            <input type="text" id="filterKeyword" placeholder="Comma separated" 
+                                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+
+                    <!-- search actions -->
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="clearSearch" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            Clear Filters
+                        </button>
+                        <button type="submit" id="searchBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors flex items-center">
+                            <span class="mr-2">🔍</span> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- search results header -->
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <span class="text-sm text-gray-600">Found <span id="resultCount">24</span> results</span>
+                </div>
+                <div class="flex gap-2">
+                    <select id="sortResults" class="px-3 py-1.5 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="relevance">Sort by: Relevance</option>
+                        <option value="date_desc">Newest first</option>
+                        <option value="date_asc">Oldest first</option>
+                        <option value="title_asc">Title A-Z</option>
+                        <option value="title_desc">Title Z-A</option>
+                    </select>
+                    <div class="flex gap-1 border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="p-2 bg-teal-700 text-white view-toggle active-view" data-view="list">
+                            <span>📋</span>
+                        </button>
+                        <button class="p-2 bg-white text-gray-600 hover:bg-gray-50 view-toggle" data-view="grid">
+                            <span>📊</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- search results - list view (default) -->
+            <div id="listView" class="space-y-3">
+                <!-- result 1 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="iso" data-status="approved">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">ISO 9001:2015</span>
+                                <span class="badge-approved px-2 py-0.5 rounded-full text-xs">Approved</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Quality Management System Manual</h3>
+                            <p class="text-xs text-gray-500 mt-1">by Dr. Santos · Updated 2026-02-15 · Version v3.2</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Comprehensive quality manual covering ISO 9001:2015 requirements, including context, leadership, planning, support, operation, evaluation, and improvement.</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 4 - Context</span>
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 5 - Leadership</span>
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 7 - Support</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="qms-manual">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- result 2 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="aaccup" data-status="pending">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">AACCUP</span>
+                                <span class="badge-pending px-2 py-0.5 rounded-full text-xs">Pending Review</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Curriculum Development Framework</h3>
+                            <p class="text-xs text-gray-500 mt-1">by Prof. Garcia · Updated 2026-02-20 · Version v1.0</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Framework for curriculum development and review, aligned with AACCUP Area II (Faculty) and Area III (Curriculum) requirements.</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Area II - Faculty</span>
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Area III - Curriculum</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="curriculum-framework">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- result 3 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="coe" data-status="draft">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">COE</span>
+                                <span class="badge-draft px-2 py-0.5 rounded-full text-xs">Draft</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Research Output Compilation 2025</h3>
+                            <p class="text-xs text-gray-500 mt-1">by Dr. Reyes · Updated 2026-02-25 · Version v0.3</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Compilation of faculty research outputs, publications, and citations for COE Indicator 2 (Research Output).</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Indicator 2 - Research</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="research-compilation">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- result 4 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="aaccup" data-status="approved">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">AACCUP</span>
+                                <span class="badge-approved px-2 py-0.5 rounded-full text-xs">Approved</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Faculty Profile and Qualifications</h3>
+                            <p class="text-xs text-gray-500 mt-1">by Dean Cruz · Updated 2026-01-10 · Version v2.1</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Comprehensive faculty profiles including educational background, specialization, and professional development activities.</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Area II - Faculty</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="faculty-profile">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- result 5 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="iso" data-status="expired">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">ISO 9001:2015</span>
+                                <span class="badge-expired px-2 py-0.5 rounded-full text-xs">Expired</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Internal Audit Report Q4 2025</h3>
+                            <p class="text-xs text-gray-500 mt-1">by QA Office · Updated 2025-12-01 · Version v1.5</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Internal audit findings, non-conformities, and corrective actions for Q4 2025.</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 9 - Evaluation</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="audit-q4">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- result 6 -->
+                <div class="bg-white rounded-xl p-4 stat-card search-result" data-category="coe" data-status="pending">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">COE</span>
+                                <span class="badge-pending px-2 py-0.5 rounded-full text-xs">Pending Review</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mt-1">Extension Program Impact Assessment</h3>
+                            <p class="text-xs text-gray-500 mt-1">by Prof. Mendoza · Updated 2026-02-22 · Version v1.1</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">Assessment of community extension programs, outcomes, and stakeholder feedback.</p>
+                            <div class="flex gap-3 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Indicator 3 - Extension</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-teal-600 hover:text-teal-800 text-sm view-doc" data-doc="extension-impact">View</button>
+                            <button class="text-gray-500 hover:text-gray-700 text-sm">📎</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- search results - grid view (hidden by default) -->
+            <div id="gridView" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- grid items will be cloned from list view via JS -->
+            </div>
+
+            <!-- pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-500" id="paginationInfo">Showing 1 to 6 of 24 results</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 pagination-prev">Previous</button>
+                    <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">4</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 pagination-next">Next</button>
+                </div>
+            </div>
+
+            <!-- saved searches / recent searches -->
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3">Recent Searches</h2>
+                <div class="bg-white rounded-xl p-4 stat-card">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center">
+                            ISO 9001 approved
+                            <button class="ml-2 text-gray-500 hover:text-gray-700">✕</button>
+                        </span>
+                        <span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center">
+                            AACCUP Area II faculty
+                            <button class="ml-2 text-gray-500 hover:text-gray-700">✕</button>
+                        </span>
+                        <span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center">
+                            COE research 2026
+                            <button class="ml-2 text-gray-500 hover:text-gray-700">✕</button>
+                        </span>
+                        <span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center">
+                            Dr. Santos
+                            <button class="ml-2 text-gray-500 hover:text-gray-700">✕</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/search.js"></script>
+</body>
+</html>

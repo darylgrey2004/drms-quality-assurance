@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS‑QA · College of Teacher Education</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- External CSS - correct path to css folder -->
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-6">
+
+    <!-- main container: clean institutional navy + teal accents, minimal spacing -->
+    <div class="max-w-5xl w-full grid md:grid-cols-2 gap-6 items-stretch">
+
+        <!-- LEFT HERO panel: brand, ISO, AACCUP, COE, minimal footer -->
+        <div class="bg-navy-medium rounded-2xl minimal-card p-8 flex flex-col border-l-4 border-teal-400"
+             style="background: #0e263b;"> <!-- solid deep navy, minimal gradient -->
+            
+            <!-- subtle top indicator (minimal) -->
+            <div class="text-teal-300 text-xs font-medium tracking-wider mb-5 uppercase">cte · qa</div>
+
+            <!-- main heading -->
+            <h1 class="text-4xl md:text-5xl font-bold leading-tight text-white">
+                Digital Records<br>
+                <span class="text-teal-300">Management System</span>
+            </h1>
+            
+            <!-- description paragraph (clean, crisp) -->
+            <p class="text-gray-300 mt-4 text-base md:text-lg max-w-md">
+                Centralized quality assurance platform for the College of Teacher Education. 
+                ISO 9001:2015 compliant, AACCUP-aligned, and COE‑ready.
+            </p>
+
+            <!-- badges row: ISO · AACCUP · COE with minimal outlines -->
+            <div class="flex flex-wrap gap-3 mt-8">
+                <div class="border border-teal-800 rounded-full px-4 py-1.5 text-teal-200 font-medium text-xs tracking-wide">
+                    ISO 9001:2015
+                </div>
+                <div class="border border-teal-800 rounded-full px-4 py-1.5 text-teal-200 font-medium text-xs tracking-wide">
+                    AACCUP Level IV
+                </div>
+                <div class="border border-teal-800 rounded-full px-4 py-1.5 text-teal-200 font-medium text-xs tracking-wide">
+                    COE Candidate
+                </div>
+            </div>
+
+            <!-- spacer -->
+            <div class="flex-1"></div>
+
+            <!-- FOOTER left: minimal, only copyright and version (cleaned, smaller) -->
+            <div class="mt-14 pt-4 border-t border-teal-900/40 text-xs text-gray-400 flex justify-between items-center">
+                <span>© 2026 College of Teacher Education</span>
+                <span class="text-teal-400 text-[0.7rem] tracking-wider">DRMS‑QA</span>
+            </div>
+        </div>
+
+        <!-- RIGHT LOGIN panel: ultra minimal white, no extra blocks -->
+        <div class="bg-white rounded-2xl minimal-card p-8 flex flex-col">
+            <!-- welcome heading (minimal, crisp) -->
+            <h2 class="text-2xl font-semibold text-navy-900 mb-1">Welcome back</h2>
+            <p class="text-gray-500 text-sm mb-8">Sign in to your account</p>
+
+            <!-- login form (clean, no extra text) -->
+            <form id="loginForm" class="flex flex-col space-y-5">
+                <!-- email field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                    <input type="email" id="email" value="you@college.edu" 
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-800 bg-gray-50/50 focus:bg-white transition-colors">
+                </div>
+                <!-- password field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Password</label>
+                    <input type="password" id="password" value="password" 
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-800 bg-gray-50/50 focus:bg-white transition-colors">
+                </div>
+
+                <!-- remember me + forgot row (minimal) -->
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-gray-500">
+                        <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                        Remember
+                    </label>
+                    <a href="#" class="text-teal-700 hover:text-teal-800 text-sm font-normal transition">Forgot?</a>
+                </div>
+
+                <!-- sign in button (clean teal, no heavy shadow) -->
+                <button type="submit" 
+                        class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3.5 rounded-lg transition-colors">
+                    Sign in
+                </button>
+            </form>
+
+            <!-- no extra demo blocks — everything minimal -->
+        </div>
+    </div>
+
+    <!-- External JavaScript - correct path to js folder -->
+    <script src="js/landing.js"></script>
+</body>
+</html>

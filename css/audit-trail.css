@@ -1,0 +1,257 @@
+/* css/audit-trail.css */
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* custom navy/teal palette (consistent with other pages) */
+.bg-navy-sidebar {
+    background-color: #0c2538;
+}
+
+.bg-navy-deep {
+    background-color: #0b1f33;
+}
+
+.text-teal-logo {
+    color: #5ee0d0;
+}
+
+.border-teal-light {
+    border-color: #2aa79b33;
+}
+
+/* hover effect for nav items */
+.hover-nav:hover {
+    background-color: #1f4e5e;
+    color: white;
+}
+
+/* active navigation item */
+.active-nav {
+    background-color: #1a4450;
+    border-left: 4px solid #2aa79b;
+}
+
+/* stat card styles (consistent) */
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* utility classes */
+.text-teal-300 {
+    color: #5eead4;
+}
+
+.text-teal-300\/70 {
+    color: rgba(94, 234, 212, 0.7);
+}
+
+.bg-teal-800\/40 {
+    background-color: rgba(17, 94, 89, 0.4);
+}
+
+.border-teal-400 {
+    border-color: #2dd4bf;
+}
+
+/* action badge colors */
+.bg-green-100 {
+    background-color: #dcfce7;
+}
+.text-green-700 {
+    color: #15803d;
+}
+.bg-blue-100 {
+    background-color: #dbeafe;
+}
+.text-blue-700 {
+    color: #1d4ed8;
+}
+.bg-yellow-100 {
+    background-color: #fef3c7;
+}
+.text-yellow-700 {
+    color: #b45309;
+}
+.bg-purple-100 {
+    background-color: #f3e8ff;
+}
+.text-purple-700 {
+    color: #7e22ce;
+}
+.bg-red-100 {
+    background-color: #fee2e2;
+}
+.text-red-700 {
+    color: #b91c1c;
+}
+.bg-gray-100 {
+    background-color: #f3f4f6;
+}
+.text-gray-700 {
+    color: #374151;
+}
+.bg-indigo-100 {
+    background-color: #e0e7ff;
+}
+.text-indigo-700 {
+    color: #4338ca;
+}
+.bg-amber-100 {
+    background-color: #fef3c7;
+}
+.text-amber-700 {
+    color: #b45309;
+}
+
+/* user avatar initials */
+.w-6.h-6 {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 9999px;
+}
+
+.w-8.h-8 {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 9999px;
+}
+
+/* hover states */
+.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+.hover\:text-teal-800:hover {
+    color: #115e59;
+}
+
+/* transitions */
+.transition {
+    transition: all 0.2s ease;
+}
+
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* focus states */
+input:focus, select:focus {
+    outline: none;
+    ring: 2px solid #14b8a6;
+}
+
+input:focus, select:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
+}
+
+/* button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+/* view toggle buttons */
+.view-toggle.active-view {
+    background-color: #0f766e;
+    color: white;
+}
+
+.view-toggle {
+    transition: all 0.2s ease;
+}
+
+/* table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: 500;
+    text-align: left;
+    font-size: 0.75rem;
+    color: #6b7280;
+    padding: 0.75rem 0.5rem;
+}
+
+td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* audit row hover */
+.audit-row:hover {
+    background-color: #f9fafb;
+}
+
+/* timeline styling */
+.border-l-2 {
+    border-left-width: 2px;
+}
+
+/* timeline colors */
+.border-teal-200 {
+    border-color: #99f6e4;
+}
+.border-blue-200 {
+    border-color: #bfdbfe;
+}
+.border-amber-200 {
+    border-color: #fde68a;
+}
+.border-purple-200 {
+    border-color: #e9d5ff;
+}
+.border-red-200 {
+    border-color: #fecaca;
+}
+.border-green-200 {
+    border-color: #bbf7d0;
+}
+.border-gray-200 {
+    border-color: #e5e7eb;
+}
+.border-indigo-200 {
+    border-color: #c7d2fe;
+}
+
+/* ensure full width */
+.w-full {
+    width: 100%;
+}
+
+/* whitespace handling */
+.whitespace-nowrap {
+    white-space: nowrap;
+}

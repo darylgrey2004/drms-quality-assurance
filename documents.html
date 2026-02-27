@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Documents</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/documents.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents (active) -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (documents) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row: Documents title + action buttons -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Documents</h1>
+                    <p class="text-sm text-gray-500 mt-1">Manage all QA records · ISO, AACCUP, COE</p>
+                </div>
+                <div class="mt-3 sm:mt-0 flex gap-3">
+                    <button id="uploadBtn" class="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <span class="mr-2">📤</span> Upload New
+                    </button>
+                    <button id="filterBtn" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <span class="mr-2">🔍</span> Filter
+                    </button>
+                </div>
+            </div>
+
+            <!-- filter bar / search (consistent with document management) -->
+            <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                            <input type="text" id="searchInput" placeholder="Search documents by title, author, category..." 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Categories</option>
+                            <option value="iso">ISO 9001:2015</option>
+                            <option value="aaccup">AACCUP</option>
+                            <option value="coe">COE</option>
+                        </select>
+                        <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Status</option>
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending Review</option>
+                            <option value="draft">Draft</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- documents count and view toggle -->
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm text-gray-600">Showing <span id="docCount">24</span> documents</span>
+                <div class="flex gap-2">
+                    <button class="p-2 bg-white rounded-lg border border-gray-200 text-teal-700">
+                        <span>📋</span>
+                    </button>
+                    <button class="p-2 bg-white rounded-lg border border-gray-200 text-gray-500">
+                        <span>📊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- documents table (consistent with homepage design) -->
+            <div class="bg-white rounded-xl p-5 stat-card">
+                <!-- table header -->
+                <div class="grid grid-cols-12 text-xs font-medium text-gray-500 pb-2 border-b border-gray-100">
+                    <div class="col-span-4">DOCUMENT</div>
+                    <div class="col-span-2">CATEGORY</div>
+                    <div class="col-span-2">AREA / CLAUSE</div>
+                    <div class="col-span-1">STATUS</div>
+                    <div class="col-span-1">VERSION</div>
+                    <div class="col-span-2">ACTIONS</div>
+                </div>
+
+                <!-- document rows -->
+                <div id="documentsList" class="divide-y divide-gray-100">
+                    <!-- rows will be managed by JS, but we include static fallback -->
+                    <!-- Row 1: QMS Manual -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="approved">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Quality Management System Manual</div>
+                            <div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
+                        <div class="col-span-2 text-gray-600">Clause 4 - Context</div>
+                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                        <div class="col-span-1 text-gray-600">v3.2</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 2: Curriculum Dev -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="pending">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Curriculum Development Framework</div>
+                            <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">AACCUP</div>
+                        <div class="col-span-2 text-gray-600">Area II - Faculty</div>
+                        <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
+                        <div class="col-span-1 text-gray-600">v1.0</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 3: Research Output -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="coe" data-status="draft">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
+                            <div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">COE</div>
+                        <div class="col-span-2 text-gray-600">Research & Extension</div>
+                        <div class="col-span-1"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></div>
+                        <div class="col-span-1 text-gray-600">v0.3</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 4: Faculty Profile -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="approved">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Faculty Profile and Qualifications</div>
+                            <div class="text-xs text-gray-400">by Dean Cruz · 2026-01-10</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">AACCUP</div>
+                        <div class="col-span-2 text-gray-600">Area III - Curriculum</div>
+                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                        <div class="col-span-1 text-gray-600">v2.1</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 5: Internal Audit Report -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="expired">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Internal Audit Report Q4 2025</div>
+                            <div class="text-xs text-gray-400">by QA Office · 2025-12-01</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
+                        <div class="col-span-2 text-gray-600">Clause 9 - Evaluation</div>
+                        <div class="col-span-1"><span class="badge-expired px-2 py-1 rounded-full text-xs">Expired</span></div>
+                        <div class="col-span-1 text-gray-600">v1.5</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 6: Extension Program -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="coe" data-status="pending">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Extension Program Impact Assessment</div>
+                            <div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">COE</div>
+                        <div class="col-span-2 text-gray-600">Community Extension</div>
+                        <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
+                        <div class="col-span-1 text-gray-600">v1.1</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 7: Student Teaching Evaluation -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="approved">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Student Teaching Evaluation Forms</div>
+                            <div class="text-xs text-gray-400">by Dr. Torres · 2026-02-18</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">AACCUP</div>
+                        <div class="col-span-2 text-gray-600">Area V - Support</div>
+                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                        <div class="col-span-1 text-gray-600">v2.3</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                    <!-- Row 8: Laboratory Safety Manual -->
+                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="draft">
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">Laboratory Safety Manual</div>
+                            <div class="text-xs text-gray-400">by Prof. Lim · 2026-02-10</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
+                        <div class="col-span-2 text-gray-600">Clause 7 - Support</div>
+                        <div class="col-span-1"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></div>
+                        <div class="col-span-1 text-gray-600">v0.5</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <button class="hover:underline view-btn">👁️</button>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-500">Showing 1 to 8 of 24 documents</div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
+                    <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/documents.js"></script>
+</body>
+</html>

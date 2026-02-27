@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Upload Document</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/upload.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload (active) -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (upload) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Upload Document</h1>
+                <p class="text-sm text-gray-500 mt-1">Add new QA records · ISO, AACCUP, COE</p>
+            </div>
+
+            <!-- upload form card - full width -->
+            <div class="bg-white rounded-xl p-6 stat-card w-full">
+                <form id="uploadForm" class="space-y-6 w-full">
+                    <!-- file upload area - full width -->
+                    <div class="w-full">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Document File <span class="text-red-500">*</span></label>
+                        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-teal-500 transition-colors cursor-pointer w-full">
+                            <div class="flex flex-col items-center">
+                                <span class="text-4xl mb-3">📄</span>
+                                <p class="text-gray-700 font-medium">Drag and drop your file here, or <span class="text-teal-700 hover:underline">browse</span></p>
+                                <p class="text-xs text-gray-400 mt-2">Supports: PDF, DOCX, XLSX, JPG, PNG (Max: 25MB)</p>
+                                <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                        <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
+                            Selected: <span id="fileName"></span> <span id="fileSize" class="text-gray-400"></span>
+                            <button type="button" id="removeFile" class="ml-2 text-red-600 hover:text-red-800">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- two column layout for form fields - full width grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                        <!-- left column -->
+                        <div class="space-y-4 w-full">
+                            <!-- document title -->
+                            <div class="w-full">
+                                <label for="docTitle" class="block text-sm font-medium text-gray-700 mb-1">Document Title <span class="text-red-500">*</span></label>
+                                <input type="text" id="docTitle" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., Quality Management System Manual" required>
+                            </div>
+
+                            <!-- category / standard -->
+                            <div class="w-full">
+                                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category <span class="text-red-500">*</span></label>
+                                <select id="category" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                                    <option value="">Select category</option>
+                                    <option value="iso">ISO 9001:2015</option>
+                                    <option value="aaccup">AACCUP</option>
+                                    <option value="coe">COE</option>
+                                </select>
+                            </div>
+
+                            <!-- area / clause (dynamic based on category) -->
+                            <div id="areaContainer" class="w-full">
+                                <label for="area" class="block text-sm font-medium text-gray-700 mb-1">Area / Clause <span class="text-red-500">*</span></label>
+                                <select id="area" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                                    <option value="">Select category first</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- right column -->
+                        <div class="space-y-4 w-full">
+                            <!-- author / uploader -->
+                            <div class="w-full">
+                                <label for="author" class="block text-sm font-medium text-gray-700 mb-1">Author / Uploader <span class="text-red-500">*</span></label>
+                                <input type="text" id="author" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="Admin" required>
+                            </div>
+
+                            <!-- version -->
+                            <div class="w-full">
+                                <label for="version" class="block text-sm font-medium text-gray-700 mb-1">Version</label>
+                                <input type="text" id="version" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., v1.0, draft, final" value="v1.0">
+                            </div>
+
+                            <!-- expiry date (optional) -->
+                            <div class="w-full">
+                                <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (optional)</label>
+                                <input type="date" id="expiryDate" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- description / notes - full width -->
+                    <div class="w-full">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description / Notes</label>
+                        <textarea id="description" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Add any additional information about this document..."></textarea>
+                    </div>
+
+                    <!-- metadata / keywords (for search) - full width -->
+                    <div class="w-full">
+                        <label for="keywords" class="block text-sm font-medium text-gray-700 mb-1">Keywords (comma separated)</label>
+                        <input type="text" id="keywords" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., QMS, manual, quality, policy">
+                    </div>
+
+                    <!-- approval workflow options - full width -->
+                    <div class="bg-gray-50 p-4 rounded-lg w-full">
+                        <h3 class="font-medium text-gray-700 mb-3">Approval Workflow</h3>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="workflow" value="submit" class="mr-2 text-teal-600" checked>
+                                <span class="text-sm text-gray-700">Submit for review</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="workflow" value="draft" class="mr-2 text-teal-600">
+                                <span class="text-sm text-gray-700">Save as draft</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="workflow" value="approve" class="mr-2 text-teal-600">
+                                <span class="text-sm text-gray-700">Approve immediately (admin only)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- form actions -->
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 w-full">
+                        <button type="button" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button type="submit" id="submitBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors flex items-center">
+                            <span class="mr-2">⬆️</span> Upload Document
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- recent uploads (optional summary) -->
+            <div class="mt-8 w-full">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3">Recent Uploads</h2>
+                <div class="bg-white rounded-xl p-4 stat-card w-full">
+                    <div class="text-xs text-gray-500 grid grid-cols-12 pb-2 border-b border-gray-100">
+                        <div class="col-span-5">DOCUMENT</div>
+                        <div class="col-span-2">CATEGORY</div>
+                        <div class="col-span-2">VERSION</div>
+                        <div class="col-span-3">UPLOADED</div>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        <div class="grid grid-cols-12 py-2 text-sm items-center">
+                            <div class="col-span-5 text-gray-700">Curriculum Development Framework</div>
+                            <div class="col-span-2 text-gray-600">AACCUP</div>
+                            <div class="col-span-2 text-gray-600">v1.0</div>
+                            <div class="col-span-3 text-gray-400 text-xs">20 Feb 2026</div>
+                        </div>
+                        <div class="grid grid-cols-12 py-2 text-sm items-center">
+                            <div class="col-span-5 text-gray-700">Research Output Compilation 2025</div>
+                            <div class="col-span-2 text-gray-600">COE</div>
+                            <div class="col-span-2 text-gray-600">v0.3</div>
+                            <div class="col-span-3 text-gray-400 text-xs">25 Feb 2026</div>
+                        </div>
+                        <div class="grid grid-cols-12 py-2 text-sm items-center">
+                            <div class="col-span-5 text-gray-700">Internal Audit Report Q4</div>
+                            <div class="col-span-2 text-gray-600">ISO</div>
+                            <div class="col-span-2 text-gray-600">v1.5</div>
+                            <div class="col-span-3 text-gray-400 text-xs">01 Dec 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Settings</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/settings.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- main grid: sidebar + content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
+        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <!-- logo / title area -->
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+            </div>
+
+            <!-- navigation menu as functional links to actual pages -->
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <!-- Dashboard -->
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <!-- Documents -->
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                </a>
+                <!-- Upload -->
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                </a>
+                <!-- Evidence Map -->
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                </a>
+                <!-- Search -->
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <!-- Approvals -->
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                </a>
+                <!-- Reports -->
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                </a>
+                <!-- Users -->
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                </a>
+                <!-- Audit Trail -->
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                </a>
+                <!-- Settings (active) -->
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <!-- footer in sidebar -->
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div>Logged in as <span class="text-teal-300">Admin</span></div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT (settings) -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+
+            <!-- header row -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">System Settings</h1>
+                <p class="text-sm text-gray-500 mt-1">Configure system parameters, workflows, and preferences</p>
+            </div>
+
+            <!-- settings tabs -->
+            <div class="mb-4 border-b border-gray-200">
+                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="settingsTabs">
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-teal-600 text-teal-700 rounded-t-lg active-tab" data-tab="general">General</a>
+                    </li>
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="workflow">Workflow</a>
+                    </li>
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="standards">Standards</a>
+                    </li>
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="notifications">Notifications</a>
+                    </li>
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="backup">Backup & Security</a>
+                    </li>
+                    <li class="mr-2">
+                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="api">API & Integration</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- General Settings Tab (default visible) -->
+            <div id="generalTab" class="tab-content block">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">General Configuration</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- System Name -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">System Name</label>
+                                <p class="text-xs text-gray-400">The name displayed throughout the system</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="text" id="systemName" value="DRMS-QA" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                        
+                        <!-- Institution Name -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Institution Name</label>
+                                <p class="text-xs text-gray-400">Your college/university name</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="text" id="institutionName" value="College of Teacher Education" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                        
+                        <!-- System Email -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">System Email</label>
+                                <p class="text-xs text-gray-400">For notifications and system messages</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="email" id="systemEmail" value="qa@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                        
+                        <!-- Timezone -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Timezone</label>
+                                <p class="text-xs text-gray-400">System timezone for logs and records</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select id="timezone" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="Asia/Manila" selected>Asia/Manila (UTC+8)</option>
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">America/New York</option>
+                                    <option value="Europe/London">Europe/London</option>
+                                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Format -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Date Format</label>
+                                <p class="text-xs text-gray-400">How dates are displayed</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select id="dateFormat" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="Y-m-d" selected>YYYY-MM-DD (2026-02-27)</option>
+                                    <option value="m/d/Y">MM/DD/YYYY (02/27/2026)</option>
+                                    <option value="d/m/Y">DD/MM/YYYY (27/02/2026)</option>
+                                    <option value="F j, Y">February 27, 2026</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Language -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Default Language</label>
+                                <p class="text-xs text-gray-400">System interface language</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select id="language" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="en" selected>English</option>
+                                    <option value="fil">Filipino</option>
+                                    <option value="es">Spanish</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Maintenance Mode -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Maintenance Mode</label>
+                                <p class="text-xs text-gray-400">Temporarily disable access for non-admins</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="maintenanceMode" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">Enable maintenance mode</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Debug Mode -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Debug Mode</label>
+                                <p class="text-xs text-gray-400">Show detailed error messages (developers only)</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="debugMode" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">Enable debug mode</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveGeneral">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Settings Tab (hidden by default) -->
+            <div id="workflowTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Workflow Configuration</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Approval Workflow -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Approval Workflow</label>
+                                <p class="text-xs text-gray-400">Configure the document approval stages</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="space-y-3">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="workflowType" value="standard" class="mr-2 text-teal-600" checked>
+                                        <span class="text-sm text-gray-700">Standard (Upload → Validate → Approve → Lock)</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="workflowType" value="simple" class="mr-2 text-teal-600">
+                                        <span class="text-sm text-gray-700">Simple (Upload → Approve → Lock)</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="workflowType" value="advanced" class="mr-2 text-teal-600">
+                                        <span class="text-sm text-gray-700">Advanced (Upload → Review → Validate → Approve → Lock)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Auto-approval -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Auto-approval</label>
+                                <p class="text-xs text-gray-400">Automatically approve documents from specific roles</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="autoApproveAdmin" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Administrator uploads</span>
+                                </label>
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="autoApproveDean" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Dean uploads</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="autoApproveQA" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">QA Coordinator uploads</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- SLA Settings -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">SLA (Hours)</label>
+                                <p class="text-xs text-gray-400">Time limits for each stage</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Validation</label>
+                                        <input type="number" id="slaValidation" value="48" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Approval</label>
+                                        <input type="number" id="slaApproval" value="72" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reminders -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Reminders</label>
+                                <p class="text-xs text-gray-400">Send reminder emails</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="reminderDue" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">When approaching SLA deadline</span>
+                                </label>
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="reminderOverdue" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">When overdue</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="reminderDaily" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">Daily digest of pending items</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Version Control -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Version Control</label>
+                                <p class="text-xs text-gray-400">Maximum versions to keep</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="number" id="maxVersions" value="10" min="1" max="50" class="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <span class="text-sm text-gray-500 ml-2">versions per document</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveWorkflow">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standards Settings Tab (hidden by default) -->
+            <div id="standardsTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Standards Configuration</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- ISO Clauses -->
+                        <div class="border border-gray-100 rounded-lg p-4">
+                            <h3 class="font-medium text-gray-800 mb-3">ISO 9001:2015 Clauses</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 4 - Context</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 5 - Leadership</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 6 - Planning</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 7 - Support</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 8 - Operation</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 9 - Evaluation</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Clause 10 - Improvement</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- AACCUP Areas -->
+                        <div class="border border-gray-100 rounded-lg p-4">
+                            <h3 class="font-medium text-gray-800 mb-3">AACCUP Areas I-X</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area I - VMGO</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area II - Faculty</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area III - Curriculum</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area IV - Students</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area V - Research</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area VI - Extension</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area VII - Library</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area VIII - Facilities</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area IX - Laboratories</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Area X - Administration</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- COE Indicators -->
+                        <div class="border border-gray-100 rounded-lg p-4">
+                            <h3 class="font-medium text-gray-800 mb-3">COE Indicators</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 1 - Teaching Quality</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 2 - Research Output</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 3 - Extension</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 4 - Curriculum</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 5 - Faculty Dev</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 6 - Student Performance</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm">Indicator 7 - International</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Required Documents per Standard -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Required Documents</label>
+                                <p class="text-xs text-gray-400">Expected document counts per standard</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">ISO</label>
+                                        <input type="number" value="180" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">AACCUP</label>
+                                        <input type="number" value="420" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">COE</label>
+                                        <input type="number" value="247" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveStandards">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab (hidden by default) -->
+            <div id="notificationsTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Notification Settings</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Email Notifications -->
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-3">Email Notifications</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Document uploaded (to QA Coordinator)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Document validated (to Dean/Approver)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Document approved (to uploader)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Document rejected (to uploader)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Pending review reminder (daily)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">Weekly summary report</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- System Notifications -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <h3 class="font-medium text-gray-700 mb-3">System Notifications</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Backup completion alerts</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Storage space warnings</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">New user registration alerts</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
+                                    <span class="text-sm text-gray-700">System error notifications</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Email -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Notification Email</label>
+                                <p class="text-xs text-gray-400">Where to send system alerts</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="email" value="admin@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveNotifications">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup & Security Tab (hidden by default) -->
+            <div id="backupTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Backup & Security</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Auto Backup -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Automatic Backup</label>
+                                <p class="text-xs text-gray-400">Schedule regular system backups</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="daily">Daily at 03:00 AM</option>
+                                    <option value="weekly" selected>Weekly (Sunday 03:00 AM)</option>
+                                    <option value="monthly">Monthly (1st of month 03:00 AM)</option>
+                                    <option value="none">Manual only</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Retention Period -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Backup Retention</label>
+                                <p class="text-xs text-gray-400">How long to keep backups</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="30">30 days</option>
+                                    <option value="60">60 days</option>
+                                    <option value="90" selected>90 days</option>
+                                    <option value="180">180 days</option>
+                                    <option value="365">1 year</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Backup Now Button -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Manual Backup</label>
+                                <p class="text-xs text-gray-400">Create a backup immediately</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <button id="backupNowBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">
+                                    Create Backup Now
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Settings -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <h3 class="font-medium text-gray-700 mb-3">Security Settings</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-sm font-medium text-gray-700">Password Policy</label>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                            <option value="standard">Standard (8+ chars)</option>
+                                            <option value="strong" selected>Strong (10+ chars, mixed case, numbers, symbols)</option>
+                                            <option value="strict">Strict (12+ chars, all requirements)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-sm font-medium text-gray-700">Session Timeout</label>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                            <option value="30">30 minutes</option>
+                                            <option value="60" selected>1 hour</option>
+                                            <option value="120">2 hours</option>
+                                            <option value="240">4 hours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-sm font-medium text-gray-700">2FA Enforcement</label>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                            <option value="optional">Optional for all users</option>
+                                            <option value="admin" selected>Required for admins only</option>
+                                            <option value="all">Required for all users</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-sm font-medium text-gray-700">Login Attempts</label>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <input type="number" value="5" min="3" max="10" class="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                        <span class="text-sm text-gray-500 ml-2">before lockout</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveBackup">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API & Integration Tab (hidden by default) -->
+            <div id="apiTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-6 stat-card">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">API & Integration</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- API Status -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">API Access</label>
+                                <p class="text-xs text-gray-400">Enable REST API for integrations</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="apiEnabled" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
+                                    <span class="text-sm text-gray-700">Enable API</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- API Keys -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">API Keys</label>
+                                <p class="text-xs text-gray-400">Manage integration keys</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium">Production Key</span>
+                                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">••••••••••••••••••••</code>
+                                        <button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button>
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center mt-4 mb-2">
+                                        <span class="text-sm font-medium">Development Key</span>
+                                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Testing</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">dev_••••••••••••••••</code>
+                                        <button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Webhooks -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Webhooks</label>
+                                <p class="text-xs text-gray-400">Send events to external systems</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="space-y-2">
+                                    <input type="url" placeholder="https://example.com/webhook" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <div class="flex gap-2">
+                                        <select class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                            <option value="all">All events</option>
+                                            <option value="upload">Upload only</option>
+                                            <option value="approval">Approval only</option>
+                                        </select>
+                                        <button class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Integration Options -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <h3 class="font-medium text-gray-700 mb-3">Available Integrations</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-700">Google Drive</span>
+                                        <p class="text-xs text-gray-400">Sync documents to Google Drive</p>
+                                    </div>
+                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
+                                </label>
+                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-700">Microsoft OneDrive</span>
+                                        <p class="text-xs text-gray-400">Sync documents to OneDrive</p>
+                                    </div>
+                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
+                                </label>
+                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-700">Slack</span>
+                                        <p class="text-xs text-gray-400">Send notifications to Slack channel</p>
+                                    </div>
+                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveApi">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- system information footer -->
+            <div class="mt-6 bg-white rounded-xl p-4 stat-card text-xs text-gray-400">
+                <div class="flex flex-wrap justify-between items-center">
+                    <div>DRMS-QA Version: <span class="text-gray-600">2.1.0</span></div>
+                    <div>Last updated: <span class="text-gray-600">February 27, 2026</span></div>
+                    <div>Database: <span class="text-gray-600">PostgreSQL 14.5</span></div>
+                    <div>PHP Version: <span class="text-gray-600">8.1.20</span></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/settings.js"></script>
+</body>
+</html>

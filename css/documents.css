@@ -1,0 +1,137 @@
+/* css/documents.css */
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* custom navy/teal palette (consistent with homepage) */
+.bg-navy-sidebar {
+    background-color: #0c2538;
+}
+
+.bg-navy-deep {
+    background-color: #0b1f33;
+}
+
+.text-teal-logo {
+    color: #5ee0d0;
+}
+
+.border-teal-light {
+    border-color: #2aa79b33;
+}
+
+/* hover effect for nav items */
+.hover-nav:hover {
+    background-color: #1f4e5e;
+    color: white;
+}
+
+/* active navigation item */
+.active-nav {
+    background-color: #1a4450;
+    border-left: 4px solid #2aa79b;
+}
+
+/* stat card styles (consistent) */
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* badge styles (consistent with homepage) */
+.badge-pending {
+    background-color: #fef9e7;
+    color: #b78103;
+}
+
+.badge-approved {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+}
+
+.badge-draft {
+    background-color: #edf2f7;
+    color: #385d7a;
+}
+
+.badge-expired {
+    background-color: #fee9e7;
+    color: #b33f2f;
+}
+
+/* dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* utility classes */
+.text-teal-300 {
+    color: #5eead4;
+}
+
+.text-teal-300\/70 {
+    color: rgba(94, 234, 212, 0.7);
+}
+
+.bg-teal-800\/40 {
+    background-color: rgba(17, 94, 89, 0.4);
+}
+
+.border-teal-400 {
+    border-color: #2dd4bf;
+}
+
+/* hover states */
+.hover\:bg-teal-50:hover {
+    background-color: #f0fdfa;
+}
+
+.hover\:text-teal-800:hover {
+    color: #115e59;
+}
+
+/* transitions */
+.transition {
+    transition: all 0.2s ease;
+}
+
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* focus states */
+input:focus, select:focus {
+    outline: none;
+    ring: 2px solid #14b8a6;
+}
+
+/* filter bar styling */
+#searchInput {
+    transition: all 0.2s ease;
+}
+
+/* table row hover effect */
+.doc-row:hover {
+    background-color: #f9fafb;
+}
+
+/* button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
