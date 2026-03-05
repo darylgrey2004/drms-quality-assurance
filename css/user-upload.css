@@ -1,0 +1,171 @@
+/* css/user-upload.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* Sidebar styling */
+.bg-user-sidebar {
+    background-color: #123a4d;
+}
+
+.hover-nav:hover {
+    background-color: #1f5a6e;
+    color: white;
+}
+
+.active-nav {
+    background-color: #1f5a6e;
+    border-left: 4px solid #2aa79b;
+}
+
+/* Dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* Card styling */
+.stat-card {
+    transition: all 0.2s ease;
+    border: 1px solid #eef2f6;
+    background-color: white;
+    border-radius: 0.75rem;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* File drop zone */
+#dropZone {
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dropZone:hover {
+    border-color: #14b8a6;
+    background-color: rgba(20, 184, 166, 0.04);
+}
+
+#dropZone.dragover {
+    border-color: #14b8a6;
+    background-color: rgba(20, 184, 166, 0.08);
+    transform: scale(1.02);
+}
+
+/* Form elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+    transition: all 0.2s ease;
+    width: 100%;
+    background-color: white;
+}
+
+input:focus, 
+select:focus, 
+textarea:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Radio buttons */
+input[type="radio"] {
+    accent-color: #0f766e;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+/* Button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+/* File info */
+#fileInfo {
+    transition: all 0.2s ease;
+}
+
+/* Ensure full width */
+.w-full {
+    width: 100%;
+}
+
+.max-w-7xl {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Main content area */
+main.flex-1 {
+    width: calc(100% - 18rem); /* 72 * 0.25rem = 18rem */
+}
+
+/* Upload card */
+.bg-white.rounded-xl {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    main.flex-1 {
+        width: 100%;
+    }
+    
+    #dropZone {
+        min-height: 150px;
+        padding: 1.5rem;
+    }
+}
+
+/* Animation for file drop */
+@keyframes pulse {
+    0%, 100% {
+        border-color: #d1d5db;
+    }
+    50% {
+        border-color: #14b8a6;
+    }
+}
+
+#dropZone.pulse {
+    animation: pulse 1.5s ease-in-out;
+}
+
+/* Cancel button hover */
+.border-2.border-gray-200:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Submit button shadow */
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-sm:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}

@@ -1,0 +1,147 @@
+/* css/user-dashboard.css */
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* custom navy/teal palette - slightly lighter for user side */
+.bg-user-sidebar {
+    background-color: #123a4d; /* slightly lighter than admin */
+}
+
+.bg-navy-deep {
+    background-color: #0b1f33;
+}
+
+.text-teal-logo {
+    color: #5ee0d0;
+}
+
+.border-teal-light {
+    border-color: #2aa79b33;
+}
+
+/* hover effect for nav items */
+.hover-nav:hover {
+    background-color: #1f5a6e;
+    color: white;
+}
+
+/* active navigation item */
+.active-nav {
+    background-color: #1f5a6e;
+    border-left: 4px solid #2aa79b;
+}
+
+/* stat card styles (consistent) */
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* badge styles */
+.badge-pending {
+    background-color: #fef9e7;
+    color: #b78103;
+}
+
+.badge-approved {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+}
+
+.badge-draft {
+    background-color: #edf2f7;
+    color: #385d7a;
+}
+
+.badge-expired {
+    background-color: #fee9e7;
+    color: #b33f2f;
+}
+
+/* utility classes */
+.text-teal-300 {
+    color: #5eead4;
+}
+
+.text-teal-300\/70 {
+    color: rgba(94, 234, 212, 0.7);
+}
+
+.bg-teal-800\/40 {
+    background-color: rgba(17, 94, 89, 0.4);
+}
+
+.border-teal-400 {
+    border-color: #2dd4bf;
+}
+
+/* table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: 500;
+    text-align: left;
+    font-size: 0.75rem;
+    color: #6b7280;
+    padding: 0.75rem 0;
+}
+
+td {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+}
+
+/* notification badge */
+.bg-amber-500 {
+    background-color: #f59e0b;
+}
+
+/* transitions */
+.transition {
+    transition: all 0.2s ease;
+}
+
+.transition-colors {
+    transition: all 0.2s ease;
+}
+
+/* focus states */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    ring: 2px solid #14b8a6;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
+}
+
+/* button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}

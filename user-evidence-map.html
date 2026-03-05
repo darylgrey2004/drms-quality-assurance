@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · Evidence Map (View Only)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/user-evidence-map.css">
+</head>
+<body class="min-h-screen">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Faculty Portal</p>
+            </div>
+
+            <div class="px-5 py-4 border-b border-teal-900/40">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">JD</span>
+                    <div>
+                        <div class="text-sm font-medium text-white">Dr. Juan Dela Cruz</div>
+                        <div class="text-xs text-teal-300">Faculty · Science Education</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+                <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                </a>
+                <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">📄</span> My Documents
+                </a>
+                <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload Document
+                </a>
+                <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">🗺️</span> Evidence Map
+                </a>
+                <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                </a>
+                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">✅</span> My Approvals
+                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                </a>
+                <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                </a>
+            </nav>
+
+            <div class="border-t border-teal-900/40 p-4 text-xs text-teal-200/50">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                    <span>Faculty Access</span>
+                </div>
+                <div class="mt-1">© CTE · v.DRMS‑QA</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+            <div class="mb-6">
+                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Evidence Map</h1>
+                <p class="text-sm text-gray-500 mt-1">View document mapping to ISO, AACCUP, and COE standards</p>
+            </div>
+
+            <!-- Summary cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-800">ISO 9001:2015</h3>
+                        <span class="bg-teal-100 text-teal-800 text-xs px-2.5 py-0.5 rounded-full">10 clauses</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Documents mapped:</span>
+                        <span class="font-medium">166/180</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
+                    </div>
+                    <div class="mt-2 text-xs text-teal-700">92% complete</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-800">AACCUP Areas I-X</h3>
+                        <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full">10 areas</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Documents mapped:</span>
+                        <span class="font-medium">328/420</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
+                    </div>
+                    <div class="mt-2 text-xs text-amber-700">78% complete</div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-800">COE Indicators</h3>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full">7 indicators</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Documents mapped:</span>
+                        <span class="font-medium">210/247</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width:85%"></div>
+                    </div>
+                    <div class="mt-2 text-xs text-indigo-700">85% complete</div>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="searchMap" placeholder="Search by standard, area, or document..." 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <select id="standardFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white">
+                        <option value="all">All Standards</option>
+                        <option value="iso">ISO 9001:2015</option>
+                        <option value="aaccup">AACCUP</option>
+                        <option value="coe">COE</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-4 border-b border-gray-200">
+                <ul class="flex gap-4 text-sm font-medium" id="mapTabs">
+                    <li><a href="#" class="inline-block p-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="iso">ISO 9001:2015</a></li>
+                    <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="aaccup">AACCUP Areas</a></li>
+                    <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="coe">COE Indicators</a></li>
+                </ul>
+            </div>
+
+            <!-- ISO Tab -->
+            <div id="isoTab" class="tab-content block">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="space-y-4">
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 4</span>
+                                    <h4 class="font-medium mt-2">Context of the Organization</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">12/12 docs</span>
+                                    <div class="text-xs text-green-600">Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 5</span>
+                                    <h4 class="font-medium mt-2">Leadership</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">15/15 docs</span>
+                                    <div class="text-xs text-green-600">Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 6</span>
+                                    <h4 class="font-medium mt-2">Planning</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">18/20 docs</span>
+                                    <div class="text-xs text-amber-600">Partial</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AACCUP Tab (hidden) -->
+            <div id="aaccupTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="space-y-4">
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Area I</span>
+                                    <h4 class="font-medium mt-2">Vision, Mission, Goals</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">42/42 docs</span>
+                                    <div class="text-xs text-green-600">Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Area II</span>
+                                    <h4 class="font-medium mt-2">Faculty</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">56/60 docs</span>
+                                    <div class="text-xs text-amber-600">Partial</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COE Tab (hidden) -->
+            <div id="coeTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl p-5 stat-card">
+                    <div class="space-y-4">
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Indicator 1</span>
+                                    <h4 class="font-medium mt-2">Quality of Teaching</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">38/40 docs</span>
+                                    <div class="text-xs text-amber-600">Partial</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Indicator 2</span>
+                                    <h4 class="font-medium mt-2">Research Output</h4>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-medium">42/45 docs</span>
+                                    <div class="text-xs text-green-600">Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/user-evidence-map.js"></script>
+</body>
+</html>

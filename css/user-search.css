@@ -1,0 +1,88 @@
+/* css/user-search.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+.bg-user-sidebar {
+    background-color: #123a4d;
+}
+
+.hover-nav:hover {
+    background-color: #1f5a6e;
+    color: white;
+}
+
+.active-nav {
+    background-color: #1f5a6e;
+    border-left: 4px solid #2aa79b;
+}
+
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* Search results */
+.search-result {
+    transition: all 0.2s ease;
+}
+
+.search-result:hover {
+    background-color: #f9fafb;
+    transform: translateX(2px);
+}
+
+/* Category badges */
+.bg-teal-100 { background-color: #f0fdfa; }
+.text-teal-800 { color: #115e59; }
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-800 { color: #92400e; }
+.bg-indigo-100 { background-color: #e0e7ff; }
+.text-indigo-800 { color: #3730a3; }
+.bg-green-100 { background-color: #dcfce7; }
+.text-green-700 { color: #15803d; }
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-700 { color: #b45309; }
+.bg-blue-100 { background-color: #dbeafe; }
+.text-blue-700 { color: #1d4ed8; }
+
+/* Form elements */
+input, select {
+    transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
+}
+
+/* Button */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+/* Advanced filters toggle */
+#toggleFilters {
+    cursor: pointer;
+    user-select: none;
+}

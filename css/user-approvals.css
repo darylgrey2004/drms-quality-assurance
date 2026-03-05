@@ -1,0 +1,91 @@
+/* css/user-approvals.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+.bg-user-sidebar {
+    background-color: #123a4d;
+}
+
+.hover-nav:hover {
+    background-color: #1f5a6e;
+    color: white;
+}
+
+.active-nav {
+    background-color: #1f5a6e;
+    border-left: 4px solid #2aa79b;
+}
+
+.stat-card {
+    transition: all 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* Approval item styling */
+.border-l-4 {
+    transition: all 0.2s ease;
+}
+
+.border-l-4:hover {
+    transform: translateX(2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Priority colors */
+.border-red-500 { border-color: #ef4444; }
+.border-amber-500 { border-color: #f59e0b; }
+.border-green-500 { border-color: #10b981; }
+
+.bg-red-50\/30 { background-color: rgba(254, 242, 242, 0.3); }
+.bg-amber-50\/30 { background-color: rgba(255, 251, 235, 0.3); }
+.bg-green-50\/30 { background-color: rgba(236, 253, 245, 0.3); }
+
+/* Badge colors */
+.bg-red-100 { background-color: #fee2e2; }
+.text-red-700 { color: #b91c1c; }
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-700 { color: #b45309; }
+.bg-blue-100 { background-color: #dbeafe; }
+.text-blue-700 { color: #1d4ed8; }
+.bg-indigo-100 { background-color: #e0e7ff; }
+.text-indigo-700 { color: #4338ca; }
+
+/* Button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+.approve-btn, .review-btn, .return-btn {
+    transition: all 0.2s ease;
+}
+
+.return-btn:hover {
+    background-color: #fef2f2;
+}
+
+/* Form elements */
+input:focus, select:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
+}
