@@ -93,7 +93,23 @@
                 </button>
             </form>
 
-            <!-- no extra demo blocks — everything minimal -->
+            <!-- Divider with "or" -->
+            <div class="flex items-center my-6">
+                <div class="flex-1 border-t border-gray-200"></div>
+                <span class="px-4 text-sm text-gray-400">or</span>
+                <div class="flex-1 border-t border-gray-200"></div>
+            </div>
+
+            <!-- Registration button -->
+            <button id="registerBtn" 
+                    class="w-full border-2 border-teal-600 text-teal-700 hover:bg-teal-50 font-medium py-3.5 rounded-lg transition-colors">
+                Create new account
+            </button>
+
+            <!-- Role selection note (hidden by default) -->
+            <div id="roleNote" class="mt-4 text-xs text-center text-gray-400 hidden">
+                Select your role to continue registration
+            </div>
         </div>
     </div>
 

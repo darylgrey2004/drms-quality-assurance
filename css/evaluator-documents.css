@@ -1,0 +1,169 @@
+/* css/evaluator-documents.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* Sidebar styling - Evaluator theme */
+.bg-evaluator-sidebar {
+    background-color: #2d3f4e;
+}
+
+.hover-nav:hover {
+    background-color: #3d515e;
+    color: white;
+}
+
+.active-nav {
+    background-color: #3d515e;
+    border-left: 4px solid #2aa79b;
+}
+
+/* Dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* Card styling */
+.stat-card {
+    transition: all 0.2s ease;
+    border: 1px solid #eef2f6;
+    background-color: white;
+    border-radius: 0.75rem;
+}
+
+/* Badge styles */
+.badge-pending {
+    background-color: #fef9e7;
+    color: #b78103;
+}
+
+.badge-approved {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+}
+
+.badge-draft {
+    background-color: #edf2f7;
+    color: #385d7a;
+}
+
+.badge-expired {
+    background-color: #fee9e7;
+    color: #b33f2f;
+}
+
+/* Category badges */
+.bg-teal-100 { background-color: #f0fdfa; }
+.text-teal-700 { color: #0f766e; }
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-700 { color: #b45309; }
+.bg-indigo-100 { background-color: #e0e7ff; }
+.text-indigo-700 { color: #4338ca; }
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: 500;
+    text-align: left;
+    font-size: 0.75rem;
+    color: #6b7280;
+    padding: 0.75rem 0;
+}
+
+td {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* View button */
+.view-doc {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    color: #374151;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.view-doc:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+/* Disabled inputs */
+input:disabled, select:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Pagination */
+.pagination-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:not(:disabled):hover {
+    background-color: #f3f4f6;
+}
+
+.pagination-btn.active {
+    background-color: #0f766e;
+    color: white;
+    border-color: #0f766e;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* View-only notice */
+.view-only-notice {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .overflow-x-auto {
+        overflow-x: auto;
+    }
+    
+    table {
+        min-width: 800px;
+    }
+}
+
+/* Utility classes */
+.text-teal-300 { color: #5eead4; }
+.text-teal-300\/70 { color: rgba(94, 234, 212, 0.7); }
+.bg-teal-800\/40 { background-color: rgba(17, 94, 89, 0.4); }
+.border-teal-400 { border-color: #2dd4bf; }

@@ -1,0 +1,99 @@
+/* css/evaluator-profile.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+/* Sidebar styling */
+.bg-evaluator-sidebar {
+    background-color: #2d3f4e;
+}
+
+.hover-nav:hover {
+    background-color: #3d515e;
+    color: white;
+}
+
+.active-nav {
+    background-color: #3d515e;
+    border-left: 4px solid #2aa79b;
+}
+
+/* Dashboard background */
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+/* Card styling */
+.stat-card {
+    transition: all 0.2s ease;
+    border: 1px solid #eef2f6;
+    background-color: white;
+    border-radius: 0.75rem;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+/* Profile avatar */
+.w-32.h-32 {
+    width: 8rem;
+    height: 8rem;
+    font-size: 2.25rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Info boxes */
+.border.rounded-lg {
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+}
+
+.border.rounded-lg:hover {
+    background-color: #f9fafb;
+}
+
+/* Access info banner */
+.bg-blue-50 {
+    background-color: #eff6ff;
+}
+
+.border-blue-200 {
+    border-color: #bfdbfe;
+}
+
+.text-blue-600 { color: #2563eb; }
+.text-blue-800 { color: #1e40af; }
+
+/* Activity log */
+.border-b {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* Utility classes */
+.text-teal-300 { color: #5eead4; }
+.text-teal-300\/70 { color: rgba(94, 234, 212, 0.7); }
+.bg-teal-800\/40 { background-color: rgba(17, 94, 89, 0.4); }
+.border-teal-400 { border-color: #2dd4bf; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flex-col.md\:flex-row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+}

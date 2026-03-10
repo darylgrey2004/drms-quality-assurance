@@ -46,32 +46,45 @@ input:focus {
     transition: all 0.2s ease;
 }
 
-/* optional hover effect for buttons (kept minimal) */
+/* button hover effects */
 .bg-teal-700:hover {
     background-color: #0f766e;
 }
 
-/* ensure border-teal-400 works */
-.border-teal-400 {
-    border-color: #2dd4bf;
+/* Register button specific styles */
+#registerBtn {
+    transition: all 0.2s ease;
 }
 
-/* text-teal-300 */
-.text-teal-300 {
-    color: #5eead4;
+#registerBtn:hover {
+    background-color: #f0fdfa;
+    transform: translateY(-1px);
 }
 
-/* text-teal-400 */
-.text-teal-400 {
-    color: #2dd4bf;
+/* Divider animation */
+.flex-1.border-t {
+    transition: width 0.3s ease;
 }
 
-/* bg-teal-700 */
-.bg-teal-700 {
-    background-color: #0f766e;
+/* Role selection note animation */
+#roleNote {
+    animation: fadeIn 0.3s ease-in;
 }
 
-/* hover:bg-teal-800 */
-.bg-teal-700:hover {
-    background-color: #115e59;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .minimal-card {
+        padding: 1.5rem;
+    }
 }
