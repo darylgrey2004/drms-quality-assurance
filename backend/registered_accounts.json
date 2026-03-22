@@ -1,0 +1,20 @@
+[
+  {
+    "id": "5fdf6fcc-00e4-48e5-bd16-85e337431716",
+    "firstName": "Guilmar",
+    "lastName": "Quimba",
+    "middleInitial": "a",
+    "fullName": "Guilmar a Quimba",
+    "gender": "Male",
+    "contactNumber": "09623671720",
+    "email": "gwaposiguilmar@gmail.com",
+    "role": "Faculty",
+    "department": "cte",
+    "password": "MTIzNDU2Nzg5",
+    "verificationCode": "05ABB5",
+    "verificationToken": "ad892a11c2d7c7dd181fad76db8948159441533af6041ef978a84246b456546a",
+    "isVerified": false,
+    "createdAt": "2026-03-10T14:35:14.319Z",
+    "status": "pending"
+  }
+]
