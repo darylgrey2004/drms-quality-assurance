@@ -1,3 +1,4 @@
+
 // js/landing.js
 
 // Wait for DOM to be fully loaded
@@ -7,51 +8,78 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get form elements
     const form = document.getElementById('loginForm');
     const registerBtn = document.getElementById('registerBtn');
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeOffIcon = document.getElementById('eyeOffIcon');
     
     // Login form submission
     if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();  // prevent actual post
-            
-            console.log('Login form submitted - redirecting to role selection');
-            
-            // subtle feedback: change button text temporarily
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
-            
-            btn.innerText = 'redirecting...';
+
+            // Disable button and show loading state
+            btn.innerText = 'Signing in...';
             btn.disabled = true;
             btn.classList.add('opacity-70');
-            
-            // In a real system, this would authenticate and redirect based on role
-            // For demo, we'll use a simple prompt
-            const role = prompt('Select your role for demo:\n1. admin\n2. dean\n3. qa-coordinator\n4. area-chair\n5. faculty\n6. evaluator', 'faculty');
-            
-            // redirect based on role (simulated)
-            setTimeout(() => {
-                switch(role?.toLowerCase()) {
-                    case 'admin':
-                        window.location.href = 'homepage.html';
-                        break;
-                    case 'dean':
-                        window.location.href = 'homepage.html'; // Dean uses admin side
-                        break;
-                    case 'qa-coordinator':
-                        window.location.href = 'homepage.html'; // QA Coordinator uses admin side
-                        break;
-                    case 'area-chair':
-                        window.location.href = 'user-dashboard.html';
-                        break;
-                    case 'faculty':
-                        window.location.href = 'user-dashboard.html';
-                        break;
-                    case 'evaluator':
-                        window.location.href = 'evaluator-dashboard.html';
-                        break;
-                    default:
-                        window.location.href = 'user-dashboard.html'; // Default to faculty
+
+            try {
+                const response = await fetch('http://127.0.0.1:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // If response is not 2xx, throw an error with the message from the backend
+                    throw new Error(data.msg || 'An unknown error occurred.');
                 }
-            }, 300);
+
+                // --- Login Successful ---
+                console.log('Login successful:', data);
+
+                // Store token and user info in localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Redirect based on role
+                if (data.user.role === 'admin') {
+                    window.location.href = 'homepage.html';
+                } else {
+                    window.location.href = 'user-dashboard.html';
+                }
+
+            } catch (error) {
+                // --- Login Failed ---
+                console.error('Login failed:', error.message);
+                alert(`Login failed: ${error.message}`); // Display error to the user
+
+                // Re-enable the button
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            }
+        });
+    }
+
+    // Password toggle handler
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // Toggle the icon
+            eyeIcon.classList.toggle('hidden');
+            eyeOffIcon.classList.toggle('hidden');
         });
     }
 
