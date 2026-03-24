@@ -36,37 +36,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            try {
-                const response = await fetch('http://localhost:3000/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        firstName: nameParts.firstName,
-                        lastName: nameParts.lastName,
-                        email: email,
-                        password: password,
-                        // Note: The 'role' is not sent to the backend from here
-                        // as the default is 'user' and will be managed by the admin.
-                    }),
-                });
+            // --- Step 1: Save data to localStorage ---
+            const registrationData = {
+                firstName: nameParts.firstName,
+                lastName: nameParts.lastName,
+                middleName: nameParts.middleName,
+                email: email,
+                password: password, // Note: Storing password temporarily. This is acceptable for a multi-step form but should be cleared after submission.
+                role: role
+            };
 
-                const data = await response.json();
+            localStorage.setItem('registrationData', JSON.stringify(registrationData));
 
-                if (!response.ok) {
-                    throw new Error(data.msg || 'An unknown error occurred.');
-                }
+            // --- Step 2: Redirect to the next step of the registration process ---
+            // The user will be sent to the faculty profile form to complete their information.
+            alert('Proceeding to profile setup.');
+            window.location.href = 'faculty-profile-form.html'; // Redirect to the faculty profile form
 
-                // --- Registration Successful ---
-                alert(data.msg); // Show success message (e.g., "pending approval")
-                window.location.href = 'landing.html'; // Redirect to login page
-
-            } catch (error) {
-                // --- Registration Failed ---
-                console.error('Registration failed:', error.message);
-                alert(`Registration failed: ${error.message}`);
-            }
         });
     }
 

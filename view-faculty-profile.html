@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRMS-QA · View Faculty Profile</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .profile-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4a5568; /* text-gray-700 */
+        }
+        .profile-value {
+            font-size: 1rem;
+            color: #1a202c; /* text-gray-900 */
+            padding: 0.5rem 0.75rem;
+            background-color: #f7fafc; /* bg-gray-100 */
+            border-radius: 0.375rem; /* rounded-md */
+            border: 1px solid #e2e8f0; /* border-gray-200 */
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748; /* text-gray-800 */
+            border-bottom: 2px solid #e2e8f0; /* border-gray-200 */
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 py-10">
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900" id="profileFullName">Loading...</h1>
+                    <p class="text-gray-500 mt-1" id="profileEmail">Loading...</p>
+                </div>
+                <a href="users.html" class="text-sm text-teal-600 hover:text-teal-800 font-medium">&larr; Back to Users List</a>
+            </div>
+
+            <!-- Personal Information -->
+            <div>
+                <h2 class="section-title">Personal Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <p class="profile-label">Date of Birth</p>
+                        <p class="profile-value" id="profileDob">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Age</p>
+                        <p class="profile-value" id="profileAge">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Gender</p>
+                        <p class="profile-value" id="profileGender">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Civil Status</p>
+                        <p class="profile-value" id="profileCivilStatus">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Nationality</p>
+                        <p class="profile-value" id="profileNationality">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Contact Number</p>
+                        <p class="profile-value" id="profilePhone">&mdash;</p>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <p class="profile-label">Address</p>
+                        <p class="profile-value" id="profileAddress">&mdash;</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Information -->
+            <div class="mt-10">
+                <h2 class="section-title">Employment Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <p class="profile-label">Employee ID</p>
+                        <p class="profile-value" id="profileEmployeeId">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Position</p>
+                        <p class="profile-value" id="profilePosition">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Department</p>
+                        <p class="profile-value" id="profileDepartment">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Employment Status</p>
+                        <p class="profile-value" id="profileEmploymentStatus">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Date of Hire</p>
+                        <p class="profile-value" id="profileDateOfHire">&mdash;</p>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <p class="profile-label">Previous Positions</p>
+                        <p class="profile-value" id="profilePreviousPositions">&mdash;</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Educational Background -->
+            <div class="mt-10">
+                <h2 class="section-title">Educational Background</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <p class="profile-label">Highest Degree</p>
+                        <p class="profile-value" id="profileHighestDegree">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Specialization</p>
+                        <p class="profile-value" id="profileSpecialization">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Institution</p>
+                        <p class="profile-value" id="profileInstitution">&mdash;</p>
+                    </div>
+                    <div>
+                        <p class="profile-label">Year of Graduation</p>
+                        <p class="profile-value" id="profileGradYear">&mdash;</p>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <p class="profile-label">Licensure / Board Exam</p>
+                        <p class="profile-value" id="profileLicense">&mdash;</p>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <p class="profile-label">Continuing Education</p>
+                        <p class="profile-value" id="profileContinuingEd">&mdash;</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add other sections as needed -->
+
+        </div>
+    </div>
+
+    <script src="js/view-faculty-profile.js"></script>
+</body>
+</html>

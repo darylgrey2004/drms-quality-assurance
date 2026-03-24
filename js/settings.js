@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Other buttons
     const backupNowBtn = document.getElementById('backupNowBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
     
     // Tab switching functionality
     tabLinks.forEach(link => {
@@ -49,7 +50,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 activeTab.classList.add('block');
             }
         });
-    });
+    }); // ✅ Fixed: was missing this closing );
+
+    // Logout button functionality
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            // Clear the user's token from local storage
+            localStorage.removeItem('token');
+            
+            // Redirect to the login page
+            window.location.href = 'landing.html';
+        });
+    }
     
     // Save General Settings
     if (saveGeneral) {
