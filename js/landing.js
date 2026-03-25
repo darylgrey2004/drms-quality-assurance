@@ -55,15 +55,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Login successful without OTP
                 console.log('Login successful:', data);
+                console.log('User role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 // Redirect based on role
-                if (data.user.role === 'admin') {
-                    window.location.href = 'homepage.html';
-                } else {
-                    window.location.href = 'user-dashboard.html';
-                }
+                redirectToDashboard(data.user.role);
 
             } catch (error) {
                 console.error('Login failed:', error.message);
@@ -102,6 +99,60 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             window.location.href = 'forgot-password.html';
         });
+    }
+
+    // Redirect to appropriate dashboard based on role
+    function redirectToDashboard(role) {
+        console.log('Redirecting user with role:', role);
+        
+        // Normalize role for comparison (handle both old and new formats)
+        const normalizedRole = role?.toLowerCase().trim();
+        
+        // Admin access - goes to admin dashboard (homepage.html)
+        if (normalizedRole === 'admin') {
+            console.log('Redirecting to admin dashboard (homepage.html)');
+            window.location.href = 'homepage.html';
+            return;
+        }
+        
+        // Faculty Member access - goes to faculty dashboard (user-dashboard.html)
+        if (normalizedRole === 'faculty member' || normalizedRole === 'faculty') {
+            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
+            window.location.href = 'user-dashboard.html';
+            return;
+        }
+        
+        // Area Chair/Program Head - goes to faculty dashboard for now
+        if (normalizedRole === 'area chair/program head' || normalizedRole === 'area-chair') {
+            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
+            window.location.href = 'user-dashboard.html';
+            return;
+        }
+        
+        // Dean - goes to faculty dashboard for now
+        if (normalizedRole === 'dean') {
+            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
+            window.location.href = 'user-dashboard.html';
+            return;
+        }
+        
+        // QA Coordinator - goes to faculty dashboard for now
+        if (normalizedRole === 'qa coordinator' || normalizedRole === 'qa-coordinator') {
+            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
+            window.location.href = 'user-dashboard.html';
+            return;
+        }
+        
+        // External Evaluator - goes to evaluator dashboard
+        if (normalizedRole === 'external evaluator' || normalizedRole === 'evaluator') {
+            console.log('Redirecting to evaluator dashboard (evaluator-dashboard.html)');
+            window.location.href = 'evaluator-dashboard.html';
+            return;
+        }
+        
+        // Default fallback - goes to user dashboard
+        console.log('Unknown role, redirecting to default user dashboard');
+        window.location.href = 'user-dashboard.html';
     }
 
     // OTP Modal Functions
@@ -182,15 +233,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // OTP verified successfully
+                console.log('OTP verified, user role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 
                 // Redirect based on role
-                if (data.user.role === 'admin') {
-                    window.location.href = 'homepage.html';
-                } else {
-                    window.location.href = 'user-dashboard.html';
-                }
+                redirectToDashboard(data.user.role);
                 
             } catch (error) {
                 alert(`Verification failed: ${error.message}`);

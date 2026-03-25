@@ -4,6 +4,81 @@ const db = require('../database');
 const { auth } = require('../middleware/auth');
 const transporter = require('../utils/mailer');
 
+// @route   GET api/user/profile/:userId
+// @desc    Get user profile
+// @access  Private
+router.get('/profile/:userId', auth, async (req, res) => {
+  const { userId } = req.params;
+
+  console.log('=== GET Profile Request ===');
+  console.log('Requested userId:', userId);
+  console.log('Authenticated user:', req.user);
+  console.log('Auth check:', req.user.id, 'vs', parseInt(userId));
+
+  // Verify user is accessing their own profile or is admin
+  if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+    console.log('Authorization failed: User not authorized');
+    return res.status(403).json({ msg: 'Not authorized to view this profile' });
+  }
+
+  try {
+    const query = `
+      SELECT 
+        u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt, 
+        fp.* 
+      FROM users u
+      LEFT JOIN faculty_profiles fp ON u.id = fp.user_id
+      WHERE u.id = ?
+    `;
+
+    console.log('Executing query for userId:', userId);
+    const [results] = await db.query(query, [userId]);
+    console.log('Query results count:', results.length);
+
+    if (results.length === 0) {
+      console.log('User not found in database');
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    console.log('Profile data found:', results[0]);
+    res.json(results[0]);
+  } catch (err) {
+    console.error('Database error:', err.message);
+    console.error('Full error:', err);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   PUT api/user/profile/:userId
+// @desc    Update user profile
+// @access  Private
+router.put('/profile/:userId', auth, async (req, res) => {
+  const { userId } = req.params;
+  const profileData = req.body;
+
+  // Verify user is updating their own profile or is admin
+  if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+    return res.status(403).json({ msg: 'Not authorized to update this profile' });
+  }
+
+  try {
+    // Update faculty_profiles table
+    const [result] = await db.query(
+      'UPDATE faculty_profiles SET ? WHERE user_id = ?',
+      [profileData, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ msg: 'Profile not found' });
+    }
+
+    res.json({ msg: 'Profile updated successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // @route   POST api/user/send-otp
 // @desc    Send OTP to user's email
 // @access  Private

@@ -12,14 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             // Get form values
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
+            const lastName = document.getElementById('lastName').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const middleInitial = document.getElementById('middleInitial').value.trim();
+            const email = document.getElementById('email').value.trim();
             const role = document.getElementById('role').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
             // Validate
-            if (!fullName || !email || !role || !password || !confirmPassword) {
+            if (!lastName || !firstName || !email || !role || !password || !confirmPassword) {
                 alert('Please fill in all required fields');
                 return;
             }
@@ -28,31 +30,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Passwords do not match. Please try again.');
                 return;
             }
-            
-            // Parse name into components
-            const nameParts = parseFullName(fullName);
-            if (!nameParts.firstName || !nameParts.lastName) {
-                alert('Please enter your first and last name.');
-                return;
-            }
 
-            // --- Step 1: Save data to localStorage ---
+            // Save data to localStorage
             const registrationData = {
-                firstName: nameParts.firstName,
-                lastName: nameParts.lastName,
-                middleName: nameParts.middleName,
+                firstName: firstName,
+                lastName: lastName,
+                middleInitial: middleInitial,
                 email: email,
-                password: password, // Note: Storing password temporarily. This is acceptable for a multi-step form but should be cleared after submission.
+                password: password,
                 role: role
             };
 
             localStorage.setItem('registrationData', JSON.stringify(registrationData));
 
-            // --- Step 2: Redirect to the next step of the registration process ---
-            // The user will be sent to the faculty profile form to complete their information.
+            // Redirect to faculty profile form
             alert('Proceeding to profile setup.');
-            window.location.href = 'faculty-profile-form.html'; // Redirect to the faculty profile form
-
+            window.location.href = 'faculty-profile-form.html';
         });
     }
 
@@ -78,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Helper function to parse full name
+    // Helper function to parse full name (no longer needed but kept for compatibility)
     function parseFullName(fullName) {
         // Expected format: "Last, First Middle" or "First Middle Last"
         let lastName = '', firstName = '', middleName = '';

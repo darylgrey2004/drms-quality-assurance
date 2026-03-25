@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const db = require('./database');
 require('dotenv').config();
 
-// This should be the same password you used in the initial SQL INSERT statement.
 const plainPassword = 'admin_password123';
 const adminEmail = 'qguilmar@gmail.com';
 
@@ -16,7 +15,6 @@ async function hashPassword() {
       process.exit(1);
     }
 
-    // Check if password already looks hashed
     if (users[0].password.startsWith('$2b$')) {
         console.log('Admin password already appears to be hashed. No action taken.');
         process.exit(0);
@@ -31,7 +29,7 @@ async function hashPassword() {
   } catch (err) {
     console.error('An error occurred while hashing the password:', err);
   }
-  // The process will exit automatically, closing the database connection.
+  
   process.exit();
 }
 
