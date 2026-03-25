@@ -1,295 +1,260 @@
 // js/users.js
 
-// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Users page JS loaded successfully');
-    
-    // DOM elements
+    const usersTableBody = document.getElementById('usersTableBody');
     const searchInput = document.getElementById('searchUsers');
     const roleFilter = document.getElementById('roleFilter');
     const statusFilter = document.getElementById('statusFilter');
-    const addUserBtn = document.getElementById('addUserBtn');
-    const sendInviteBtn = document.getElementById('sendInviteBtn');
-    const inviteEmail = document.getElementById('inviteEmail');
-    const inviteRole = document.getElementById('inviteRole');
-    const userRows = document.querySelectorAll('.user-row');
-    
-    // Action buttons
-    const editButtons = document.querySelectorAll('.edit-user');
-    const viewButtons = document.querySelectorAll('.view-user');
-    const deactivateButtons = document.querySelectorAll('.deactivate-user');
-    const approveButtons = document.querySelectorAll('.approve-user');
-    const rejectButtons = document.querySelectorAll('.reject-user');
-    const reactivateButtons = document.querySelectorAll('.reactivate-user');
-    
-    // Filter function
-    function filterUsers() {
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        const role = roleFilter ? roleFilter.value : 'all';
-        const status = statusFilter ? statusFilter.value : 'all';
-        
-        let visibleCount = 0;
-        
-        userRows.forEach(row => {
-            const rowText = row.textContent.toLowerCase();
-            const rowRole = row.getAttribute('data-role') || '';
-            const rowStatus = row.getAttribute('data-status') || '';
-            
-            // Search match
-            const matchesSearch = searchTerm === '' || rowText.includes(searchTerm);
-            
-            // Role match
-            let matchesRole = role === 'all';
-            if (!matchesRole) {
-                matchesRole = rowRole === role;
+    const token = localStorage.getItem('token');
+
+    let allUsers = []; // Store all users for filtering
+
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
+    }
+
+    // Function to fetch users and render them in the table
+    async function fetchAndRenderUsers() {
+        try {
+            const response = await fetch('http://localhost:3000/api/admin/users', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token,
+                },
+            });
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    alert('You are not authorized to view this page. Redirecting to login.');
+                    localStorage.removeItem('token');
+                    window.location.href = 'landing.html';
+                }
+                throw new Error('Failed to fetch users.');
             }
+
+            const users = await response.json();
+            allUsers = users; // Store for filtering
+            renderUsers(users);
+            updateStats(users);
+
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Error loading users. Please try again.</td></tr>`;
+        }
+    }
+
+    // Function to update statistics cards
+    function updateStats(users) {
+        const totalUsers = users.length;
+        const approvedUsers = users.filter(u => u.status === 'approved').length;
+        const pendingUsers = users.filter(u => u.status === 'pending').length;
+        const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
+
+        // Update stat cards
+        document.querySelector('.stat-card:nth-child(1) .text-3xl').textContent = totalUsers;
+        document.querySelector('.stat-card:nth-child(2) .text-3xl').textContent = approvedUsers;
+        document.querySelector('.stat-card:nth-child(3) .text-3xl').textContent = pendingUsers;
+        document.querySelector('.stat-card:nth-child(4) .text-3xl').textContent = uniqueRoles;
+
+        // Update percentages
+        const activeRate = totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0;
+        document.querySelector('.stat-card:nth-child(2) .text-xs').textContent = `${activeRate}% approved rate`;
+        document.querySelector('.stat-card:nth-child(1) .text-xs').textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+    }
+
+    // Function to render the users in the table
+    function renderUsers(users) {
+        usersTableBody.innerHTML = ''; // Clear existing rows
+
+        if (users.length === 0) {
+            usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-500">No users found matching your criteria.</td></tr>`;
+            return;
+        }
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'user-row hover:bg-gray-50 transition-colors';
+
+            // Define status badge based on user status
+            const statusBadge = user.status === 'approved' 
+                ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Approved</span>`
+                : user.status === 'rejected'
+                ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
+                : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
+
+            // Format last active date or show 'Never'
+            const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
             
-            // Status match
-            let matchesStatus = status === 'all';
-            if (!matchesStatus) {
-                matchesStatus = rowStatus === status;
-            }
-            
-            if (matchesSearch && matchesRole && matchesStatus) {
-                row.classList.remove('hidden');
-                visibleCount++;
+            // Determine which action buttons to show
+            let actionButtons = '';
+            if (user.status === 'pending') {
+                actionButtons = `
+                    <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
+                    <button class="text-green-600 hover:text-green-800 approve-user" data-id="${user.id}" title="Approve User">✓ Approve</button>
+                    <button class="text-red-600 hover:text-red-800 reject-user" data-id="${user.id}" title="Reject User">✕ Reject</button>
+                `;
             } else {
-                row.classList.add('hidden');
+                actionButtons = `
+                    <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${user.id}" title="Edit User">✏️</button>
+                    <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
+                `;
             }
-        });
-        
-        // Update visible count (could be displayed)
-        console.log(`Showing ${visibleCount} of ${userRows.length} users`);
-        
-        // Update any counter if needed
-        const showingSpan = document.querySelector('.text-sm.text-gray-500');
-        if (showingSpan && showingSpan.textContent.includes('Showing')) {
-            showingSpan.textContent = `Showing 1 to ${visibleCount} of ${userRows.length} users`;
-        }
-    }
-    
-    // Add event listeners for filters
-    if (searchInput) searchInput.addEventListener('input', filterUsers);
-    if (roleFilter) roleFilter.addEventListener('change', filterUsers);
-    if (statusFilter) statusFilter.addEventListener('change', filterUsers);
-    
-    // Add User button
-    if (addUserBtn) {
-        addUserBtn.addEventListener('click', function() {
-            alert('Add User form would open here.\n\nThis would allow creating a new user manually.');
-        });
-    }
-    
-    // Send Invitation button
-    if (sendInviteBtn) {
-        sendInviteBtn.addEventListener('click', function() {
-            const email = inviteEmail ? inviteEmail.value : '';
-            const role = inviteRole ? inviteRole.value : 'faculty';
-            
-            if (!email) {
-                alert('Please enter an email address');
-                return;
-            }
-            
-            if (!email.includes('@')) {
-                alert('Please enter a valid email address');
-                return;
-            }
-            
-            alert(`Invitation sent to ${email} with role: ${role}\n\nIn a full system, this would send an email with setup instructions.`);
-            
-            // Clear the input
-            if (inviteEmail) inviteEmail.value = '';
-        });
-    }
-    
-    // Edit user buttons
-    editButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            alert(`Editing user: ${userName} (ID: ${userId})\n\nThis would open the user edit form.`);
-        });
-    });
-    
-    // View user buttons
-    viewButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            alert(`Viewing user profile: ${userName}\n\nThis would show detailed user information and activity.`);
-        });
-    });
-    
-    // Deactivate user buttons
-    deactivateButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            if (confirm(`Deactivate user: ${userName}?`)) {
-                alert(`User ${userName} has been deactivated.`);
-                
-                // Update UI (demo)
-                const statusSpan = userRow?.querySelector('td:nth-child(5) span');
-                if (statusSpan) {
-                    statusSpan.className = 'bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs';
-                    statusSpan.textContent = 'Inactive';
-                }
-                
-                // Update data attribute
-                if (userRow) {
-                    userRow.setAttribute('data-status', 'inactive');
-                }
-            }
-        });
-    });
-    
-    // Approve pending user buttons
-    approveButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            if (confirm(`Approve user: ${userName}?`)) {
-                alert(`User ${userName} has been approved and activated.`);
-                
-                // Update UI (demo)
-                const statusSpan = userRow?.querySelector('td:nth-child(5) span');
-                if (statusSpan) {
-                    statusSpan.className = 'badge-approved px-2 py-1 rounded-full text-xs';
-                    statusSpan.textContent = 'Active';
-                }
-                
-                // Update action buttons
-                const actionCell = userRow?.querySelector('td:last-child');
-                if (actionCell) {
-                    actionCell.innerHTML = `
-                        <div class="flex gap-2">
-                            <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${userId}">✏️</button>
-                            <button class="text-gray-500 hover:text-gray-700 view-user" data-id="${userId}">👁️</button>
-                            <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="${userId}">🔒</button>
+
+            // Construct the table row
+            row.innerHTML = `
+                <td class="py-3 px-2">
+                    <div class="flex items-center gap-2">
+                        <div>
+                            <div class="font-medium text-gray-800">${user.firstName} ${user.lastName}</div>
                         </div>
-                    `;
-                }
-                
-                // Update data attribute
-                if (userRow) {
-                    userRow.setAttribute('data-status', 'active');
-                }
-            }
+                    </div>
+                </td>
+                <td class="py-3 px-2 text-gray-600">${user.email}</td>
+                <td class="py-3 px-2 text-gray-600">${user.role || 'User'}</td>
+                <td class="py-3 px-2 text-gray-600">${user.department || 'N/A'}</td>
+                <td class="py-3 px-2">${statusBadge}</td>
+                <td class="py-3 px-2 text-gray-400">${lastActive}</td>
+                <td class="py-3 px-2">
+                    <div class="flex gap-2">
+                        ${actionButtons}
+                    </div>
+                </td>
+            `;
+            usersTableBody.appendChild(row);
         });
-    });
-    
-    // Reject pending user buttons
-    rejectButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            if (confirm(`Reject user: ${userName}?`)) {
-                alert(`User ${userName} has been rejected.`);
-                
-                // Remove row (demo)
-                if (userRow) {
-                    userRow.remove();
-                }
+    }
+
+    // Event delegation for approve/reject/other buttons
+    usersTableBody.addEventListener('click', async function(e) {
+        const target = e.target.closest('button'); // Ensure we get the button element
+        if (!target) return;
+
+        const userId = target.getAttribute('data-id');
+
+        if (target.classList.contains('approve-user')) {
+            if (confirm('Are you sure you want to approve this user?')) {
+                await updateUserStatus(userId, 'approved');
             }
-        });
-    });
-    
-    // Reactivate inactive user buttons
-    reactivateButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const userId = this.getAttribute('data-id') || 'unknown';
-            const userRow = this.closest('tr');
-            const userName = userRow?.querySelector('.font-medium')?.textContent || 'User';
-            
-            if (confirm(`Reactivate user: ${userName}?`)) {
-                alert(`User ${userName} has been reactivated.`);
-                
-                // Update UI (demo)
-                const statusSpan = userRow?.querySelector('td:nth-child(5) span');
-                if (statusSpan) {
-                    statusSpan.className = 'badge-approved px-2 py-1 rounded-full text-xs';
-                    statusSpan.textContent = 'Active';
-                }
-                
-                // Update action buttons
-                const actionCell = userRow?.querySelector('td:last-child');
-                if (actionCell) {
-                    actionCell.innerHTML = `
-                        <div class="flex gap-2">
-                            <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${userId}">✏️</button>
-                            <button class="text-gray-500 hover:text-gray-700 view-user" data-id="${userId}">👁️</button>
-                            <button class="text-red-500 hover:text-red-700 deactivate-user" data-id="${userId}">🔒</button>
-                        </div>
-                    `;
-                }
-                
-                // Update data attribute
-                if (userRow) {
-                    userRow.setAttribute('data-status', 'active');
-                }
+        } else if (target.classList.contains('reject-user')) {
+            if (confirm('Are you sure you want to reject this user? This will remove their registration request.')) {
+                await deleteUser(userId);
             }
-        });
-    });
-    
-    // Pagination buttons (demo)
-    const paginationButtons = document.querySelectorAll('.flex.gap-2 button');
-    paginationButtons.forEach(btn => {
-        if (btn.textContent === 'Previous' || btn.textContent === 'Next') {
-            btn.addEventListener('click', function() {
-                alert(`${this.textContent} page would load in the full system`);
-            });
-        } else if (btn.textContent.match(/^\d+$/)) {
-            btn.addEventListener('click', function() {
-                // Page number click
-                paginationButtons.forEach(b => {
-                    if (b.textContent.match(/^\d+$/)) {
-                        b.classList.remove('bg-teal-700', 'text-white');
-                        b.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-600');
-                    }
-                });
-                this.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-600');
-                this.classList.add('bg-teal-700', 'text-white');
-                
-                alert(`Page ${this.textContent} would load in the full system`);
-            });
+        } else if (target.classList.contains('edit-user')) {
+            alert(`Edit functionality for user ID ${userId} is not yet implemented.`);
         }
     });
-    
-    // Optional: Add active state tracking for sidebar navigation
-    const currentPath = window.location.pathname.split('/').pop() || 'users.html';
-    const navLinks = document.querySelectorAll('nav a');
-    
-    navLinks.forEach(link => {
-        const href = link.getAttribute('href');
-        if (href === currentPath) {
-            // Remove active class from all
-            navLinks.forEach(l => {
-                l.classList.remove('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
-                l.style.background = '';
+
+    // Function to update user status (for approval)
+    async function updateUserStatus(userId, status) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token,
+                },
+                body: JSON.stringify({ status: status }),
             });
-            // Add active class to current
-            link.classList.add('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
-            link.style.background = '#1a4450';
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.msg || 'Failed to update user status.');
+            }
+
+            alert('User has been approved successfully!');
+            fetchAndRenderUsers(); // Refresh the user list
+
+        } catch (error) {
+            console.error('Error updating user status:', error);
+            alert(`Failed to approve user: ${error.message}`);
         }
-    });
-    
-    // Initialize filter count
-    filterUsers();
+    }
+
+    // Function to delete a user (for rejection)
+    async function deleteUser(userId) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token,
+                },
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.msg || 'Failed to reject user.');
+            }
+
+            alert('User has been rejected and removed.');
+            fetchAndRenderUsers(); // Refresh the user list
+
+        } catch (error) {
+            console.error('Error rejecting user:', error);
+            alert(`Failed to reject user: ${error.message}`);
+        }
+    }
+
+    // Initial fetch and render of users
+    fetchAndRenderUsers();
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterUsers();
+        });
+    }
+
+    // Role filter functionality
+    if (roleFilter) {
+        roleFilter.addEventListener('change', function() {
+            filterUsers();
+        });
+    }
+
+    // Status filter functionality
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            filterUsers();
+        });
+    }
+
+    // Filter users based on search and filters
+    function filterUsers() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedRole = roleFilter.value;
+        const selectedStatus = statusFilter.value;
+
+        let filteredUsers = allUsers;
+
+        // Filter by search term (name, email, or role)
+        if (searchTerm) {
+            filteredUsers = filteredUsers.filter(user => {
+                const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+                const email = (user.email || '').toLowerCase();
+                const role = (user.role || '').toLowerCase();
+                const department = (user.department || '').toLowerCase();
+                
+                return fullName.includes(searchTerm) || 
+                       email.includes(searchTerm) || 
+                       role.includes(searchTerm) ||
+                       department.includes(searchTerm);
+            });
+        }
+
+        // Filter by role
+        if (selectedRole !== 'all') {
+            filteredUsers = filteredUsers.filter(user => user.role === selectedRole);
+        }
+
+        // Filter by status
+        if (selectedStatus !== 'all') {
+            filteredUsers = filteredUsers.filter(user => user.status === selectedStatus);
+        }
+
+        // Render filtered users
+        renderUsers(filteredUsers);
+    }
 });

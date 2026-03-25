@@ -27,8 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Evidence items already have onclick alerts in HTML
-    // But we can add additional logging
+    // Evidence items
     const evidenceItems = document.querySelectorAll('.border.rounded-lg');
     evidenceItems.forEach(item => {
         item.addEventListener('click', function() {
