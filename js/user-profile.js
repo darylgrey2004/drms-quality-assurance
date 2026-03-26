@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
+    // Get input references for auto-calculation
+    const dobInput = document.getElementById('dob');
+    const ageInput = document.getElementById('age');
+    const hireDateInput = document.getElementById('dateOfHire');
+    const yearsServiceInput = document.getElementById('yearsInService');
+
     // Logout button handler
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
@@ -56,13 +62,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Fetch user profile data from backend (AFTER button references are set)
-    await loadUserProfile(user.id);
-
     // Auto-calculate age from DOB
-    const dobInput = document.getElementById('dob');
-    const ageInput = document.getElementById('age');
-    
     if (dobInput && ageInput) {
         dobInput.addEventListener('change', function() {
             if (this.value) {
@@ -81,9 +81,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Auto-calculate years in service from date of hire
-    const hireDateInput = document.getElementById('dateOfHire');
-    const yearsServiceInput = document.getElementById('yearsInService');
-    
     if (hireDateInput && yearsServiceInput) {
         hireDateInput.addEventListener('change', function() {
             if (this.value) {
@@ -100,6 +97,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
+
+    // Fetch user profile data from backend (AFTER all references are set)
+    await loadUserProfile(user.id);
 
     // Enable edit mode
     function enableEditMode() {
@@ -255,7 +255,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('email').value = data.email || '';
 
         // Personal Information (editable fields)
-        if (data.dateOfBirth) document.getElementById('dob').value = data.dateOfBirth;
+        if (data.dateOfBirth) {
+            // Format date for input field (YYYY-MM-DD)
+            const dobDate = new Date(data.dateOfBirth);
+            const formattedDOB = dobDate.toISOString().split('T')[0];
+            document.getElementById('dob').value = formattedDOB;
+        }
         if (data.age) document.getElementById('age').value = data.age;
         if (data.gender) document.getElementById('gender').value = data.gender;
         if (data.civilStatus) document.getElementById('civilStatus').value = data.civilStatus;
@@ -270,7 +275,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('employmentStatus').value = data.employmentStatus || '';
 
         // Employment Information (editable fields)
-        if (data.dateOfHire) document.getElementById('dateOfHire').value = data.dateOfHire;
+        if (data.dateOfHire) {
+            // Format date for input field (YYYY-MM-DD)
+            const hireDate = new Date(data.dateOfHire);
+            const formattedHireDate = hireDate.toISOString().split('T')[0];
+            document.getElementById('dateOfHire').value = formattedHireDate;
+        }
         if (data.yearsInService) document.getElementById('yearsInService').value = data.yearsInService;
         if (data.previousPositions) document.getElementById('previousPositions').value = data.previousPositions;
 
@@ -293,13 +303,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (data.researchInterests) document.getElementById('researchInterests').value = data.researchInterests;
         if (data.publications) document.getElementById('publications').value = data.publications;
 
-        // Trigger age calculation if DOB exists
-        if (data.dateOfBirth && dobInput) {
+        // Trigger age calculation if DOB exists (use the already declared dobInput)
+        if (data.dateOfBirth && dobInput && ageInput) {
             dobInput.dispatchEvent(new Event('change'));
         }
 
-        // Trigger years in service calculation if date of hire exists
-        if (data.dateOfHire && hireDateInput) {
+        // Trigger years in service calculation if date of hire exists (use the already declared hireDateInput)
+        if (data.dateOfHire && hireDateInput && yearsServiceInput) {
             hireDateInput.dispatchEvent(new Event('change'));
         }
     }
@@ -308,33 +318,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function saveUserProfile(userId) {
         const profileData = {
             // Personal Information
-            dateOfBirth: document.getElementById('dob')?.value,
-            age: document.getElementById('age')?.value,
-            gender: document.getElementById('gender')?.value,
-            civilStatus: document.getElementById('civilStatus')?.value,
-            nationality: document.getElementById('nationality')?.value,
-            phone: document.getElementById('phone')?.value,
-            address: document.getElementById('address')?.value,
+            dateOfBirth: document.getElementById('dob')?.value || null,
+            age: document.getElementById('age')?.value || null,
+            gender: document.getElementById('gender')?.value || null,
+            civilStatus: document.getElementById('civilStatus')?.value || null,
+            nationality: document.getElementById('nationality')?.value || null,
+            phone: document.getElementById('phone')?.value || null,
+            address: document.getElementById('address')?.value || null,
             // Employment Information
-            dateOfHire: document.getElementById('dateOfHire')?.value,
-            previousPositions: document.getElementById('previousPositions')?.value,
+            dateOfHire: document.getElementById('dateOfHire')?.value || null,
+            previousPositions: document.getElementById('previousPositions')?.value || null,
             // Educational Background
-            highestDegree: document.getElementById('highestDegree')?.value,
-            specialization: document.getElementById('specialization')?.value,
-            institution: document.getElementById('institution')?.value,
-            gradYear: document.getElementById('gradYear')?.value,
-            license: document.getElementById('license')?.value,
-            continuingEd: document.getElementById('continuingEd')?.value,
+            highestDegree: document.getElementById('highestDegree')?.value || null,
+            specialization: document.getElementById('specialization')?.value || null,
+            institution: document.getElementById('institution')?.value || null,
+            gradYear: document.getElementById('gradYear')?.value || null,
+            license: document.getElementById('license')?.value || null,
+            continuingEd: document.getElementById('continuingEd')?.value || null,
             // Teaching Load
-            subjectsTaught: document.getElementById('subjectsTaught')?.value,
-            yearLevel: document.getElementById('yearLevel')?.value,
-            loadUnits: document.getElementById('loadUnits')?.value,
-            advising: document.getElementById('advising')?.value,
-            committeeRoles: document.getElementById('committeeRoles')?.value,
+            subjectsTaught: document.getElementById('subjectsTaught')?.value || null,
+            yearLevel: document.getElementById('yearLevel')?.value || null,
+            loadUnits: document.getElementById('loadUnits')?.value || null,
+            advising: document.getElementById('advising')?.value || null,
+            committeeRoles: document.getElementById('committeeRoles')?.value || null,
             // Research Activities
-            researchInterests: document.getElementById('researchInterests')?.value,
-            publications: document.getElementById('publications')?.value
+            researchInterests: document.getElementById('researchInterests')?.value || null,
+            publications: document.getElementById('publications')?.value || null
         };
+
+        console.log('=== Saving Profile ===');
+        console.log('Profile data to save:', profileData);
+        console.log('Date of Birth value:', profileData.dateOfBirth);
 
         try {
             const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
@@ -346,16 +360,20 @@ document.addEventListener('DOMContentLoaded', async function() {
                 body: JSON.stringify(profileData)
             });
 
+            console.log('Save response status:', response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to save profile');
+                const errorData = await response.json().catch(() => ({ msg: 'Unknown error' }));
+                console.error('Save error response:', errorData);
+                throw new Error(errorData.msg || 'Failed to save profile');
             }
 
             const result = await response.json();
+            console.log('Save successful:', result);
             alert('Profile updated successfully!');
             
             // Reload profile and disable edit mode
             await loadUserProfile(userId);
-            disableEditMode();
 
         } catch (error) {
             console.error('Error saving profile:', error);
