@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            if (!email.endsWith('@wmsu.edu.ph')) {
+                alert('Only @wmsu.edu.ph email addresses are allowed.');
+                return;
+            }
+
             if (password !== confirmPassword) {
                 alert('Passwords do not match. Please try again.');
                 return;

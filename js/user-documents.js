@@ -2,6 +2,47 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Documents JS loaded');
+
+    // ── Sidebar: load user info + logout + heartbeat ──
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
+    const role = (user.role || '').toLowerCase().trim();
+    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
+    const el = (id) => document.getElementById(id);
+    if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
+    if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || 'Faculty Member';
+    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
+        headers: { 'x-auth-token': token }
+    }).then(r => r.json()).then(data => {
+        if (el('sidebarRole')) {
+            const dept = data.department ? ` · ${data.department}` : '';
+            el('sidebarRole').textContent = `${data.role || user.role || 'Faculty Member'}${dept}`;
+        }
+    }).catch(() => {});
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'landing.html';
+            }
+        });
+    }
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
+    if (role === 'faculty member') {
+        const approvalsLink = document.querySelector('a[href="user-approvals.html"]');
+        if (approvalsLink) approvalsLink.style.display = 'none';
+    }
+    // ─────────────────────────────────────────────────
     
     // Search functionality
     const searchInput = document.getElementById('searchDocuments');

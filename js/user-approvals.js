@@ -3,6 +3,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Approvals JS loaded');
 
+    // ── Role guard: Faculty Member cannot access this page ──
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
+    const role = (user.role || '').toLowerCase().trim();
+    if (role === 'faculty member') { window.location.href = 'user-dashboard.html'; return; }
+    if (role === 'dean' || role === 'qa coordinator' || role === 'admin') { window.location.href = 'homepage.html'; return; }
+    // ────────────────────────────────────────────────────────
+
     // DOM elements
     const searchInput = document.getElementById('searchApprovals');
     const priorityFilter = document.getElementById('priorityFilter');

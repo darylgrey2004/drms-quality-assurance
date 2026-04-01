@@ -133,7 +133,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '5h' }, // Token expires in 5 hours
       (err, token) => {
         if (err) throw err;
-        res.json({ token, user: { id: user.id, role: user.role, isVerified: user.isVerified } });
+        res.json({ token, user: { id: user.id, role: user.role, isVerified: user.isVerified, firstName: user.firstName, lastName: user.lastName } });
       }
     );
   } catch (err) {
@@ -195,8 +195,8 @@ router.post('/verify-otp', async (req, res) => {
         if (err) throw err;
         res.json({ 
           msg: 'Account verified successfully!',
-          token, 
-          user: { id: user.id, role: user.role, isVerified: true } 
+          token,
+          user: { id: user.id, role: user.role, isVerified: true, firstName: user.firstName, lastName: user.lastName }
         });
       }
     );

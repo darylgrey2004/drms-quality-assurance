@@ -23,6 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
 
+            if (!email.endsWith('@wmsu.edu.ph')) {
+                alert('Only @wmsu.edu.ph email addresses are allowed.');
+                return;
+            }
+
             btn.innerText = 'Signing in...';
             btn.disabled = true;
             btn.classList.add('opacity-70');
@@ -129,17 +134,17 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Dean - goes to faculty dashboard for now
+        // Dean - goes to admin dashboard
         if (normalizedRole === 'dean') {
-            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
-            window.location.href = 'user-dashboard.html';
+            console.log('Redirecting to admin dashboard (homepage.html)');
+            window.location.href = 'homepage.html';
             return;
         }
-        
-        // QA Coordinator - goes to faculty dashboard for now
+
+        // QA Coordinator - goes to admin dashboard
         if (normalizedRole === 'qa coordinator' || normalizedRole === 'qa-coordinator') {
-            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
-            window.location.href = 'user-dashboard.html';
+            console.log('Redirecting to admin dashboard (homepage.html)');
+            window.location.href = 'homepage.html';
             return;
         }
         

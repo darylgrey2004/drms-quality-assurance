@@ -3,6 +3,13 @@
 /* Import Inter font (already in HTML, but included here for completeness) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
 
+/* ── Role-based nav hiding (set via data-role on <html> before render) ── */
+[data-role="qa coordinator"] a[href="upload.html"],
+[data-role="qa coordinator"] a[href="users.html"],
+[data-role="qa coordinator"] a[href="settings.html"] {
+    display: none !important;
+}
+
 * {
     font-family: 'Inter', system-ui, sans-serif;
 }

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` VARCHAR(100) DEFAULT 'Faculty Member',
   `status` ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
   `isVerified` BOOLEAN DEFAULT FALSE,
+  `last_seen` TIMESTAMP NULL DEFAULT NULL,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_email (email),
   INDEX idx_status (status)

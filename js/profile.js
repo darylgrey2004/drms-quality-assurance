@@ -1,7 +1,7 @@
-// js/user-profile.js
+// js/profile.js
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('User Profile JS loaded');
+    console.log('Admin Profile JS loaded');
 
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -13,29 +13,63 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
+    // RBAC: Only admin-type users can access this page
+    if (role === 'faculty member' || role === 'area chair/program head') {
+        window.location.href = 'user-dashboard.html';
+        return;
+    }
+
+    // ── Sidebar: populate user info ──
+    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
+    const el = (id) => document.getElementById(id);
+    if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
+    if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || '';
+
+    // Fetch profile for dept to update sidebarRole
+    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
+        headers: { 'x-auth-token': token }
+    }).then(r => r.json()).then(data => {
+        if (el('sidebarRole')) {
+            const dept = data.department ? ` · ${data.department}` : '';
+            el('sidebarRole').textContent = `${data.role || user.role || ''}${dept}`;
+        }
+    }).catch(() => {});
+
+    // Heartbeat
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
+
+    // Hide Upload, Users, and Settings links for QA Coordinator
+    if (role === 'qa coordinator') {
+        const uploadLink = document.querySelector('a[href="upload.html"]');
+        if (uploadLink) uploadLink.style.display = 'none';
+        const usersLink = document.querySelector('a[href="users.html"]');
+        if (usersLink) usersLink.style.display = 'none';
+        const settingsLink = document.querySelector('a[href="settings.html"]');
+        if (settingsLink) settingsLink.style.display = 'none';
+    }
+    // ─────────────────────────────────────────────────
+
     // Edit mode state
     let isEditMode = false;
     let originalData = {};
 
-    // Get button references FIRST before any functions use them
+    // Get button references
     const editProfileBtn = document.getElementById('editProfileBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-<<<<<<< Updated upstream
-=======
     // Get input references for auto-calculation
     const dobInput = document.getElementById('dob');
     const ageInput = document.getElementById('age');
 
-    // Hide My Approvals link for Faculty Member
-    if (role === 'faculty member') {
-        const approvalsLink = document.querySelector('a[href="user-approvals.html"]');
-        if (approvalsLink) approvalsLink.style.display = 'none';
-    }
-
->>>>>>> Stashed changes
     // Logout button handler
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
@@ -58,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         cancelEditBtn.addEventListener('click', function() {
             if (confirm('Discard all changes?')) {
                 disableEditMode();
-                populateProfile(originalData); // Restore original data
+                populateProfile(originalData);
             }
         });
     }
@@ -70,13 +104,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Fetch user profile data from backend (AFTER button references are set)
-    await loadUserProfile(user.id);
-
     // Auto-calculate age from DOB
-    const dobInput = document.getElementById('dob');
-    const ageInput = document.getElementById('age');
-    
     if (dobInput && ageInput) {
         dobInput.addEventListener('change', function() {
             if (this.value) {
@@ -94,42 +122,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-<<<<<<< Updated upstream
-    // Auto-calculate years in service from date of hire
-    const hireDateInput = document.getElementById('dateOfHire');
-    const yearsServiceInput = document.getElementById('yearsInService');
-    
-    if (hireDateInput && yearsServiceInput) {
-        hireDateInput.addEventListener('change', function() {
-            if (this.value) {
-                const hireDate = new Date(this.value);
-                const today = new Date();
-                let years = today.getFullYear() - hireDate.getFullYear();
-                const monthDiff = today.getMonth() - hireDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < hireDate.getDate())) {
-                    years--;
-                }
-                yearsServiceInput.value = years + (years === 1 ? ' year' : ' years');
-            } else {
-                yearsServiceInput.value = '';
-            }
-        });
-    }
-=======
-    // Fetch user profile data from backend (AFTER all references are set)
+    // Fetch user profile data from backend
     await loadUserProfile(user.id);
->>>>>>> Stashed changes
 
     // Enable edit mode
     function enableEditMode() {
         isEditMode = true;
-        
-        // Show/hide buttons
+
         editProfileBtn.classList.add('hidden');
         saveProfileBtn.classList.remove('hidden');
         cancelEditBtn.classList.remove('hidden');
 
-        // Enable all editable fields
         const editableFields = [
             'dob', 'gender', 'civilStatus', 'nationality', 'phone', 'address',
             'highestDegree', 'specialization', 'institution', 'gradYear', 'license', 'continuingEd',
@@ -152,12 +155,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     function disableEditMode() {
         isEditMode = false;
 
-        // Show/hide buttons
         editProfileBtn.classList.remove('hidden');
         saveProfileBtn.classList.add('hidden');
         cancelEditBtn.classList.add('hidden');
 
-        // Disable all editable fields
         const editableFields = [
             'dob', 'gender', 'civilStatus', 'nationality', 'phone', 'address',
             'highestDegree', 'specialization', 'institution', 'gradYear', 'license', 'continuingEd',
@@ -182,12 +183,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load user profile from backend
     async function loadUserProfile(userId) {
         try {
-            console.log('=== Loading Profile Debug Info ===');
-            console.log('User ID:', userId);
-            console.log('Token exists:', !!token);
-            console.log('Token value:', token?.substring(0, 20) + '...');
-            console.log('API URL:', `http://localhost:3000/api/user/profile/${userId}`);
-            
             const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
                 method: 'GET',
                 headers: {
@@ -196,52 +191,40 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ msg: 'Unknown error' }));
-                console.error('Error response:', errorData);
                 throw new Error(errorData.msg || 'Failed to load profile');
             }
 
             const profileData = await response.json();
-            console.log('Profile data loaded:', profileData);
-            console.log('User role:', profileData.role);
-            originalData = profileData; // Store original data
+            originalData = profileData;
             populateProfile(profileData);
-            disableEditMode(); // Start in view mode
+            disableEditMode();
 
         } catch (error) {
-            console.error('=== Error Details ===');
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-            console.error('Full error:', error);
+            console.error('Error loading profile:', error);
             alert('Failed to load profile data. Check console for details.');
         }
     }
 
     // Populate all profile fields
     function populateProfile(data) {
-        // Generate initials
         const initials = (data.firstName?.charAt(0) || '') + (data.lastName?.charAt(0) || '');
         const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-        
-        // Format role for display
-        const displayRole = data.role || 'Faculty Member';
-        const roleDept = `${displayRole} · ${data.department || 'N/A'}`;
+        const displayRole = data.role || '';
+        const roleDept = `${displayRole}${data.department ? ' · ' + data.department : ''}`;
 
         // Sidebar
-        document.getElementById('sidebarInitials').textContent = initials;
-        document.getElementById('sidebarName').textContent = fullName;
-        document.getElementById('sidebarRole').textContent = roleDept;
+        if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
+        if (el('sidebarName')) el('sidebarName').textContent = fullName;
+        if (el('sidebarRole')) el('sidebarRole').textContent = roleDept;
 
         // Profile card
         document.getElementById('profileInitials').textContent = initials;
         document.getElementById('profileName').textContent = fullName;
         document.getElementById('profileRoleDept').textContent = roleDept;
         document.getElementById('profileEmail').textContent = data.email || '';
-        
+
         // Member since
         if (data.createdAt) {
             const date = new Date(data.createdAt);
@@ -253,26 +236,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('profileStatus').textContent = statusBadge;
 
         // Account status
-        document.getElementById('emailVerified').innerHTML = data.isVerified ? 
-            '<span class="text-green-600">✓ Yes</span>' : 
+        document.getElementById('emailVerified').innerHTML = data.isVerified ?
+            '<span class="text-green-600">✓ Yes</span>' :
             '<span class="text-gray-500">Not verified</span>';
-        
+
         document.getElementById('accountType').textContent = displayRole;
         document.getElementById('accountType').className = 'bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full';
-        
+
         document.getElementById('accountStatus').textContent = statusBadge;
-        const statusClass = data.status === 'approved' ? 'bg-green-100 text-green-700' : 
+        const statusClass = data.status === 'approved' ? 'bg-green-100 text-green-700' :
                            data.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700';
         document.getElementById('accountStatus').className = statusClass + ' text-xs px-2 py-1 rounded-full';
 
-        // Personal Information (readonly fields)
+        // Personal Information (readonly)
         document.getElementById('lastName').value = data.lastName || '';
         document.getElementById('firstName').value = data.firstName || '';
         document.getElementById('middleInitial').value = data.middleInitial || '';
         document.getElementById('email').value = data.email || '';
 
-        // Personal Information (editable fields)
-        if (data.dateOfBirth) document.getElementById('dob').value = data.dateOfBirth;
+        // Personal Information (editable)
+        if (data.dateOfBirth) {
+            const dobDate = new Date(data.dateOfBirth);
+            document.getElementById('dob').value = dobDate.toISOString().split('T')[0];
+        }
         if (data.age) document.getElementById('age').value = data.age;
         if (data.gender) document.getElementById('gender').value = data.gender;
         if (data.civilStatus) document.getElementById('civilStatus').value = data.civilStatus;
@@ -280,20 +266,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (data.phone) document.getElementById('phone').value = data.phone;
         if (data.address) document.getElementById('address').value = data.address;
 
-        // Employment Information (readonly fields)
+        // Employment Information (readonly)
         document.getElementById('employeeId').value = data.employeeId || '';
         document.getElementById('position').value = data.position || '';
         document.getElementById('department').value = data.department || '';
         document.getElementById('employmentStatus').value = data.employmentStatus || '';
 
-<<<<<<< Updated upstream
-        // Employment Information (editable fields)
-        if (data.dateOfHire) document.getElementById('dateOfHire').value = data.dateOfHire;
-        if (data.yearsInService) document.getElementById('yearsInService').value = data.yearsInService;
-        if (data.previousPositions) document.getElementById('previousPositions').value = data.previousPositions;
-
-=======
->>>>>>> Stashed changes
         // Educational Background
         if (data.highestDegree) document.getElementById('highestDegree').value = data.highestDegree;
         if (data.specialization) document.getElementById('specialization').value = data.specialization;
@@ -314,35 +292,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (data.publications) document.getElementById('publications').value = data.publications;
 
         // Trigger age calculation if DOB exists
-        if (data.dateOfBirth && dobInput) {
+        if (data.dateOfBirth && dobInput && ageInput) {
             dobInput.dispatchEvent(new Event('change'));
         }
-
-<<<<<<< Updated upstream
-        // Trigger years in service calculation if date of hire exists
-        if (data.dateOfHire && hireDateInput) {
-            hireDateInput.dispatchEvent(new Event('change'));
-        }
-=======
->>>>>>> Stashed changes
     }
 
     // Save user profile
     async function saveUserProfile(userId) {
         const profileData = {
-            // Personal Information
-<<<<<<< Updated upstream
-            dateOfBirth: document.getElementById('dob')?.value,
-            age: document.getElementById('age')?.value,
-            gender: document.getElementById('gender')?.value,
-            civilStatus: document.getElementById('civilStatus')?.value,
-            nationality: document.getElementById('nationality')?.value,
-            phone: document.getElementById('phone')?.value,
-            address: document.getElementById('address')?.value,
-            // Employment Information
-            dateOfHire: document.getElementById('dateOfHire')?.value,
-            previousPositions: document.getElementById('previousPositions')?.value,
-=======
             dateOfBirth: document.getElementById('dob')?.value || null,
             age: document.getElementById('age')?.value || null,
             gender: document.getElementById('gender')?.value || null,
@@ -350,23 +307,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             nationality: document.getElementById('nationality')?.value || null,
             phone: document.getElementById('phone')?.value || null,
             address: document.getElementById('address')?.value || null,
->>>>>>> Stashed changes
-            // Educational Background
-            highestDegree: document.getElementById('highestDegree')?.value,
-            specialization: document.getElementById('specialization')?.value,
-            institution: document.getElementById('institution')?.value,
-            gradYear: document.getElementById('gradYear')?.value,
-            license: document.getElementById('license')?.value,
-            continuingEd: document.getElementById('continuingEd')?.value,
-            // Teaching Load
-            subjectsTaught: document.getElementById('subjectsTaught')?.value,
-            yearLevel: document.getElementById('yearLevel')?.value,
-            loadUnits: document.getElementById('loadUnits')?.value,
-            advising: document.getElementById('advising')?.value,
-            committeeRoles: document.getElementById('committeeRoles')?.value,
-            // Research Activities
-            researchInterests: document.getElementById('researchInterests')?.value,
-            publications: document.getElementById('publications')?.value
+            highestDegree: document.getElementById('highestDegree')?.value || null,
+            specialization: document.getElementById('specialization')?.value || null,
+            institution: document.getElementById('institution')?.value || null,
+            gradYear: document.getElementById('gradYear')?.value || null,
+            license: document.getElementById('license')?.value || null,
+            continuingEd: document.getElementById('continuingEd')?.value || null,
+            subjectsTaught: document.getElementById('subjectsTaught')?.value || null,
+            yearLevel: document.getElementById('yearLevel')?.value || null,
+            loadUnits: document.getElementById('loadUnits')?.value || null,
+            advising: document.getElementById('advising')?.value || null,
+            committeeRoles: document.getElementById('committeeRoles')?.value || null,
+            researchInterests: document.getElementById('researchInterests')?.value || null,
+            publications: document.getElementById('publications')?.value || null
         };
 
         try {
@@ -380,15 +333,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to save profile');
+                const errorData = await response.json().catch(() => ({ msg: 'Unknown error' }));
+                throw new Error(errorData.msg || 'Failed to save profile');
             }
 
-            const result = await response.json();
+            await response.json();
             alert('Profile updated successfully!');
-            
-            // Reload profile and disable edit mode
             await loadUserProfile(userId);
-            disableEditMode();
 
         } catch (error) {
             console.error('Error saving profile:', error);
