@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Other buttons
     const backupNowBtn = document.getElementById('backupNowBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
     
     // Tab switching functionality
     tabLinks.forEach(link => {

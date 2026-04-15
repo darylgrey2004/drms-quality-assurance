@@ -74,15 +74,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if user is approved
-    if (user.status !== 'approved') {
-        if (user.status === 'pending') {
-            return res.status(403).json({ msg: 'Your account is pending approval.' });
-        }
-        return res.status(403).json({ msg: 'Your account has not been approved.' });
+    // Check if user is rejected
+    if (user.status === 'rejected') {
+        return res.status(403).json({ msg: 'Your account has been rejected. Please contact an administrator.' });
     }
 
-    // If not verified, send OTP
+    // If not verified (pending or approved but not yet verified), send OTP
     if (!user.isVerified) {
       // Generate a 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -170,8 +167,8 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ msg: 'OTP has expired. Please request a new one.' });
     }
 
-    // OTP is valid, update user verification status
-    await db.query("UPDATE users SET isVerified = TRUE WHERE email = ?", [email]);
+    // OTP is valid, update user verification status and approve the account
+    await db.query("UPDATE users SET isVerified = TRUE, status = 'approved' WHERE email = ?", [email]);
 
     // Delete the OTP from the database
     await db.query('DELETE FROM otps WHERE id = ?', [otpRecord.id]);

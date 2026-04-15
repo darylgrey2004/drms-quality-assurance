@@ -69,7 +69,7 @@ router.post('/faculty', async (req, res) => {
         await db.query('INSERT INTO faculty_profiles SET ?', newProfile);
 
         // Send success response
-        res.status(201).json({ msg: 'Registration complete! Your account is pending approval.' });
+        res.status(201).json({ msg: 'Registration complete! Please log in and verify your WMSU email via OTP to activate your account.' });
 
     } catch (err) {
         console.error('Error during faculty profile creation:', err.message);

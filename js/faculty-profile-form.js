@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Success - Clear localStorage and redirect
                 localStorage.removeItem('registrationData');
-                alert(data.msg || 'Registration complete! Your account is pending approval.');
+                alert(data.msg || 'Registration complete! Please log in and verify your WMSU email via OTP to activate your account.');
                 window.location.href = 'landing.html';
 
             } catch (error) {
