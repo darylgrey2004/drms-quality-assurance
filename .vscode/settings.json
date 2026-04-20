@@ -1,4 +1,3 @@
 {
-    "codium.codeCompletion.enable": true,
-    "claudeCodeChat.permissions.yoloMode": false
+    "codium.codeCompletion.enable": true
 }

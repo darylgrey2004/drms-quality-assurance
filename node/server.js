@@ -5,6 +5,8 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/user');
 const profileRoutes = require('./routes/profile');
+const documentRoutes = require('./routes/documents');
+const path = require('path');
 
 dotenv.config();
 
@@ -13,12 +15,14 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/documents', documentRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
