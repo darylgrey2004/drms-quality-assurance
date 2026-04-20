@@ -1,7 +1,56 @@
 // js/user-approvals.js
 
 document.addEventListener('DOMContentLoaded', function() {
+<<<<<<< Updated upstream
     console.log('User Approvals JS loaded');
+=======
+    // ── Role guard ──
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
+    const role = (user.role || '').toLowerCase().trim();
+    if (role === 'faculty member') { window.location.href = 'user-dashboard.html'; return; }
+    if (role === 'dean' || role === 'qa coordinator' || role === 'admin') { window.location.href = 'homepage.html'; return; }
+    // ── Sidebar ──
+    const portalLabels = {
+        'faculty member': 'Faculty Portal',
+        'area chair/program head': 'Area Chair Portal'
+    };
+    const el = (id) => document.getElementById(id);
+    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
+    if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
+    if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || '';
+    if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${user.role} Portal`;
+    const accessLabels = { 'faculty member': 'Faculty Access', 'area chair/program head': 'Area Chair Access' };
+    if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${user.role} Access`;
+    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
+        headers: { 'x-auth-token': token }
+    }).then(r => r.json()).then(data => {
+        if (el('sidebarRole')) {
+            const dept = data.department ? ` · ${data.department}` : '';
+            el('sidebarRole').textContent = `${data.role || user.role}${dept}`;
+        }
+    }).catch(() => {});
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'landing.html';
+            }
+        });
+    }
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
+    // ────────────────────────────────────────────────────────
+>>>>>>> Stashed changes
 
     // ── Role guard: Faculty Member cannot access this page ──
     const token = localStorage.getItem('token');

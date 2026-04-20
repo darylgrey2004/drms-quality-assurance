@@ -56,6 +56,11 @@ router.put('/profile/:userId', auth, async (req, res) => {
   const { userId } = req.params;
   const profileData = req.body;
 
+  console.log('=== PUT Profile Request ===');
+  console.log('User ID:', userId);
+  console.log('Profile data received:', profileData);
+  console.log('Date of Birth:', profileData.dateOfBirth);
+
   // Verify user is updating their own profile or is admin
   if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
     return res.status(403).json({ msg: 'Not authorized to update this profile' });
@@ -68,13 +73,19 @@ router.put('/profile/:userId', auth, async (req, res) => {
       [profileData, userId]
     );
 
+    console.log('Update result:', result);
+    console.log('Affected rows:', result.affectedRows);
+
     if (result.affectedRows === 0) {
+      console.log('Profile not found for user_id:', userId);
       return res.status(404).json({ msg: 'Profile not found' });
     }
 
+    console.log('Profile updated successfully');
     res.json({ msg: 'Profile updated successfully' });
   } catch (err) {
-    console.error(err.message);
+    console.error('Update error:', err.message);
+    console.error('Full error:', err);
     res.status(500).send('Server error');
   }
 });

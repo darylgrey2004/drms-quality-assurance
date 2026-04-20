@@ -74,15 +74,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if user is approved
-    if (user.status !== 'approved') {
-        if (user.status === 'pending') {
-            return res.status(403).json({ msg: 'Your account is pending approval.' });
-        }
-        return res.status(403).json({ msg: 'Your account has not been approved.' });
+    // Check if user is rejected
+    if (user.status === 'rejected') {
+        return res.status(403).json({ msg: 'Your account has been rejected. Please contact an administrator.' });
     }
 
-    // If not verified, send OTP
+    // If not verified (pending or approved but not yet verified), send OTP
     if (!user.isVerified) {
       // Generate a 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -170,8 +167,8 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ msg: 'OTP has expired. Please request a new one.' });
     }
 
-    // OTP is valid, update user verification status
-    await db.query("UPDATE users SET isVerified = TRUE WHERE email = ?", [email]);
+    // OTP is valid, update user verification status and approve the account
+    await db.query("UPDATE users SET isVerified = TRUE, status = 'approved' WHERE email = ?", [email]);
 
     // Delete the OTP from the database
     await db.query('DELETE FROM otps WHERE id = ?', [otpRecord.id]);
@@ -200,6 +197,132 @@ router.post('/verify-otp', async (req, res) => {
         });
       }
     );
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/auth/forgot-password
+// @desc    Send OTP for password reset
+// @access  Public
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ msg: 'Please provide an email address' });
+  }
+
+  try {
+    // Check if user exists
+    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ msg: 'No account found with this email address' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Store OTP in database
+    await db.query('DELETE FROM otps WHERE email = ?', [email]);
+    await db.query('INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)', [email, otp, expiresAt]);
+
+    // Send email
+    try {
+      const mailOptions = {
+        from: `"DRMS-QA" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Password Reset Verification Code',
+        text: `Your password reset verification code is ${otp}. It will expire in 10 minutes.`,
+        html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Password Reset Request</h2>
+          <p>You requested to reset your password. Your verification code is:</p>
+          <h1 style="color: #0d9488; letter-spacing: 5px;">${otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+        </div>`,
+      };
+      await transporter.sendMail(mailOptions);
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr);
+      return res.status(500).json({ msg: 'Failed to send verification email' });
+    }
+
+    res.json({ msg: 'Verification code sent to your email address' });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/auth/verify-reset-otp
+// @desc    Verify OTP for password reset
+// @access  Public
+router.post('/verify-reset-otp', async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ msg: 'Please provide email and OTP' });
+  }
+
+  try {
+    // Find OTP in database
+    const [otps] = await db.query(
+      'SELECT * FROM otps WHERE email = ? AND otp = ?',
+      [email, otp]
+    );
+
+    if (otps.length === 0) {
+      return res.status(400).json({ msg: 'Invalid verification code' });
+    }
+
+    const otpRecord = otps[0];
+
+    // Check if OTP expired
+    if (new Date() > new Date(otpRecord.expiresAt)) {
+      return res.status(400).json({ msg: 'Verification code has expired. Please request a new one.' });
+    }
+
+    // OTP is valid - don't delete yet, will delete after password reset
+    res.json({ msg: 'Verification code confirmed' });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/auth/reset-password
+// @desc    Reset password after OTP verification
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ msg: 'Please provide email and new password' });
+  }
+
+  try {
+    // Verify user exists
+    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    await db.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email]);
+
+    // Delete OTP
+    await db.query('DELETE FROM otps WHERE email = ?', [email]);
+
+    res.json({ msg: 'Password reset successfully' });
 
   } catch (err) {
     console.error(err.message);

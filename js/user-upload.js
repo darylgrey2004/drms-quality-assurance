@@ -3,6 +3,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Upload JS loaded');
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> registration-feature
     // ── Sidebar: load user info + logout + heartbeat ──
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -13,6 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
     if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
     if (el('sidebarRole')) el('sidebarRole').textContent = user.role || 'Faculty Member';
+<<<<<<< HEAD
+=======
+    const portalLabels = {
+        'faculty member': 'Faculty Portal',
+        'area chair/program head': 'Area Chair Portal'
+    };
+    if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${user.role} Portal`;
+    const accessLabels = { 'faculty member': 'Faculty Access', 'area chair/program head': 'Area Chair Access' };
+    if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${user.role} Access`;
+>>>>>>> registration-feature
     fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
         headers: { 'x-auth-token': token }
     }).then(r => r.json()).then(data => {
@@ -44,6 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // ─────────────────────────────────────────────────
 
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> registration-feature
     // DOM elements
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');

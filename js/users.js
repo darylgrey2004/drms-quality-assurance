@@ -150,19 +150,32 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Determine which action buttons to show
             let actionButtons = '';
+<<<<<<< HEAD
             if (isViewOnly) {
                 // Dean: view only, no edit/delete/approve/reject
                 actionButtons = `<a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>`;
             } else if (user.status === 'pending') {
+=======
+<<<<<<< Updated upstream
+            if (user.status === 'pending') {
+>>>>>>> registration-feature
                 actionButtons = `
                     <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
                     <button class="text-green-600 hover:text-green-800 approve-user" data-id="${user.id}" title="Approve User">✓ Approve</button>
                     <button class="text-red-600 hover:text-red-800 reject-user" data-id="${user.id}" title="Reject User">✕ Reject</button>
                 `;
+=======
+            const isAdmin = (user.role || '').toLowerCase().trim() === 'admin';
+            if (isAdmin) {
+                actionButtons = '';
+            } else if (isViewOnly) {
+                actionButtons = `<a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>`;
+>>>>>>> Stashed changes
             } else {
                 actionButtons = `
-                    <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${user.id}" title="Edit User">✏️</button>
                     <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
+                    <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${user.id}" title="Edit User">✏️ Edit</button>
+                    <button class="text-red-600 hover:text-red-800 delete-user" data-id="${user.id}" title="Delete User">🗑️ Delete</button>
                 `;
             }
 
@@ -190,53 +203,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Event delegation for approve/reject/other buttons
     usersTableBody.addEventListener('click', async function(e) {
         const target = e.target.closest('button'); // Ensure we get the button element
         if (!target) return;
 
         const userId = target.getAttribute('data-id');
 
-        if (target.classList.contains('approve-user')) {
-            if (confirm('Are you sure you want to approve this user?')) {
-                await updateUserStatus(userId, 'approved');
-            }
-        } else if (target.classList.contains('reject-user')) {
-            if (confirm('Are you sure you want to reject this user? This will remove their registration request.')) {
+        if (target.classList.contains('edit-user')) {
+            alert(`Edit functionality for user ID ${userId} is not yet implemented.`);
+        } else if (target.classList.contains('delete-user')) {
+            if (confirm('Are you sure you want to delete this user?')) {
                 await deleteUser(userId);
             }
-        } else if (target.classList.contains('edit-user')) {
-            alert(`Edit functionality for user ID ${userId} is not yet implemented.`);
         }
     });
 
-    // Function to update user status (for approval)
-    async function updateUserStatus(userId, status) {
-        try {
-            const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token,
-                },
-                body: JSON.stringify({ status: status }),
-            });
 
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.msg || 'Failed to update user status.');
-            }
-
-            alert('User has been approved successfully!');
-            fetchAndRenderUsers(); // Refresh the user list
-
-        } catch (error) {
-            console.error('Error updating user status:', error);
-            alert(`Failed to approve user: ${error.message}`);
-        }
-    }
-
-    // Function to delete a user (for rejection)
     async function deleteUser(userId) {
         try {
             const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
@@ -252,12 +234,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.msg || 'Failed to reject user.');
             }
 
-            alert('User has been rejected and removed.');
-            fetchAndRenderUsers(); // Refresh the user list
+            alert('User has been deleted.');
+            fetchAndRenderUsers();
 
         } catch (error) {
-            console.error('Error rejecting user:', error);
-            alert(`Failed to reject user: ${error.message}`);
+            console.error('Error deleting user:', error);
+            alert(`Failed to delete user: ${error.message}`);
         }
     }
 
@@ -328,4 +310,47 @@ document.addEventListener('DOMContentLoaded', function() {
         // Render filtered users
         renderUsers(filteredUsers);
     }
+});
+// Mobile Sidebar Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.w-72');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (menuToggle && sidebar && overlay) {
+        // Toggle sidebar when hamburger menu is clicked
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
+        });
+        
+        // Close sidebar when overlay is clicked
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        });
+        
+        // Close sidebar when a navigation link is clicked (optional)
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+        });
+    }
+    
+    // Close sidebar when window is resized to desktop size
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+    });
 });

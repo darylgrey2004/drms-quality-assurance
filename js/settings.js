@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Other buttons
     const backupNowBtn = document.getElementById('backupNowBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
     
     // Tab switching functionality
     tabLinks.forEach(link => {
@@ -284,6 +283,49 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add active class to current
             link.classList.add('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
             link.style.background = '#1a4450';
+        }
+    });
+});
+// Mobile Sidebar Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.w-72');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (menuToggle && sidebar && overlay) {
+        // Toggle sidebar when hamburger menu is clicked
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
+        });
+        
+        // Close sidebar when overlay is clicked
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        });
+        
+        // Close sidebar when a navigation link is clicked (optional)
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+        });
+    }
+    
+    // Close sidebar when window is resized to desktop size
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
         }
     });
 });
