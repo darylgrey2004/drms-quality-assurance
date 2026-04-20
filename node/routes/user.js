@@ -9,14 +9,16 @@ const transporter = require('../utils/mailer');
 // @access  Private
 router.get('/profile/:userId', auth, async (req, res) => {
   const { userId } = req.params;
+  const requestedUserId = Number(userId);
+  const authenticatedUserId = Number(req.user.id);
 
   console.log('=== GET Profile Request ===');
   console.log('Requested userId:', userId);
   console.log('Authenticated user:', req.user);
-  console.log('Auth check:', req.user.id, 'vs', parseInt(userId));
+  console.log('Auth check:', authenticatedUserId, 'vs', requestedUserId);
 
   // Verify user is accessing their own profile or is admin
-  if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+  if (authenticatedUserId !== requestedUserId && req.user.role !== 'admin') {
     console.log('Authorization failed: User not authorized');
     return res.status(403).json({ msg: 'Not authorized to view this profile' });
   }
@@ -54,7 +56,14 @@ router.get('/profile/:userId', auth, async (req, res) => {
 // @access  Private
 router.put('/profile/:userId', auth, async (req, res) => {
   const { userId } = req.params;
-  const profileData = req.body;
+  const requestedUserId = Number(userId);
+  const authenticatedUserId = Number(req.user.id);
+  const {
+    firstName,
+    lastName,
+    middleInitial,
+    ...profileData
+  } = req.body;
 
   console.log('=== PUT Profile Request ===');
   console.log('User ID:', userId);
@@ -62,11 +71,20 @@ router.put('/profile/:userId', auth, async (req, res) => {
   console.log('Date of Birth:', profileData.dateOfBirth);
 
   // Verify user is updating their own profile or is admin
-  if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+  if (authenticatedUserId !== requestedUserId && req.user.role !== 'admin') {
     return res.status(403).json({ msg: 'Not authorized to update this profile' });
   }
 
   try {
+    // Update users table for editable name fields.
+    const userUpdates = {};
+    if (firstName !== undefined) userUpdates.firstName = firstName;
+    if (lastName !== undefined) userUpdates.lastName = lastName;
+    if (middleInitial !== undefined) userUpdates.middleInitial = middleInitial;
+    if (Object.keys(userUpdates).length > 0) {
+      await db.query('UPDATE users SET ? WHERE id = ?', [userUpdates, userId]);
+    }
+
     // Update faculty_profiles table
     const [result] = await db.query(
       'UPDATE faculty_profiles SET ? WHERE user_id = ?',
@@ -82,7 +100,15 @@ router.put('/profile/:userId', auth, async (req, res) => {
     }
 
     console.log('Profile updated successfully');
-    res.json({ msg: 'Profile updated successfully' });
+    const [updatedUsers] = await db.query(
+      'SELECT id, firstName, lastName, middleInitial, email, role FROM users WHERE id = ?',
+      [userId]
+    );
+
+    res.json({
+      msg: 'Profile updated successfully',
+      user: updatedUsers[0] || null
+    });
   } catch (err) {
     console.error('Update error:', err.message);
     console.error('Full error:', err);
@@ -169,19 +195,6 @@ router.post('/verify-otp', auth, async (req, res) => {
 
     res.json({ msg: 'Account verified successfully!' });
 
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-// @route   POST api/user/heartbeat
-// @desc    Update user's last_seen timestamp (for online status tracking)
-// @access  Private
-router.post('/heartbeat', auth, async (req, res) => {
-  try {
-    await db.query('UPDATE users SET last_seen = NOW() WHERE id = ?', [req.user.id]);
-    res.json({ ok: true });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

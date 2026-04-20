@@ -2,67 +2,11 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // ── Admin Role-Based Access Control ──
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
-
-    const role = (user.role || '').toLowerCase().trim();
-    const currentPage = window.location.pathname.split('/').pop() || 'homepage.html';
-
-    // Redirect user-level roles to their dashboard
-    if (role === 'faculty member' || role === 'area chair/program head') {
-        window.location.href = 'user-dashboard.html'; return;
-    }
-
-    // Populate sidebar user info
-    const elById = (id) => document.getElementById(id);
-    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
-    if (elById('sidebarInitials')) elById('sidebarInitials').textContent = initials;
-    if (elById('sidebarName')) elById('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    if (elById('sidebarRole')) elById('sidebarRole').textContent = user.role || 'Admin';
-    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
-        headers: { 'x-auth-token': token }
-    }).then(r => r.json()).then(data => {
-        if (elById('sidebarRole')) {
-            const dept = data.department ? ` · ${data.department}` : '';
-            elById('sidebarRole').textContent = `${data.role || user.role}${dept}`;
-        }
-    }).catch(() => {});
-
-    // Hide Upload, Users, and Settings links for QA Coordinator on all pages
-    if (role === 'qa coordinator') {
-        const uploadLink = document.querySelector('a[href="upload.html"]');
-        if (uploadLink) uploadLink.style.display = 'none';
-        const usersLink = document.querySelector('a[href="users.html"]');
-        if (usersLink) usersLink.style.display = 'none';
-        const settingsLink = document.querySelector('a[href="settings.html"]');
-        if (settingsLink) settingsLink.style.display = 'none';
-    }
-
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-    }
-
-    // Heartbeat
-    function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-        }).catch(() => {});
-    }
-    sendHeartbeat();
-    setInterval(sendHeartbeat, 2 * 60 * 1000);
-    // ─────────────────────────────────────────────────
-
     console.log('Documents page JS loaded successfully');
+
+    const token = localStorage.getItem('token');
+    const API_BASE = 'http://localhost:3000';
+    const documentsList = document.getElementById('documentsList');
     
     // Get DOM elements
     const searchInput = document.getElementById('searchInput');
@@ -72,6 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const docCount = document.getElementById('docCount');
     const uploadBtn = document.getElementById('uploadBtn');
     const filterBtn = document.getElementById('filterBtn');
+    const docPreviewModal = document.getElementById('docPreviewModal');
+    const docPreviewBackdrop = document.getElementById('docPreviewBackdrop');
+    const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
+    const docPreviewFrame = document.getElementById('docPreviewFrame');
+    const docPreviewTitle = document.getElementById('docPreviewTitle');
     
     // Update document count
     function updateDocCount() {
@@ -135,8 +84,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const attachBtns = document.querySelectorAll('.attach-btn');
     const editBtns = document.querySelectorAll('.edit-btn');
     
+    const previewableExt = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'txt'];
+    function getFileExtFromUrl(url) {
+        try {
+            const clean = String(url || '').split('?')[0].split('#')[0];
+            return clean.includes('.') ? clean.split('.').pop().toLowerCase() : '';
+        } catch (_e) {
+            return '';
+        }
+    }
+
+    function openPreviewModal(url, title) {
+        if (!docPreviewModal || !docPreviewFrame) {
+            window.open(url, '_blank');
+            return;
+        }
+        if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
+        docPreviewFrame.src = url;
+        docPreviewModal.classList.remove('hidden');
+        docPreviewModal.classList.add('flex');
+    }
+
+    function closePreviewModal() {
+        if (!docPreviewModal || !docPreviewFrame) return;
+        docPreviewModal.classList.add('hidden');
+        docPreviewModal.classList.remove('flex');
+        docPreviewFrame.src = 'about:blank';
+    }
+
+    if (docPreviewCloseBtn) docPreviewCloseBtn.addEventListener('click', closePreviewModal);
+    if (docPreviewBackdrop) docPreviewBackdrop.addEventListener('click', closePreviewModal);
+
     viewBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
+            // Dynamic rows use <a href="http://localhost:3000/uploads/...">
+            if (this.tagName.toLowerCase() === 'a') {
+                const href = this.getAttribute('href') || '';
+                const ext = getFileExtFromUrl(href);
+                const docRow = this.closest('.doc-row');
+                const docTitle = docRow?.querySelector('.font-medium')?.textContent || 'Document Preview';
+                if (ext && !previewableExt.includes(ext)) {
+                    e.preventDefault();
+                    const proceed = confirm('Preview is not supported for this file type.\n\nPress OK to download, or Cancel to stay on this page.');
+                    if (proceed) window.open(href, '_blank');
+                    return;
+                }
+                e.preventDefault();
+                openPreviewModal(href, docTitle);
+                return;
+            }
+
+            // Static fallback rows use buttons
             e.preventDefault();
             const docRow = this.closest('.doc-row');
             const docTitle = docRow?.querySelector('.font-medium')?.textContent || 'Document';
@@ -183,6 +181,61 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize count
     updateDocCount();
+
+    // Pull latest documents from backend and prepend them.
+    if (token && documentsList) {
+        fetch(`${API_BASE}/api/documents?scope=all`, {
+            headers: { 'x-auth-token': token }
+        })
+            .then((r) => r.json())
+            .then((docs) => {
+                if (!Array.isArray(docs) || docs.length === 0) return;
+                // Keep existing static rows as fallback; just add newest dynamic rows on top.
+                docs.slice(0, 10).reverse().forEach((d) => {
+                    const row = document.createElement('div');
+                    row.className = `grid grid-cols-12 py-3 text-sm items-center doc-row`;
+                    row.setAttribute('data-category', d.category || '');
+                    row.setAttribute('data-status', d.workflow_status || '');
+
+                    const statusText =
+                        d.workflow_status === 'approved' ? 'Approved' :
+                        d.workflow_status === 'validated' ? 'Validated' :
+                        d.workflow_status === 'draft' ? 'Draft' :
+                        d.workflow_status === 'rejected' ? 'Rejected' :
+                        'Pending Review';
+                    const statusClass =
+                        d.workflow_status === 'approved' ? 'badge-approved' :
+                        d.workflow_status === 'draft' ? 'badge-draft' :
+                        d.workflow_status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        'badge-pending';
+
+                    const created = d.created_at ? new Date(d.created_at).toISOString().slice(0, 10) : '';
+                    const authorLine = `by ${d.author_name || 'Uploader'}${created ? ` · ${created}` : ''}`;
+
+                    const fileHref = d.file_url ? `${API_BASE}${d.file_url}` : '#';
+                    row.innerHTML = `
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">${d.title || 'Untitled'}</div>
+                            <div class="text-xs text-gray-400">${authorLine}</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">${(d.category || '').toUpperCase()}</div>
+                        <div class="col-span-2 text-gray-600">${d.area || '-'}</div>
+                        <div class="col-span-1"><span class="${statusClass} px-2 py-1 rounded-full text-xs">${statusText}</span></div>
+                        <div class="col-span-1 text-gray-600">${d.version || 'v1.0'}</div>
+                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
+                            <a class="hover:underline view-btn" href="${fileHref}" target="_blank" rel="noreferrer">👁️</a>
+                            <button class="hover:underline attach-btn">📎</button>
+                            <button class="hover:underline edit-btn">✏️</button>
+                        </div>
+                    `;
+                    documentsList.prepend(row);
+                });
+
+                // Refresh cached row node list by reloading page filters on next tick
+                setTimeout(updateDocCount, 0);
+            })
+            .catch(() => {});
+    }
     
     // Optional: Add active state tracking for sidebar navigation
     const currentPath = window.location.pathname.split('/').pop() || 'documents.html';
@@ -199,49 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add active class to current
             link.classList.add('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
             link.style.background = '#1a4450';
-        }
-    });
-});
-// Mobile Sidebar Toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.querySelector('.menu-toggle');
-    const sidebar = document.querySelector('.w-72');
-    const overlay = document.querySelector('.sidebar-overlay');
-    
-    if (menuToggle && sidebar && overlay) {
-        // Toggle sidebar when hamburger menu is clicked
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-            document.body.classList.toggle('sidebar-open');
-        });
-        
-        // Close sidebar when overlay is clicked
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
-        });
-        
-        // Close sidebar when a navigation link is clicked (optional)
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('active');
-                    document.body.classList.remove('sidebar-open');
-                }
-            });
-        });
-    }
-    
-    // Close sidebar when window is resized to desktop size
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
         }
     });
 });

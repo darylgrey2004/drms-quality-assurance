@@ -59,7 +59,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify(finalPayload),
                 });
 
-                const data = await response.json();
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const data = isJson ? await response.json() : { msg: await response.text() };
 
                 if (!response.ok) {
                     throw new Error(data.msg || 'An unknown error occurred during profile setup.');

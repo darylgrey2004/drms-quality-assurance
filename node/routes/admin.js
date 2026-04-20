@@ -10,7 +10,7 @@ router.get('/users', adminAuth, async (req, res) => {
   try {
     const query = `
       SELECT 
-        u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt, u.last_seen,
+        u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt,
         fp.department, fp.position
       FROM users u
       LEFT JOIN faculty_profiles fp ON u.id = fp.user_id

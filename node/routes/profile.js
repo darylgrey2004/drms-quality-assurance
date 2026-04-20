@@ -73,7 +73,7 @@ router.post('/faculty', async (req, res) => {
 
     } catch (err) {
         console.error('Error during faculty profile creation:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: `Server error: ${err.message}` });
     }
 });
 

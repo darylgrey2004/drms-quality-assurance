@@ -1,58 +1,18 @@
 // js/users.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    // ── Admin Role-Based Access Control ──
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
-    const role = (user.role || '').toLowerCase().trim();
-    if (role === 'faculty member' || role === 'area chair/program head') {
-        window.location.href = 'user-dashboard.html'; return;
-    }
-    if (role === 'qa coordinator') {
-        window.location.href = 'homepage.html'; return;
-    }
-    const isViewOnly = (role === 'dean');
-    const elById = (id) => document.getElementById(id);
-    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
-    if (elById('sidebarInitials')) elById('sidebarInitials').textContent = initials;
-    if (elById('sidebarName')) elById('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    if (elById('sidebarRole')) elById('sidebarRole').textContent = user.role || 'Admin';
-    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
-        headers: { 'x-auth-token': token }
-    }).then(r => r.json()).then(data => {
-        if (elById('sidebarRole')) {
-            const dept = data.department ? ` · ${data.department}` : '';
-            elById('sidebarRole').textContent = `${data.role || user.role}${dept}`;
-        }
-    }).catch(() => {});
-    if (role === 'qa coordinator') {
-        const uploadLink = document.querySelector('a[href="upload.html"]');
-        if (uploadLink) uploadLink.style.display = 'none';
-    }
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token'); localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-    }
-    function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-        }).catch(() => {});
-    }
-    sendHeartbeat(); setInterval(sendHeartbeat, 2 * 60 * 1000);
-    // ─────────────────────────────────────────────────
-
     const usersTableBody = document.getElementById('usersTableBody');
     const searchInput = document.getElementById('searchUsers');
     const roleFilter = document.getElementById('roleFilter');
     const statusFilter = document.getElementById('statusFilter');
+    const token = localStorage.getItem('token');
 
     let allUsers = []; // Store all users for filtering
+
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
+    }
 
     // Function to fetch users and render them in the table
     async function fetchAndRenderUsers() {
@@ -124,41 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
                 : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
 
-            // Determine online status: active within last 1 minute
-            const isOnline = user.last_seen && (Date.now() - new Date(user.last_seen).getTime() < 60 * 1000);
-            const onlineDot = isOnline
-                ? `<span class="inline-block w-2 h-2 bg-green-400 rounded-full mr-1" title="Online"></span>`
-                : `<span class="inline-block w-2 h-2 bg-gray-300 rounded-full mr-1" title="Offline"></span>`;
-
-            // Format last active as relative time (e.g. "2 minutes ago")
-            const lastActiveVal = user.last_seen || user.lastActive;
-            function timeAgo(dateStr) {
-                const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-                if (diff < 60) return diff <= 1 ? 'Just now' : `${diff} seconds ago`;
-                const mins = Math.floor(diff / 60);
-                if (mins < 60) return mins === 1 ? '1 minute ago' : `${mins} minutes ago`;
-                const hrs = Math.floor(mins / 60);
-                if (hrs < 24) return hrs === 1 ? '1 hour ago' : `${hrs} hours ago`;
-                const days = Math.floor(hrs / 24);
-                return days === 1 ? '1 day ago' : `${days} days ago`;
-            }
-            const lastActive = lastActiveVal
-                ? (isOnline
-                    ? '<span class="text-green-600 font-medium">● Online now</span>'
-                    : `<span class="text-gray-400">${timeAgo(lastActiveVal)}</span>`)
-                : '<span class="text-gray-300">Never</span>';
+            // Format last active date or show 'Never'
+            const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
             
             // Determine which action buttons to show
             let actionButtons = '';
-<<<<<<< HEAD
-            if (isViewOnly) {
-                // Dean: view only, no edit/delete/approve/reject
-                actionButtons = `<a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>`;
-            } else if (user.status === 'pending') {
-=======
 <<<<<<< Updated upstream
             if (user.status === 'pending') {
->>>>>>> registration-feature
                 actionButtons = `
                     <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
                     <button class="text-green-600 hover:text-green-800 approve-user" data-id="${user.id}" title="Approve User">✓ Approve</button>
@@ -184,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
                         <div>
-                            <div class="font-medium text-gray-800 flex items-center">${onlineDot}${user.firstName} ${user.lastName}</div>
+                            <div class="font-medium text-gray-800">${user.firstName} ${user.lastName}</div>
                         </div>
                     </div>
                 </td>
@@ -192,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="py-3 px-2 text-gray-600">${user.role || 'User'}</td>
                 <td class="py-3 px-2 text-gray-600">${user.department || 'N/A'}</td>
                 <td class="py-3 px-2">${statusBadge}</td>
-                <td class="py-3 px-2 text-gray-400 text-xs">${lastActive}</td>
+                <td class="py-3 px-2 text-gray-400">${lastActive}</td>
                 <td class="py-3 px-2">
                     <div class="flex gap-2">
                         ${actionButtons}
@@ -246,9 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial fetch and render of users
     fetchAndRenderUsers();
 
-    // Auto-refresh every 30 seconds to keep online status current
-    setInterval(fetchAndRenderUsers, 30000);
-
     // Search functionality
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -298,59 +227,12 @@ document.addEventListener('DOMContentLoaded', function() {
             filteredUsers = filteredUsers.filter(user => user.role === selectedRole);
         }
 
-        // Filter by status or online
-        if (selectedStatus === 'online') {
-            filteredUsers = filteredUsers.filter(user =>
-                user.last_seen && (Date.now() - new Date(user.last_seen).getTime() < 60 * 1000)
-            );
-        } else if (selectedStatus !== 'all') {
+        // Filter by status
+        if (selectedStatus !== 'all') {
             filteredUsers = filteredUsers.filter(user => user.status === selectedStatus);
         }
 
         // Render filtered users
         renderUsers(filteredUsers);
     }
-});
-// Mobile Sidebar Toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.querySelector('.menu-toggle');
-    const sidebar = document.querySelector('.w-72');
-    const overlay = document.querySelector('.sidebar-overlay');
-    
-    if (menuToggle && sidebar && overlay) {
-        // Toggle sidebar when hamburger menu is clicked
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-            document.body.classList.toggle('sidebar-open');
-        });
-        
-        // Close sidebar when overlay is clicked
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
-        });
-        
-        // Close sidebar when a navigation link is clicked (optional)
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('active');
-                    document.body.classList.remove('sidebar-open');
-                }
-            });
-        });
-    }
-    
-    // Close sidebar when window is resized to desktop size
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
-        }
-    });
 });

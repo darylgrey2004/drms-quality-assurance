@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<script>try{var __r=(JSON.parse(localStorage.getItem('user')||'{}').role||'').toLowerCase().trim();if(__r)document.documentElement.setAttribute('data-role',__r);}catch(e){}</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,11 +15,7 @@
 
     <!-- main grid: sidebar + content -->
     <div class="flex h-screen overflow-hidden">
-<!-- Mobile Menu Toggle Button -->
-<button class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2 rounded-lg shadow-lg">
-    ☰
-</button>
-<div class="sidebar-overlay"></div>
+
         <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
         <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <!-- logo / title area -->
@@ -29,10 +24,9 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
             </div>
 
-            <!-- user info -->
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
                     <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
@@ -85,10 +79,6 @@
                 <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">⚙️</span> Settings
                 </a>
-                <!-- Profile -->
-                <a href="profile.html" id="navProfile" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
-                </a>
             </nav>
 
             <!-- footer in sidebar -->
@@ -97,7 +87,8 @@
                     🚪 Logout
                 </button>
                 <div class="text-xs text-teal-200/50 mt-3">
-                    <div>© CTE · v.DRMS‑QA</div>
+                    <div id="adminAccessLabel" class="text-teal-300">Admin · Full Access</div>
+                    <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
             </div>
         </aside>
@@ -117,17 +108,24 @@
                     <!-- file upload area - full width -->
                     <div class="w-full">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Document File <span class="text-red-500">*</span></label>
-                        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-teal-500 transition-colors cursor-pointer w-full">
-                            <div class="flex flex-col items-center">
-                                <span class="text-4xl mb-3">📄</span>
-                                <p class="text-gray-700 font-medium">Drag and drop your file here, or <span class="text-teal-700 hover:underline">browse</span></p>
-                                <p class="text-xs text-gray-400 mt-2">Supports: PDF, DOCX, XLSX, JPG, PNG (Max: 25MB)</p>
-                                <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png">
+                        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-teal-500 transition-colors cursor-pointer w-full">
+                            <div id="dropZoneEmpty" class="text-center">
+                                <div class="flex flex-col items-center">
+                                    <span class="text-4xl mb-3">📄</span>
+                                    <p class="text-gray-700 font-medium">Drag and drop your file(s) here, or <span class="text-teal-700 hover:underline">browse</span></p>
+                                    <p class="text-xs text-gray-400 mt-2">Supports: PDF, DOCX, XLSX, JPG, PNG (Max: 25MB each)</p>
+                                </div>
                             </div>
-                        </div>
-                        <div id="fileInfo" class="mt-2 text-sm text-gray-600 hidden">
-                            Selected: <span id="fileName"></span> <span id="fileSize" class="text-gray-400"></span>
-                            <button type="button" id="removeFile" class="ml-2 text-red-600 hover:text-red-800">✕</button>
+
+                            <div id="dropZoneFiles" class="hidden">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="text-sm font-medium text-gray-700">Selected files</div>
+                                    <button type="button" id="addMoreBtn" class="text-sm text-teal-700 hover:text-teal-800 hover:underline">+ Add more</button>
+                                </div>
+                                <div id="uploadFileList" class="upload-file-list"></div>
+                            </div>
+
+                            <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png" multiple>
                         </div>
                     </div>
 
@@ -259,7 +257,26 @@
         </main>
     </div>
 
+    <!-- Upload success modal -->
+    <div id="uploadSuccessModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
+        <div id="uploadSuccessBackdrop" class="absolute inset-0 bg-slate-900/50"></div>
+        <div class="relative bg-white w-[92vw] max-w-md rounded-2xl shadow-2xl p-6">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-lg">✓</div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-800">Upload successfully</h3>
+                    <p class="text-sm text-gray-500 mt-1">Your document is now saved and will appear in Documents and Approvals.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" id="closeUploadSuccessBtn" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Close</button>
+                <a href="documents.html" id="goToDocumentsBtn" class="px-4 py-2 rounded-lg bg-teal-700 text-white hover:bg-teal-800">View Documents</a>
+            </div>
+        </div>
+    </div>
+
     <!-- External JavaScript -->
+    <script src="js/admin-session.js"></script>
     <script src="js/upload.js"></script>
 </body>
 </html>
