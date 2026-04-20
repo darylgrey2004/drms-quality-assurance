@@ -5,6 +5,9 @@
 
 * {
     font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -44,6 +47,8 @@ body {
 .stat-card {
     transition: all 0.15s ease;
     border: 1px solid #eef2f6;
+    background-color: white;
+    border-radius: 0.75rem;
 }
 
 .stat-card:hover {
@@ -93,7 +98,8 @@ body {
 /* focus states */
 input:focus, select:focus, textarea:focus {
     outline: none;
-    ring: 2px solid #14b8a6;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 1px #14b8a6;
 }
 
 /* file drop zone - full width fix */
@@ -101,11 +107,21 @@ input:focus, select:focus, textarea:focus {
     transition: all 0.2s ease;
     width: 100%;
     box-sizing: border-box;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #dropZone:hover {
     border-color: #14b8a6;
     background-color: #f0fdfa;
+}
+
+#dropZone.dragover {
+    border-color: #14b8a6;
+    background-color: rgba(20, 184, 166, 0.08);
+    transform: scale(1.02);
 }
 
 /* form element styling - ensure full width */
@@ -125,7 +141,7 @@ textarea,
 
 /* ensure grid children take full width */
 .grid > div {
-    min-width: 0; /* prevents grid overflow */
+    min-width: 0;
     width: 100%;
 }
 
@@ -162,7 +178,7 @@ input[type="radio"] {
 
 /* ensure main content area allows full width */
 main.flex-1 {
-    width: calc(100% - 18rem); /* sidebar is w-72 = 18rem */
+    width: calc(100% - 18rem);
     max-width: calc(100% - 18rem);
 }
 
@@ -175,4 +191,489 @@ main.flex-1 {
 /* remove any max-width constraints */
 .max-w-4xl {
     max-width: none !important;
+}
+
+/* ============================================ */
+/* RESPONSIVE DESIGN ADDITIONS */
+/* ============================================ */
+
+/* Sidebar - Mobile Responsive */
+@media (max-width: 768px) {
+    .w-72 {
+        width: 100%;
+        max-width: 280px;
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+    }
+    
+    .sidebar-open .w-72 {
+        left: 0;
+    }
+    
+    main {
+        width: 100% !important;
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    main.flex-1 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1001;
+        background: #0c2538;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 1.25rem;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .menu-toggle {
+        display: none;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+/* Header Section - Responsive */
+@media (max-width: 768px) {
+    .mb-6 {
+        margin-bottom: 1rem;
+    }
+    
+    h1.text-3xl {
+        font-size: 1.5rem;
+    }
+    
+    .text-sm.text-gray-500.mt-1 {
+        font-size: 0.75rem;
+    }
+}
+
+/* Upload Card - Responsive */
+@media (max-width: 768px) {
+    .bg-white.rounded-xl.p-6.stat-card {
+        padding: 1rem;
+    }
+    
+    .space-y-6 {
+        gap: 1rem;
+    }
+}
+
+/* File Drop Zone - Responsive */
+@media (max-width: 640px) {
+    #dropZone {
+        min-height: 150px;
+        padding: 1.5rem;
+    }
+    
+    #dropZone .text-4xl {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    #dropZone p.text-gray-700.font-medium {
+        font-size: 0.85rem;
+    }
+    
+    #dropZone .text-xs.text-gray-400 {
+        font-size: 0.65rem;
+    }
+}
+
+/* File Info - Responsive */
+@media (max-width: 640px) {
+    #fileInfo {
+        padding: 0.5rem;
+    }
+    
+    #fileInfo .flex.items-center.justify-between {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    #fileName {
+        font-size: 0.75rem;
+    }
+}
+
+/* Form Grid - Responsive */
+@media (max-width: 768px) {
+    .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem;
+    }
+}
+
+/* Form Inputs - Responsive */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    label {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .text-sm {
+        font-size: 0.75rem;
+    }
+    
+    .text-xs {
+        font-size: 0.65rem;
+    }
+}
+
+/* Textarea - Responsive */
+@media (max-width: 640px) {
+    textarea {
+        min-height: 80px;
+    }
+}
+
+/* Submit Options - Responsive */
+@media (max-width: 640px) {
+    .bg-gray-50.p-4.rounded-lg {
+        padding: 0.75rem;
+    }
+    
+    h3.font-medium.text-gray-700 {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .flex.gap-4 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    label.flex.items-center {
+        padding: 0.25rem 0;
+    }
+    
+    .text-sm {
+        font-size: 0.8rem;
+    }
+}
+
+/* Form Actions - Responsive */
+@media (max-width: 768px) {
+    .flex.justify-end.gap-3 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .px-6.py-2 {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .px-6.py-2.border.border-gray-300,
+    .px-6.py-2.bg-teal-700 {
+        width: 100%;
+    }
+}
+
+/* Main Container - Responsive */
+@media (max-width: 768px) {
+    .max-w-7xl {
+        padding: 0;
+    }
+}
+
+/* Recent Uploads Table - Responsive */
+@media (max-width: 768px) {
+    .overflow-x-auto {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 500px;
+    }
+    
+    table td, table th {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    table th:nth-child(3),
+    table td:nth-child(3) {
+        display: none;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+    button, 
+    a,
+    .clickable,
+    [role="button"],
+    input,
+    select,
+    textarea,
+    #dropZone {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    input, select, textarea {
+        min-height: 40px;
+    }
+    
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+        font-size: 14px;
+    }
+}
+
+/* Form Elements - Prevent Zoom on iOS */
+@media (max-width: 640px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Desktop optimization */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+    
+    main {
+        padding: 2rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    nav,
+    .menu-toggle,
+    button:not(.no-print),
+    #cancelBtn,
+    [type="submit"] {
+        display: none !important;
+    }
+    
+    body {
+        background-color: white;
+    }
+    
+    .bg-white {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    input, select, textarea {
+        border: none;
+        border-bottom: 1px solid #000;
+        background: transparent;
+    }
+    
+    #dropZone {
+        border: 1px solid #ddd;
+        background: #f9f9f9;
+    }
+}
+
+/* Loading States */
+.skeleton-loader {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.2s ease, 
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+/* Sidebar User Info - Responsive */
+@media (max-width: 768px) {
+    .flex.items-center.gap-3 {
+        gap: 0.5rem;
+    }
+    
+    .w-10.h-10 {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.8rem;
+    }
+    
+    .text-sm.font-medium.text-white {
+        font-size: 0.8rem;
+    }
+    
+    .text-xs.text-teal-300 {
+        font-size: 0.65rem;
+    }
+}
+
+/* Sidebar Footer - Responsive */
+@media (max-width: 640px) {
+    .border-t.border-teal-900\/40.p-4 {
+        padding: 0.75rem;
+    }
+    
+    .text-xs.text-teal-200\/50 {
+        font-size: 0.6rem;
+    }
+}
+
+/* Navigation Items - Touch Friendly */
+@media (max-width: 768px) {
+    nav a {
+        padding: 0.75rem 0.75rem;
+        margin: 0.25rem 0;
+    }
+    
+    .space-y-1 {
+        gap: 0.25rem;
+    }
+}
+
+/* File drop zone animation */
+@keyframes pulse {
+    0%, 100% {
+        border-color: #d1d5db;
+    }
+    50% {
+        border-color: #14b8a6;
+    }
+}
+
+#dropZone.pulse {
+    animation: pulse 1.5s ease-in-out;
+}
+
+/* Required field indicator */
+.text-red-500 {
+    color: #ef4444;
+}
+
+/* Helper text */
+.text-gray-400 {
+    color: #9ca3af;
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
+
+.text-gray-700 {
+    color: #374151;
+}
+
+/* Disabled state */
+input:disabled, select:disabled, textarea:disabled, button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Radio and Checkbox groups spacing */
+@media (max-width: 640px) {
+    .space-y-2 {
+        gap: 0.5rem;
+    }
+}
+
+/* Dropdown arrow on mobile */
+@media (max-width: 768px) {
+    select {
+        background-position: right 0.75rem center;
+        padding-right: 2rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 0.75rem;
+    }
+}
+
+/* Form section spacing */
+@media (max-width: 640px) {
+    .space-y-8 {
+        gap: 1rem;
+    }
+    
+    .pt-4 {
+        padding-top: 0.75rem;
+    }
+    
+    .mt-2 {
+        margin-top: 0.5rem;
+    }
+}
+
+/* File info text wrapping */
+@media (max-width: 480px) {
+    #fileInfo .flex.items-center.justify-between {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    #fileInfo button {
+        margin-top: 0.25rem;
+    }
 }

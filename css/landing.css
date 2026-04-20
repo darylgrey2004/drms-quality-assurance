@@ -3,9 +3,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
 
 /* base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Inter', system-ui, sans-serif;
     background-color: #0b1f33;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
 }
 
 /* custom utility classes */
@@ -28,6 +39,8 @@ body {
 /* minimalist card without heavy shadows */
 .minimal-card {
     box-shadow: 0 4px 14px 0 rgba(0, 20, 30, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
 }
 
 /* subtle teal glow for focus — minimal but effective */
@@ -82,9 +95,394 @@ input:focus {
     }
 }
 
-/* Responsive adjustments */
+/* ============================================ */
+/* RESPONSIVE DESIGN ADDITIONS */
+/* ============================================ */
+
+/* Main Container - Responsive */
 @media (max-width: 768px) {
-    .minimal-card {
+    .max-w-5xl {
+        max-width: 100%;
+        padding: 0 0.5rem;
+    }
+    
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .max-w-5xl {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+    
+    .grid.md\:grid-cols-2 {
+        gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .max-w-5xl {
+        max-width: 90%;
+    }
+}
+
+@media (min-width: 1281px) {
+    .max-w-5xl {
+        max-width: 1024px;
+    }
+}
+
+/* Left Hero Panel - Responsive */
+@media (max-width: 768px) {
+    .bg-navy-medium.rounded-2xl.minimal-card {
         padding: 1.5rem;
+        text-align: center;
+    }
+    
+    /* Subtle top indicator */
+    .text-teal-300.text-xs.font-medium.tracking-wider.mb-5 {
+        font-size: 0.65rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Main heading */
+    h1.text-4xl.md\:text-5xl {
+        font-size: 1.75rem;
+    }
+    
+    h1.text-4xl.md\:text-5xl .text-teal-300 {
+        font-size: 1.75rem;
+    }
+    
+    /* Description paragraph */
+    .text-gray-300.mt-4.text-base.md\:text-lg {
+        font-size: 0.85rem;
+        margin-top: 0.75rem;
+    }
+    
+    /* Badges row */
+    .flex.flex-wrap.gap-3.mt-8 {
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        justify-content: center;
+    }
+    
+    .border.border-teal-800.rounded-full.px-4.py-1\.5 {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.6rem;
+    }
+    
+    /* Footer */
+    .mt-14.pt-4 {
+        margin-top: 2rem;
+        padding-top: 0.75rem;
+    }
+    
+    .text-xs.text-gray-400 {
+        font-size: 0.6rem;
+    }
+    
+    .text-teal-400.text-\[0\.7rem\] {
+        font-size: 0.6rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .bg-navy-medium.rounded-2xl.minimal-card {
+        padding: 1.5rem;
+    }
+    
+    h1.text-4xl.md\:text-5xl {
+        font-size: 2rem;
+    }
+    
+    h1.text-4xl.md\:text-5xl .text-teal-300 {
+        font-size: 2rem;
+    }
+    
+    .text-gray-300.mt-4.text-base.md\:text-lg {
+        font-size: 0.9rem;
+    }
+}
+
+/* Right Login Panel - Responsive */
+@media (max-width: 768px) {
+    .bg-white.rounded-2xl.minimal-card {
+        padding: 1.5rem;
+    }
+    
+    h2.text-2xl.font-semibold.text-navy-900 {
+        font-size: 1.25rem;
+    }
+    
+    .text-gray-500.text-sm.mb-8 {
+        font-size: 0.7rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Form elements */
+    .flex.flex-col.space-y-5 {
+        gap: 1rem;
+    }
+    
+    label.block.text-sm.font-medium.text-gray-600 {
+        font-size: 0.7rem;
+    }
+    
+    input {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Remember me + forgot row */
+    .flex.items-center.justify-between.text-sm {
+        font-size: 0.7rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    /* Sign in button */
+    .bg-teal-700.hover\:bg-teal-800 {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Divider */
+    .flex.items-center.my-6 {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .px-4.text-sm.text-gray-400 {
+        font-size: 0.7rem;
+        padding: 0 0.75rem;
+    }
+    
+    /* Register button */
+    #registerBtn {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Role note */
+    .text-xs.text-center.text-gray-400 {
+        font-size: 0.6rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .bg-white.rounded-2xl.minimal-card {
+        padding: 1.5rem;
+    }
+    
+    h2.text-2xl.font-semibold.text-navy-900 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Role Selection Buttons - Responsive */
+@media (max-width: 640px) {
+    .grid.grid-cols-2.gap-2 {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem;
+    }
+    
+    .role-btn {
+        padding: 0.5rem;
+        font-size: 0.7rem;
+        width: 100%;
+    }
+    
+    .text-xs.text-gray-400.mt-2 {
+        font-size: 0.55rem;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+    .grid.grid-cols-2.gap-2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .role-btn {
+        padding: 0.4rem;
+        font-size: 0.65rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+    button, 
+    a,
+    input,
+    [role="button"],
+    .role-btn,
+    #registerBtn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    body {
+        font-size: 14px;
+    }
+}
+
+/* Form Elements - Prevent Zoom on iOS */
+@media (max-width: 640px) {
+    input, select {
+        font-size: 16px !important;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        padding: 0.5rem;
+    }
+    
+    .max-w-5xl {
+        gap: 0.75rem;
+    }
+    
+    .bg-navy-medium.rounded-2xl.minimal-card,
+    .bg-white.rounded-2xl.minimal-card {
+        padding: 1rem;
+    }
+    
+    h1.text-4xl.md\:text-5xl {
+        font-size: 1.25rem;
+    }
+    
+    .mt-14.pt-4 {
+        margin-top: 0.75rem;
+        padding-top: 0.5rem;
+    }
+}
+
+/* Small devices (320px and below) */
+@media (max-width: 320px) {
+    body {
+        padding: 0.5rem;
+    }
+    
+    .bg-navy-medium.rounded-2xl.minimal-card,
+    .bg-white.rounded-2xl.minimal-card {
+        padding: 1rem;
+    }
+    
+    h1.text-4xl.md\:text-5xl {
+        font-size: 1.25rem;
+    }
+    
+    .border.border-teal-800.rounded-full.px-4.py-1\.5 {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.55rem;
+    }
+    
+    .text-gray-300.mt-4.text-base.md\:text-lg {
+        font-size: 0.75rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background-color: white;
+        padding: 0;
+    }
+    
+    .bg-navy-medium {
+        background-color: white;
+        border: 1px solid #ccc;
+    }
+    
+    .bg-white {
+        border: 1px solid #ccc;
+    }
+    
+    button,
+    #registerBtn,
+    .role-btn,
+    .menu-toggle {
+        display: none !important;
+    }
+    
+    input {
+        border: none;
+        border-bottom: 1px solid #000;
+    }
+    
+    .text-teal-300, .text-teal-700 {
+        color: black !important;
+    }
+}
+
+/* Loading States */
+.skeleton-loader {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: background-color 0.2s ease, 
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+    outline: 2px solid #0d9488;
+    outline-offset: 2px;
+}
+
+/* Custom scrollbar for better mobile experience */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #0d9488;
+        border-radius: 4px;
+    }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+    
+    .max-w-5xl {
+        overflow-x: hidden;
+    }
+}
+
+/* Center content on very small devices */
+@media (max-width: 480px) {
+    .flex.flex-wrap.gap-3.mt-8 {
+        justify-content: center;
+    }
+    
+    .flex.justify-between.items-center {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
     }
 }

@@ -20,6 +20,8 @@ body {
 /* Form container */
 .bg-white {
     transition: all 0.2s ease;
+    background-color: white;
+    border-radius: 0.75rem;
 }
 
 /* Input focus styles */
@@ -47,6 +49,7 @@ input:focus, select:focus, textarea:focus {
 /* Button transitions */
 button {
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 button:active {
@@ -56,18 +59,6 @@ button:active {
 /* Form sections */
 .border-b {
     border-bottom-width: 2px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .grid-cols-1.md\:grid-cols-2 {
-        grid-template-columns: 1fr;
-    }
-    
-    .flex.flex-col.md\:flex-row {
-        flex-direction: column;
-        text-align: center;
-    }
 }
 
 /* Animation for form sections */
@@ -111,3 +102,420 @@ button:active {
 .tooltip:hover .tooltip-text {
     visibility: visible;
 }
+
+/* ============================================ */
+/* RESPONSIVE DESIGN ADDITIONS */
+/* ============================================ */
+
+/* Mobile First Approach - Base styles */
+
+/* Header Section - Responsive */
+@media (max-width: 768px) {
+    .text-center.mb-8 {
+        margin-bottom: 1.5rem;
+    }
+    
+    h1.text-3xl {
+        font-size: 1.5rem;
+    }
+    
+    .text-gray-500.mt-2 {
+        font-size: 0.75rem;
+    }
+}
+
+/* Progress Steps - Responsive */
+@media (max-width: 768px) {
+    .bg-white.rounded-xl.shadow-sm.p-4 {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .flex.items-center.justify-between {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .flex.items-center.gap-2 {
+        gap: 0.25rem;
+    }
+    
+    .w-8.h-8 {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.7rem;
+    }
+    
+    .text-sm.font-medium {
+        font-size: 0.65rem;
+    }
+    
+    .h-px.flex-1 {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .flex.items-center.justify-between {
+        gap: 0.5rem;
+    }
+    
+    .text-sm.font-medium {
+        font-size: 0.7rem;
+    }
+}
+
+/* Form Sections - Responsive */
+@media (max-width: 768px) {
+    .bg-white.rounded-xl.shadow-sm.p-6 {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .flex.items-center.gap-3.mb-5.pb-3 {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .w-8.h-8 {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.7rem;
+    }
+    
+    h2.text-lg {
+        font-size: 1rem;
+    }
+}
+
+/* Form Grid - Responsive */
+@media (max-width: 768px) {
+    .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem;
+    }
+}
+
+/* Form Inputs - Responsive */
+@media (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important; /* Prevents zoom on iOS */
+        padding: 0.5rem 0.75rem;
+    }
+    
+    label {
+        font-size: 0.75rem;
+    }
+    
+    .text-sm {
+        font-size: 0.75rem;
+    }
+    
+    .text-xs {
+        font-size: 0.65rem;
+    }
+}
+
+/* Submit Section - Responsive */
+@media (max-width: 768px) {
+    .bg-white.rounded-xl.shadow-sm.p-6 {
+        padding: 1rem;
+    }
+    
+    .flex.flex-col.md\:flex-row {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .flex.flex-col.md\:flex-row .flex {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .flex.gap-3 {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .px-6.py-2\.5 {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Save Draft and Submit Buttons - Responsive */
+@media (max-width: 640px) {
+    #saveDraftBtn, button[type="submit"] {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .flex.gap-3 {
+        flex-direction: column;
+    }
+}
+
+/* Main Container - Responsive */
+@media (max-width: 768px) {
+    .max-w-5xl {
+        padding: 0 0.75rem;
+    }
+    
+    .py-8 {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+    button, 
+    a,
+    input,
+    select,
+    textarea,
+    [role="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    input, select, textarea {
+        min-height: 40px;
+    }
+    
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+        font-size: 14px;
+    }
+}
+
+/* Desktop optimization */
+@media (min-width: 1200px) {
+    .max-w-5xl {
+        max-width: 80rem;
+        margin: 0 auto;
+    }
+    
+    .py-8 {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    button,
+    .menu-toggle,
+    .sidebar-overlay,
+    #saveDraftBtn,
+    [type="submit"] {
+        display: none !important;
+    }
+    
+    body {
+        background-color: white;
+    }
+    
+    .bg-white {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    input, select, textarea {
+        border: none;
+        background: transparent;
+    }
+    
+    .progress-step {
+        background-color: #e5e7eb;
+        color: black;
+    }
+}
+
+/* Loading States */
+.skeleton-loader {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.2s ease, 
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+/* Required field indicator */
+.text-red-500 {
+    color: #ef4444;
+}
+
+/* Helper text styles */
+.text-gray-400 {
+    color: #9ca3af;
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
+
+.text-gray-700 {
+    color: #374151;
+}
+
+/* Form validation styles */
+input:invalid, select:invalid, textarea:invalid {
+    border-color: #ef4444;
+}
+
+input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Disabled state */
+input:disabled, select:disabled, textarea:disabled, button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Read-only state */
+input:read-only, select:read-only, textarea:read-only {
+    background-color: #f9fafb;
+    cursor: default;
+}
+
+/* Small screen additional adjustments */
+@media (max-width: 480px) {
+    .flex.items-center.gap-3.mb-5.pb-3 {
+        flex-wrap: wrap;
+    }
+    
+    .w-8.h-8 {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.6rem;
+    }
+    
+    h2.text-lg {
+        font-size: 0.9rem;
+    }
+    
+    .text-xs.text-gray-400 {
+        font-size: 0.55rem;
+    }
+    
+    .mt-8.pt-5 {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+    }
+}
+
+/* Section headers consistency */
+.flex.items-center.gap-3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Form section hover effect */
+.bg-white.rounded-xl.shadow-sm {
+    transition: all 0.2s ease;
+}
+
+.bg-white.rounded-xl.shadow-sm:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+}
+
+/* Progress steps container */
+.bg-white.rounded-xl.shadow-sm.p-4 {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Submit button styles */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+
+/* Cancel button styles */
+.border.border-gray-300 {
+    border: 1px solid #d1d5db;
+}
+
+.border.border-gray-300:hover {
+    background-color: #f9fafb;
+}
+
+/* Responsive grid gap */
+@media (max-width: 768px) {
+    .gap-5 {
+        gap: 0.75rem;
+    }
+    
+    .space-y-4 {
+        gap: 0.75rem;
+    }
+    
+    .space-y-6 {
+        gap: 1rem;
+    }
+}
+
+/* Footer text */
+.text-xs.text-gray-400.text-center {
+    text-align: center;
+    font-size: 0.65rem;
+    color: #9ca3af;
+}
+
+/* Animation for form sections on scroll */
+@keyframes fadeInSection {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bg-white.rounded-xl.shadow-sm {
+    animation: fadeInSection 0.4s ease-out forwards;
+}
+
+/* Stagger animation for multiple sections */
+.bg-white.rounded-xl.shadow-sm:nth-child(1) { animation-delay: 0s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(2) { animation-delay: 0.05s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(3) { animation-delay: 0.1s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(4) { animation-delay: 0.15s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(5) { animation-delay: 0.2s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(6) { animation-delay: 0.25s; }
+.bg-white.rounded-xl.shadow-sm:nth-child(7) { animation-delay: 0.3s; }
