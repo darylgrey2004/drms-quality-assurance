@@ -75,12 +75,34 @@ body {
     background-color: #115e59;
 }
 
-.approve-btn, .review-btn, .return-btn {
-    transition: all 0.2s ease;
+.action-link {
+    color: #0f766e;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.2;
 }
 
-.return-btn:hover {
-    background-color: #fef2f2;
+.action-link:hover {
+    color: #115e59;
+    text-decoration: underline;
+}
+
+.action-link-danger {
+    color: #dc2626;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+.action-link-danger:hover {
+    color: #b91c1c;
+    text-decoration: underline;
 }
 
 /* Form elements */

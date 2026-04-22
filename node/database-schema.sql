@@ -64,3 +64,37 @@ CREATE TABLE IF NOT EXISTS `otps` (
   INDEX idx_email (email),
   INDEX idx_otp (otp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create documents table (uploads + workflow)
+CREATE TABLE IF NOT EXISTS `documents` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) NOT NULL,
+  `category` VARCHAR(50) NOT NULL,
+  `area` VARCHAR(120) NOT NULL,
+  `version` VARCHAR(50) DEFAULT 'v1.0',
+  `description` TEXT,
+  `keywords` TEXT,
+  `workflow_status` ENUM('draft','pending','validated','approved','locked','rejected') DEFAULT 'pending',
+  `uploader_id` INT NOT NULL,
+  `author_name` VARCHAR(255),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`uploader_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX idx_category (`category`),
+  INDEX idx_status (`workflow_status`),
+  INDEX idx_uploader (`uploader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create document_files table (file storage metadata)
+CREATE TABLE IF NOT EXISTS `document_files` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `document_id` INT NOT NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `stored_name` VARCHAR(255) NOT NULL,
+  `mime_type` VARCHAR(120),
+  `size_bytes` BIGINT,
+  `url_path` VARCHAR(255) NOT NULL,
+  `uploaded_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`document_id`) REFERENCES `documents`(`id`) ON DELETE CASCADE,
+  INDEX idx_document (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

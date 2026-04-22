@@ -3,8 +3,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Evidence Map JS loaded');
 
-<<<<<<< Updated upstream
-=======
     // ── Sidebar: load user info + logout + heartbeat ──
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -53,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // ─────────────────────────────────────────────────
 
->>>>>>> Stashed changes
     // Tab switching
     const tabLinks = document.querySelectorAll('#mapTabs a');
     const tabContents = document.querySelectorAll('.tab-content');

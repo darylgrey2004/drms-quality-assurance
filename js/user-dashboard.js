@@ -3,8 +3,6 @@
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Dashboard JS loaded successfully');
-<<<<<<< Updated upstream
-=======
 
     // ── Sidebar: load user info + logout + heartbeat ──
     const token = localStorage.getItem('token');
@@ -55,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (approvalsLink) approvalsLink.style.display = 'none';
     }
     // ─────────────────────────────────────────────────
->>>>>>> Stashed changes
     
     // Notification button
     const notificationBtn = document.querySelector('button[class*="bg-white p-2 rounded-full"]');

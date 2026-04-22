@@ -193,3 +193,22 @@ button:disabled {
 .w-full {
     width: 100%;
 }
+
+/* Professional action links in approvals table */
+.action-link {
+    color: #0f766e;
+}
+
+.action-link:hover {
+    color: #115e59;
+    text-decoration: underline;
+}
+
+.action-link-danger {
+    color: #dc2626;
+}
+
+.action-link-danger:hover {
+    color: #b91c1c;
+    text-decoration: underline;
+}

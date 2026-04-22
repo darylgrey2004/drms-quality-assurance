@@ -129,10 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Dean - goes to faculty dashboard for now
+        // Dean - use admin-style sidebar/dashboard
         if (normalizedRole === 'dean') {
-            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
-            window.location.href = 'user-dashboard.html';
+            console.log('Redirecting to dean/admin dashboard (homepage.html)');
+            window.location.href = 'homepage.html';
             return;
         }
         

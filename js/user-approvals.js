@@ -1,9 +1,7 @@
 // js/user-approvals.js
 
 document.addEventListener('DOMContentLoaded', function() {
-<<<<<<< Updated upstream
     console.log('User Approvals JS loaded');
-=======
     // ── Role guard ──
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -50,15 +48,14 @@ document.addEventListener('DOMContentLoaded', function() {
     sendHeartbeat();
     setInterval(sendHeartbeat, 2 * 60 * 1000);
     // ────────────────────────────────────────────────────────
->>>>>>> Stashed changes
 
     // DOM elements
     const searchInput = document.getElementById('searchApprovals');
     const priorityFilter = document.getElementById('priorityFilter');
     const areaFilter = document.getElementById('areaFilter');
-    const approveBtns = document.querySelectorAll('.approve-btn');
-    const reviewBtns = document.querySelectorAll('.review-btn');
-    const returnBtns = document.querySelectorAll('.return-btn');
+    const viewBtns = document.querySelectorAll('.view-btn');
+    const validateBtns = document.querySelectorAll('.validate-btn');
+    const rejectBtns = document.querySelectorAll('.reject-btn');
 
     // Filter function
     function filterApprovals() {
@@ -85,22 +82,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (priorityFilter) priorityFilter.addEventListener('change', filterApprovals);
     if (areaFilter) areaFilter.addEventListener('change', filterApprovals);
 
-    // Approve button
-    approveBtns.forEach(btn => {
+    // Validate button
+    validateBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const item = this.closest('.border-l-4');
             const title = item.querySelector('h3')?.textContent || 'Document';
             
-            if (confirm(`Approve "${title}"?`)) {
-                alert('Document approved successfully!');
+            if (confirm(`Validate "${title}"?`)) {
+                alert('Document validated successfully!');
                 item.remove();
                 updateStats();
             }
         });
     });
 
-    // Review button
-    reviewBtns.forEach(btn => {
+    // View button
+    viewBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const item = this.closest('.border-l-4');
             const title = item.querySelector('h3')?.textContent || 'Document';
@@ -109,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Return button
-    returnBtns.forEach(btn => {
+    // Reject button
+    rejectBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const item = this.closest('.border-l-4');
             const title = item.querySelector('h3')?.textContent || 'Document';

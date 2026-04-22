@@ -3,6 +3,22 @@
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Approvals page JS loaded successfully');
+
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = (user.role || '').toString().toLowerCase().trim();
+    const API_BASE = 'http://localhost:3000';
+    const approvalsList = document.getElementById('approvalsList');
+
+    // Access guard: approvals action view is for Dean/Admin on this page.
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
+    }
+    if (role !== 'admin' && role !== 'dean') {
+        window.location.href = 'user-approvals.html';
+        return;
+    }
     
     // DOM elements
     const searchInput = document.getElementById('searchApprovals');
@@ -18,13 +34,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Action buttons
     const viewBtns = document.querySelectorAll('.view-approval');
     const validateBtns = document.querySelectorAll('.validate-btn');
-    const approveBtns = document.querySelectorAll('.approve-btn');
     const rejectBtns = document.querySelectorAll('.reject-btn');
     
     // Stats counters
     const pendingCount = document.getElementById('pendingCount');
     const validationCount = document.getElementById('validationCount');
     const approvalCount = document.getElementById('approvalCount');
+    const docPreviewModal = document.getElementById('docPreviewModal');
+    const docPreviewBackdrop = document.getElementById('docPreviewBackdrop');
+    const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
+    const docPreviewFrame = document.getElementById('docPreviewFrame');
+    const docPreviewTitle = document.getElementById('docPreviewTitle');
+    const previewableExt = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'txt'];
+
+    function getFileExtFromUrl(url) {
+        try {
+            const clean = String(url || '').split('?')[0].split('#')[0];
+            return clean.includes('.') ? clean.split('.').pop().toLowerCase() : '';
+        } catch (_e) {
+            return '';
+        }
+    }
+
+    function openPreviewModal(url, title) {
+        if (!docPreviewModal || !docPreviewFrame) {
+            window.open(url, '_blank');
+            return;
+        }
+        if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
+        docPreviewFrame.src = url;
+        docPreviewModal.classList.remove('hidden');
+        docPreviewModal.classList.add('flex');
+    }
+
+    function closePreviewModal() {
+        if (!docPreviewModal || !docPreviewFrame) return;
+        docPreviewModal.classList.add('hidden');
+        docPreviewModal.classList.remove('flex');
+        docPreviewFrame.src = 'about:blank';
+    }
+
+    if (docPreviewCloseBtn) docPreviewCloseBtn.addEventListener('click', closePreviewModal);
+    if (docPreviewBackdrop) docPreviewBackdrop.addEventListener('click', closePreviewModal);
     
     // Tab switching functionality
     tabLinks.forEach(link => {
@@ -164,115 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // View button handlers
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const docId = this.getAttribute('data-id') || 'document';
-            const approvalItem = this.closest('.approval-item');
-            const docTitle = approvalItem?.querySelector('.font-medium')?.textContent || docId;
-            
-            console.log(`Viewing approval item: ${docTitle}`);
-            alert(`Viewing: ${docTitle}\n(This would open the document review panel in the full system)`);
-        });
-    });
-    
-    // Validate button handlers
-    validateBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const docId = this.getAttribute('data-id') || 'document';
-            const approvalItem = this.closest('.approval-item');
-            const docTitle = approvalItem?.querySelector('.font-medium')?.textContent || docId;
-            
-            if (confirm(`Validate document: ${docTitle}?`)) {
-                alert(`Document validated successfully!\nIt will now move to Approval stage.`);
-                
-                // Update UI (demo)
-                const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-child');
-                const statusSpan = approvalItem?.querySelector('.col-span-1 span');
-                
-                if (stageSpan) {
-                    stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
-                    stageSpan.textContent = 'Approval';
-                }
-                if (statusSpan) {
-                    statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
-                    statusSpan.textContent = 'Under Review';
-                }
-                
-                // Update data attributes
-                if (approvalItem) {
-                    approvalItem.setAttribute('data-stage', 'approve');
-                    approvalItem.setAttribute('data-status', 'review');
-                }
-            }
-        });
-    });
-    
-    // Approve button handlers
-    approveBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const docId = this.getAttribute('data-id') || 'document';
-            const approvalItem = this.closest('.approval-item');
-            const docTitle = approvalItem?.querySelector('.font-medium')?.textContent || docId;
-            
-            if (confirm(`Approve document: ${docTitle}?`)) {
-                alert(`Document approved successfully!\nIt will now be locked.`);
-                
-                // Update UI (demo)
-                const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-child');
-                const statusSpan = approvalItem?.querySelector('.col-span-1 span');
-                const actionButtons = approvalItem?.querySelectorAll('.col-span-2 button');
-                
-                if (stageSpan) {
-                    stageSpan.className = 'bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full';
-                    stageSpan.textContent = 'Locked';
-                }
-                if (statusSpan) {
-                    statusSpan.className = 'badge-approved px-2 py-1 rounded-full text-xs';
-                    statusSpan.textContent = 'Approved';
-                }
-                
-                // Disable action buttons except view
-                if (actionButtons) {
-                    actionButtons.forEach(btn => {
-                        if (!btn.classList.contains('view-approval')) {
-                            btn.disabled = true;
-                            btn.classList.add('text-gray-400');
-                        }
-                    });
-                }
-                
-                // Update data attributes
-                if (approvalItem) {
-                    approvalItem.setAttribute('data-stage', 'lock');
-                    approvalItem.setAttribute('data-status', 'approved');
-                }
-            }
-        });
-    });
-    
-    // Reject button handlers
-    rejectBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const docId = this.getAttribute('data-id') || 'document';
-            const approvalItem = this.closest('.approval-item');
-            const docTitle = approvalItem?.querySelector('.font-medium')?.textContent || docId;
-            
-            const reason = prompt(`Please provide reason for rejecting: ${docTitle}`);
-            if (reason !== null) {
-                alert(`Document rejected.\nReason: ${reason}\n\nIt will be returned to the uploader.`);
-                
-                // Remove item (demo)
-                if (approvalItem) {
-                    approvalItem.remove();
-                }
-            }
-        });
-    });
+    // Action handling is delegated near the bottom so dynamic rows also work.
     
     // Select all functionality
     if (selectAllCheckbox) {
@@ -341,4 +284,110 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize with All tab
     filterByTab('all');
+
+    // Pull latest approval items from backend and prepend them.
+    if (token && approvalsList) {
+        fetch(`${API_BASE}/api/documents/approvals`, {
+            headers: { 'x-auth-token': token }
+        })
+            .then((r) => r.json())
+            .then((docs) => {
+                if (!Array.isArray(docs) || docs.length === 0) return;
+
+                docs.slice(0, 10).reverse().forEach((d) => {
+                    const item = document.createElement('div');
+                    item.className = 'grid grid-cols-12 py-3 text-sm items-center approval-item';
+                    const stage = d.workflow_status === 'validated' ? 'approve' : 'validate';
+                    const status = d.workflow_status === 'validated' ? 'review' : 'pending';
+                    item.setAttribute('data-stage', stage);
+                    item.setAttribute('data-status', status);
+
+                    const stageChipClass = stage === 'approve'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-blue-100 text-blue-700';
+                    const stageText = stage === 'approve' ? 'Approval' : 'Validation';
+
+                    const statusChipClass = status === 'review'
+                        ? 'badge-pending'
+                        : 'badge-pending';
+                    const statusText = status === 'review' ? 'Under Review' : 'Pending';
+
+                    const fileHref = d.file_url ? `${API_BASE}${d.file_url}` : '#';
+                    item.innerHTML = `
+                        <div class="col-span-4">
+                            <div class="font-medium text-gray-800">${d.title || 'Untitled'}</div>
+                            <div class="text-xs text-gray-400">by ${d.author_name || 'Uploader'}</div>
+                        </div>
+                        <div class="col-span-2 text-gray-600">${(d.category || '').toUpperCase()}</div>
+                        <div class="col-span-2">
+                            <span class="${stageChipClass} text-xs px-2 py-1 rounded-full">${stageText}</span>
+                        </div>
+                        <div class="col-span-1">
+                            <span class="${statusChipClass} px-2 py-1 rounded-full text-xs">${statusText}</span>
+                        </div>
+                        <div class="col-span-1 text-gray-600">${d.version || 'v1.0'}</div>
+                        <div class="col-span-2 text-xs space-x-2">
+                            <a class="action-link view-approval" data-id="${d.id}" href="${fileHref}" target="_blank" rel="noreferrer">👁 View</a>
+                            <button class="action-link validate-btn" data-id="${d.id}">✓ Validate</button>
+                            <button class="action-link-danger reject-btn" data-id="${d.id}">✕</button>
+                        </div>
+                    `;
+                    approvalsList.prepend(item);
+                });
+            })
+            .catch(() => {});
+    }
+
+    // Delegate click handlers so dynamically added rows work too.
+    if (approvalsList) {
+        approvalsList.addEventListener('click', (e) => {
+            const viewBtn = e.target.closest('.view-approval');
+            const validateBtn = e.target.closest('.validate-btn');
+            const rejectBtn = e.target.closest('.reject-btn');
+            if (!viewBtn && !validateBtn && !rejectBtn) return;
+
+            const approvalItem = e.target.closest('.approval-item');
+            const docTitle = approvalItem?.querySelector('.font-medium')?.textContent || 'document';
+
+            if (viewBtn) {
+                const href = viewBtn.getAttribute('href') || '';
+                const ext = getFileExtFromUrl(href);
+                if (ext && !previewableExt.includes(ext)) {
+                    e.preventDefault();
+                    const proceed = confirm('Preview is not supported for this file type.\n\nPress OK to download, or Cancel to stay on this page.');
+                    if (proceed) window.open(href, '_blank');
+                    return;
+                }
+                e.preventDefault();
+                openPreviewModal(href, docTitle);
+                return;
+            }
+
+            e.preventDefault();
+            if (validateBtn) {
+                if (confirm(`Validate document: ${docTitle}?`)) {
+                    const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-child');
+                    const statusSpan = approvalItem?.querySelector('.col-span-1 span');
+                    if (stageSpan) {
+                        stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
+                        stageSpan.textContent = 'Approval';
+                    }
+                    if (statusSpan) {
+                        statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
+                        statusSpan.textContent = 'Under Review';
+                    }
+                    if (approvalItem) {
+                        approvalItem.setAttribute('data-stage', 'approve');
+                        approvalItem.setAttribute('data-status', 'review');
+                    }
+                }
+                return;
+            }
+
+            if (rejectBtn) {
+                const reason = prompt(`Please provide reason for rejecting: ${docTitle}`);
+                if (reason !== null && approvalItem) approvalItem.remove();
+            }
+        });
+    }
 });

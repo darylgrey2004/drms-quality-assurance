@@ -3,8 +3,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Upload JS loaded');
 
-<<<<<<< Updated upstream
-=======
     // ── Sidebar: load user info + logout + heartbeat ──
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -53,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // ─────────────────────────────────────────────────
 
->>>>>>> Stashed changes
     // DOM elements
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -61,10 +58,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileName = document.getElementById('fileName');
     const fileSize = document.getElementById('fileSize');
     const removeFile = document.getElementById('removeFile');
+    const uploadProgressBar = document.getElementById('uploadProgressBar');
+    const uploadStatusText = document.getElementById('uploadStatusText');
+    const uploadPercentText = document.getElementById('uploadPercentText');
     const categorySelect = document.getElementById('category');
     const areaSelect = document.getElementById('area');
     const uploadForm = document.getElementById('uploadForm');
     const cancelBtn = document.querySelector('.border.border-gray-300');
+    const uploadLoadingOverlay = document.getElementById('uploadLoadingOverlay');
+    const uploadSuccessModal = document.getElementById('uploadSuccessModal');
+    const uploadSuccessBackdrop = document.getElementById('uploadSuccessBackdrop');
+    const closeUploadSuccessBtn = document.getElementById('closeUploadSuccessBtn');
+    const STORAGE_KEY = 'userUploadedDocuments';
+    let progressTimer = null;
 
     // Area options
     const areaOptions = {
@@ -166,13 +172,45 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fileInfo.classList.remove('hidden');
         dropZone.classList.add('border-teal-500', 'bg-teal-50');
+        resetProgressUI();
     }
+
+    function resetProgressUI() {
+        if (uploadProgressBar) uploadProgressBar.style.width = '0%';
+        if (uploadStatusText) uploadStatusText.textContent = 'Ready to upload';
+        if (uploadPercentText) uploadPercentText.textContent = '0%';
+    }
+
+    function updateProgressUI(percent, statusText) {
+        const clamped = Math.max(0, Math.min(100, percent));
+        if (uploadProgressBar) uploadProgressBar.style.width = `${clamped}%`;
+        if (uploadPercentText) uploadPercentText.textContent = `${Math.round(clamped)}%`;
+        if (uploadStatusText) uploadStatusText.textContent = statusText;
+    }
+
+    function showUploadSuccessModal() {
+        if (!uploadSuccessModal) return;
+        uploadSuccessModal.classList.remove('hidden');
+    }
+
+    function hideUploadSuccessModal() {
+        if (!uploadSuccessModal) return;
+        uploadSuccessModal.classList.add('hidden');
+    }
+
+    if (closeUploadSuccessBtn) closeUploadSuccessBtn.addEventListener('click', hideUploadSuccessModal);
+    if (uploadSuccessBackdrop) uploadSuccessBackdrop.addEventListener('click', hideUploadSuccessModal);
 
     if (removeFile) {
         removeFile.addEventListener('click', () => {
+            if (progressTimer) {
+                clearInterval(progressTimer);
+                progressTimer = null;
+            }
             fileInput.value = '';
             fileInfo.classList.add('hidden');
             dropZone.classList.remove('border-teal-500', 'bg-teal-50');
+            resetProgressUI();
         });
     }
 
@@ -184,6 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = document.getElementById('docTitle')?.value;
             const category = document.getElementById('category')?.value;
             const area = document.getElementById('area')?.value;
+            const version = document.getElementById('version')?.value || 'v1.0';
+            const description = document.getElementById('description')?.value || '';
+            const submitOption = document.querySelector('input[name="submitOption"]:checked')?.value || 'submit';
             const file = fileInput?.files[0];
 
             if (!file) {
@@ -199,15 +240,57 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
             submitBtn.disabled = true;
+            if (uploadLoadingOverlay) uploadLoadingOverlay.classList.remove('hidden');
+            updateProgressUI(3, 'Preparing upload...');
+
+            if (progressTimer) clearInterval(progressTimer);
+            let progress = 3;
+            progressTimer = setInterval(() => {
+                if (progress >= 92) return;
+                progress += Math.random() * 12;
+                updateProgressUI(progress, 'Uploading...');
+            }, 180);
 
             setTimeout(() => {
-                alert('Document uploaded successfully! It has been submitted for review.');
+                if (progressTimer) {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                }
+                updateProgressUI(100, 'Upload completed');
+                const uploadDate = new Date().toISOString();
+                const currentUserId = String(user.id || '');
+                const categoryLabelMap = { iso: 'ISO', aaccup: 'AACCUP', coe: 'COE' };
+                const statusLabel = submitOption === 'draft' ? 'Draft' : 'Pending';
+                const statusClass = submitOption === 'draft'
+                    ? 'bg-gray-100 text-gray-700'
+                    : 'badge-pending';
+                const storedDocs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                storedDocs.unshift({
+                    id: Date.now(),
+                    ownerId: currentUserId,
+                    title,
+                    category,
+                    categoryLabel: categoryLabelMap[category] || String(category || '').toUpperCase(),
+                    area,
+                    status: statusLabel,
+                    statusClass,
+                    version,
+                    description,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    uploadedAt: uploadDate
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(storedDocs));
+
+                showUploadSuccessModal();
                 uploadForm.reset();
                 if (fileInfo) fileInfo.classList.add('hidden');
                 if (dropZone) dropZone.classList.remove('border-teal-500', 'bg-teal-50');
                 if (areaSelect) areaSelect.innerHTML = '<option value="">Select category first</option>';
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
+                if (uploadLoadingOverlay) uploadLoadingOverlay.classList.add('hidden');
+                resetProgressUI();
             }, 1500);
         });
     }

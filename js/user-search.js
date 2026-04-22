@@ -3,8 +3,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('User Search JS loaded');
 
-<<<<<<< Updated upstream
-=======
     // ── Sidebar: load user info + logout + heartbeat ──
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -53,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // ─────────────────────────────────────────────────
 
->>>>>>> Stashed changes
     // DOM elements
     const searchInput = document.getElementById('mainSearch');
     const searchBtn = document.getElementById('searchBtn');
