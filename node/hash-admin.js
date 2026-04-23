@@ -3,7 +3,7 @@ const db = require('./database');
 require('dotenv').config();
 
 const plainPassword = 'admin_password123';
-const adminEmail = 'qguilmar@gmail.com';
+const adminEmail = 'admin@wmsu.edu.ph';
 
 async function hashPassword() {
   try {

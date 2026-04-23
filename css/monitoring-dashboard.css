@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f7fb;
+}
+
+.bg-navy-sidebar {
+    background-color: #0c2538;
+}
+
+.bg-dashboard-bg {
+    background-color: #f4f7fb;
+}
+
+.hover-nav:hover {
+    background-color: #1f4e5e;
+    color: #ffffff;
+}
+
+.active-nav {
+    background-color: #1a4450;
+    border-left: 4px solid #2aa79b;
+}
+
+.stat-card {
+    transition: box-shadow 0.15s ease;
+    border: 1px solid #eef2f6;
+}
+
+.stat-card:hover {
+    box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 12px;
+}
+
+.status-ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.status-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}

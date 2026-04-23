@@ -1,31 +1,22 @@
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
+const {
+  ALLOWED_WORKFLOW_STATUS,
+  ServiceError,
+  createDocument,
+  listDocuments,
+  getDocumentById,
+  updateDocumentMetadata,
+  updateWorkflowStatus,
+  addDocumentFile,
+  listFilesByDocumentId,
+  listDocumentStats
+} = require('../services/documentService');
+
 const router = express.Router();
-const db = require('../database');
-const { auth } = require('../middleware/auth');
 
-function normalizeRole(role) {
-  return (role || '').toString().toLowerCase().trim();
-}
-
-function canUpload(role) {
-  const r = normalizeRole(role);
-  return r === 'admin' || r === 'faculty member' || r === 'area chair/program head' || r === 'qa coordinator';
-}
-
-function canViewAll(role) {
-  const r = normalizeRole(role);
-  return r === 'admin' || r === 'dean' || r === 'qa coordinator';
-}
-
-function canApprove(role) {
-  const r = normalizeRole(role);
-  return r === 'admin' || r === 'dean';
-}
-
-// Ensure uploads dir exists
 const uploadRoot = path.join(__dirname, '..', 'uploads');
 fs.mkdirSync(uploadRoot, { recursive: true });
 
@@ -35,207 +26,152 @@ const storage = multer.diskStorage({
   },
   filename: function (_req, file, cb) {
     const safeOriginal = (file.originalname || 'file').replace(/[^\w.\-()+ ]+/g, '_');
-    const stamp = Date.now();
-    cb(null, `${stamp}-${Math.round(Math.random() * 1e9)}-${safeOriginal}`);
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}-${safeOriginal}`);
   }
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 } // 25MB
+  limits: { fileSize: 25 * 1024 * 1024 }
 });
 
-// POST /api/documents/upload
-// multipart/form-data: files[], title, category, area, version, author, description, keywords, workflow
-router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
-  try {
-    if (!canUpload(req.user.role)) {
-      return res.status(403).json({ msg: 'Not authorized to upload documents' });
-    }
-
-    const {
-      title,
-      category,
-      area,
-      version,
-      author,
-      description,
-      keywords,
-      workflow
-    } = req.body || {};
-
-    const files = req.files || [];
-    if (!files.length) return res.status(400).json({ msg: 'No files uploaded' });
-    if (!title || !category || !area) return res.status(400).json({ msg: 'Missing required fields' });
-
-    const workflowMap = {
-      submit: 'pending',
-      draft: 'draft',
-      approve: 'approved'
-    };
-    const status = workflowMap[String(workflow || 'submit')] || 'pending';
-
-    const [result] = await db.query(
-      `INSERT INTO documents
-        (title, category, area, version, description, keywords, workflow_status, uploader_id, author_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        title,
-        category,
-        area,
-        version || 'v1.0',
-        description || null,
-        keywords || null,
-        status,
-        req.user.id,
-        author || null
-      ]
-    );
-
-    const documentId = result.insertId;
-
-    for (const f of files) {
-      const relPath = `/uploads/${path.basename(f.path)}`;
-      await db.query(
-        `INSERT INTO document_files
-          (document_id, original_name, stored_name, mime_type, size_bytes, url_path)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          documentId,
-          f.originalname,
-          path.basename(f.path),
-          f.mimetype,
-          f.size,
-          relPath
-        ]
-      );
-    }
-
-    res.status(201).json({
-      msg: 'Uploaded',
-      document: {
-        id: documentId,
-        title,
-        category,
-        area,
-        version: version || 'v1.0',
-        workflow_status: status
+function sendError(res, error, fallbackMessage) {
+  if (error instanceof ServiceError) {
+    return res.status(error.statusCode).json({
+      error: {
+        message: error.message,
+        details: error.details
       }
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+  }
+  return res.status(500).json({
+    error: {
+      message: fallbackMessage || 'Internal server error'
+    }
+  });
+}
+
+function isPlainObject(value) {
+  return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+// POST /api/documents
+router.post('/', async (req, res) => {
+  try {
+    if (!isPlainObject(req.body)) {
+      throw new ServiceError('Request body must be a JSON object', 400);
+    }
+    const document = await createDocument(req.body || {});
+    res.status(201).json(document);
+  } catch (error) {
+    return sendError(res, error, 'Failed to create document');
   }
 });
 
 // GET /api/documents
-// Query: scope=all|mine (default role-based), status, category
-router.get('/', auth, async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
-    const { scope, status, category } = req.query || {};
-    const viewAll = canViewAll(req.user.role);
-
-    const where = [];
-    const params = [];
-
-    if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
-      where.push('d.uploader_id = ?');
-      params.push(req.user.id);
-    }
-    if (status) {
-      where.push('d.workflow_status = ?');
-      params.push(status);
-    }
-    if (category) {
-      where.push('d.category = ?');
-      params.push(category);
-    }
-
-    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-    const [rows] = await db.query(
-      `
-      SELECT d.*,
-             (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
-      FROM documents d
-      ${whereSql}
-      ORDER BY d.created_at DESC
-      LIMIT 200
-      `,
-      params
-    );
-
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    const docs = await listDocuments();
+    return res.json(docs);
+  } catch (error) {
+    return sendError(res, error, 'Failed to list documents');
   }
 });
 
 // GET /api/documents/stats
-router.get('/stats', auth, async (req, res) => {
+router.get('/stats', async (_req, res) => {
   try {
-    const viewAll = canViewAll(req.user.role);
-    const params = [];
-    let whereSql = '';
-    if (!viewAll) {
-      whereSql = 'WHERE uploader_id = ?';
-      params.push(req.user.id);
-    }
-    const [rows] = await db.query(
-      `
-      SELECT workflow_status, COUNT(*) AS count
-      FROM documents
-      ${whereSql}
-      GROUP BY workflow_status
-      `,
-      params
-    );
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    const rows = await listDocumentStats();
+    return res.json(rows);
+  } catch (error) {
+    return sendError(res, error, 'Failed to get document stats');
   }
 });
 
-// GET /api/documents/approvals
-router.get('/approvals', auth, async (req, res) => {
+// GET /api/documents/:id
+router.get('/:id', async (req, res) => {
   try {
-    if (!canApprove(req.user.role)) {
-      return res.status(403).json({ msg: 'Not authorized to view approvals' });
-    }
-    const [rows] = await db.query(
-      `
-      SELECT d.*,
-             (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
-      FROM documents d
-      WHERE d.workflow_status IN ('pending','validated')
-      ORDER BY d.created_at DESC
-      LIMIT 200
-      `
-    );
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    const document = await getDocumentById(req.params.id);
+    if (!document) return res.status(404).json({ error: { message: 'Document not found' } });
+    return res.json(document);
+  } catch (error) {
+    return sendError(res, error, 'Failed to fetch document');
   }
 });
 
-// PUT /api/documents/:id/status  body: { status }
-router.put('/:id/status', auth, async (req, res) => {
+// PUT /api/documents/:id
+router.put('/:id', async (req, res) => {
   try {
-    if (!canApprove(req.user.role)) {
-      return res.status(403).json({ msg: 'Not authorized to update status' });
+    if (!isPlainObject(req.body)) {
+      throw new ServiceError('Request body must be a JSON object', 400);
     }
-    const docId = Number(req.params.id);
-    const status = (req.body?.status || '').toString().toLowerCase().trim();
-    const allowed = ['draft', 'pending', 'validated', 'approved', 'locked', 'rejected'];
-    if (!allowed.includes(status)) return res.status(400).json({ msg: 'Invalid status' });
+    const updated = await updateDocumentMetadata(req.params.id, req.body || {});
+    if (!updated) return res.status(404).json({ error: { message: 'Document not found' } });
+    return res.json(updated);
+  } catch (error) {
+    return sendError(res, error, 'Failed to update document metadata');
+  }
+});
 
-    await db.query('UPDATE documents SET workflow_status = ? WHERE id = ?', [status, docId]);
-    res.json({ msg: 'Updated' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+// PATCH /api/documents/:id/status
+router.patch('/:id/status', async (req, res) => {
+  try {
+    if (!isPlainObject(req.body)) {
+      throw new ServiceError('Request body must be a JSON object', 400);
+    }
+    const status = req.body?.workflow_status;
+    if (typeof status !== 'string' || !ALLOWED_WORKFLOW_STATUS.includes(String(status).toLowerCase().trim())) {
+      throw new ServiceError(`workflow_status must be one of: ${ALLOWED_WORKFLOW_STATUS.join(', ')}`, 400, {
+        field: 'workflow_status'
+      });
+    }
+    const updated = await updateWorkflowStatus(req.params.id, status);
+    if (!updated) return res.status(404).json({ error: { message: 'Document not found' } });
+    return res.json(updated);
+  } catch (error) {
+    return sendError(res, error, 'Failed to update workflow status');
+  }
+});
+
+// POST /api/documents/:id/files
+router.post('/:id/files', (req, res) => {
+  upload.single('file')(req, res, (uploadError) => {
+    (async () => {
+      try {
+      if (uploadError) {
+        if (uploadError instanceof multer.MulterError) {
+          throw new ServiceError(uploadError.message, 400);
+        }
+        throw uploadError;
+      }
+      if (!req.file) throw new ServiceError('File is required under field name "file"', 400, { field: 'file' });
+
+      const fileRecord = await addDocumentFile(req.params.id, {
+        original_name: req.file.originalname,
+        stored_name: req.file.filename,
+        mime_type: req.file.mimetype,
+        size_bytes: req.file.size,
+        url_path: `/files/${req.file.filename}`
+      });
+
+      if (!fileRecord) return res.status(404).json({ error: { message: 'Document not found' } });
+      return res.status(201).json(fileRecord);
+      } catch (error) {
+        return sendError(res, error, 'Failed to upload file');
+      }
+    })();
+  });
+});
+
+// GET /api/documents/:id/files
+router.get('/:id/files', async (req, res) => {
+  try {
+    const doc = await getDocumentById(req.params.id);
+    if (!doc) return res.status(404).json({ error: { message: 'Document not found' } });
+    const files = await listFilesByDocumentId(req.params.id);
+    return res.json(files);
+  } catch (error) {
+    return sendError(res, error, 'Failed to fetch document files');
   }
 });
 
