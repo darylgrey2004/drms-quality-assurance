@@ -213,3 +213,43 @@ td {
 .w-full {
     width: 100%;
 }
+
+/* compact action pills for users table */
+.action-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.action-pill-view {
+    background-color: #e6fffa;
+    border-color: #99f6e4;
+    color: #0f766e;
+}
+
+.action-pill-view:hover {
+    background-color: #ccfbf1;
+    border-color: #5eead4;
+    color: #115e59;
+}
+
+.action-pill-delete {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.action-pill-delete:hover {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}

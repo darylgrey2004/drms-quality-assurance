@@ -104,6 +104,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function syncProfileSidebarLink(data) {
+        const nav = document.querySelector('aside nav');
+        if (!nav) return;
+
+        const role = (data?.role || '').toString().toLowerCase().trim();
+        const existingLink = nav.querySelector('a[data-nav-profile]');
+        const shouldShowProfile = role !== 'admin';
+
+        if (!shouldShowProfile) {
+            if (existingLink) existingLink.remove();
+            return;
+        }
+
+        if (existingLink) {
+            existingLink.href = 'user-profile.html';
+            return;
+        }
+
+        const profileLink = document.createElement('a');
+        profileLink.href = 'user-profile.html';
+        profileLink.setAttribute('data-nav-profile', 'true');
+        profileLink.className = 'flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav';
+        profileLink.innerHTML = '<span class="mr-3 text-teal-300/70">👤</span> Profile';
+        nav.appendChild(profileLink);
+    }
+
     function getNormalizedRole(data) {
         return (data?.role || '').toString().toLowerCase().trim();
     }
@@ -159,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
     }
     applyIdentity(user);
+    syncProfileSidebarLink(user);
 
     // Guard: these pages are for Dean/Admin only.
     if (!isDeanOrAdmin(user)) {
@@ -178,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const mergedUser = { ...user, ...profileData };
                 localStorage.setItem('user', JSON.stringify(mergedUser));
                 applyIdentity(mergedUser);
+                syncProfileSidebarLink(mergedUser);
             })
             .catch(() => {
                 // Keep fallback from localStorage.

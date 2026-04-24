@@ -67,11 +67,32 @@ router.post('/login', async (req, res) => {
     }
 
     const user = users[0];
+    const normalizedRole = (user.role || '').toString().toLowerCase().trim();
+    const isEvaluatorRole = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+
+    if (isEvaluatorRole) {
+      try {
+        const [limits] = await db.query(
+          'SELECT expiresAt FROM evaluator_access_limits WHERE user_id = ? LIMIT 1',
+          [user.id]
+        );
+        if (limits.length > 0) {
+          const expiresAt = new Date(limits[0].expiresAt);
+          if (!Number.isNaN(expiresAt.getTime()) && expiresAt <= new Date()) {
+            return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.' });
+          }
+        }
+      } catch (limitError) {
+        if (limitError?.code !== 'ER_NO_SUCH_TABLE') {
+          throw limitError;
+        }
+      }
     }
 
     // Check if user is rejected
