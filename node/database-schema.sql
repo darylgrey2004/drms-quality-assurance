@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS `otps` (
   INDEX idx_otp (otp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Create evaluator access limits table (time-limited evaluator accounts)
+CREATE TABLE IF NOT EXISTS `evaluator_access_limits` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL UNIQUE,
+  `expiresAt` DATETIME NOT NULL,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX idx_evaluator_expires (`expiresAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Create documents table (uploads + workflow)
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

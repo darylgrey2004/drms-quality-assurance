@@ -11,12 +11,60 @@ document.addEventListener('DOMContentLoaded', function () {
     const el = (id) => document.getElementById(id);
     const resolvedUserId = resolveUserId(user, token);
     const normalizedRole = (user.role || '').toString().toLowerCase().trim();
+    const currentPage = window.location.pathname.split('/').pop().toLowerCase();
 
-    // Dean/Admin should use the admin-style pages/sidebar.
-    // Redirecting here temporarily hides old user sidebar for these roles.
-    if (normalizedRole === 'dean' || normalizedRole === 'admin') {
+    // Admin should always use admin-style pages/sidebar.
+    if (normalizedRole === 'admin') {
         window.location.href = 'homepage.html';
         return;
+    }
+
+    // Dean can access the shared profile page, but keeps admin-style pages elsewhere.
+    if (normalizedRole === 'dean' && currentPage !== 'user-profile.html') {
+        window.location.href = 'homepage.html';
+        return;
+    }
+
+    function syncDeanProfileSidebar() {
+        if (normalizedRole !== 'dean' || currentPage !== 'user-profile.html') return;
+        const nav = document.querySelector('aside nav');
+        if (!nav) return;
+
+        nav.innerHTML = `
+            <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+            </a>
+            <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📄</span> Documents
+            </a>
+            <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+            </a>
+            <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+            </a>
+            <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">🔍</span> Search
+            </a>
+            <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">✅</span> Approvals
+            </a>
+            <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📈</span> Reports
+            </a>
+            <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">👥</span> Users
+            </a>
+            <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+            </a>
+            <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+            </a>
+            <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                <span class="mr-3 text-teal-300">👤</span> Profile
+            </a>
+        `;
     }
 
     if (resolvedUserId) {
@@ -89,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (el('welcomeUserText')) el('welcomeUserText').textContent = `Welcome back, ${first}`;
     }
 
+    syncDeanProfileSidebar();
     applyIdentity(user);
 
     // Re-apply after page-level scripts run to prevent blank sidebar identity.

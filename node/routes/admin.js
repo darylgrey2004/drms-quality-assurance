@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
-const { adminAuth } = require('../middleware/auth');
+const bcrypt = require('bcrypt');
+const { auth, adminAuth } = require('../middleware/auth');
+
+function deanOrAdminAuth(req, res, next) {
+  auth(req, res, () => {
+    const role = (req.user?.role || '').toString().toLowerCase().trim();
+    if (role !== 'admin' && role !== 'dean') {
+      return res.status(403).json({ msg: 'Access denied. Dean or Admin privileges required.' });
+    }
+    next();
+  });
+}
 
 // @route   GET api/admin/users
 // @desc    Get all users with their profiles
-// @access  Private (Admin only)
-router.get('/users', adminAuth, async (req, res) => {
+// @access  Private (Dean/Admin)
+router.get('/users', deanOrAdminAuth, async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -18,6 +29,92 @@ router.get('/users', adminAuth, async (req, res) => {
     `;
     const [users] = await db.query(query);
     res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/admin/users
+// @desc    Create a new user account (Admin only)
+// @access  Private (Admin only)
+router.post('/users', adminAuth, async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    middleInitial,
+    email,
+    password,
+    role,
+    evaluatorExpiresAt
+  } = req.body || {};
+
+  if (!firstName || !lastName || !email || !password || !role) {
+    return res.status(400).json({ msg: 'Please provide first name, last name, email, password, and role.' });
+  }
+
+  const normalizedRole = String(role).toLowerCase().trim();
+  const isEvaluatorRole = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
+  let parsedEvaluatorExpiration = null;
+
+  if (isEvaluatorRole && !evaluatorExpiresAt) {
+    return res.status(400).json({ msg: 'External Evaluator accounts require an expiration date/time.' });
+  }
+
+  if (isEvaluatorRole) {
+    parsedEvaluatorExpiration = new Date(evaluatorExpiresAt);
+    if (Number.isNaN(parsedEvaluatorExpiration.getTime())) {
+      return res.status(400).json({ msg: 'Invalid evaluator expiration date/time.' });
+    }
+    if (parsedEvaluatorExpiration <= new Date()) {
+      return res.status(400).json({ msg: 'Evaluator expiration must be set to a future date/time.' });
+    }
+  }
+
+  try {
+    const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ msg: 'A user with this email already exists.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUserPayload = {
+      firstName: String(firstName).trim(),
+      lastName: String(lastName).trim(),
+      middleInitial: middleInitial ? String(middleInitial).trim() : null,
+      email: String(email).trim(),
+      password: hashedPassword,
+      role: String(role).trim(),
+      status: 'approved',
+      isVerified: 1
+    };
+
+    const [createUserResult] = await db.query('INSERT INTO users SET ?', [newUserPayload]);
+    const createdUserId = createUserResult.insertId;
+
+    if (isEvaluatorRole) {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS evaluator_access_limits (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL UNIQUE,
+          expiresAt DATETIME NOT NULL,
+          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      `);
+
+      await db.query(
+        `INSERT INTO evaluator_access_limits (user_id, expiresAt)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE expiresAt = VALUES(expiresAt)`,
+        [createdUserId, parsedEvaluatorExpiration]
+      );
+    }
+
+    res.status(201).json({ msg: 'User account created successfully.' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -120,8 +217,8 @@ router.post('/approve', adminAuth, async (req, res) => {
 
 // @route   GET api/admin/profile/:userId
 // @desc    Get a specific user's full profile
-// @access  Private (Admin only)
-router.get('/profile/:userId', adminAuth, async (req, res) => {
+// @access  Private (Dean/Admin)
+router.get('/profile/:userId', deanOrAdminAuth, async (req, res) => {
     try {
         const userId = req.params.userId;
 
@@ -147,6 +244,63 @@ router.get('/profile/:userId', adminAuth, async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
+});
+
+// @route   PUT api/admin/profile/:userId
+// @desc    Update a specific user's profile (Admin only)
+// @access  Private (Admin only)
+router.put('/profile/:userId', adminAuth, async (req, res) => {
+  const { userId } = req.params;
+  const {
+    firstName,
+    lastName,
+    middleInitial,
+    email,
+    ...profileData
+  } = req.body || {};
+
+  try {
+    const userUpdates = {};
+    if (firstName !== undefined) userUpdates.firstName = firstName;
+    if (lastName !== undefined) userUpdates.lastName = lastName;
+    if (middleInitial !== undefined) userUpdates.middleInitial = middleInitial;
+    if (email !== undefined) userUpdates.email = email;
+
+    if (Object.keys(userUpdates).length > 0) {
+      await db.query('UPDATE users SET ? WHERE id = ?', [userUpdates, userId]);
+    }
+
+    const [profileColumns] = await db.query('SHOW COLUMNS FROM faculty_profiles');
+    const allowedProfileFields = new Set(profileColumns.map((column) => column.Field));
+    const sanitizedProfileData = Object.fromEntries(
+      Object.entries(profileData || {}).filter(([key]) => allowedProfileFields.has(key))
+    );
+
+    const [existingProfiles] = await db.query(
+      'SELECT id FROM faculty_profiles WHERE user_id = ? LIMIT 1',
+      [userId]
+    );
+
+    if (existingProfiles.length > 0) {
+      if (Object.keys(sanitizedProfileData).length > 0) {
+        await db.query(
+          'UPDATE faculty_profiles SET ? WHERE user_id = ?',
+          [sanitizedProfileData, userId]
+        );
+      }
+    } else {
+      const insertPayload = { user_id: userId, ...sanitizedProfileData };
+      await db.query(
+        'INSERT INTO faculty_profiles SET ?',
+        [insertPayload]
+      );
+    }
+
+    res.json({ msg: 'Profile updated successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
 });
 
 module.exports = router;
