@@ -7,6 +7,7 @@ const userRoutes = require('./routes/user');
 const profileRoutes = require('./routes/profile');
 const documentRoutes = require('./routes/documents');
 const path = require('path');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -15,7 +16,10 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadsDir = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
+app.use('/files', express.static(uploadsDir));
 
 // API Routes
 app.use('/api/auth', authRoutes);
