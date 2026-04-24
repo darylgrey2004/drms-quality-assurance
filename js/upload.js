@@ -2,9 +2,10 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Upload page JS loaded successfully');
-    
-    // DOM elements
+    const API_BASE = 'http://127.0.0.1:3000';
+    const token = localStorage.getItem('token');
+    const sessionUser = JSON.parse(localStorage.getItem('user') || '{}');
+
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const dropZoneEmpty = document.getElementById('dropZoneEmpty');
@@ -20,8 +21,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeUploadSuccessBtn = document.getElementById('closeUploadSuccessBtn');
 
     let selectedFiles = [];
-    const token = localStorage.getItem('token');
-    const API_BASE = 'http://localhost:3000';
+
+    function getApiErrorMessage(payload, fallback) {
+        return payload?.error?.details || payload?.error?.message || payload?.msg || fallback;
+    }
+
+    async function apiRequest(path, options = {}) {
+        const headers = { ...(options.headers || {}) };
+        if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (token) headers['x-auth-token'] = token;
+
+        const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+        let payload = null;
+        try {
+            payload = await response.json();
+        } catch (_e) {
+            payload = null;
+        }
+
+        if (!response.ok) {
+            throw new Error(getApiErrorMessage(payload, `Request failed (${response.status})`));
+        }
+        return payload;
+    }
 
     function showUploadSuccessModal() {
         if (!uploadSuccessModal) return;
@@ -227,9 +251,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    async function uploadSingleFile(documentId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return apiRequest(`/api/documents/${documentId}/files`, {
+            method: 'POST',
+            body: formData
+        });
+    }
+
     // Form submission
     if (uploadForm) {
-        uploadForm.addEventListener('submit', function(e) {
+        uploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Basic validation
@@ -248,6 +281,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Please fill in all required fields');
                 return;
             }
+
+            if (!sessionUser?.id) {
+                alert('Missing user session. Please login again.');
+                window.location.href = 'landing.html';
+                return;
+            }
             
             // Check file sizes (25MB limit each)
             const tooLarge = files.find(f => f.size > 25 * 1024 * 1024);
@@ -262,104 +301,54 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
             submitBtn.disabled = true;
 
-            if (!token) {
-                alert('Session expired. Please login again.');
-                window.location.href = 'landing.html';
-                return;
-            }
+            try {
+                const workflowChoice = document.querySelector('input[name="workflow"]:checked')?.value || 'submit';
+                const workflowMap = {
+                    submit: 'pending',
+                    draft: 'draft',
+                    approve: 'approved'
+                };
 
-            // Sequential backend upload with per-file progress (Drive-like).
-            let currentIndex = 0;
-            function uploadNext() {
-                if (currentIndex >= files.length) {
-                    // done
-                    setTimeout(() => {
-                        showUploadSuccessModal();
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                        uploadForm.reset();
-                        selectedFiles = [];
-                        renderFileList();
-                        if (areaSelect) areaSelect.innerHTML = '<option value="">Select category first</option>';
-                    }, 250);
-                    return;
+                const documentPayload = {
+                    title,
+                    category,
+                    area,
+                    version: document.getElementById('version')?.value || 'v1.0',
+                    description: document.getElementById('description')?.value || '',
+                    keywords: document.getElementById('keywords')?.value || '',
+                    workflow_status: workflowMap[workflowChoice] || 'pending',
+                    uploader_id: String(sessionUser.id),
+                    author_name: author
+                };
+
+                const created = await apiRequest('/api/documents', {
+                    method: 'POST',
+                    body: JSON.stringify(documentPayload)
+                });
+
+                const documentId = created?.id;
+                if (!documentId) {
+                    throw new Error('Document created but missing ID from API response.');
                 }
 
-                const file = files[currentIndex];
-                updateRowProgress(currentIndex, 3, 'Preparing upload...');
+                for (let i = 0; i < files.length; i += 1) {
+                    updateRowProgress(i, 30, 'Uploading...');
+                    await uploadSingleFile(documentId, files[i]);
+                    updateRowProgress(i, 100, 'Upload completed');
+                }
 
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('category', category);
-                formData.append('area', area);
-                formData.append('version', document.getElementById('version')?.value || 'v1.0');
-                formData.append('author', author);
-                formData.append('description', document.getElementById('description')?.value || '');
-                formData.append('keywords', document.getElementById('keywords')?.value || '');
-                formData.append('workflow', document.querySelector('input[name="workflow"]:checked')?.value || 'submit');
-                formData.append('files', file);
-
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', `${API_BASE}/api/documents/upload`);
-                xhr.setRequestHeader('x-auth-token', token);
-
-                // Fallback simulated progress (in case progress events are sparse)
-                let simulated = 3;
-                let sawRealProgress = false;
-                const simTimer = setInterval(() => {
-                    if (sawRealProgress) return;
-                    if (simulated >= 92) return;
-                    simulated += Math.random() * 10;
-                    updateRowProgress(currentIndex, simulated, 'Uploading...');
-                }, 180);
-
-                xhr.upload.addEventListener('progress', (event) => {
-                    if (!event.lengthComputable) return;
-                    sawRealProgress = true;
-                    const percent = (event.loaded / event.total) * 100;
-                    updateRowProgress(currentIndex, percent, 'Uploading...');
-                });
-
-                xhr.addEventListener('load', () => {
-                    clearInterval(simTimer);
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        updateRowProgress(currentIndex, 100, 'Upload completed');
-                        currentIndex += 1;
-                        uploadNext();
-                    } else {
-                        let msg = 'Upload failed';
-                        try {
-                            const parsed = JSON.parse(xhr.responseText || '{}');
-                            msg = parsed.msg || msg;
-                        } catch (_e) {}
-                        updateRowProgress(currentIndex, 0, msg);
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                    }
-                });
-
-                xhr.addEventListener('error', () => {
-                    clearInterval(simTimer);
-                    updateRowProgress(currentIndex, 0, 'Network error');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                });
-
-                xhr.send(formData);
+                showUploadSuccessModal();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                uploadForm.reset();
+                selectedFiles = [];
+                renderFileList();
+                if (areaSelect) areaSelect.innerHTML = '<option value="">Select category first</option>';
+            } catch (error) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                alert(`Upload failed: ${error.message}`);
             }
-
-            uploadNext();
-            
-            console.log('Uploading document(s):', {
-                title,
-                category,
-                area,
-                author,
-                version: document.getElementById('version')?.value,
-                expiryDate: document.getElementById('expiryDate')?.value,
-                workflow: document.querySelector('input[name="workflow"]:checked')?.value,
-                files: files.map((f) => f.name)
-            });
         });
     }
     

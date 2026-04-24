@@ -71,12 +71,48 @@ async function updateWorkflowStatus(id, workflowStatus, updatedAt) {
 }
 
 async function listDocumentStats() {
-  const [rows] = await db.query(
+  const [totalRows] = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM documents`
+  );
+  const [statusRows] = await db.query(
     `SELECT workflow_status, COUNT(*) AS count
      FROM documents
      GROUP BY workflow_status`
   );
-  return rows;
+  const [categoryRows] = await db.query(
+    `SELECT category, COUNT(*) AS count
+     FROM documents
+     GROUP BY category`
+  );
+
+  const byStatus = {
+    draft: 0,
+    pending: 0,
+    validated: 0,
+    approved: 0,
+    locked: 0,
+    rejected: 0
+  };
+
+  statusRows.forEach((row) => {
+    const key = String(row.workflow_status || '').toLowerCase().trim();
+    if (Object.prototype.hasOwnProperty.call(byStatus, key)) {
+      byStatus[key] = Number(row.count) || 0;
+    }
+  });
+
+  const byCategory = {};
+  categoryRows.forEach((row) => {
+    const key = String(row.category || '').trim() || 'Uncategorized';
+    byCategory[key] = Number(row.count) || 0;
+  });
+
+  return {
+    total: Number(totalRows?.[0]?.total) || 0,
+    byStatus,
+    byCategory
+  };
 }
 
 module.exports = {

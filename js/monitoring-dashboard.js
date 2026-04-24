@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('token');
-    const API_BASE = window.location.origin && window.location.origin.startsWith('http')
-        ? window.location.origin
-        : 'http://localhost:3000';
+    const API_BASE = 'http://127.0.0.1:3000';
 
     const refreshBtn = document.getElementById('refreshBtn');
     const statusBanner = document.getElementById('statusBanner');
@@ -12,6 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const otherEl = document.getElementById('otherRecords');
     const lastUpdatedEl = document.getElementById('lastUpdated');
     const tableBody = document.getElementById('recordsTableBody');
+    const recordsSection = tableBody ? tableBody.closest('section') : null;
+
+    let categoryChart = null;
+    let statusChart = null;
+    let categoryCanvas = null;
+    let statusCanvas = null;
 
     function showStatus(message, kind) {
         if (!statusBanner) return;
@@ -20,31 +24,30 @@ document.addEventListener('DOMContentLoaded', function () {
         statusBanner.classList.add(kind === 'error' ? 'status-error' : 'status-ok');
     }
 
-    function setCounts(statsRows) {
-        const counts = {
-            approved: 0,
-            pending: 0,
-            draft: 0,
-            validated: 0,
-            rejected: 0,
-            locked: 0
-        };
+    function getApiErrorMessage(payload, fallback) {
+        return payload?.error?.details || payload?.error?.message || payload?.msg || fallback;
+    }
 
-        (statsRows || []).forEach((row) => {
-            const status = String(row.workflow_status || '').toLowerCase();
-            const value = Number(row.count) || 0;
-            if (Object.prototype.hasOwnProperty.call(counts, status)) {
-                counts[status] = value;
-            }
-        });
+    async function apiRequest(path) {
+        const headers = token ? { 'x-auth-token': token } : {};
+        const response = await fetch(API_BASE + path, { headers: headers });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+            throw new Error(getApiErrorMessage(payload, 'Request failed'));
+        }
+        return payload;
+    }
 
-        const pendingTotal = counts.pending + counts.validated;
-        const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-        const other = total - counts.approved - pendingTotal;
+    function setCounts(stats) {
+        const status = stats?.byStatus || {};
+        const total = Number(stats?.total) || 0;
+        const approved = Number(status.approved) || 0;
+        const pending = (Number(status.pending) || 0) + (Number(status.validated) || 0);
+        const other = total - approved - pending;
 
         totalEl.textContent = String(total);
-        approvedEl.textContent = String(counts.approved);
-        pendingEl.textContent = String(pendingTotal);
+        approvedEl.textContent = String(approved);
+        pendingEl.textContent = String(pending);
         otherEl.textContent = String(other < 0 ? 0 : other);
     }
 
@@ -91,6 +94,86 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
+    function ensureChartSection() {
+        if (!recordsSection || categoryCanvas || statusCanvas) return;
+
+        const chartSection = document.createElement('section');
+        chartSection.className = 'grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6';
+        chartSection.innerHTML = [
+            '<article class="bg-white rounded-xl p-5 stat-card">',
+            '<h2 class="font-semibold text-gray-800 text-lg mb-4">Documents Per Category</h2>',
+            '<div class="h-72"><canvas id="categoryChart"></canvas></div>',
+            '</article>',
+            '<article class="bg-white rounded-xl p-5 stat-card">',
+            '<h2 class="font-semibold text-gray-800 text-lg mb-4">Documents By Workflow Status</h2>',
+            '<div class="h-72"><canvas id="statusChart"></canvas></div>',
+            '</article>'
+        ].join('');
+
+        recordsSection.parentNode.insertBefore(chartSection, recordsSection);
+        categoryCanvas = document.getElementById('categoryChart');
+        statusCanvas = document.getElementById('statusChart');
+    }
+
+    async function ensureChartJs() {
+        if (window.Chart) return;
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = resolve;
+            script.onerror = function () { reject(new Error('Failed to load Chart.js')); };
+            document.head.appendChild(script);
+        });
+    }
+
+    function renderCharts(stats) {
+        if (!window.Chart || !categoryCanvas || !statusCanvas) return;
+
+        const categoryEntries = Object.entries(stats?.byCategory || {});
+        const statusEntries = Object.entries(stats?.byStatus || {});
+
+        const categoryLabels = categoryEntries.map((entry) => entry[0]);
+        const categoryValues = categoryEntries.map((entry) => Number(entry[1]) || 0);
+
+        const statusLabels = statusEntries.map((entry) => entry[0]);
+        const statusValues = statusEntries.map((entry) => Number(entry[1]) || 0);
+
+        if (categoryChart) categoryChart.destroy();
+        if (statusChart) statusChart.destroy();
+
+        categoryChart = new window.Chart(categoryCanvas, {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: 'Documents',
+                    data: categoryValues,
+                    backgroundColor: '#0f766e'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+
+        statusChart = new window.Chart(statusCanvas, {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusValues,
+                    backgroundColor: ['#6b7280', '#f59e0b', '#3b82f6', '#16a34a', '#111827', '#dc2626']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
     async function loadDashboard() {
         if (!token) {
             showStatus('No session token found. Please sign in again.', 'error');
@@ -99,26 +182,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             showStatus('Loading monitoring data...', 'ok');
-
-            const headers = { 'x-auth-token': token };
-            const [statsRes, recordsRes] = await Promise.all([
-                fetch(API_BASE + '/api/documents/stats', { headers: headers }),
-                fetch(API_BASE + '/api/documents?scope=all', { headers: headers })
+            ensureChartSection();
+            await ensureChartJs();
+            const [stats, records] = await Promise.all([
+                apiRequest('/api/documents/stats'),
+                apiRequest('/api/documents')
             ]);
-
-            if (!statsRes.ok || !recordsRes.ok) {
-                throw new Error('Failed to load dashboard data');
-            }
-
-            const [stats, records] = await Promise.all([statsRes.json(), recordsRes.json()]);
             setCounts(stats);
             renderRows(records);
+            renderCharts(stats);
 
             const stamp = new Date().toLocaleString();
             if (lastUpdatedEl) lastUpdatedEl.textContent = 'Last updated: ' + stamp;
             showStatus('Monitoring data loaded successfully.', 'ok');
-        } catch (_error) {
-            showStatus('Unable to load monitoring data from server.', 'error');
+        } catch (error) {
+            showStatus('Unable to load monitoring data: ' + (error.message || 'Unknown error'), 'error');
         }
     }
 
