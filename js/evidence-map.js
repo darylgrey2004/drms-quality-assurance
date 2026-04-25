@@ -2,7 +2,8 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Evidence Map page JS loaded successfully');
+    const token = localStorage.getItem('token');
+    let documents = [];
     
     // DOM elements
     const searchInput = document.getElementById('searchMap');
@@ -13,6 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabContents = document.querySelectorAll('.tab-content');
     const viewClauseBtns = document.querySelectorAll('.view-clause');
     const bulkMapBtn = document.getElementById('bulkMapBtn');
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: token ? { 'x-auth-token': token } : {}
+        }).then((r) => r.json());
+    }
     
     // Tab switching functionality
     tabLinks.forEach(link => {
@@ -156,9 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const clause = this.getAttribute('data-clause') || 'clause';
             const clauseItem = this.closest('.clause-item');
             const clauseTitle = clauseItem?.querySelector('h4')?.textContent || 'Clause';
-            
-            console.log(`Viewing ${clause}: ${clauseTitle}`);
-            alert(`Viewing documents mapped to: ${clauseTitle}\n(This would show all documents for this standard in the full system)`);
+            const matched = documents.filter((doc) =>
+                String(doc.area || '').toLowerCase().includes(String(clause).toLowerCase())
+            );
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write(`<h2>${clauseTitle}</h2><pre>${JSON.stringify(matched, null, 2)}</pre>`);
+                win.document.close();
+            }
         });
     });
     
@@ -166,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (bulkMapBtn) {
         bulkMapBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('Bulk mapping interface would open here.\nSelect multiple documents and map them to standards.');
+            window.location.href = 'upload.html';
         });
     }
     
@@ -178,7 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const docRow = this.closest('.grid');
                 const docTitle = docRow?.querySelector('.col-span-6')?.textContent || 'Document';
-                alert(`Viewing: ${docTitle}`);
+                const match = documents.find((doc) => String(doc.title || '') === String(docTitle || '').trim());
+                if (!match) return;
+                api(`/api/documents/${match.id}/files`).then((files) => {
+                    if (Array.isArray(files) && files.length > 0) {
+                        window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+                    }
+                }).catch(() => {});
             });
         }
     });
@@ -201,6 +219,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Initialize filter count
-    filterClauses();
+    api('/api/documents')
+        .then((rows) => {
+            documents = Array.isArray(rows) ? rows : [];
+            filterClauses();
+        })
+        .catch(() => {
+            documents = [];
+            filterClauses();
+        });
 });

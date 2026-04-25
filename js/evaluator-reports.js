@@ -1,7 +1,14 @@
 // js/evaluator-reports.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Evaluator Reports JS loaded');
+    const token = localStorage.getItem('token');
+    const statCards = document.querySelectorAll('.grid-cols-1.md\\:grid-cols-3 .stat-card .text-3xl');
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: token ? { 'x-auth-token': token } : {}
+        }).then((r) => r.json());
+    }
 
     // Tab switching
     const tabLinks = document.querySelectorAll('#reportTabs a');
@@ -27,15 +34,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Summary cards click
     const summaryCards = document.querySelectorAll('.grid-cols-1.md\\:grid-cols-3 .stat-card');
     summaryCards.forEach(card => {
         card.addEventListener('click', function() {
             const title = this.querySelector('h3')?.textContent || 'Report';
             const percentage = this.querySelector('.text-3xl')?.textContent || '';
             const details = this.querySelector('.text-sm.text-gray-500')?.textContent || '';
-            
-            alert(`📊 ${title}\n\nCurrent Status: ${percentage}\n${details}\n\nThis shows the overall compliance summary for ${title}.`);
+            console.log(title, percentage, details);
         });
     });
 
@@ -45,8 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             const clause = this.querySelector('span:first-child')?.textContent || 'Item';
             const status = this.querySelector('span:last-child')?.textContent || '';
-            
-            alert(`📋 ${clause}\n\nStatus: ${status}\n\nClick for detailed document list.`);
+            console.log(clause, status);
         });
     });
 
@@ -65,8 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function() {
             const year = this.querySelector('.text-sm.text-gray-500')?.textContent || 'Year';
             const value = this.querySelector('.text-lg')?.textContent || '';
-            
-            alert(`📅 ${year}\n\n${value}\n\nHistorical performance data for this period.`);
+            console.log(year, value);
         });
     });
 
@@ -79,7 +82,13 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.closest('button')?.textContent.includes('Export') ||
             e.target.closest('button')?.textContent.includes('Download')) {
             e.preventDefault();
-            alert('❌ Report generation is disabled. You have view-only access to existing reports.');
         }
     });
+
+    api('/api/documents/stats').then((stats) => {
+        const byStatus = stats?.byStatus || {};
+        if (statCards[0]) statCards[0].textContent = String(stats?.total || 0);
+        if (statCards[1]) statCards[1].textContent = String(byStatus.pending || 0);
+        if (statCards[2]) statCards[2].textContent = String(byStatus.approved || 0);
+    }).catch(() => {});
 });

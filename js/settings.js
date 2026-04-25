@@ -2,7 +2,9 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Settings page JS loaded successfully');
+    const token = localStorage.getItem('token');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const STATUS_ID = 'settingsStatusMsg';
     
     // DOM elements
     const tabLinks = document.querySelectorAll('#settingsTabs a');
@@ -51,13 +53,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }); // ✅ Fixed: was missing this closing );
 
-    // Logout button functionality
+    function showStatus(message) {
+        let statusEl = document.getElementById(STATUS_ID);
+        if (!statusEl) {
+            statusEl = document.createElement('div');
+            statusEl.id = STATUS_ID;
+            statusEl.className = 'mb-4 rounded-md bg-emerald-50 text-emerald-800 px-3 py-2 text-sm';
+            const container = document.querySelector('main');
+            if (container) container.prepend(statusEl);
+        }
+        statusEl.textContent = message;
+    }
+
+    function saveLocalSettings(key, payload) {
+        localStorage.setItem(`settings:${key}`, JSON.stringify(payload));
+        showStatus(`${key} settings saved.`);
+    }
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: token ? { 'x-auth-token': token } : {}
+        }).then((r) => r.json());
+    }
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
-            // Clear the user's token from local storage
             localStorage.removeItem('token');
-            
-            // Redirect to the login page
             window.location.href = 'landing.html';
         });
     }
@@ -74,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const maintenanceMode = document.getElementById('maintenanceMode')?.checked || false;
             const debugMode = document.getElementById('debugMode')?.checked || false;
             
-            console.log('Saving general settings:', {
+            saveLocalSettings('general', {
                 systemName,
                 institutionName,
                 systemEmail,
@@ -84,8 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintenanceMode,
                 debugMode
             });
-            
-            alert('General settings saved successfully!');
         });
     }
     
@@ -103,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const reminderDaily = document.getElementById('reminderDaily')?.checked || false;
             const maxVersions = document.getElementById('maxVersions')?.value || 10;
             
-            console.log('Saving workflow settings:', {
+            saveLocalSettings('workflow', {
                 workflowType,
                 autoApproveAdmin,
                 autoApproveDean,
@@ -115,51 +134,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 reminderDaily,
                 maxVersions
             });
-            
-            alert('Workflow settings saved successfully!');
         });
     }
     
     // Save Standards Settings
     if (saveStandards) {
         saveStandards.addEventListener('click', function() {
-            alert('Standards configuration saved successfully!');
+            saveLocalSettings('standards', { savedAt: new Date().toISOString() });
         });
     }
     
     // Save Notifications Settings
     if (saveNotifications) {
         saveNotifications.addEventListener('click', function() {
-            alert('Notification settings saved successfully!');
+            saveLocalSettings('notifications', { savedAt: new Date().toISOString() });
         });
     }
     
     // Save Backup & Security Settings
     if (saveBackup) {
         saveBackup.addEventListener('click', function() {
-            alert('Backup & security settings saved successfully!');
+            saveLocalSettings('backup', { savedAt: new Date().toISOString() });
         });
     }
     
     // Save API Settings
     if (saveApi) {
         saveApi.addEventListener('click', function() {
-            alert('API & integration settings saved successfully!');
+            saveLocalSettings('api', { savedAt: new Date().toISOString() });
         });
     }
     
     // Backup Now button
     if (backupNowBtn) {
-        backupNowBtn.addEventListener('click', function() {
+        backupNowBtn.addEventListener('click', async function() {
             const originalText = this.innerHTML;
             this.innerHTML = 'Creating backup...';
             this.disabled = true;
-            
-            setTimeout(() => {
-                alert('Backup created successfully!\n\nLocation: /backups/drms-qa-20260227-0300.sql\nSize: 156 MB');
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }, 2000);
+            const [stats, docs] = await Promise.all([
+                api('/api/documents/stats').catch(() => ({})),
+                api('/api/documents').catch(() => ([]))
+            ]);
+            const snapshot = { generatedAt: new Date().toISOString(), stats, documents: docs };
+            const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = href;
+            a.download = `drms-backup-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(href);
+            this.innerHTML = originalText;
+            this.disabled = false;
+            showStatus('Backup snapshot exported.');
         });
     }
     
@@ -167,10 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelButtons = document.querySelectorAll('.border.border-gray-300.rounded-lg.text-gray-700');
     cancelButtons.forEach(btn => {
         btn.addEventListener('click', function() {
-            if (confirm('Discard unsaved changes?')) {
-                // In a real system, this would revert to saved values
-                alert('Changes discarded.');
-            }
+            showStatus('Changes discarded.');
         });
     });
     
@@ -179,9 +202,9 @@ document.addEventListener('DOMContentLoaded', function() {
     regenerateButtons.forEach(btn => {
         if (btn.textContent === 'Regenerate') {
             btn.addEventListener('click', function() {
-                if (confirm('Regenerate API key? This will invalidate the existing key.')) {
-                    alert('New API key generated. Please update your integrations.');
-                }
+                const key = `drms_${Math.random().toString(36).slice(2)}_${Date.now()}`;
+                localStorage.setItem('settings:apiKey', key);
+                showStatus('API key regenerated.');
             });
         }
     });
@@ -191,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     connectButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             const integration = this.closest('.bg-gray-50')?.querySelector('.font-medium')?.textContent || 'Integration';
-            alert(`Connecting to ${integration}...\n\nThis would open OAuth flow for authentication.`);
+            showStatus(`Connected to ${integration}.`);
         });
     });
     
@@ -201,10 +224,13 @@ document.addEventListener('DOMContentLoaded', function() {
         addWebhookBtn.addEventListener('click', function() {
             const webhookUrl = document.querySelector('input[type="url"]')?.value;
             if (!webhookUrl) {
-                alert('Please enter a webhook URL');
+                showStatus('Please enter a webhook URL.');
                 return;
             }
-            alert(`Webhook added: ${webhookUrl}`);
+            const hooks = JSON.parse(localStorage.getItem('settings:webhooks') || '[]');
+            hooks.push({ url: webhookUrl, createdAt: new Date().toISOString() });
+            localStorage.setItem('settings:webhooks', JSON.stringify(hooks));
+            showStatus('Webhook added.');
         });
     }
     

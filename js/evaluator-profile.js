@@ -1,14 +1,25 @@
 // js/evaluator-profile.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Evaluator Profile JS loaded');
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || !user.id) {
+        window.location.href = 'landing.html';
+        return;
+    }
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        }).then((r) => r.json());
+    }
 
     // Activity log items
     const activityItems = document.querySelectorAll('.border-b, .flex.items-start.gap-3');
     activityItems.forEach(item => {
         item.addEventListener('click', function() {
             const activity = this.querySelector('.text-sm')?.textContent || 'Activity';
-            alert(`📋 ${activity}\n\nThis shows details of your evaluation activity.`);
+            console.log('Activity:', activity);
         });
     });
 
@@ -18,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         box.addEventListener('click', function() {
             const title = this.querySelector('.text-sm.font-medium')?.textContent || 'Information';
             const content = this.querySelector('.text-xs.text-gray-500')?.textContent || '';
-            alert(`ℹ️ ${title}\n\n${content}`);
+            console.log(title, content);
         });
     });
 
@@ -28,16 +39,17 @@ document.addEventListener('DOMContentLoaded', function() {
         field.addEventListener('click', function() {
             const label = this.previousElementSibling?.textContent || 'Field';
             const value = this.textContent;
-            alert(`👤 ${label}\n\nCurrent value: ${value}\n\nProfile information is view-only. Contact administrator for changes.`);
+            console.log(label, value);
         });
     });
 
-    // Access expiry warning
-    const expiryDate = document.querySelector('.text-gray-800:contains("March 31, 2026")');
-    if (expiryDate) {
-        const daysLeft = 21; // Calculate in real app
-        console.log(`Access expires in ${daysLeft} days`);
-    }
+    api(`/api/user/profile/${user.id}`).then((profile) => {
+        const values = document.querySelectorAll('.grid .text-gray-800');
+        if (values[0] && profile.firstName) values[0].textContent = `${profile.firstName} ${profile.lastName || ''}`.trim();
+        if (values[1] && profile.email) values[1].textContent = profile.email;
+        if (values[2] && profile.role) values[2].textContent = profile.role;
+        if (values[3] && profile.department) values[3].textContent = profile.department;
+    }).catch(() => {});
 
     // Any attempt to edit profile
     document.addEventListener('click', function(e) {
@@ -45,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.closest('button')?.textContent.includes('Update') ||
             e.target.closest('button')?.textContent.includes('Change')) {
             e.preventDefault();
-            alert('❌ Profile editing is disabled. You have view-only access.');
         }
     });
 

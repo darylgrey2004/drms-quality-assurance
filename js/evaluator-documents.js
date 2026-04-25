@@ -1,100 +1,49 @@
-// js/evaluator-documents.js
-
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Evaluator Documents JS loaded');
-
-    // View document buttons
-    const viewButtons = document.querySelectorAll('.view-doc');
-    
-    viewButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            const docName = row?.querySelector('.font-medium')?.textContent || 'Document';
-            const category = row?.querySelector('.bg-teal-100, .bg-amber-100, .bg-indigo-100')?.textContent || 'Category';
-            
-            alert(`📄 Document Viewer (View-Only Mode)\n\nDocument: ${docName}\nCategory: ${category}\n\nThis would open the complete document for review. As an External Evaluator, you have full view access.`);
-        });
-    });
-
-    // Filter input is disabled (view-only)
-    const filterInput = document.getElementById('filterDocuments');
-    if (filterInput) {
-        filterInput.addEventListener('click', function() {
-            alert('🔍 Filtering is disabled in view-only mode. All documents are visible for review.');
-        });
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
     }
 
-    // Pagination buttons
-    const paginationBtns = document.querySelectorAll('.pagination-btn, .flex.gap-2 button');
-    paginationBtns.forEach(btn => {
-        if (!btn.disabled) {
-            btn.addEventListener('click', function() {
-                if (this.textContent === 'Previous' || this.textContent === 'Next') {
-                    alert(`📑 ${this.textContent} page would load more documents for review.`);
-                } else if (this.textContent.match(/^\d+$/)) {
-                    // Simulate page change
-                    paginationBtns.forEach(b => {
-                        if (b.textContent.match(/^\d+$/)) {
-                            b.classList.remove('bg-teal-700', 'text-white');
-                            b.classList.add('bg-white', 'border', 'text-gray-600');
-                        }
-                    });
-                    this.classList.add('bg-teal-700', 'text-white');
-                    alert(`📑 Loading page ${this.textContent} of documents...`);
-                }
-            });
-        }
-    });
+    const tbody = document.querySelector('tbody');
+    const countDisplay = document.querySelector('.text-sm.text-gray-500');
 
-    // Table row hover effect (just for visual feedback)
-    const rows = document.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.classList.add('bg-gray-50');
-        });
-        row.addEventListener('mouseleave', function() {
-            this.classList.remove('bg-gray-50');
-        });
-    });
-
-    // Document count display
-    const updateDocumentCount = () => {
-        const totalDocs = document.querySelectorAll('tbody tr').length;
-        const countDisplay = document.querySelector('.text-sm.text-gray-500');
-        if (countDisplay && countDisplay.textContent.includes('Showing')) {
-            // Already has correct count
-        }
-    };
-
-    // Simulate document loading
-    console.log('All documents loaded for review');
-    updateDocumentCount();
-
-    // Disabled select clicks
-    const disabledSelects = document.querySelectorAll('select:disabled');
-    disabledSelects.forEach(select => {
-        select.addEventListener('click', function() {
-            alert('❌ Filters are disabled in view-only mode. You can view all documents without filtering.');
-        });
-    });
-
-    // Any attempt to interact with documents in edit mode
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('button')?.textContent.includes('Edit') ||
-            e.target.closest('button')?.textContent.includes('Delete') ||
-            e.target.closest('button')?.textContent.includes('Upload')) {
-            e.preventDefault();
-            alert('❌ Edit/Delete/Upload actions are disabled. You have view-only access.');
-        }
-    });
-
-    // View all link in header (if exists)
-    const viewAllLink = document.querySelector('a[href="#"]');
-    if (viewAllLink && viewAllLink.textContent.includes('View All')) {
-        viewAllLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('📋 Showing all documents for review.');
-        });
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        }).then((r) => r.json());
     }
+
+    function renderRows(rows) {
+        if (!tbody) return;
+        tbody.innerHTML = rows.slice(0, 10).map((doc) => `
+            <tr data-id="${doc.id}">
+                <td class="py-3"><div class="font-medium">${doc.title || 'Untitled'}</div></td>
+                <td class="py-3 text-gray-600">${doc.category || '-'}</td>
+                <td class="py-3 text-gray-600">${doc.area || '-'}</td>
+                <td class="py-3 text-gray-600">${doc.workflow_status || '-'}</td>
+                <td class="py-3 text-gray-500">${doc.created_at ? new Date(doc.created_at).toLocaleDateString() : '-'}</td>
+                <td class="py-3"><button class="view-doc text-teal-700">View</button></td>
+            </tr>
+        `).join('');
+        if (countDisplay) countDisplay.textContent = `Showing ${Math.min(rows.length, 10)} of ${rows.length} documents`;
+    }
+
+    tbody?.addEventListener('click', async (e) => {
+        const row = e.target.closest('tr[data-id]');
+        if (!row || !e.target.closest('.view-doc')) return;
+        const id = row.getAttribute('data-id');
+        const files = await api(`/api/documents/${id}/files`).catch(() => []);
+        if (Array.isArray(files) && files.length > 0) {
+            window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+        }
+    });
+
+    api('/api/documents')
+        .then((docs) => {
+            renderRows(Array.isArray(docs) ? docs : []);
+        })
+        .catch(() => {
+            renderRows([]);
+        });
 });

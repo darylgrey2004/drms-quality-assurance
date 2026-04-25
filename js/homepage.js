@@ -2,27 +2,45 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Homepage JS loaded successfully');
+    const token = localStorage.getItem('token');
     
-    // Add click handlers for document action buttons (👁️ and 📎)
-    const viewButtons = document.querySelectorAll('button.hover\\:underline');
-    
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault();
-            
-            // Get the button emoji to determine action
-            const buttonText = this.textContent.trim();
-            
-            if (buttonText === '👁️') {
-                console.log('View document clicked - would open document viewer');
-                alert('Document viewer would open here (demo functionality)');
-            } else if (buttonText === '📎') {
-                console.log('Attachment clicked - would show attachments');
-                alert('Document attachments would be shown here (demo functionality)');
-            }
-        });
-    });
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: token ? { 'x-auth-token': token } : {}
+        }).then((r) => r.json());
+    }
+
+    async function openDocFromRow(row) {
+        const id = row?.getAttribute('data-id');
+        if (!id) return;
+        const files = await api(`/api/documents/${id}/files`).catch(() => []);
+        if (Array.isArray(files) && files.length > 0) {
+            window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+        }
+    }
+
+    const listWrap = document.querySelector('main');
+    if (listWrap) {
+        api('/api/documents').then((docs) => {
+            const rows = listWrap.querySelectorAll('.grid.grid-cols-12.py-2, .grid.grid-cols-12.py-3');
+            rows.forEach((row, idx) => {
+                const doc = docs?.[idx];
+                if (!doc) return;
+                row.setAttribute('data-id', String(doc.id));
+                const titleEl = row.querySelector('.font-medium');
+                if (titleEl) titleEl.textContent = doc.title || 'Untitled';
+                const cells = row.querySelectorAll('div');
+                if (cells[1]) cells[1].textContent = doc.category || '-';
+                if (cells[2]) cells[2].textContent = doc.area || '-';
+            });
+            listWrap.querySelectorAll('button.hover\\:underline').forEach((button) => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    openDocFromRow(button.closest('[data-id]'));
+                });
+            });
+        }).catch(() => {});
+    }
     
     // Optional: Add active state tracking for sidebar navigation
     const currentPath = window.location.pathname.split('/').pop() || 'homepage.html';

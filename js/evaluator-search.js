@@ -1,71 +1,9 @@
-// js/evaluator-search.js
-
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Evaluator Search JS loaded');
-
-    // Mock data - in real app, this would come from an API
-    const mockDocuments = [
-        {
-            title: 'Quality Management System Manual',
-            category: 'ISO',
-            categoryClass: 'badge-iso',
-            area: 'Clause 4-10',
-            status: 'Approved',
-            statusClass: 'status-approved',
-            version: 'v3.2',
-            author: 'Dr. Santos',
-            date: '2026-02-15',
-            description: 'Comprehensive quality manual covering ISO 9001:2015 requirements.'
-        },
-        {
-            title: 'Curriculum Development Framework',
-            category: 'AACCUP',
-            categoryClass: 'badge-aaccup',
-            area: 'Area II, III',
-            status: 'Pending',
-            statusClass: 'status-pending',
-            version: 'v1.0',
-            author: 'Prof. Garcia',
-            date: '2026-02-20',
-            description: 'Framework for curriculum development aligned with AACCUP standards.'
-        },
-        {
-            title: 'Research Output Compilation 2025',
-            category: 'COE',
-            categoryClass: 'badge-coe',
-            area: 'Indicator 2',
-            status: 'Draft',
-            statusClass: 'status-draft',
-            version: 'v0.3',
-            author: 'Dr. Reyes',
-            date: '2026-02-25',
-            description: 'Compilation of faculty research outputs for COE Indicator 2.'
-        },
-        {
-            title: 'Faculty Profile and Qualifications',
-            category: 'AACCUP',
-            categoryClass: 'badge-aaccup',
-            area: 'Area II',
-            status: 'Approved',
-            statusClass: 'status-approved',
-            version: 'v2.1',
-            author: 'Dean Cruz',
-            date: '2026-01-10',
-            description: 'Comprehensive faculty profiles and qualifications.'
-        },
-        {
-            title: 'Internal Audit Report Q4 2025',
-            category: 'ISO',
-            categoryClass: 'badge-iso',
-            area: 'Clause 9',
-            status: 'Expired',
-            statusClass: 'status-expired',
-            version: 'v1.5',
-            author: 'QA Office',
-            date: '2025-12-01',
-            description: 'Internal audit findings and corrective actions.'
-        }
-    ];
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
+    }
 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
@@ -81,8 +19,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const paginationInfo = document.getElementById('paginationInfo');
     const pagination = document.getElementById('pagination');
 
+    let allDocuments = [];
     let currentPage = 1;
-    let currentResults = [...mockDocuments];
+    const pageSize = 8;
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        }).then(async (res) => {
+            const payload = await res.json().catch(() => []);
+            if (!res.ok) throw new Error(payload?.msg || payload?.error?.message || 'Request failed');
+            return payload;
+        });
+    }
 
     // Display results
     function displayResults(results) {
@@ -101,43 +50,49 @@ document.addEventListener('DOMContentLoaded', function() {
         pagination.classList.remove('hidden');
         paginationInfo.classList.remove('hidden');
 
-        results.forEach(doc => {
+        const total = results.length;
+        const start = (currentPage - 1) * pageSize;
+        const pageRows = results.slice(start, start + pageSize);
+
+        pageRows.forEach(doc => {
             const resultEl = document.createElement('div');
             resultEl.className = 'search-result';
             resultEl.innerHTML = `
                 <div class="flex flex-col md:flex-row justify-between">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="${doc.categoryClass}">${doc.category}</span>
-                            <span class="${doc.statusClass}">${doc.status}</span>
+                            <span class="badge-iso">${doc.category || '-'}</span>
+                            <span class="status-pending">${doc.workflow_status || '-'}</span>
                         </div>
-                        <h3 class="font-medium text-gray-800 text-lg">${doc.title}</h3>
-                        <p class="text-sm text-gray-600 mt-1">${doc.description}</p>
+                        <h3 class="font-medium text-gray-800 text-lg">${doc.title || 'Untitled'}</h3>
+                        <p class="text-sm text-gray-600 mt-1">${doc.description || ''}</p>
                         <div class="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
-                            <span>📁 ${doc.area}</span>
-                            <span>👤 ${doc.author}</span>
-                            <span>📅 ${doc.date}</span>
-                            <span>📌 v${doc.version}</span>
+                            <span>📁 ${doc.area || '-'}</span>
+                            <span>👤 ${doc.author_name || '-'}</span>
+                            <span>📅 ${doc.created_at ? new Date(doc.created_at).toLocaleDateString() : '-'}</span>
+                            <span>📌 ${doc.version || 'v1.0'}</span>
                         </div>
                     </div>
                     <div class="flex items-center mt-3 md:mt-0">
-                        <button class="view-btn" data-doc='${JSON.stringify(doc)}'>View Document</button>
+                        <button class="view-btn" data-id="${doc.id}">View Document</button>
                     </div>
                 </div>
             `;
             resultsContainer.appendChild(resultEl);
         });
 
-        // Add view button listeners
         document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const doc = JSON.parse(this.getAttribute('data-doc'));
-                alert(`📄 Viewing Document (Read-Only)\n\nTitle: ${doc.title}\nCategory: ${doc.category}\nArea: ${doc.area}\nStatus: ${doc.status}\nAuthor: ${doc.author}\nDate: ${doc.date}\nVersion: ${doc.version}\n\nDescription: ${doc.description}\n\nThis is a view-only preview. In the full system, the complete document would open.`);
+            btn.addEventListener('click', async function() {
+                const id = this.getAttribute('data-id');
+                const files = await api(`/api/documents/${id}/files`).catch(() => []);
+                if (Array.isArray(files) && files.length > 0) {
+                    window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+                }
             });
         });
 
-        resultCount.textContent = results.length;
-        paginationInfo.textContent = `Showing 1 to ${results.length} of ${mockDocuments.length} documents`;
+        resultCount.textContent = String(total);
+        paginationInfo.textContent = `Showing ${total === 0 ? 0 : start + 1} to ${Math.min(start + pageRows.length, total)} of ${total} documents`;
     }
 
     // Filter results
@@ -147,25 +102,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const status = filterStatus.value;
         const date = filterDate.value;
 
-        let filtered = mockDocuments.filter(doc => {
-            // Search filter
+        let filtered = allDocuments.filter(doc => {
             const matchesSearch = searchTerm === '' || 
-                doc.title.toLowerCase().includes(searchTerm) ||
-                doc.author.toLowerCase().includes(searchTerm) ||
-                doc.description.toLowerCase().includes(searchTerm);
+                String(doc.title || '').toLowerCase().includes(searchTerm) ||
+                String(doc.author_name || '').toLowerCase().includes(searchTerm) ||
+                String(doc.description || '').toLowerCase().includes(searchTerm);
 
             // Category filter
             const matchesCategory = category === 'all' || 
-                doc.category.toLowerCase() === category;
+                String(doc.category || '').toLowerCase() === category;
 
             // Status filter
             const matchesStatus = status === 'all' || 
-                doc.status.toLowerCase() === status;
+                String(doc.workflow_status || '').toLowerCase() === status;
 
             // Date filter (simplified for demo)
             let matchesDate = true;
             if (date !== 'all') {
-                const docDate = new Date(doc.date);
+                const docDate = new Date(doc.created_at);
                 const today = new Date();
                 const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
                 const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -207,8 +161,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        currentResults = filtered;
+        currentPage = 1;
         displayResults(filtered);
+        return filtered;
     }
 
     // Event listeners
@@ -251,13 +206,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Pagination
     document.querySelectorAll('[data-page]').forEach(btn => {
         btn.addEventListener('click', function() {
+            const filtered = filterResults();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
             const page = this.getAttribute('data-page');
             if (page === 'prev' && currentPage > 1) {
                 currentPage--;
-            } else if (page === 'next' && currentPage < 4) {
+            } else if (page === 'next' && currentPage < totalPages) {
                 currentPage++;
             } else if (!isNaN(page)) {
-                currentPage = parseInt(page);
+                currentPage = Math.min(totalPages, parseInt(page, 10));
             }
 
             // Update pagination buttons
@@ -277,12 +234,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const prevBtn = document.querySelector('[data-page="prev"]');
             const nextBtn = document.querySelector('[data-page="next"]');
             if (prevBtn) prevBtn.disabled = currentPage === 1;
-            if (nextBtn) nextBtn.disabled = currentPage === 4;
-
-            alert(`📑 Page ${currentPage} would load more documents in the full system.`);
+            if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+            displayResults(filtered);
         });
     });
 
-    // Initial display
-    displayResults(mockDocuments);
+    api('/api/documents')
+        .then((docs) => {
+            allDocuments = Array.isArray(docs) ? docs : [];
+            displayResults(allDocuments);
+        })
+        .catch(() => {
+            allDocuments = [];
+            displayResults([]);
+        });
 });

@@ -57,44 +57,47 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoryFilter = document.getElementById('categoryFilter');
     const filterBtn = document.querySelector('.bg-teal-700.text-white');
     const documentsTable = document.getElementById('documentsTable');
-    const STORAGE_KEY = 'userUploadedDocuments';
+    let documentsCache = [];
 
     function formatUploadDate(isoDate) {
         const date = new Date(isoDate);
-        if (Number.isNaN(date.getTime())) return 'Just now';
+        if (Number.isNaN(date.getTime())) return '-';
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    function renderUploadedSamples() {
-        if (!documentsTable) return;
-        const currentUserId = String(user.id || '');
-        const storedDocs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const myDocs = storedDocs.filter((doc) => String(doc.ownerId) === currentUserId);
+    function getApiErrorMessage(payload, fallback) {
+        return payload?.error?.details || payload?.error?.message || payload?.msg || fallback;
+    }
 
-        myDocs.forEach((doc) => {
-            const row = document.createElement('tr');
-            row.classList.add('uploaded-sample-row');
-            row.innerHTML = `
+    async function apiRequest(path) {
+        const response = await fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(getApiErrorMessage(payload, 'Request failed'));
+        return payload;
+    }
+
+    function renderRows(rows) {
+        if (!documentsTable) return;
+        documentsTable.innerHTML = rows.map((doc) => `
+            <tr data-id="${doc.id}">
                 <td class="py-3">
                     <div class="font-medium text-gray-800">${doc.title || 'Untitled Document'}</div>
-                    <div class="text-xs text-gray-400">${doc.fileName || 'Uploaded file'}</div>
+                    <div class="text-xs text-gray-400">${doc.author_name || 'Uploader'}</div>
                 </td>
-                <td class="py-3"><span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">${doc.categoryLabel || 'ISO'}</span></td>
+                <td class="py-3"><span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">${doc.category || '-'}</span></td>
                 <td class="py-3 text-gray-600">${doc.area || '-'}</td>
-                <td class="py-3"><span class="${doc.statusClass || 'badge-pending'} px-2 py-1 rounded-full text-xs">${doc.status || 'Pending'}</span></td>
+                <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">${doc.workflow_status || 'pending'}</span></td>
                 <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
-                <td class="py-3 text-gray-400">${formatUploadDate(doc.uploadedAt)}</td>
+                <td class="py-3 text-gray-400">${formatUploadDate(doc.created_at)}</td>
                 <td class="py-3">
                     <button class="text-teal-600 hover:text-teal-800 mr-2 view-doc">👁️</button>
                     <button class="text-gray-500 hover:text-gray-700 mr-2 attach-doc">📎</button>
-                    <button class="text-blue-600 hover:text-blue-800 version-doc">📋</button>
                 </td>
-            `;
-            documentsTable.prepend(row);
-        });
+            </tr>
+        `).join('');
     }
-
-    renderUploadedSamples();
     
     function filterDocuments() {
         const searchTerm = searchInput?.value.toLowerCase() || '';
@@ -123,32 +126,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (statusFilter) statusFilter.addEventListener('change', filterDocuments);
     if (categoryFilter) categoryFilter.addEventListener('change', filterDocuments);
     if (filterBtn) filterBtn.addEventListener('click', filterDocuments);
-    
-    // Document action buttons
-    document.querySelectorAll('.view-doc').forEach(btn => {
-        btn.addEventListener('click', () => alert('Document viewer would open'));
-    });
-    
-    document.querySelectorAll('.attach-doc').forEach(btn => {
-        btn.addEventListener('click', () => alert('Attachments panel would open'));
-    });
-    
-    document.querySelectorAll('.version-doc').forEach(btn => {
-        btn.addEventListener('click', () => alert('Version history would open'));
-    });
-    
-    // Pagination
-    document.querySelectorAll('.flex.gap-2 button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.textContent === 'Previous' || this.textContent === 'Next') {
-                alert(this.textContent + ' page');
-            } else if (this.textContent.match(/^\d+$/)) {
-                document.querySelectorAll('.flex.gap-2 button').forEach(b => {
-                    b.classList.remove('bg-teal-700', 'text-white');
-                    b.classList.add('bg-white', 'border', 'text-gray-600');
-                });
-                this.classList.add('bg-teal-700', 'text-white');
+
+    documentsTable?.addEventListener('click', async (e) => {
+        const row = e.target.closest('tr[data-id]');
+        if (!row) return;
+        const id = row.getAttribute('data-id');
+        if (e.target.closest('.view-doc') || e.target.closest('.attach-doc')) {
+            try {
+                const files = await apiRequest(`/api/documents/${id}/files`);
+                if (!Array.isArray(files) || files.length === 0) {
+                    alert('No files available for this document.');
+                    return;
+                }
+                window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+            } catch (error) {
+                alert(error.message || 'Failed to load document files');
             }
-        });
+        }
     });
+    
+    apiRequest('/api/documents')
+        .then((rows) => {
+            documentsCache = Array.isArray(rows) ? rows : [];
+            renderRows(documentsCache);
+            filterDocuments();
+        })
+        .catch((error) => {
+            console.error('Failed to load documents', error);
+        });
 });

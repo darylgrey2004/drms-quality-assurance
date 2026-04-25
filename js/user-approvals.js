@@ -49,96 +49,77 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(sendHeartbeat, 2 * 60 * 1000);
     // ────────────────────────────────────────────────────────
 
-    // DOM elements
+    const approvalsList = document.getElementById('approvalsList');
     const searchInput = document.getElementById('searchApprovals');
-    const priorityFilter = document.getElementById('priorityFilter');
     const areaFilter = document.getElementById('areaFilter');
-    const viewBtns = document.querySelectorAll('.view-btn');
-    const validateBtns = document.querySelectorAll('.validate-btn');
-    const rejectBtns = document.querySelectorAll('.reject-btn');
+    let queue = [];
 
-    // Filter function
-    function filterApprovals() {
-        const searchTerm = searchInput?.value.toLowerCase() || '';
-        const priority = priorityFilter?.value || 'all';
-        const area = areaFilter?.value || 'all';
-
-        document.querySelectorAll('.border-l-4').forEach(item => {
-            const text = item.textContent.toLowerCase();
-            const hasUrgent = item.classList.contains('border-red-500');
-            const areaText = item.querySelector('.bg-amber-100, .bg-blue-100, .bg-indigo-100')?.textContent.toLowerCase() || '';
-
-            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-            const matchesPriority = priority === 'all' || 
-                (priority === 'urgent' && hasUrgent) ||
-                (priority === 'normal' && !hasUrgent);
-            const matchesArea = area === 'all' || areaText.includes(area);
-
-            item.style.display = (matchesSearch && matchesPriority && matchesArea) ? 'block' : 'none';
+    function api(path, options) {
+        return fetch(`http://localhost:3000${path}`, {
+            ...(options || {}),
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token,
+                ...((options && options.headers) || {})
+            }
+        }).then(async (res) => {
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(payload.error?.message || payload.msg || 'Request failed');
+            return payload;
         });
     }
 
-    if (searchInput) searchInput.addEventListener('input', filterApprovals);
-    if (priorityFilter) priorityFilter.addEventListener('change', filterApprovals);
-    if (areaFilter) areaFilter.addEventListener('change', filterApprovals);
-
-    // Validate button
-    validateBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            if (confirm(`Validate "${title}"?`)) {
-                alert('Document validated successfully!');
-                item.remove();
-                updateStats();
-            }
+    function render() {
+        if (!approvalsList) return;
+        const term = String(searchInput?.value || '').toLowerCase();
+        const area = String(areaFilter?.value || 'all').toLowerCase();
+        const filtered = queue.filter((doc) => {
+            const haystack = `${doc.title || ''} ${doc.area || ''} ${doc.category || ''}`.toLowerCase();
+            return (!term || haystack.includes(term)) && (area === 'all' || String(doc.area || '').toLowerCase().includes(area));
         });
-    });
-
-    // View button
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            alert(`Opening review panel for: ${title}\n\nThis would show the document for detailed review.`);
-        });
-    });
-
-    // Reject button
-    rejectBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            const reason = prompt(`Provide feedback for returning "${title}":`);
-            if (reason) {
-                alert(`Document returned to faculty.\nFeedback: ${reason}`);
-                item.remove();
-                updateStats();
-            }
-        });
-    });
-
-    // Update stats after actions
-    function updateStats() {
-        const pendingCount = document.querySelectorAll('.border-l-4').length;
+        approvalsList.innerHTML = filtered.map((doc) => `
+            <div class="border-l-4 border-blue-500 bg-white p-4 rounded-lg shadow-sm mb-3" data-id="${doc.id}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold">${doc.title || 'Untitled'}</h3>
+                        <p class="text-xs text-gray-500">${doc.category || '-'} · ${doc.area || '-'}</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="validate-btn text-teal-700">Validate</button>
+                        <button class="reject-btn text-red-600">Reject</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
         const pendingElement = document.querySelector('.grid .stat-card:first-child .text-3xl');
-        if (pendingElement) {
-            pendingElement.textContent = pendingCount;
-        }
+        if (pendingElement) pendingElement.textContent = String(filtered.length);
     }
 
-    // Stats cards click (for demo)
-    document.querySelectorAll('.stat-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const label = this.querySelector('.text-gray-500')?.textContent;
-            if (label === 'Pending Review') {
-                alert('Showing all pending approvals');
-            } else if (label === 'Approved (This Month)') {
-                alert('Showing approved documents this month');
+    async function loadQueue() {
+        queue = await api('/api/documents/approvals');
+        render();
+    }
+
+    approvalsList?.addEventListener('click', async (e) => {
+        const wrap = e.target.closest('[data-id]');
+        if (!wrap) return;
+        const id = wrap.getAttribute('data-id');
+        try {
+            if (e.target.closest('.validate-btn')) {
+                await api(`/api/documents/${id}/validate`, { method: 'POST' });
+            } else if (e.target.closest('.reject-btn')) {
+                const reason = prompt('Provide feedback for rejection:') || '';
+                await api(`/api/documents/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+            } else {
+                return;
             }
-        });
+            await loadQueue();
+        } catch (error) {
+            alert(error.message || 'Approval action failed');
+        }
     });
+
+    searchInput?.addEventListener('input', render);
+    areaFilter?.addEventListener('change', render);
+    loadQueue().catch((error) => alert(error.message || 'Failed to load approvals'));
 });

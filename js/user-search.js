@@ -61,8 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterDate = document.getElementById('filterDate');
     const sortSelect = document.getElementById('sortResults');
     const resultCount = document.getElementById('resultCount');
-    const searchResults = document.querySelectorAll('.search-result');
-    const viewButtons = document.querySelectorAll('.view-result');
+    const resultsContainer = document.getElementById('listView') || document.getElementById('searchResults');
+    const paginationInfo = document.getElementById('paginationInfo');
+    let allDocuments = [];
 
     // Toggle advanced filters
     if (toggleFilters && advancedFilters) {
@@ -73,31 +74,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Search function
+    function renderResults(rows) {
+        if (!resultsContainer) return;
+        resultsContainer.innerHTML = rows.map((doc) => `
+            <div class="search-result bg-white rounded-lg border border-gray-200 p-4 mb-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">${doc.title || 'Untitled'}</h3>
+                        <p class="text-xs text-gray-500">${doc.category || '-'} · ${doc.area || '-'} · ${doc.workflow_status || '-'}</p>
+                    </div>
+                    <button class="view-result text-teal-700" data-id="${doc.id}">View</button>
+                </div>
+            </div>
+        `).join('');
+        if (paginationInfo) paginationInfo.textContent = `Showing ${rows.length} of ${allDocuments.length} documents`;
+        resultsContainer.querySelectorAll('.view-result').forEach((btn) => {
+            btn.addEventListener('click', async function() {
+                const id = this.getAttribute('data-id');
+                const files = await fetch(`http://localhost:3000/api/documents/${id}/files`, {
+                    headers: { 'x-auth-token': token }
+                }).then((r) => r.json()).catch(() => []);
+                if (Array.isArray(files) && files.length > 0) {
+                    window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+                }
+            });
+        });
+    }
+
     function performSearch() {
         const searchTerm = searchInput?.value.toLowerCase() || '';
         const category = filterCategory?.value || 'all';
         const status = filterStatus?.value || 'all';
         
-        let visibleCount = 0;
-
-        searchResults.forEach(result => {
-            const text = result.textContent.toLowerCase();
-            const categoryBadge = result.querySelector('.bg-teal-100, .bg-amber-100, .bg-indigo-100')?.textContent.toLowerCase() || '';
-            const statusBadge = result.querySelector('.bg-green-100, .bg-amber-100, .bg-blue-100')?.textContent.toLowerCase() || '';
-
+        const filtered = allDocuments.filter((doc) => {
+            const text = `${doc.title || ''} ${doc.author_name || ''} ${doc.area || ''}`.toLowerCase();
             const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-            const matchesCategory = category === 'all' || categoryBadge.includes(category);
-            const matchesStatus = status === 'all' || statusBadge.includes(status);
-
-            if (matchesSearch && matchesCategory && matchesStatus) {
-                result.classList.remove('hidden');
-                visibleCount++;
-            } else {
-                result.classList.add('hidden');
-            }
+            const matchesCategory = category === 'all' || String(doc.category || '').toLowerCase() === category;
+            const matchesStatus = status === 'all' || String(doc.workflow_status || '').toLowerCase() === status;
+            return matchesSearch && matchesCategory && matchesStatus;
         });
-
-        if (resultCount) resultCount.textContent = visibleCount;
+        if (resultCount) resultCount.textContent = String(filtered.length);
+        renderResults(filtered);
     }
 
     // Search button click
@@ -127,30 +144,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // View result buttons
-    viewButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const result = this.closest('.search-result');
-            const title = result?.querySelector('h3')?.textContent || 'Document';
-            alert(`Viewing: ${title}\n\nThis would open the document.`);
+    fetch('http://localhost:3000/api/documents', {
+        headers: { 'x-auth-token': token }
+    })
+        .then((r) => r.json())
+        .then((docs) => {
+            allDocuments = Array.isArray(docs) ? docs : [];
+            if (resultCount) resultCount.textContent = String(allDocuments.length);
+            renderResults(allDocuments);
+        })
+        .catch(() => {
+            allDocuments = [];
+            renderResults([]);
         });
-    });
-
-    // Pagination
-    document.querySelectorAll('.flex.gap-2 button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.textContent === 'Previous' || this.textContent === 'Next') {
-                alert(this.textContent + ' page');
-            } else if (this.textContent.match(/^\d+$/)) {
-                document.querySelectorAll('.flex.gap-2 button').forEach(b => {
-                    if (b.textContent.match(/^\d+$/)) {
-                        b.classList.remove('bg-teal-700', 'text-white');
-                        b.classList.add('bg-white', 'border', 'text-gray-600');
-                    }
-                });
-                this.classList.add('bg-teal-700', 'text-white');
-                alert(`Page ${this.textContent}`);
-            }
-        });
-    });
 });

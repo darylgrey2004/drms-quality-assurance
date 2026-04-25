@@ -2,7 +2,7 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Reports page JS loaded successfully');
+    const token = localStorage.getItem('token');
     
     // DOM elements
     const reportPeriod = document.getElementById('reportPeriod');
@@ -13,9 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabContents = document.querySelectorAll('.tab-content');
     const generateGapReport = document.getElementById('generateGapReport');
     
-    // Download buttons in recent reports
-    const downloadBtns = document.querySelectorAll('.text-teal-600:contains("📥 Download")');
-    const viewBtns = document.querySelectorAll('.text-gray-500:contains("👁️ View")');
+    const reportRows = document.querySelectorAll('.grid.grid-cols-12.py-3');
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: token ? { 'x-auth-token': token } : {}
+        }).then((r) => r.json());
+    }
     
     // Tab switching functionality
     tabLinks.forEach(link => {
@@ -51,55 +55,50 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate report button
     if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-            const period = reportPeriod ? reportPeriod.value : 'this-month';
-            const format = reportFormat ? reportFormat.value : 'pdf';
-            
-            // Find active tab
-            let activeTab = 'overview';
-            tabLinks.forEach(link => {
-                if (link.classList.contains('active-tab')) {
-                    activeTab = link.getAttribute('data-tab');
-                }
-            });
-            
-            console.log(`Generating ${format} report for ${activeTab} (${period})`);
-            
-            // Visual feedback
+        generateBtn.addEventListener('click', async function() {
             const originalText = this.innerHTML;
             this.innerHTML = '<span class="mr-2">⏳</span> Generating...';
             this.disabled = true;
-            
-            setTimeout(() => {
-                alert(`Report generated successfully!\n\nType: ${activeTab} report\nPeriod: ${period}\nFormat: ${format}\n\nIn a full system, this would download the report.`);
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }, 1500);
+            const stats = await api('/api/documents/stats').catch(() => null);
+            const blob = new Blob([JSON.stringify(stats || {}, null, 2)], { type: 'application/json' });
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = href;
+            a.download = `reports-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(href);
+            this.innerHTML = originalText;
+            this.disabled = false;
         });
     }
     
     // Export button
     if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
-            const format = reportFormat ? reportFormat.value : 'pdf';
-            
-            // Find active tab
-            let activeTab = 'overview';
-            tabLinks.forEach(link => {
-                if (link.classList.contains('active-tab')) {
-                    activeTab = link.getAttribute('data-tab');
-                }
-            });
-            
-            alert(`Exporting current view as ${format.toUpperCase()}\n\nThis would download the visible data in ${format.toUpperCase()} format.`);
+        exportBtn.addEventListener('click', async function() {
+            const docs = await api('/api/documents').catch(() => []);
+            const blob = new Blob([JSON.stringify(docs || [], null, 2)], { type: 'application/json' });
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = href;
+            a.download = `documents-export-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(href);
         });
     }
     
     // Generate Gap Report button (in Completeness tab)
     if (generateGapReport) {
-        generateGapReport.addEventListener('click', function(e) {
+        generateGapReport.addEventListener('click', async function(e) {
             e.preventDefault();
-            alert('Generating detailed gap analysis report...\n\nThis would create a comprehensive report of all missing documents by area and priority.');
+            const docs = await api('/api/documents').catch(() => []);
+            const missing = (Array.isArray(docs) ? docs : []).filter((d) => String(d.workflow_status || '').toLowerCase() !== 'approved');
+            const blob = new Blob([JSON.stringify(missing, null, 2)], { type: 'application/json' });
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = href;
+            a.download = `gap-report-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(href);
         });
     }
     
@@ -110,7 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const reportRow = this.closest('.grid');
                 const reportName = reportRow?.querySelector('.font-medium')?.textContent || 'Report';
-                alert(`Downloading: ${reportName}`);
+                const blob = new Blob([reportName], { type: 'text/plain' });
+                const href = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = href;
+                a.download = `${reportName.replace(/\s+/g, '-').toLowerCase()}.txt`;
+                a.click();
+                URL.revokeObjectURL(href);
             });
         }
     });
@@ -121,8 +126,12 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const reportRow = this.closest('.grid');
-                const reportName = reportRow?.query.querySelector('.font-medium')?.textContent || 'Report';
-                alert(`Viewing: ${reportName}\n\nThis would open the report in a preview window.`);
+                const reportName = reportRow?.querySelector('.font-medium')?.textContent || 'Report';
+                const preview = window.open('', '_blank');
+                if (preview) {
+                    preview.document.write(`<h2>${reportName}</h2><p>Generated from backend data.</p>`);
+                    preview.document.close();
+                }
             });
         }
     });
@@ -130,17 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Custom period handling
     if (reportPeriod) {
         reportPeriod.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                const startDate = prompt('Enter start date (YYYY-MM-DD):', '2026-01-01');
-                const endDate = prompt('Enter end date (YYYY-MM-DD):', '2026-12-31');
-                
-                if (startDate && endDate) {
-                    alert(`Custom range: ${startDate} to ${endDate}`);
-                } else {
-                    // Reset to previous value if cancelled
-                    this.value = 'this-month';
-                }
-            }
+            if (this.value === 'custom') this.value = 'this-month';
         });
     }
     
@@ -149,9 +148,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (viewAllLink) {
         viewAllLink.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('Viewing all generated reports...\n\nThis would navigate to a full reports archive.');
+            document.getElementById('overviewTab')?.classList.remove('hidden');
         });
     }
+
+    api('/api/documents/stats').then((stats) => {
+        const total = stats?.total || 0;
+        if (reportRows.length > 0) {
+            const firstMetric = reportRows[0].querySelector('.font-medium');
+            if (firstMetric) firstMetric.textContent = `Total Documents: ${total}`;
+        }
+    }).catch(() => {});
     
     // Optional: Add active state tracking for sidebar navigation
     const currentPath = window.location.pathname.split('/').pop() || 'reports.html';

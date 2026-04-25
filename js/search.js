@@ -23,45 +23,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridView = document.getElementById('gridView');
     const resultCount = document.getElementById('resultCount');
     const paginationInfo = document.getElementById('paginationInfo');
-    const searchResults = document.querySelectorAll('.search-result');
+    const searchResultsRoot = document.getElementById('listView');
+    const token = localStorage.getItem('token');
+    let allDocuments = [];
     
-    // Initialize grid view by cloning list items
-    function initGridView() {
-        if (!gridView) return;
-        
-        // Clear existing grid items
-        gridView.innerHTML = '';
-        
-        // Clone each search result for grid view
-        searchResults.forEach(result => {
-            const clone = result.cloneNode(true);
-            clone.classList.add('grid-item');
-            gridView.appendChild(clone);
-            
-            // Re-attach event listeners to cloned buttons
-            const viewBtns = clone.querySelectorAll('.view-doc');
-            viewBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const docId = this.getAttribute('data-doc') || 'document';
-                    alert(`Viewing document: ${docId}\n(This would open the document in the full system)`);
-                });
-            });
-            
-            const attachBtns = clone.querySelectorAll('.text-gray-500');
-            attachBtns.forEach(btn => {
-                if (btn.textContent.includes('📎')) {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        alert('Attachments panel would open here');
-                    });
-                }
+    function getApi(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        }).then((r) => r.json());
+    }
+
+    async function openDocument(docId) {
+        const files = await getApi(`/api/documents/${docId}/files`).catch(() => []);
+        if (Array.isArray(files) && files.length > 0) {
+            window.open(`http://localhost:3000${files[0].url_path}`, '_blank');
+        }
+    }
+
+    function renderDocuments(rows) {
+        if (!searchResultsRoot) return;
+        const html = rows.map((doc) => `
+            <div class="search-result bg-white rounded-lg border border-gray-200 p-4 mb-3" data-category="${(doc.category || '').toLowerCase()}" data-status="${(doc.workflow_status || '').toLowerCase()}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">${doc.title || 'Untitled'}</h3>
+                        <p class="text-xs text-gray-500">${doc.category || '-'} · ${doc.area || '-'} · ${doc.workflow_status || '-'}</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="view-doc text-teal-700" data-doc="${doc.id}">👁️</button>
+                        <button class="open-files text-gray-500" data-doc="${doc.id}">📎</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        searchResultsRoot.innerHTML = html;
+        if (gridView) gridView.innerHTML = html;
+        document.querySelectorAll('.view-doc, .open-files').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openDocument(btn.getAttribute('data-doc'));
             });
         });
     }
-    
-    // Call init
-    initGridView();
     
     // View toggle functionality
     viewToggles.forEach(toggle => {
@@ -101,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let visibleCount = 0;
         
         // Filter both list and grid items
-        const itemsToFilter = [...searchResults];
+        const itemsToFilter = [...document.querySelectorAll('#listView .search-result')];
         
         itemsToFilter.forEach(item => {
             const itemText = item.textContent.toLowerCase();
@@ -144,8 +147,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 matchesVersion = itemText.includes(version);
             }
             
-            // Date match (simplified - would need actual date parsing in real system)
             let matchesDate = true;
+            if (dateFrom || dateTo) {
+                const source = allDocuments.find((d) => String(d.id) === String(item.querySelector('button[data-doc]')?.getAttribute('data-doc')));
+                const created = source?.created_at ? new Date(source.created_at) : null;
+                if (created) {
+                    if (dateFrom) matchesDate = matchesDate && created >= new Date(dateFrom);
+                    if (dateTo) matchesDate = matchesDate && created <= new Date(dateTo);
+                }
+            }
             
             // Combine all filters
             if (matchesSearch && matchesCategory && matchesStatus && matchesArea && matchesAuthor && matchesVersion && matchesDate) {
@@ -174,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update result count
         if (resultCount) resultCount.textContent = visibleCount;
-        if (paginationInfo) paginationInfo.textContent = `Showing 1 to ${Math.min(visibleCount, 6)} of ${visibleCount} results`;
+        if (paginationInfo) paginationInfo.textContent = `Showing ${visibleCount} of ${allDocuments.length} results`;
         
         console.log(`Search completed: ${visibleCount} results found`);
     }
@@ -202,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (filterKeyword) filterKeyword.value = '';
             
             // Show all results
-            searchResults.forEach(item => {
+            document.querySelectorAll('#listView .search-result').forEach(item => {
                 item.classList.remove('hidden');
             });
             
@@ -212,8 +222,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Update count
-            if (resultCount) resultCount.textContent = searchResults.length;
-            if (paginationInfo) paginationInfo.textContent = `Showing 1 to ${Math.min(searchResults.length, 6)} of ${searchResults.length} results`;
+            if (resultCount) resultCount.textContent = String(allDocuments.length);
+            if (paginationInfo) paginationInfo.textContent = `Showing ${allDocuments.length} of ${allDocuments.length} results`;
         });
     }
     
@@ -223,34 +233,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const sortBy = this.value;
             console.log('Sorting by:', sortBy);
             
-            // In a real system, this would reorder the results
-            // For demo, just show an alert
-            alert(`Sort by ${sortBy} would reorder the results in the full system.`);
+            const sorted = [...allDocuments];
+            if (sortBy === 'date_asc') sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            if (sortBy === 'date_desc') sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            if (sortBy === 'title_asc') sorted.sort((a, b) => String(a.title || '').localeCompare(String(b.title || '')));
+            if (sortBy === 'title_desc') sorted.sort((a, b) => String(b.title || '').localeCompare(String(a.title || '')));
+            renderDocuments(sorted);
+            performSearch();
         });
     }
-    
-    // View document buttons
-    const viewDocBtns = document.querySelectorAll('.view-doc');
-    viewDocBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const docId = this.getAttribute('data-doc') || 'document';
-            const docRow = this.closest('.search-result');
-            const docTitle = docRow?.querySelector('h3')?.textContent || docId;
-            alert(`Viewing: ${docTitle}\n(This would open the document in the full system)`);
-        });
-    });
-    
-    // Attachment buttons
-    const attachBtns = document.querySelectorAll('.text-gray-500');
-    attachBtns.forEach(btn => {
-        if (btn.textContent.includes('📎')) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Attachments and version history would open here');
-            });
-        }
-    });
     
     // Recent search remove buttons
     const recentSearchRemove = document.querySelectorAll('.bg-gray-100 button');
@@ -268,17 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const paginationPrev = document.querySelector('.pagination-prev');
     const paginationNext = document.querySelector('.pagination-next');
     
-    if (paginationPrev) {
-        paginationPrev.addEventListener('click', function() {
-            alert('Previous page would load in the full system');
-        });
-    }
-    
-    if (paginationNext) {
-        paginationNext.addEventListener('click', function() {
-            alert('Next page would load in the full system');
-        });
-    }
+    if (paginationPrev) paginationPrev.addEventListener('click', function() {});
+    if (paginationNext) paginationNext.addEventListener('click', function() {});
     
     // Optional: Add active state tracking for sidebar navigation
     const currentPath = window.location.pathname.split('/').pop() || 'search.html';
@@ -298,6 +280,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Initial search count
-    if (resultCount) resultCount.textContent = searchResults.length;
+    getApi('/api/documents')
+        .then((docs) => {
+            allDocuments = Array.isArray(docs) ? docs : [];
+            renderDocuments(allDocuments);
+            if (resultCount) resultCount.textContent = String(allDocuments.length);
+            if (paginationInfo) paginationInfo.textContent = `Showing ${allDocuments.length} of ${allDocuments.length} results`;
+        })
+        .catch(() => {
+            allDocuments = [];
+            renderDocuments([]);
+            if (resultCount) resultCount.textContent = '0';
+            if (paginationInfo) paginationInfo.textContent = 'Showing 0 of 0 results';
+        });
 });

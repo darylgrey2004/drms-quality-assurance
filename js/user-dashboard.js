@@ -54,34 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // ─────────────────────────────────────────────────
     
-    // Notification button
-    const notificationBtn = document.querySelector('button[class*="bg-white p-2 rounded-full"]');
-    if (notificationBtn) {
-        notificationBtn.addEventListener('click', function() {
-            alert('Notifications panel would open here.\n\nYou have 3 new notifications.');
-        });
-    }
-    
-    // View document buttons
-    const viewButtons = document.querySelectorAll('.text-teal-600.hover\\:text-teal-800');
-    viewButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            const docName = row?.querySelector('.font-medium')?.textContent || 'Document';
-            alert(`Viewing: ${docName}\n\nThis would open the document viewer.`);
-        });
-    });
-    
-    // Attachment buttons
-    const attachButtons = document.querySelectorAll('.text-gray-500.hover\\:text-gray-700');
-    attachButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Document attachments and version history would open here.');
-        });
-    });
-    
     // Upload buttons in deadlines
     const uploadButtons = document.querySelectorAll('.text-xs.text-teal-700.hover\\:text-teal-800');
     uploadButtons.forEach(btn => {
@@ -90,15 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'user-upload.html';
         });
     });
-    
-    // View all notifications
-    const viewAllLink = document.querySelector('.mt-3.text-sm.text-teal-700');
-    if (viewAllLink) {
-        viewAllLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('All notifications would be displayed here.');
-        });
-    }
     
     // Optional: Add active state tracking for sidebar navigation
     const currentPath = window.location.pathname.split('/').pop() || 'user-dashboard.html';
@@ -115,4 +78,61 @@ document.addEventListener('DOMContentLoaded', function() {
             link.style.background = '#1f5a6e';
         }
     });
+
+    function getApiErrorMessage(payload, fallback) {
+        return payload?.error?.details || payload?.error?.message || payload?.msg || fallback;
+    }
+
+    async function apiRequest(path) {
+        const response = await fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(getApiErrorMessage(payload, 'Request failed'));
+        return payload;
+    }
+
+    function updateDashboardStats(stats) {
+        const status = stats?.byStatus || {};
+        const total = Number(stats?.total || 0);
+        const pending = Number(status.pending || 0);
+        const validated = Number(status.validated || 0);
+        const approved = Number(status.approved || 0);
+        const statValues = document.querySelectorAll('.stat-card .text-3xl');
+        if (statValues[0]) statValues[0].textContent = String(total);
+        if (statValues[1]) statValues[1].textContent = String(pending + validated);
+        if (statValues[2]) statValues[2].textContent = String(approved);
+    }
+
+    function renderRecentDocuments(documents) {
+        const body = document.querySelector('tbody');
+        if (!body) return;
+        body.innerHTML = (documents || []).slice(0, 5).map((doc) => `
+            <tr>
+                <td class="py-3">
+                    <div class="font-medium text-gray-800">${doc.title || 'Untitled'}</div>
+                    <div class="text-xs text-gray-400">${doc.category || '-'}</div>
+                </td>
+                <td class="py-3 text-gray-600">${doc.area || '-'}</td>
+                <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">${doc.workflow_status || 'pending'}</span></td>
+                <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
+                <td class="py-3 text-gray-500">${doc.created_at ? new Date(doc.created_at).toLocaleDateString() : '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadDashboardData() {
+        try {
+            const [stats, documents] = await Promise.all([
+                apiRequest('/api/documents/stats'),
+                apiRequest('/api/documents')
+            ]);
+            updateDashboardStats(stats);
+            renderRecentDocuments(documents);
+        } catch (error) {
+            console.error('Dashboard load failed:', error);
+        }
+    }
+
+    loadDashboardData();
 });

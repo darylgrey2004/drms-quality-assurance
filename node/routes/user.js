@@ -201,4 +201,17 @@ router.post('/verify-otp', auth, async (req, res) => {
   }
 });
 
+// @route   POST api/user/heartbeat
+// @desc    Update user's last activity timestamp
+// @access  Private
+router.post('/heartbeat', auth, async (req, res) => {
+  try {
+    await db.query('UPDATE users SET last_seen = NOW() WHERE id = ?', [req.user.id]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;

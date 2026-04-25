@@ -2,9 +2,12 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Audit Trail page JS loaded successfully');
-    
-    // DOM elements
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'landing.html';
+        return;
+    }
+
     const searchInput = document.getElementById('searchAudit');
     const actionTypeFilter = document.getElementById('actionTypeFilter');
     const userFilter = document.getElementById('userFilter');
@@ -14,8 +17,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const listView = document.getElementById('listView');
     const timelineView = document.getElementById('timelineView');
     const eventCount = document.getElementById('eventCount');
-    const auditRows = document.querySelectorAll('.audit-row');
-    const viewDetailsBtns = document.querySelectorAll('.view-details');
+    const tableBody = document.querySelector('tbody');
+    let auditData = [];
+
+    function api(path) {
+        return fetch(`http://localhost:3000${path}`, {
+            headers: { 'x-auth-token': token }
+        }).then((r) => r.json());
+    }
+
+    async function buildAuditData() {
+        const docs = await api('/api/documents').catch(() => []);
+        const rows = [];
+        for (const doc of (Array.isArray(docs) ? docs : [])) {
+            const logs = await api(`/api/documents/approval-logs/${doc.id}`).catch(() => []);
+            if (Array.isArray(logs) && logs.length > 0) {
+                logs.forEach((log) => {
+                    rows.push({
+                        id: log.id,
+                        timestamp: log.created_at || doc.updated_at || doc.created_at,
+                        user: `${log.firstName || ''} ${log.lastName || ''}`.trim() || 'System',
+                        action: log.action || doc.workflow_status,
+                        document: doc.title || 'Untitled',
+                        details: log.reason || '-'
+                    });
+                });
+            } else {
+                rows.push({
+                    id: `doc-${doc.id}`,
+                    timestamp: doc.updated_at || doc.created_at,
+                    user: doc.author_name || 'Uploader',
+                    action: doc.workflow_status || 'updated',
+                    document: doc.title || 'Untitled',
+                    details: doc.description || '-'
+                });
+            }
+        }
+        return rows.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }
+
+    function renderRows(rows) {
+        if (!tableBody) return;
+        tableBody.innerHTML = rows.map((row) => `
+            <tr class="audit-row">
+                <td>${row.timestamp ? new Date(row.timestamp).toLocaleString() : '-'}</td>
+                <td>${row.user}</td>
+                <td><span>${row.action}</span></td>
+                <td>${row.document}</td>
+                <td><a href="#" class="view-details" data-id="${row.id}">View</a></td>
+            </tr>
+        `).join('');
+    }
     
     // Filter function
     function filterAudit() {
@@ -26,57 +78,30 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let visibleCount = 0;
         
-        auditRows.forEach(row => {
-            const rowText = row.textContent.toLowerCase();
-            
-            // Get action type from the row
-            const actionSpan = row.querySelector('td:nth-child(3) span');
-            const actionText = actionSpan ? actionSpan.textContent.toLowerCase() : '';
-            
-            // Get user from the row
-            const userSpan = row.querySelector('td:nth-child(2) span:last-child');
-            const userText = userSpan ? userSpan.textContent.toLowerCase() : '';
-            
-            // Search match
+        const filtered = auditData.filter((row) => {
+            const rowText = `${row.user} ${row.action} ${row.document} ${row.details}`.toLowerCase();
             const matchesSearch = searchTerm === '' || rowText.includes(searchTerm);
-            
-            // Action type match
-            let matchesAction = actionType === 'all';
-            if (!matchesAction) {
-                matchesAction = actionText.includes(actionType.toLowerCase());
-            }
-            
-            // User match
-            let matchesUser = user === 'all';
-            if (!matchesUser) {
-                const userMap = {
-                    'santos': 'santos',
-                    'garcia': 'garcia',
-                    'cruz': 'cruz',
-                    'reyes': 'reyes',
-                    'mendoza': 'mendoza',
-                    'qa': 'qa'
-                };
-                matchesUser = userText.includes(userMap[user] || user);
-            }
-            
-            // Date range match (simplified - would be more complex in real system)
+            const matchesAction = actionType === 'all' || String(row.action).toLowerCase().includes(actionType.toLowerCase());
+            const matchesUser = user === 'all' || String(row.user).toLowerCase().includes(user.toLowerCase());
             let matchesDate = true;
-            
-            if (matchesSearch && matchesAction && matchesUser && matchesDate) {
-                row.classList.remove('hidden');
-                visibleCount++;
-            } else {
-                row.classList.add('hidden');
+            const when = row.timestamp ? new Date(row.timestamp) : null;
+            if (when && dateRange !== 'all') {
+                const now = Date.now();
+                const age = now - when.getTime();
+                if (dateRange === 'today') matchesDate = age <= 24 * 60 * 60 * 1000;
+                if (dateRange === 'week') matchesDate = age <= 7 * 24 * 60 * 60 * 1000;
+                if (dateRange === 'month') matchesDate = age <= 30 * 24 * 60 * 60 * 1000;
             }
+            return matchesSearch && matchesAction && matchesUser && matchesDate;
         });
+        visibleCount = filtered.length;
+        renderRows(filtered);
         
         // Update event count
         if (eventCount) {
             eventCount.textContent = `Showing ${visibleCount} events`;
         }
         
-        console.log(`Filtered: ${visibleCount} events visible`);
     }
     
     // Add event listeners for filters
@@ -116,65 +141,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export button
     if (exportBtn) {
         exportBtn.addEventListener('click', function() {
-            const actionType = actionTypeFilter ? actionTypeFilter.value : 'all';
-            const dateRange = dateRangeFilter ? dateRangeFilter.value : 'month';
-            
-            alert(`Exporting audit trail\n\nFilters: Action=${actionType}, Period=${dateRange}\n\nThis would download the audit log in CSV/PDF format.`);
+            const blob = new Blob([JSON.stringify(auditData, null, 2)], { type: 'application/json' });
+            const href = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = href;
+            a.download = `audit-trail-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(href);
         });
     }
-    
-    // View details buttons
-    viewDetailsBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const eventId = this.getAttribute('data-id') || 'unknown';
-            const row = this.closest('tr');
-            const action = row?.querySelector('td:nth-child(3) span')?.textContent || 'action';
-            const document = row?.querySelector('td:nth-child(4)')?.textContent || 'item';
-            
-            alert(`Audit Event Details (ID: ${eventId})\n\nAction: ${action}\nDocument: ${document}\nTimestamp: ${row?.querySelector('td:first-child')?.textContent}\nUser: ${row?.querySelector('td:nth-child(2)')?.textContent.trim()}\n\nThis would show complete event details including before/after values.`);
-        });
+
+    tableBody?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.view-details');
+        if (!btn) return;
+        e.preventDefault();
+        const eventId = btn.getAttribute('data-id');
+        const match = auditData.find((row) => String(row.id) === String(eventId));
+        if (match) {
+            const detailsWindow = window.open('', '_blank');
+            if (detailsWindow) {
+                detailsWindow.document.write(`<pre>${JSON.stringify(match, null, 2)}</pre>`);
+                detailsWindow.document.close();
+            }
+        }
     });
     
     // Custom date range handling
     if (dateRangeFilter) {
         dateRangeFilter.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                const startDate = prompt('Enter start date (YYYY-MM-DD):', '2026-01-01');
-                const endDate = prompt('Enter end date (YYYY-MM-DD):', '2026-12-31');
-                
-                if (startDate && endDate) {
-                    alert(`Custom range: ${startDate} to ${endDate}\n\nThis would filter events between these dates.`);
-                } else {
-                    // Reset to previous value if cancelled
-                    this.value = 'month';
-                }
-            }
+            if (this.value === 'custom') this.value = 'month';
         });
     }
     
     // Pagination buttons (demo)
     const paginationButtons = document.querySelectorAll('.flex.gap-2 button');
     paginationButtons.forEach(btn => {
-        if (btn.textContent === 'Previous' || btn.textContent === 'Next') {
-            btn.addEventListener('click', function() {
-                alert(`${this.textContent} page would load in the full system`);
-            });
-        } else if (btn.textContent.match(/^\d+$/)) {
-            btn.addEventListener('click', function() {
-                // Page number click
-                paginationButtons.forEach(b => {
-                    if (b.textContent.match(/^\d+$/)) {
-                        b.classList.remove('bg-teal-700', 'text-white');
-                        b.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-600');
-                    }
-                });
-                this.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-600');
-                this.classList.add('bg-teal-700', 'text-white');
-                
-                alert(`Page ${this.textContent} would load in the full system`);
-            });
-        }
+        btn.addEventListener('click', function() {});
     });
     
     // Optional: Add active state tracking for sidebar navigation
@@ -195,6 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Initialize filter count
-    filterAudit();
+    buildAuditData()
+        .then((rows) => {
+            auditData = rows;
+            filterAudit();
+        })
+        .catch(() => {
+            auditData = [];
+            filterAudit();
+        });
 });
