@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const createRole = document.getElementById('createRole');
     const evaluatorExpiryWrap = document.getElementById('evaluatorExpiryWrap');
     const createEvaluatorExpiresAt = document.getElementById('createEvaluatorExpiresAt');
+    const departmentWrap = document.getElementById('departmentWrap');
+    const createDepartment = document.getElementById('createDepartment');
 
     let allUsers = []; // Store all users for filtering
 
@@ -24,6 +26,16 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'landing.html';
         return;
     }
+
+    // ── Heartbeat: Update lastActive status ──
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
 
     function openCreateUserModal() {
         if (!createUserModal || !canDeleteUsers) return;
@@ -45,6 +57,12 @@ document.addEventListener('DOMContentLoaded', function() {
         evaluatorExpiryWrap.classList.toggle('hidden', !isEvaluator);
         createEvaluatorExpiresAt.required = isEvaluator;
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
+        
+        // Show department field for evaluators and deans
+        if (departmentWrap && createDepartment) {
+            const showDepartment = isEvaluator || selectedRole === 'dean' || selectedRole === 'area chair/program head';
+            departmentWrap.classList.toggle('hidden', !showDepartment);
+        }
     }
 
     if (openCreateUserModalBtn) {
@@ -54,11 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeCreateUserModalBtn) closeCreateUserModalBtn.addEventListener('click', closeCreateUserModal);
     if (cancelCreateUserBtn) cancelCreateUserBtn.addEventListener('click', closeCreateUserModal);
     if (createRole) createRole.addEventListener('change', syncEvaluatorExpiryField);
-    if (createUserModal) {
-        createUserModal.addEventListener('click', function (e) {
-            if (e.target === createUserModal) closeCreateUserModal();
-        });
-    }
 
     if (createUserForm) {
         createUserForm.addEventListener('submit', async function (e) {
@@ -72,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const role = document.getElementById('createRole')?.value;
             const password = document.getElementById('createPassword')?.value;
             const confirmPassword = document.getElementById('createConfirmPassword')?.value;
+            const department = document.getElementById('createDepartment')?.value?.trim() || null;
             const evaluatorExpiresAt = createEvaluatorExpiresAt?.value || null;
 
             if (!firstName || !lastName || !email || !role || !password || !confirmPassword) {
@@ -104,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         email,
                         role,
                         password,
+                        department,
                         evaluatorExpiresAt
                     })
                 });
@@ -194,6 +209,73 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Helper function to determine if user is currently active
+        function isCurrentlyActive(lastActive) {
+            if (!lastActive) return false;
+            const lastActiveDate = new Date(lastActive);
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); // 5 minutes
+            return lastActiveDate > fiveMinutesAgo;
+        }
+
+        // Helper function to format last active display with relative time (like Messenger)
+        function formatLastActive(lastActive, role) {
+            if (!lastActive) return 'Never';
+            
+            // Check if evaluator is expired
+            if (role && (role.toLowerCase() === 'evaluator' || role.toLowerCase() === 'external evaluator')) {
+                return 'Never';
+            }
+            
+            // If currently active, show "active now"
+            if (isCurrentlyActive(lastActive)) {
+                return '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">🟢 active now</span>';
+            }
+            
+            // Calculate relative time
+            const lastActiveDate = new Date(lastActive);
+            const now = new Date();
+            const diffMs = now - lastActiveDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            const diffWeeks = Math.floor(diffMs / 604800000);
+            const diffMonths = Math.floor(diffMs / 2592000000);
+            
+            if (diffMins < 1) {
+                return 'just now';
+            } else if (diffMins < 60) {
+                return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            } else if (diffHours < 24) {
+                return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            } else if (diffDays < 7) {
+                return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            } else if (diffWeeks < 4) {
+                return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+            } else if (diffMonths < 12) {
+                return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+            } else {
+                return lastActiveDate.toLocaleDateString();
+            }
+        }
+
+        // Helper function to check if evaluator is expired
+        function getEvaluatorStatus(role, expiresAt) {
+            if (!role || (role.toLowerCase() !== 'evaluator' && role.toLowerCase() !== 'external evaluator')) {
+                return null;
+            }
+            
+            if (!expiresAt) return null;
+            
+            const expiresDate = new Date(expiresAt);
+            const now = new Date();
+            
+            if (expiresDate <= now) {
+                return '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">❌ expired</span>';
+            }
+            
+            return null;
+        }
+
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'user-row hover:bg-gray-50 transition-colors';
@@ -205,8 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
                 : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
 
-            // Format last active date or show 'Never'
-            const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
+            // Check if evaluator is expired
+            const evaluatorExpiredStatus = getEvaluatorStatus(user.role, user.evaluatorExpiresAt);
+            const finalStatusBadge = evaluatorExpiredStatus || statusBadge;
+
+            // Format last active display
+            const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
             
             const userId = user.id || user._id;
             const actionButtons = userId
@@ -228,8 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="py-3 px-2 text-gray-600">${user.email}</td>
                 <td class="py-3 px-2 text-gray-600">${user.role || 'User'}</td>
                 <td class="py-3 px-2 text-gray-600">${user.department || 'N/A'}</td>
-                <td class="py-3 px-2">${statusBadge}</td>
-                <td class="py-3 px-2 text-gray-400">${lastActive}</td>
+                <td class="py-3 px-2">${finalStatusBadge}</td>
+                <td class="py-3 px-2">${lastActiveDisplay}</td>
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-3">
                         ${actionButtons}

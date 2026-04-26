@@ -15,20 +15,44 @@ function deanOrAdminAuth(req, res, next) {
 }
 
 // @route   GET api/admin/users
-// @desc    Get all users with their profiles
+// @desc    Get all users with their profiles and active status
 // @access  Private (Dean/Admin)
 router.get('/users', deanOrAdminAuth, async (req, res) => {
   try {
-    const query = `
+    // First try with lastActive column (new schema)
+    let query = `
       SELECT 
-        u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt,
-        fp.department, fp.position
+        u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt, u.lastActive,
+        fp.department, fp.position,
+        eal.expiresAt AS evaluatorExpiresAt
       FROM users u
       LEFT JOIN faculty_profiles fp ON u.id = fp.user_id
+      LEFT JOIN evaluator_access_limits eal ON u.id = eal.user_id
       ORDER BY u.createdAt DESC
     `;
-    const [users] = await db.query(query);
-    res.json(users);
+    
+    try {
+      const [users] = await db.query(query);
+      res.json(users);
+    } catch (err) {
+      // If lastActive column doesn't exist yet, fallback to old query
+      if (err.message && err.message.includes('Unknown column')) {
+        const fallbackQuery = `
+          SELECT 
+            u.id, u.firstName, u.lastName, u.middleInitial, u.email, u.role, u.status, u.isVerified, u.createdAt, NULL as lastActive,
+            fp.department, fp.position,
+            eal.expiresAt AS evaluatorExpiresAt
+          FROM users u
+          LEFT JOIN faculty_profiles fp ON u.id = fp.user_id
+          LEFT JOIN evaluator_access_limits eal ON u.id = eal.user_id
+          ORDER BY u.createdAt DESC
+        `;
+        const [users] = await db.query(fallbackQuery);
+        res.json(users);
+      } else {
+        throw err;
+      }
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

@@ -1,7 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 const db = require('../database');
+const crypto = require('crypto');
+const UAParser = require('ua-parser-js');
+const jwt = require('jsonwebtoken');
+const transporter = require('../utils/mailer');
+
+// Helper function to generate unique session token
+function generateSessionToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Helper function to create a session
+async function createSession(userId, req) {
+  try {
+    const sessionToken = generateSessionToken();
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    const parser = new UAParser(userAgent);
+    const result = parser.getResult();
+    
+    const browserInfo = `${result.browser.name || 'Unknown'} ${result.browser.version || ''}`.trim();
+    const deviceInfo = `${result.os.name || 'Unknown'} ${result.os.version || ''}`.trim();
+    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0] || req.connection.remoteAddress || 'Unknown';
+
+    await db.query(
+      'INSERT INTO sessions (user_id, session_token, browser_info, device_info, ip_address, lastActive) VALUES (?, ?, ?, ?, ?, NOW())',
+      [userId, sessionToken, browserInfo, deviceInfo, ipAddress]
+    );
+
+    return { sessionToken, browserInfo, deviceInfo, ipAddress };
+  } catch (err) {
+    console.error('Error creating session:', err.message);
+    return null;
+  }
+}
 
 // @route   POST api/auth/register
 // @desc    Register a new user
@@ -44,9 +78,6 @@ router.post('/register', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-const jwt = require('jsonwebtoken');
-const transporter = require('../utils/mailer');
 
 // @route   POST api/auth/login
 // @desc    Authenticate user and send OTP if approved
@@ -145,13 +176,58 @@ router.post('/login', async (req, res) => {
       },
     };
 
+    // Fetch faculty profile if exists (for department info)
+    let department = null;
+    try {
+      const [profiles] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
+        [user.id]
+      );
+      if (profiles.length > 0) {
+        department = profiles[0].department;
+      }
+    } catch (profileErr) {
+      // Profile table may not exist or no profile for this user
+      console.log('Profile lookup skipped:', profileErr.message);
+    }
+
+    // Update lastActive timestamp on successful login
+    try {
+      await db.query(
+        'UPDATE users SET lastActive = NOW() WHERE id = ?',
+        [user.id]
+      );
+    } catch (updateErr) {
+      // If column doesn't exist yet, continue anyway
+      if (!updateErr.message || !updateErr.message.includes('Unknown column')) {
+        console.error('Error updating lastActive:', updateErr.message);
+      }
+    }
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
       { expiresIn: '5h' }, // Token expires in 5 hours
-      (err, token) => {
+      async (err, token) => {
         if (err) throw err;
-        res.json({ token, user: { id: user.id, role: user.role, isVerified: user.isVerified } });
+        
+        // Create session for this login
+        const sessionData = await createSession(user.id, req);
+        
+        res.json({ 
+          token, 
+          sessionToken: sessionData?.sessionToken,
+          user: { 
+            id: user.id, 
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role, 
+            isVerified: user.isVerified,
+            department: department
+          },
+          session: sessionData
+        });
       }
     );
   } catch (err) {
@@ -189,7 +265,7 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     // OTP is valid, update user verification status and approve the account
-    await db.query("UPDATE users SET isVerified = TRUE, status = 'approved' WHERE email = ?", [email]);
+    await db.query("UPDATE users SET isVerified = TRUE, status = 'approved', lastActive = NOW() WHERE email = ?", [email]);
 
     // Delete the OTP from the database
     await db.query('DELETE FROM otps WHERE id = ?', [otpRecord.id]);
@@ -205,16 +281,45 @@ router.post('/verify-otp', async (req, res) => {
       },
     };
 
+    // Fetch faculty profile if exists (for department info)
+    let department = null;
+    try {
+      const [profiles] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
+        [user.id]
+      );
+      if (profiles.length > 0) {
+        department = profiles[0].department;
+      }
+    } catch (profileErr) {
+      // Profile table may not exist or no profile for this user
+      console.log('Profile lookup skipped:', profileErr.message);
+    }
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
       { expiresIn: '5h' },
-      (err, token) => {
+      async (err, token) => {
         if (err) throw err;
+        
+        // Create session for this login
+        const sessionData = await createSession(user.id, req);
+        
         res.json({ 
           msg: 'Account verified successfully!',
           token, 
-          user: { id: user.id, role: user.role, isVerified: true } 
+          sessionToken: sessionData?.sessionToken,
+          user: { 
+            id: user.id, 
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role, 
+            isVerified: true,
+            department: department
+          },
+          session: sessionData
         });
       }
     );

@@ -5,12 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Documents page JS loaded successfully');
 
     const token = localStorage.getItem('token');
+    const sessionToken = localStorage.getItem('sessionToken');
     const API_BASE = 'http://localhost:3000';
     const documentsList = document.getElementById('documentsList');
     
+    // ── Heartbeat: Update session activity ──
+    if (token && sessionManager) {
+        sessionManager.initializeHeartbeat(2 * 60 * 1000);
+    }
+    
     // Get DOM elements
     const searchInput = document.getElementById('searchInput');
-    const categoryFilter = document.getElementById('categoryFilter');
     const statusFilter = document.getElementById('statusFilter');
     const docRows = document.querySelectorAll('.doc-row');
     const docCount = document.getElementById('docCount');

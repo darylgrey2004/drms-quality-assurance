@@ -3,6 +3,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Evaluator Reports JS loaded');
 
+    // ── Heartbeat: Update lastActive status ──
+    const token = localStorage.getItem('token');
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    if (token) {
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 2 * 60 * 1000);
+    }
+
     // Tab switching
     const tabLinks = document.querySelectorAll('#reportTabs a');
     const tabContents = document.querySelectorAll('.tab-content');

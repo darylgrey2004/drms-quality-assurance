@@ -13,9 +13,30 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` VARCHAR(100) DEFAULT 'Faculty Member',
   `status` ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
   `isVerified` BOOLEAN DEFAULT FALSE,
+  `lastActive` DATETIME,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_email (email),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_lastActive (lastActive)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create sessions table (multi-device/browser tracking)
+CREATE TABLE IF NOT EXISTS `sessions` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `session_token` VARCHAR(255) NOT NULL UNIQUE,
+  `browser_info` VARCHAR(255),
+  `device_info` VARCHAR(255),
+  `ip_address` VARCHAR(45),
+  `lastActive` DATETIME,
+  `isActive` BOOLEAN DEFAULT TRUE,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_session_token (session_token),
+  INDEX idx_lastActive (lastActive),
+  INDEX idx_isActive (isActive)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Create faculty_profiles table

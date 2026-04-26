@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const API_BASE = 'http://localhost:3000';
     const approvalsList = document.getElementById('approvalsList');
 
+    // ── Heartbeat: Update session activity ──
+    if (token && sessionManager) {
+        sessionManager.initializeHeartbeat(2 * 60 * 1000);
+    }
+
     // Access guard: approvals action view is for Dean/Admin on this page.
     if (!token) {
         window.location.href = 'landing.html';
@@ -365,22 +370,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
             e.preventDefault();
             if (validateBtn) {
-                if (confirm(`Validate document: ${docTitle}?`)) {
-                    const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-child');
-                    const statusSpan = approvalItem?.querySelector('.col-span-1 span');
-                    if (stageSpan) {
-                        stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
-                        stageSpan.textContent = 'Approval';
-                    }
-                    if (statusSpan) {
-                        statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
-                        statusSpan.textContent = 'Under Review';
-                    }
-                    if (approvalItem) {
-                        approvalItem.setAttribute('data-stage', 'approve');
-                        approvalItem.setAttribute('data-status', 'review');
-                    }
+                // Update status on the same page
+                const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-of-type');
+                const statusSpan = approvalItem?.querySelector('.col-span-1 span');
+                const docId = validateBtn.getAttribute('data-id') || '';
+                
+                // Update visual display
+                if (stageSpan) {
+                    stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
+                    stageSpan.textContent = 'Approval';
                 }
+                if (statusSpan) {
+                    statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
+                    statusSpan.textContent = 'Under Review';
+                }
+                if (approvalItem) {
+                    approvalItem.setAttribute('data-stage', 'approve');
+                    approvalItem.setAttribute('data-status', 'review');
+                }
+                
+                // Send validation status to backend
+                if (token && docId) {
+                    fetch(`${API_BASE}/api/documents/${docId}/validate`, {
+                        method: 'PUT',
+                        headers: {
+                            'x-auth-token': token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ workflow_status: 'validated' })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('Document validated successfully:', data);
+                    })
+                    .catch(err => console.error('Validation error:', err));
+                }
+                
                 return;
             }
 

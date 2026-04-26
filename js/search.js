@@ -4,6 +4,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Search page JS loaded successfully');
     
+    // ── Heartbeat: Update lastActive status ──
+    const token = localStorage.getItem('token');
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    if (token) {
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 2 * 60 * 1000);
+    }
+    
     // DOM elements
     const searchForm = document.getElementById('searchForm');
     const mainSearch = document.getElementById('mainSearch');

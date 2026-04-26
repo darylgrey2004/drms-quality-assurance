@@ -4,6 +4,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Upload page JS loaded successfully');
     
+    const token = localStorage.getItem('token');
+    
+    // ── Heartbeat: Update lastActive status ──
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    if (token) {
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 2 * 60 * 1000);
+    }
+    
     // DOM elements
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -20,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeUploadSuccessBtn = document.getElementById('closeUploadSuccessBtn');
 
     let selectedFiles = [];
-    const token = localStorage.getItem('token');
     const API_BASE = 'http://localhost:3000';
 
     function showUploadSuccessModal() {

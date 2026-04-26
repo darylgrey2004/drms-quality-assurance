@@ -58,6 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('User role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Store session token for multi-device tracking
+                if (data.sessionToken) {
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    console.log('Session token stored for multi-device tracking');
+                }
 
                 // Redirect based on role
                 redirectToDashboard(data.user.role);
@@ -236,6 +242,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('OTP verified, user role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Store session token for multi-device tracking
+                if (data.sessionToken) {
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    console.log('Session token stored for multi-device tracking');
+                }
                 
                 // Redirect based on role
                 redirectToDashboard(data.user.role);

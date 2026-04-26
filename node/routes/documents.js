@@ -133,15 +133,23 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const { scope, status, category } = req.query || {};
+    const normalizedRole = normalizeRole(req.user.role);
+    const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
     const viewAll = canViewAll(req.user.role);
 
     const where = [];
     const params = [];
 
-    if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
+    // For evaluators: show all approved documents
+    if (isEvaluator) {
+      where.push('d.workflow_status = ?');
+      params.push('approved');
+    } else if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
+      // For others: show only their own documents unless they can view all
       where.push('d.uploader_id = ?');
       params.push(req.user.id);
     }
+
     if (status) {
       where.push('d.workflow_status = ?');
       params.push(status);

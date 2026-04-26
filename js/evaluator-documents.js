@@ -1,100 +1,198 @@
 // js/evaluator-documents.js
 
+// Store document data for viewing
+let documentsData = {};
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Evaluator Documents JS loaded');
-
-    // View document buttons
-    const viewButtons = document.querySelectorAll('.view-doc');
     
-    viewButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            const docName = row?.querySelector('.font-medium')?.textContent || 'Document';
-            const category = row?.querySelector('.bg-teal-100, .bg-amber-100, .bg-indigo-100')?.textContent || 'Category';
-            
-            alert(`📄 Document Viewer (View-Only Mode)\n\nDocument: ${docName}\nCategory: ${category}\n\nThis would open the complete document for review. As an External Evaluator, you have full view access.`);
-        });
+    const token = localStorage.getItem('token');
+    const tbody = document.querySelector('tbody');
+    
+    if (!token) {
+        console.error('No authentication token found');
+        return;
+    }
+
+    // ── Heartbeat: Update lastActive status ──
+    function sendHeartbeat() {
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
+
+    // ── Document Modal Functions ──
+    const modal = document.getElementById('documentModal');
+    const closeModal = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function closeDocumentModal() {
+        modal.classList.add('hidden');
+    }
+
+    closeModal?.addEventListener('click', closeDocumentModal);
+    closeModalBtn?.addEventListener('click', closeDocumentModal);
+    
+    modal?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDocumentModal();
+        }
     });
+
+    function openDocumentViewer(docId) {
+        const doc = documentsData[docId];
+        if (!doc) {
+            alert('Document not found');
+            return;
+        }
+
+        // Update modal header
+        document.getElementById('docViewerTitle').textContent = doc.title || 'Untitled Document';
+        document.getElementById('docViewerMeta').textContent = 
+            `${doc.category || 'N/A'} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+
+        // Load document content
+        const content = document.getElementById('docViewerContent');
+        
+        if (doc.file_url) {
+            // Determine file type
+            const fileUrl = doc.file_url;
+            const isPDF = fileUrl.toLowerCase().endsWith('.pdf');
+            
+            if (isPDF) {
+                // For PDF, use iframe
+                content.innerHTML = `
+                    <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${doc.title}"></iframe>
+                    <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${doc.title}</p>
+                `;
+            } else {
+                // For other files, show download prompt
+                content.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-4xl mb-4">📄</div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${doc.title}</h3>
+                        <p class="text-gray-600 mb-4">File Type: ${doc.file_url.split('.').pop().toUpperCase()}</p>
+                        <p class="text-gray-500 text-sm mb-6">This document can be viewed or downloaded using the button below.</p>
+                        <a href="${fileUrl}" download class="inline-block px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
+                            📥 Download Document
+                        </a>
+                    </div>
+                `;
+            }
+        } else {
+            content.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-4xl mb-4">⚠️</div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">No File Available</h3>
+                    <p class="text-gray-600">This document does not have an associated file.</p>
+                </div>
+            `;
+        }
+
+        // Setup download button
+        const downloadBtn = document.getElementById('downloadDoc');
+        if (doc.file_url) {
+            downloadBtn.onclick = function() {
+                const link = document.createElement('a');
+                link.href = doc.file_url;
+                link.download = doc.title || 'document';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            downloadBtn.style.display = 'block';
+        } else {
+            downloadBtn.style.display = 'none';
+        }
+
+        // Show modal
+        modal.classList.remove('hidden');
+    }
+
+    // Fetch approved documents from API
+    async function loadApprovedDocuments() {
+        try {
+            console.log('Fetching approved documents...');
+            const response = await fetch('http://127.0.0.1:3000/api/documents?status=approved', {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const documents = await response.json();
+            console.log('Documents fetched:', documents);
+
+            if (tbody) {
+                // Clear existing rows
+                tbody.innerHTML = '';
+
+                if (documents.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-500">No approved documents available</td></tr>';
+                    return;
+                }
+
+                // Store documents data
+                documents.forEach(doc => {
+                    documentsData[doc.id] = doc;
+                });
+
+                // Populate table with documents
+                documents.forEach(doc => {
+                    const row = document.createElement('tr');
+                    const categoryBg = doc.category === 'ISO' ? 'teal' : doc.category === 'AACCUP' ? 'amber' : 'indigo';
+                    const categoryClass = categoryBg === 'teal' ? 'bg-teal-100 text-teal-700' : categoryBg === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700';
+                    
+                    row.innerHTML = `
+                        <td class="py-3">
+                            <div class="font-medium text-gray-800">${doc.title || 'Untitled'}</div>
+                        </td>
+                        <td class="py-3"><span class="${categoryClass} text-xs px-2 py-1 rounded-full">${doc.category || 'N/A'}</span></td>
+                        <td class="py-3 text-gray-600">${doc.area || 'N/A'}</td>
+                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                        <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
+                        <td class="py-3 text-gray-500 text-xs">${doc.author_name || 'Unknown'}</td>
+                        <td class="py-3 text-gray-500 text-xs">${new Date(doc.created_at).toLocaleDateString('en-CA')}</td>
+                        <td class="py-3">
+                            <button class="view-doc px-3 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 text-teal-600 hover:text-teal-700 font-medium" data-doc-id="${doc.id}">View</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Attach event listeners to view buttons
+                document.querySelectorAll('.view-doc').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const docId = this.dataset.docId;
+                        openDocumentViewer(docId);
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Error loading documents:', error);
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading approved documents</td></tr>';
+            }
+        }
+    }
+
+    // Load documents on page load
+    loadApprovedDocuments();
 
     // Filter input is disabled (view-only)
     const filterInput = document.getElementById('filterDocuments');
     if (filterInput) {
         filterInput.addEventListener('click', function() {
-            alert('🔍 Filtering is disabled in view-only mode. All documents are visible for review.');
-        });
-    }
-
-    // Pagination buttons
-    const paginationBtns = document.querySelectorAll('.pagination-btn, .flex.gap-2 button');
-    paginationBtns.forEach(btn => {
-        if (!btn.disabled) {
-            btn.addEventListener('click', function() {
-                if (this.textContent === 'Previous' || this.textContent === 'Next') {
-                    alert(`📑 ${this.textContent} page would load more documents for review.`);
-                } else if (this.textContent.match(/^\d+$/)) {
-                    // Simulate page change
-                    paginationBtns.forEach(b => {
-                        if (b.textContent.match(/^\d+$/)) {
-                            b.classList.remove('bg-teal-700', 'text-white');
-                            b.classList.add('bg-white', 'border', 'text-gray-600');
-                        }
-                    });
-                    this.classList.add('bg-teal-700', 'text-white');
-                    alert(`📑 Loading page ${this.textContent} of documents...`);
-                }
-            });
-        }
-    });
-
-    // Table row hover effect (just for visual feedback)
-    const rows = document.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.classList.add('bg-gray-50');
-        });
-        row.addEventListener('mouseleave', function() {
-            this.classList.remove('bg-gray-50');
-        });
-    });
-
-    // Document count display
-    const updateDocumentCount = () => {
-        const totalDocs = document.querySelectorAll('tbody tr').length;
-        const countDisplay = document.querySelector('.text-sm.text-gray-500');
-        if (countDisplay && countDisplay.textContent.includes('Showing')) {
-            // Already has correct count
-        }
-    };
-
-    // Simulate document loading
-    console.log('All documents loaded for review');
-    updateDocumentCount();
-
-    // Disabled select clicks
-    const disabledSelects = document.querySelectorAll('select:disabled');
-    disabledSelects.forEach(select => {
-        select.addEventListener('click', function() {
-            alert('❌ Filters are disabled in view-only mode. You can view all documents without filtering.');
-        });
-    });
-
-    // Any attempt to interact with documents in edit mode
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('button')?.textContent.includes('Edit') ||
-            e.target.closest('button')?.textContent.includes('Delete') ||
-            e.target.closest('button')?.textContent.includes('Upload')) {
-            e.preventDefault();
-            alert('❌ Edit/Delete/Upload actions are disabled. You have view-only access.');
-        }
-    });
-
-    // View all link in header (if exists)
-    const viewAllLink = document.querySelector('a[href="#"]');
-    if (viewAllLink && viewAllLink.textContent.includes('View All')) {
-        viewAllLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('📋 Showing all documents for review.');
+            alert('🔍 Filtering is disabled in view-only mode. All approved documents are visible for review.');
         });
     }
 });
