@@ -476,8 +476,146 @@
         </div>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="js/admin-session.js"></script>
-    <script src="js/approvals.js"></script>
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+        
+        // ========== REJECTION MODAL FUNCTIONS ==========
+        const rejectionModal = document.getElementById('rejectionModal');
+        const closeRejectionModal = document.getElementById('closeRejectionModal');
+        const cancelRejection = document.getElementById('cancelRejection');
+        const submitRejection = document.getElementById('submitRejection');
+        const rejectionComment = document.getElementById('rejectionComment');
+        
+        const modalDocTitle = document.getElementById('modalDocTitle');
+        const modalDocDate = document.getElementById('modalDocDate');
+        const modalDocCategory = document.getElementById('modalDocCategory');
+        const modalDocAuthor = document.getElementById('modalDocAuthor');
+        
+        let currentRejectedDoc = null;
+        
+        function openRejectionModal(docData) {
+            currentRejectedDoc = docData;
+            modalDocTitle.textContent = docData.title;
+            modalDocDate.textContent = docData.date;
+            modalDocCategory.textContent = `${docData.category} / ${docData.area}`;
+            modalDocAuthor.textContent = docData.author;
+            rejectionComment.value = '';
+            rejectionModal.classList.remove('hidden');
+            rejectionModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeRejectionModalFunc() {
+            rejectionModal.classList.add('hidden');
+            rejectionModal.classList.remove('active');
+            document.body.style.overflow = '';
+            currentRejectedDoc = null;
+        }
+        
+        // Event listeners for reject buttons
+        document.querySelectorAll('.btn-reject, .btn-reject-sm').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Get data from data attributes
+                const title = this.getAttribute('data-title');
+                const author = this.getAttribute('data-author');
+                const date = this.getAttribute('data-date');
+                const category = this.getAttribute('data-category');
+                const area = this.getAttribute('data-area');
+                
+                if (title && author && date && category) {
+                    openRejectionModal({
+                        title: title,
+                        author: author,
+                        date: date,
+                        category: category,
+                        area: area || 'N/A'
+                    });
+                } else {
+                    alert('Error: Could not load document information');
+                }
+            });
+        });
+        
+        // Close modal events
+        if (closeRejectionModal) closeRejectionModal.addEventListener('click', closeRejectionModalFunc);
+        if (cancelRejection) cancelRejection.addEventListener('click', closeRejectionModalFunc);
+        rejectionModal?.addEventListener('click', (e) => { if (e.target === rejectionModal) closeRejectionModalFunc(); });
+        
+        // Submit rejection
+        if (submitRejection) {
+            submitRejection.addEventListener('click', function() {
+                const comment = rejectionComment.value.trim();
+                if (!comment) {
+                    alert('Please provide a reason for rejection.');
+                    return;
+                }
+                alert(`Document "${currentRejectedDoc?.title}" has been rejected.\n\nReason: ${comment}\n\nThe uploader (${currentRejectedDoc?.author}) will be notified.`);
+                closeRejectionModalFunc();
+            });
+        }
+        
+        // Other action buttons
+        document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => btn.addEventListener('click', () => alert('Viewing document')));
+        document.querySelectorAll('.btn-validate, .btn-validate-sm').forEach(btn => btn.addEventListener('click', () => alert('Document validated and moved to Approval stage')));
+        document.querySelectorAll('.btn-approve, .btn-approve-sm').forEach(btn => btn.addEventListener('click', () => alert('Document approved and ready to lock')));
+        document.querySelectorAll('.btn-unlock, .btn-unlock-sm').forEach(btn => btn.addEventListener('click', () => alert('Document unlocked and can be edited')));
+        
+        // Refresh button
+        document.getElementById('refreshApprovals')?.addEventListener('click', () => alert('Approval list refreshed'));
+        
+        // Select All functionality
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const docCheckboxes = () => document.querySelectorAll('.doc-checkbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() { docCheckboxes().forEach(cb => cb.checked = this.checked); });
+        }
+        
+        function updateSelectAll() {
+            if (selectAllCheckbox) {
+                const allChecked = Array.from(docCheckboxes()).every(cb => cb.checked);
+                const anyChecked = Array.from(docCheckboxes()).some(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = !allChecked && anyChecked;
+            }
+        }
+        
+        docCheckboxes().forEach(cb => cb.addEventListener('change', updateSelectAll));
+        
+        // Bulk action
+        document.getElementById('applyBulk')?.addEventListener('click', () => {
+            const selected = Array.from(docCheckboxes()).filter(cb => cb.checked).length;
+            if (selected === 0) { alert('Please select at least one document'); return; }
+            const action = document.getElementById('bulkAction')?.value;
+            if (!action) { alert('Please select a bulk action'); return; }
+            alert(`Bulk ${action} applied to ${selected} document(s)`);
+        });
+        
+        // Tab switching
+        document.querySelectorAll('#workflowTabs a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('#workflowTabs a').forEach(l => {
+                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                    l.classList.add('border-transparent', 'text-gray-500');
+                });
+                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+                alert(`Filtering: ${this.textContent}`);
+            });
+        });
+    </script>
 </body>
 </html>

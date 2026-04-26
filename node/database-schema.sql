@@ -69,20 +69,33 @@ CREATE TABLE IF NOT EXISTS `otps` (
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
-  `category` VARCHAR(50) NOT NULL,
+  `department` VARCHAR(120) NOT NULL,
+  `category` ENUM('ISO','COE','AACCUP') NOT NULL,
   `area` VARCHAR(120) NOT NULL,
   `version` VARCHAR(50) DEFAULT 'v1.0',
   `description` TEXT,
   `keywords` TEXT,
+  `status` ENUM('submitted','validated_program_head','validated_coordinator','approved','locked','rejected') DEFAULT 'submitted',
   `workflow_status` ENUM('draft','pending','validated','approved','locked','rejected') DEFAULT 'pending',
+  `is_locked` BOOLEAN DEFAULT FALSE,
+  `date_added` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `approved_at` TIMESTAMP NULL DEFAULT NULL,
+  `approved_by` VARCHAR(120) NULL,
+  `locked_at` TIMESTAMP NULL DEFAULT NULL,
+  `pdf_file_path` VARCHAR(255) NULL,
   `uploader_id` INT NOT NULL,
   `author_name` VARCHAR(255),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`uploader_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX idx_department (`department`),
   INDEX idx_category (`category`),
   INDEX idx_status (`workflow_status`),
-  INDEX idx_uploader (`uploader_id`)
+  INDEX idx_uploader (`uploader_id`),
+  INDEX idx_workflow_status_v2 (`status`),
+  INDEX idx_is_locked (`is_locked`),
+  INDEX idx_date_added (`date_added`),
+  INDEX idx_approved_at (`approved_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Create document_files table (file storage metadata)

@@ -121,24 +121,42 @@
                             <input type="text" id="searchInput" placeholder="Search documents by title, author, category..." 
                                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                         </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Categories</option>
-                            <option value="iso">ISO 9001:2015</option>
-                            <option value="aaccup">AACCUP</option>
-                            <option value="coe">COE</option>
-                        </select>
-                        <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Status</option>
-                            <option value="approved">Approved</option>
-                            <option value="pending">Pending Review</option>
-                            <option value="draft">Draft</option>
-                            <option value="expired">Expired</option>
-                        </select>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                                <option value="all">All Categories</option>
+                                <option value="iso">ISO 9001:2015</option>
+                                <option value="aaccup">AACCUP</option>
+                                <option value="coe">COE</option>
+                            </select>
+                            <select id="areaFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                                <option value="all">All Areas / Clauses</option>
+                                <option value="clause4">Clause 4 - Context</option>
+                                <option value="clause5">Clause 5 - Leadership</option>
+                                <option value="clause6">Clause 6 - Planning</option>
+                                <option value="clause7">Clause 7 - Support</option>
+                                <option value="clause8">Clause 8 - Operation</option>
+                                <option value="clause9">Clause 9 - Evaluation</option>
+                                <option value="clause10">Clause 10 - Improvement</option>
+                                <option value="area1">Area I - VMGO</option>
+                                <option value="area2">Area II - Faculty</option>
+                                <option value="area3">Area III - Curriculum</option>
+                                <option value="area4">Area IV - Students</option>
+                                <option value="area5">Area V - Research</option>
+                                <option value="area6">Area VI - Extension</option>
+                                <option value="indicator1">Indicator 1 - Teaching</option>
+                                <option value="indicator2">Indicator 2 - Research</option>
+                                <option value="indicator3">Indicator 3 - Extension</option>
+                            </select>
+                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                                <option value="all">All Status</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending Review</option>
+                                <option value="draft">Draft</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <!-- documents count and view toggle -->
             <div class="flex justify-between items-center mb-4">
@@ -165,120 +183,22 @@
                     <div class="col-span-2">ACTIONS</div>
                 </div>
 
-                <!-- document rows -->
-                <div id="documentsList" class="divide-y divide-gray-100">
-                    <!-- rows will be managed by JS, but we include static fallback -->
-                    <!-- Row 1: QMS Manual -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="approved">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Quality Management System Manual</div>
-                            <div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
-                        <div class="col-span-2 text-gray-600">Clause 4 - Context</div>
-                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
-                        <div class="col-span-1 text-gray-600">v3.2</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 2: Curriculum Dev -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="pending">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Curriculum Development Framework</div>
-                            <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2 text-gray-600">Area II - Faculty</div>
-                        <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
-                        <div class="col-span-1 text-gray-600">v1.0</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 3: Research Output -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="coe" data-status="draft">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
-                            <div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">COE</div>
-                        <div class="col-span-2 text-gray-600">Research & Extension</div>
-                        <div class="col-span-1"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></div>
-                        <div class="col-span-1 text-gray-600">v0.3</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 4: Faculty Profile -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="approved">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Faculty Profile and Qualifications</div>
-                            <div class="text-xs text-gray-400">by Dean Cruz · 2026-01-10</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2 text-gray-600">Area III - Curriculum</div>
-                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
-                        <div class="col-span-1 text-gray-600">v2.1</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 5: Internal Audit Report -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="expired">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Internal Audit Report Q4 2025</div>
-                            <div class="text-xs text-gray-400">by QA Office · 2025-12-01</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
-                        <div class="col-span-2 text-gray-600">Clause 9 - Evaluation</div>
-                        <div class="col-span-1"><span class="badge-expired px-2 py-1 rounded-full text-xs">Expired</span></div>
-                        <div class="col-span-1 text-gray-600">v1.5</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 6: Extension Program -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="coe" data-status="pending">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Extension Program Impact Assessment</div>
-                            <div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">COE</div>
-                        <div class="col-span-2 text-gray-600">Community Extension</div>
-                        <div class="col-span-1"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></div>
-                        <div class="col-span-1 text-gray-600">v1.1</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
-                    </div>
-                    <!-- Row 7: Student Teaching Evaluation -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="aaccup" data-status="approved">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Student Teaching Evaluation Forms</div>
-                            <div class="text-xs text-gray-400">by Dr. Torres · 2026-02-18</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2 text-gray-600">Area V - Support</div>
-                        <div class="col-span-1"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
-                        <div class="col-span-1 text-gray-600">v2.3</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-btn">👁️</button>
-                            <button class="hover:underline attach-btn">📎</button>
-                            <button class="hover:underline edit-btn">✏️</button>
-                        </div>
+                <!-- Desktop Table View -->
+                <div class="hidden md:block bg-white rounded-xl overflow-hidden stat-card">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50">
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">DOCUMENT</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">CATEGORY</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">AREA / CLAUSE</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">STATUS</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">VERSION</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentsTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
                     <!-- Row 8: Laboratory Safety Manual -->
                     <div class="grid grid-cols-12 py-3 text-sm items-center doc-row" data-category="iso" data-status="draft">
@@ -313,20 +233,111 @@
         </main>
     </div>
 
-    <!-- Document preview modal -->
-    <div id="docPreviewModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
-        <div id="docPreviewBackdrop" class="absolute inset-0 bg-slate-900/60"></div>
-        <div class="relative bg-white w-[95vw] max-w-5xl h-[88vh] rounded-xl shadow-2xl overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h3 id="docPreviewTitle" class="text-sm font-semibold text-gray-800">Document Preview</h3>
-                <button id="docPreviewCloseBtn" type="button" class="text-gray-500 hover:text-gray-800 text-lg leading-none">✕</button>
-            </div>
-            <iframe id="docPreviewFrame" class="w-full h-[calc(88vh-52px)]" title="Document Preview"></iframe>
-        </div>
-    </div>
+    <script>
+        // Document data
+        let documents = [
+            { id: 1, title: "Quality Management System Manual", author: "Dr. Santos", date: "2026-02-15", category: "ISO 9001:2015", categoryClass: "iso", area: "Clause 4 - Context", status: "Approved", statusClass: "approved", version: "v3.2", isLocked: false },
+            { id: 2, title: "Curriculum Development Framework", author: "Prof. Garcia", date: "2026-02-20", category: "AACCUP", categoryClass: "aaccup", area: "Area II - Faculty", status: "Pending Review", statusClass: "pending", version: "v1.0", isLocked: false },
+            { id: 3, title: "Research Output Compilation 2025", author: "Dr. Reyes", date: "2026-02-25", category: "COE", categoryClass: "coe", area: "Research & Extension", status: "Draft", statusClass: "draft", version: "v0.3", isLocked: false },
+            { id: 4, title: "Faculty Profile and Qualifications", author: "Dean Cruz", date: "2026-01-10", category: "AACCUP", categoryClass: "aaccup", area: "Area III - Curriculum", status: "Approved", statusClass: "approved", version: "v2.1", isLocked: true },
+            { id: 5, title: "Internal Audit Report Q4 2025", author: "QA Office", date: "2025-12-01", category: "ISO 9001:2015", categoryClass: "iso", area: "Clause 9 - Evaluation", status: "Expired", statusClass: "expired", version: "v1.5", isLocked: false },
+            { id: 6, title: "Extension Program Impact Assessment", author: "Prof. Mendoza", date: "2026-02-22", category: "COE", categoryClass: "coe", area: "Community Extension", status: "Pending Review", statusClass: "pending", version: "v1.1", isLocked: false },
+            { id: 7, title: "Student Teaching Evaluation Forms", author: "Dr. Torres", date: "2026-02-18", category: "AACCUP", categoryClass: "aaccup", area: "Area V - Support", status: "Approved", statusClass: "approved", version: "v2.3", isLocked: true },
+            { id: 8, title: "Laboratory Safety Manual", author: "Prof. Lim", date: "2026-02-10", category: "ISO 9001:2015", categoryClass: "iso", area: "Clause 7 - Support", status: "Draft", statusClass: "draft", version: "v0.5", isLocked: false }
+        ];
 
-    <!-- External JavaScript -->
-    <script src="js/admin-session.js"></script>
-    <script src="js/documents.js"></script>
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+
+        // Button action handlers
+        function handleView(e) { alert(`Viewing document: ${e.currentTarget.dataset.title}`); }
+        function handleDownload(e) { alert(`Downloading document: ${e.currentTarget.dataset.title}`); }
+        function handleEdit(e) { alert(`Editing document: ${e.currentTarget.dataset.title}`); }
+        function handleDelete(e) { const id = parseInt(e.currentTarget.dataset.id); const title = e.currentTarget.dataset.title; if (confirm(`Delete "${title}"?`)) { documents = documents.filter(d => d.id !== id); renderDocuments(); alert(`Document "${title}" deleted.`); } }
+        function handleLockToggle(e) { const id = parseInt(e.currentTarget.dataset.id); const title = e.currentTarget.dataset.title; const isLocked = e.currentTarget.dataset.locked === 'true'; if (confirm(`${isLocked ? 'Unlock' : 'Lock'} "${title}"?`)) { const doc = documents.find(d => d.id === id); if (doc) { doc.isLocked = !isLocked; renderDocuments(); alert(`Document "${title}" ${doc.isLocked ? 'locked' : 'unlocked'}.`); } } }
+
+        function renderDocuments() {
+            const tbody = document.getElementById('documentsTableBody');
+            const mobileContainer = document.getElementById('mobileDocumentsContainer');
+            if (tbody) {
+                tbody.innerHTML = documents.map(doc => `
+                    <tr class="doc-row hover:bg-gray-50 transition">
+                        <td class="py-3 px-4"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400">by ${escapeHtml(doc.author)} · ${doc.date}</div></td>
+                        <td class="py-3 px-4"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span></td>
+                        <td class="py-3 px-4 text-gray-600 text-sm">${escapeHtml(doc.area)}</td>
+                        <td class="py-3 px-4"><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></td>
+                        <td class="py-3 px-4 text-gray-600 text-sm">${doc.version}</td>
+                        <td class="py-3 px-4"><div class="flex flex-wrap gap-2"><button class="btn-view" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></td>
+                    </tr>
+                `).join('');
+            }
+            if (mobileContainer) {
+                mobileContainer.innerHTML = documents.map(doc => `
+                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400 mb-2">by ${escapeHtml(doc.author)} · ${doc.date}</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></div><div class="text-sm text-gray-600 mb-3">${escapeHtml(doc.area)} · ${doc.version}</div><div class="flex flex-wrap gap-2"><button class="btn-view-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></div>
+                `).join('');
+            }
+            document.getElementById('docCount').textContent = documents.length;
+            document.getElementById('totalDocuments').textContent = documents.length;
+            document.getElementById('paginationEnd').textContent = documents.length;
+            
+            document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => { btn.removeEventListener('click', handleView); btn.addEventListener('click', handleView); });
+            document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => { btn.removeEventListener('click', handleDownload); btn.addEventListener('click', handleDownload); });
+            document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => { btn.removeEventListener('click', handleEdit); btn.addEventListener('click', handleEdit); });
+            document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => { btn.removeEventListener('click', handleDelete); btn.addEventListener('click', handleDelete); });
+            document.querySelectorAll('.btn-lock, .btn-lock-sm').forEach(btn => { btn.removeEventListener('click', handleLockToggle); btn.addEventListener('click', handleLockToggle); });
+        }
+        
+        renderDocuments();
+        
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+        
+        document.getElementById('uploadBtn')?.addEventListener('click', () => window.location.href = 'upload.html');
+        
+        function filterDocuments() {
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const category = document.getElementById('categoryFilter')?.value || 'all';
+            const area = document.getElementById('areaFilter')?.value || 'all';
+            const status = document.getElementById('statusFilter')?.value || 'all';
+            const filtered = documents.filter(doc => {
+                const matchesSearch = searchTerm === '' || doc.title.toLowerCase().includes(searchTerm) || doc.author.toLowerCase().includes(searchTerm);
+                const matchesCategory = category === 'all' || doc.categoryClass === category;
+                const matchesStatus = status === 'all' || doc.statusClass === status;
+                const matchesArea = area === 'all' || doc.area.toLowerCase().includes(area.toLowerCase());
+                return matchesSearch && matchesCategory && matchesStatus && matchesArea;
+            });
+            const tbody = document.getElementById('documentsTableBody');
+            const mobileContainer = document.getElementById('mobileDocumentsContainer');
+            if (tbody) {
+                tbody.innerHTML = filtered.map(doc => `<tr class="doc-row hover:bg-gray-50 transition"><td class="py-3 px-4"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400">by ${escapeHtml(doc.author)} · ${doc.date}</div></td><td class="py-3 px-4"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span></td><td class="py-3 px-4 text-gray-600 text-sm">${escapeHtml(doc.area)}</td><td class="py-3 px-4"><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></td><td class="py-3 px-4 text-gray-600 text-sm">${doc.version}</td><td class="py-3 px-4"><div class="flex flex-wrap gap-2"><button class="btn-view" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></td></tr>`).join('');
+            }
+            if (mobileContainer) {
+                mobileContainer.innerHTML = filtered.map(doc => `<div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400 mb-2">by ${escapeHtml(doc.author)} · ${doc.date}</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></div><div class="text-sm text-gray-600 mb-3">${escapeHtml(doc.area)} · ${doc.version}</div><div class="flex flex-wrap gap-2"><button class="btn-view-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></div>`).join('');
+            }
+            document.getElementById('docCount').textContent = filtered.length;
+            document.getElementById('totalDocuments').textContent = filtered.length;
+            document.getElementById('paginationEnd').textContent = filtered.length;
+            document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => { btn.removeEventListener('click', handleView); btn.addEventListener('click', handleView); });
+            document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => { btn.removeEventListener('click', handleDownload); btn.addEventListener('click', handleDownload); });
+            document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => { btn.removeEventListener('click', handleEdit); btn.addEventListener('click', handleEdit); });
+            document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => { btn.removeEventListener('click', handleDelete); btn.addEventListener('click', handleDelete); });
+            document.querySelectorAll('.btn-lock, .btn-lock-sm').forEach(btn => { btn.removeEventListener('click', handleLockToggle); btn.addEventListener('click', handleLockToggle); });
+        }
+        
+        document.getElementById('searchInput')?.addEventListener('input', filterDocuments);
+        document.getElementById('categoryFilter')?.addEventListener('change', filterDocuments);
+        document.getElementById('areaFilter')?.addEventListener('change', filterDocuments);
+        document.getElementById('statusFilter')?.addEventListener('change', filterDocuments);
+    </script>
 </body>
 </html>

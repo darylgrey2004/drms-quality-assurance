@@ -31,24 +31,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const DEAN_FUNCTIONS = {
         dashboard: 'View college-level statistics and overview across all departments',
         documents: 'View all documents across all departments (read-only)',
-        evidenceMap: 'View document mapping to standards (read-only)',
-        search: 'Search across all documents to find evidence for accreditation',
-        approvals: 'Provide final approval after QA validation (approve only, no validation)',
-        reports: 'Generate college-level and accreditation-readiness reports',
-        users: 'View faculty list and user information (read-only)',
-        auditTrail: 'View activity logs (read-only)',
+        approvals: 'Provide final approval after QA validation (approve only)',
         profile: 'Edit personal profile information and preferences'
     };
 
     const DEAN_RESTRICTIONS = {
-        upload: 'Cannot upload documents directly',
+        upload: 'Cannot upload documents',
         editDocuments: 'Cannot edit any document content',
         deleteDocuments: 'Cannot delete any documents',
         editEvidenceMap: 'Cannot edit or modify standard mappings',
         userManagement: 'Cannot create, edit, or delete user accounts',
         settings: 'Cannot modify system settings',
-        fullAuditTrail: 'Cannot see detailed system-level audit logs',
-        bulkActions: 'Cannot perform bulk document operations'
+        fullAuditTrail: 'Cannot access audit trail management',
+        bulkActions: 'Cannot perform bulk document operations',
+        reports: 'Cannot generate management reports'
     };
 
     function resolveUserId(userData, authToken) {
@@ -136,8 +132,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function isReadOnlyScope(functionKey, data = JSON.parse(localStorage.getItem('user') || '{}')) {
         if (getNormalizedRole(data) !== 'dean') return false;
-        const readOnlyFunctions = ['documents', 'evidenceMap', 'users', 'auditTrail'];
+        const readOnlyFunctions = ['documents'];
         return readOnlyFunctions.includes(functionKey);
+    }
+
+    function enforceDeanPageRestrictions(data) {
+        if (getNormalizedRole(data) !== 'dean') return;
+        const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+        const blockedPages = new Set([
+            'upload.html',
+            'users.html',
+            'settings.html',
+            'audit-trail.html',
+            'reports.html',
+            'evidence-map.html'
+        ]);
+
+        if (blockedPages.has(currentPage)) {
+            window.location.href = 'homepage.html';
+            return;
+        }
+
+        document.body.setAttribute('data-role-readonly', 'true');
     }
 
     // Expose helpers for other admin scripts/pages.
@@ -159,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
     }
     applyIdentity(user);
+    syncProfileSidebarLink(user);
 
     // Guard: these pages are for Dean/Admin only.
     if (!isDeanOrAdmin(user)) {
@@ -178,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const mergedUser = { ...user, ...profileData };
                 localStorage.setItem('user', JSON.stringify(mergedUser));
                 applyIdentity(mergedUser);
+                syncProfileSidebarLink(mergedUser);
             })
             .catch(() => {
                 // Keep fallback from localStorage.

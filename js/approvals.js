@@ -1,14 +1,17 @@
-// js/approvals.js
-
-// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Approvals page JS loaded successfully');
-
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const role = (user.role || '').toString().toLowerCase().trim();
     const API_BASE = 'http://localhost:3000';
+    if (!token) { window.location.href = 'landing.html'; return; }
+    if (role !== 'admin' && role !== 'dean') { window.location.href = 'user-approvals.html'; return; }
+
     const approvalsList = document.getElementById('approvalsList');
+
+    // ── Heartbeat: Update session activity ──
+    if (token && sessionManager) {
+        sessionManager.initializeHeartbeat(2 * 60 * 1000);
+    }
 
     // Access guard: approvals action view is for Dean/Admin on this page.
     if (!token) {
@@ -25,46 +28,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const workflowStage = document.getElementById('workflowStage');
     const approvalStatus = document.getElementById('approvalStatus');
     const refreshBtn = document.getElementById('refreshApprovals');
-    const tabLinks = document.querySelectorAll('#workflowTabs a');
-    const approvalItems = document.querySelectorAll('.approval-item');
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const bulkAction = document.getElementById('bulkAction');
-    const applyBulk = document.getElementById('applyBulk');
-    
-    // Action buttons
-    const viewBtns = document.querySelectorAll('.view-approval');
-    const validateBtns = document.querySelectorAll('.validate-btn');
-    const rejectBtns = document.querySelectorAll('.reject-btn');
-    
-    // Stats counters
-    const pendingCount = document.getElementById('pendingCount');
-    const validationCount = document.getElementById('validationCount');
-    const approvalCount = document.getElementById('approvalCount');
-    const docPreviewModal = document.getElementById('docPreviewModal');
-    const docPreviewBackdrop = document.getElementById('docPreviewBackdrop');
-    const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
-    const docPreviewFrame = document.getElementById('docPreviewFrame');
-    const docPreviewTitle = document.getElementById('docPreviewTitle');
-    const previewableExt = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'txt'];
+    let queue = [];
 
-    function getFileExtFromUrl(url) {
-        try {
-            const clean = String(url || '').split('?')[0].split('#')[0];
-            return clean.includes('.') ? clean.split('.').pop().toLowerCase() : '';
-        } catch (_e) {
-            return '';
-        }
+    function statusText(status) {
+        const map = {
+            validated_coordinator: 'Awaiting Final Approval',
+            approved: 'Approved',
+            locked: 'Locked'
+        };
+        return map[status] || status;
     }
 
-    function openPreviewModal(url, title) {
-        if (!docPreviewModal || !docPreviewFrame) {
-            window.open(url, '_blank');
-            return;
-        }
-        if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
-        docPreviewFrame.src = url;
-        docPreviewModal.classList.remove('hidden');
-        docPreviewModal.classList.add('flex');
+    function stageText(status) {
+        if (status === 'validated_coordinator') return 'Approval';
+        if (status === 'approved') return 'Lock';
+        return 'Locked';
     }
 
     function closePreviewModal() {
@@ -365,22 +343,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
             e.preventDefault();
             if (validateBtn) {
-                if (confirm(`Validate document: ${docTitle}?`)) {
-                    const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-child');
-                    const statusSpan = approvalItem?.querySelector('.col-span-1 span');
-                    if (stageSpan) {
-                        stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
-                        stageSpan.textContent = 'Approval';
-                    }
-                    if (statusSpan) {
-                        statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
-                        statusSpan.textContent = 'Under Review';
-                    }
-                    if (approvalItem) {
-                        approvalItem.setAttribute('data-stage', 'approve');
-                        approvalItem.setAttribute('data-status', 'review');
-                    }
+                // Update status on the same page
+                const stageSpan = approvalItem?.querySelector('.col-span-2 span:first-of-type');
+                const statusSpan = approvalItem?.querySelector('.col-span-1 span');
+                const docId = validateBtn.getAttribute('data-id') || '';
+                
+                // Update visual display
+                if (stageSpan) {
+                    stageSpan.className = 'bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full';
+                    stageSpan.textContent = 'Approval';
                 }
+                if (statusSpan) {
+                    statusSpan.className = 'badge-pending px-2 py-1 rounded-full text-xs';
+                    statusSpan.textContent = 'Under Review';
+                }
+                if (approvalItem) {
+                    approvalItem.setAttribute('data-stage', 'approve');
+                    approvalItem.setAttribute('data-status', 'review');
+                }
+                
+                // Send validation status to backend
+                if (token && docId) {
+                    fetch(`${API_BASE}/api/documents/${docId}/validate`, {
+                        method: 'PUT',
+                        headers: {
+                            'x-auth-token': token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ workflow_status: 'validated' })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('Document validated successfully:', data);
+                    })
+                    .catch(err => console.error('Validation error:', err));
+                }
+                
                 return;
             }
 

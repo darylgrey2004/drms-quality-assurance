@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
-const { adminAuth } = require('../middleware/auth');
+const bcrypt = require('bcrypt');
+const { auth, adminAuth } = require('../middleware/auth');
+
+function deanOrAdminAuth(req, res, next) {
+  auth(req, res, () => {
+    const role = (req.user?.role || '').toString().toLowerCase().trim();
+    if (role !== 'admin' && role !== 'dean') {
+      return res.status(403).json({ msg: 'Access denied. Dean or Admin privileges required.' });
+    }
+    next();
+  });
+}
 
 // @route   GET api/admin/users
-// @desc    Get all users with their profiles
-// @access  Private (Admin only)
-router.get('/users', adminAuth, async (req, res) => {
+// @desc    Get all users with their profiles and active status
+// @access  Private (Dean/Admin)
+router.get('/users', deanOrAdminAuth, async (req, res) => {
   try {
     const query = `
       SELECT 
