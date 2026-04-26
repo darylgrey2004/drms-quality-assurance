@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Users</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,12 +13,17 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <!-- main grid: sidebar + content -->
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
-        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
-            <!-- logo / title area -->
+        <!-- SIDEBAR -->
+        <aside id="mainSidebar" class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -37,186 +42,173 @@
                 </div>
             </div>
 
-            <!-- navigation menu as functional links to actual pages -->
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
-                <!-- Dashboard -->
                 <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">📊</span> Dashboard
                 </a>
-                <!-- Documents -->
                 <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">📄</span> Documents
                 </a>
-                <!-- Upload -->
                 <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">⬆️</span> Upload
                 </a>
-                <!-- Evidence Map -->
                 <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
                 </a>
-                <!-- Search -->
                 <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">🔍</span> Search
                 </a>
-                <!-- Approvals -->
                 <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">✅</span> Approvals
                 </a>
-                <!-- Reports -->
                 <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">📈</span> Reports
                 </a>
-                <!-- Users (active) -->
                 <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
                     <span class="mr-3 text-teal-300">👥</span> Users
                 </a>
-                <!-- Audit Trail -->
                 <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
                 </a>
-                <!-- Settings -->
                 <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">⚙️</span> Settings
                 </a>
             </nav>
 
-            <!-- footer in sidebar -->
             <div class="border-t border-teal-900/40 p-4">
-                <button id="logoutBtn" class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
-                    🚪 Logout
-                </button>
-                <div class="text-xs text-teal-200/50 mt-3">
+                <div class="text-xs text-teal-200/50">
                     <div id="adminAccessLabel" class="text-teal-300">Admin · Full Access</div>
                     <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT (users) -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-
-            <!-- header row -->
-            <div class="mb-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">User Management</h1>
-                        <p class="text-sm text-gray-500 mt-1">Manage system users and role-based access control</p>
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <!-- header row -->
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">User Management</h1>
+                            <p class="text-sm text-gray-500 mt-1">Manage system users and role-based access control</p>
+                        </div>
+                        <button id="openCreateUserModalBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-sm font-medium w-full sm:w-auto">
+                            + Create User
+                        </button>
                     </div>
-                    <button id="openCreateUserModalBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-sm font-medium">
-                        + Create User
-                    </button>
+                </div>
+
+                <!-- user stats cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-gray-500 text-sm">Total Users</span>
+                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
+                            </div>
+                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">👥</span>
+                        </div>
+                        <div class="text-xs text-green-600 mt-2">Loading...</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-gray-500 text-sm">Approved</span>
+                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
+                            </div>
+                            <span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span>
+                        </div>
+                        <div class="text-xs text-green-600 mt-2">0% approved rate</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-gray-500 text-sm">Pending</span>
+                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
+                            </div>
+                            <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
+                        </div>
+                        <div class="text-xs text-amber-600 mt-2">Awaiting approval</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-gray-500 text-sm">Roles</span>
+                                <div class="text-3xl font-bold text-gray-800 mt-2">6</div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">🔐</span>
+                        </div>
+                        <div class="text-xs text-purple-600 mt-2">RBAC enabled</div>
+                    </div>
+                </div>
+
+                <!-- user filters and actions -->
+                <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                    <div class="flex flex-col lg:flex-row gap-4">
+                        <div class="flex-1">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                <input type="text" id="searchUsers" placeholder="Search by name, email, or role..." 
+                                       class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Roles</option>
+                                <option value="admin">Administrator</option>
+                                <option value="dean">Dean</option>
+                                <option value="qa-coordinator">QA Coordinator</option>
+                                <option value="area-chair">Area Chair / Program Head</option>
+                                <option value="faculty">Faculty</option>
+                                <option value="evaluator">External Evaluator</option>
+                            </select>
+                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Status</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- users table -->
+                <div class="bg-white rounded-xl p-5 stat-card overflow-x-auto">
+                    <div class="min-w-[800px]">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                    <th class="text-left py-3 px-2">User</th>
+                                    <th class="text-left py-3 px-2">Email</th>
+                                    <th class="text-left py-3 px-2">Role</th>
+                                    <th class="text-left py-3 px-2">Department</th>
+                                    <th class="text-left py-3 px-2">Status</th>
+                                    <th class="text-left py-3 px-2">Last Active</th>
+                                    <th class="text-left py-3 px-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                                <!-- Data will be populated by users.js -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- user stats cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Total Users</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                        </div>
-                        <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">👥</span>
-                    </div>
-                    <div class="text-xs text-green-600 mt-2">Loading...</div>
-                </div>
-                
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Approved</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                        </div>
-                        <span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span>
-                    </div>
-                    <div class="text-xs text-green-600 mt-2">0% approved rate</div>
-                </div>
-                
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Pending</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                        </div>
-                        <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
-                    </div>
-                    <div class="text-xs text-amber-600 mt-2">Awaiting approval</div>
-                </div>
-                
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Roles</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                        </div>
-                        <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">🔐</span>
-                    </div>
-                    <div class="text-xs text-purple-600 mt-2">RBAC enabled</div>
-                </div>
-            </div>
-
-            <!-- user filters and actions -->
-            <div class="bg-white rounded-xl p-4 stat-card mb-6">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1">
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
-                            <input type="text" id="searchUsers" placeholder="Search by name, email, or role..." 
-                                   class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Roles</option>
-                            <option value="admin">Administrator</option>
-                            <option value="dean">Dean</option>
-                            <option value="qa-coordinator">QA Coordinator</option>
-                            <option value="area-chair">Area Chair / Program Head</option>
-                            <option value="faculty">Faculty</option>
-                            <option value="evaluator">External Evaluator</option>
-                        </select>
-                        <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Status</option>
-                            <option value="approved">Approved</option>
-                            <option value="pending">Pending</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
-            </div>
-
-            <!-- users table -->
-            <div class="bg-white rounded-xl p-5 stat-card">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-200 text-gray-500 text-xs">
-                                <th class="text-left py-3 px-2">User</th>
-                                <th class="text-left py-3 px-2">Email</th>
-                                <th class="text-left py-3 px-2">Role</th>
-                                <th class="text-left py-3 px-2">Department</th>
-                                <th class="text-left py-3 px-2">Status</th>
-                                <th class="text-left py-3 px-2">Last Active</th>
-                                <th class="text-left py-3 px-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody" class="divide-y divide-gray-100">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-
-
         </main>
     </div>
 
-    <div id="createUserModal" class="hidden fixed inset-0 z-50 bg-black/40 p-4">
-        <div class="max-w-2xl mx-auto bg-white rounded-xl p-6 shadow-xl mt-8">
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 overflow-y-auto">
+        <div class="max-w-2xl mx-auto bg-white rounded-xl p-4 md:p-6 shadow-xl mt-8 md:mt-16">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">Create User Account</h2>
-                <button id="closeCreateUserModalBtn" class="text-gray-500 hover:text-gray-700 text-lg">✕</button>
+                <h2 class="text-lg md:text-xl font-semibold text-gray-800">Create User Account</h2>
+                <button id="closeCreateUserModalBtn" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
             </div>
             <form id="createUserForm" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -248,7 +240,7 @@
                             <option value="evaluator">External Evaluator</option>
                         </select>
                     </div>
-                    <div id="departmentWrap" class="md:col-span-2 hidden">
+                    <div id="departmentWrap" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Department / Program / Institution</label>
                         <input id="createDepartment" type="text" placeholder="e.g., Bachelor of Elementary Education (BEED)" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
                     </div>
@@ -266,7 +258,7 @@
                         <p class="text-xs text-amber-600 mt-1">External Evaluator accounts require an expiration date/time.</p>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2">
                     <button id="cancelCreateUserBtn" type="button" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="px-4 py-2 rounded-lg bg-teal-700 text-white hover:bg-teal-800">Create Account</button>
                 </div>
@@ -276,6 +268,47 @@
 
     <!-- External JavaScript -->
     <script src="js/admin-session.js"></script>
+    <script src="js/session-manager.js"></script>
     <script src="js/users.js"></script>
+    
+    <script>
+        // Mobile Sidebar Toggle (preserved for responsiveness without interfering with users.js)
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+        
+        // Role select handler for modal (added separately so users.js doesn't need to change)
+        const roleSelect = document.getElementById('createRole');
+        const departmentWrap = document.getElementById('departmentWrap');
+        const evaluatorExpiryWrap = document.getElementById('evaluatorExpiryWrap');
+        
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                const role = this.value.toLowerCase();
+                if (departmentWrap) departmentWrap.classList.toggle('hidden', !(role === 'faculty member' || role === 'area chair/program head' || role === 'dean'));
+                if (evaluatorExpiryWrap) evaluatorExpiryWrap.classList.toggle('hidden', role !== 'evaluator');
+            });
+        }
+        
+        // Modal handlers
+        const modal = document.getElementById('createUserModal');
+        const openBtn = document.getElementById('openCreateUserModalBtn');
+        const closeBtn = document.getElementById('closeCreateUserModalBtn');
+        const cancelBtn = document.getElementById('cancelCreateUserBtn');
+        
+        if (openBtn) openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+        if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        if (cancelBtn) cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+    </script>
 </body>
 </html>
