@@ -211,3 +211,25 @@ input:focus, select:focus {
 
 /* Grid view */
 #gridView .search-result { height: 100%; display: flex; flex-direction: column; }
+/* New Category Badges for Search */
+.bg-blue-100 { background-color: #dbeafe; }
+.text-blue-800 { color: #1e40af; }
+
+.bg-green-100 { background-color: #dcfce7; }
+.text-green-800 { color: #166534; }
+
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-800 { color: #92400e; }
+
+.bg-purple-100 { background-color: #f3e8ff; }
+.text-purple-800 { color: #6b21a5; }
+
+/* Department tags */
+.badge-department {
+    background-color: #f1f5f9;
+    color: #475569;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+}

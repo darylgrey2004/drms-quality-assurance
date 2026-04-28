@@ -105,61 +105,40 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">Total Users</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                            </div>
+                            <div><span class="text-gray-500 text-sm">Total Users</span><div class="text-3xl font-bold text-gray-800 mt-2" id="totalUsersCount">0</div></div>
                             <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">👥</span>
                         </div>
                         <div class="text-xs text-green-600 mt-2">Loading...</div>
                     </div>
-                    
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">Approved</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                            </div>
+                            <div><span class="text-gray-500 text-sm">Approved</span><div class="text-3xl font-bold text-gray-800 mt-2" id="approvedUsersCount">0</div></div>
                             <span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span>
                         </div>
-                        <div class="text-xs text-green-600 mt-2">0% approved rate</div>
+                        <div class="text-xs text-green-600 mt-2">Approved accounts</div>
                     </div>
-                    
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">Pending</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">0</div>
-                            </div>
+                            <div><span class="text-gray-500 text-sm">Pending</span><div class="text-3xl font-bold text-gray-800 mt-2" id="pendingUsersCount">0</div></div>
                             <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
                         </div>
                         <div class="text-xs text-amber-600 mt-2">Awaiting approval</div>
                     </div>
-                    
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">Roles</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">6</div>
-                            </div>
+                            <div><span class="text-gray-500 text-sm">Roles</span><div class="text-3xl font-bold text-gray-800 mt-2">6</div></div>
                             <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">🔐</span>
                         </div>
                         <div class="text-xs text-purple-600 mt-2">RBAC enabled</div>
                     </div>
                 </div>
 
-                <!-- user filters and actions -->
+                <!-- user filters -->
                 <div class="bg-white rounded-xl p-4 stat-card mb-6">
                     <div class="flex flex-col lg:flex-row gap-4">
-                        <div class="flex-1">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
-                                <input type="text" id="searchUsers" placeholder="Search by name, email, or role..." 
-                                       class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <div class="flex-1"><div class="relative"><span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span><input type="text" id="searchUsers" placeholder="Search by name, email, or role..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"></div></div>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
                                 <option value="all">All Roles</option>
                                 <option value="admin">Administrator</option>
                                 <option value="dean">Dean</option>
@@ -168,7 +147,7 @@
                                 <option value="faculty">Faculty</option>
                                 <option value="evaluator">External Evaluator</option>
                             </select>
-                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
                                 <option value="all">All Status</option>
                                 <option value="approved">Approved</option>
                                 <option value="pending">Pending</option>
@@ -193,9 +172,7 @@
                                     <th class="text-left py-3 px-2">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersTableBody" class="divide-y divide-gray-100">
-                                <!-- Data will be populated by users.js -->
-                            </tbody>
+                            <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -203,7 +180,7 @@
         </main>
     </div>
 
-    <!-- Create User Modal -->
+    <!-- Create User Modal with Password Toggle -->
     <div id="createUserModal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 overflow-y-auto">
         <div class="max-w-2xl mx-auto bg-white rounded-xl p-4 md:p-6 shadow-xl mt-8 md:mt-16">
             <div class="flex items-center justify-between mb-4">
@@ -212,25 +189,11 @@
             </div>
             <form id="createUserForm" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">First Name</label>
-                        <input id="createFirstName" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Last Name</label>
-                        <input id="createLastName" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Middle Initial (optional)</label>
-                        <input id="createMiddleInitial" type="text" maxlength="5" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Email</label>
-                        <input id="createEmail" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Role</label>
-                        <select id="createRole" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                    <div><label class="block text-sm text-gray-600 mb-1">First Name</label><input id="createFirstName" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">Last Name</label><input id="createLastName" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">Middle Initial (optional)</label><input id="createMiddleInitial" type="text" maxlength="5" class="w-full px-3 py-2 border border-gray-200 rounded-lg"></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">Email</label><input id="createEmail" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required></div>
+                    <div><label class="block text-sm text-gray-600 mb-1">Role</label><select id="createRole" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
                             <option value="">Select role</option>
                             <option value="admin">Administrator</option>
                             <option value="dean">Dean</option>
@@ -240,23 +203,37 @@
                             <option value="evaluator">External Evaluator</option>
                         </select>
                     </div>
-                    <div id="departmentWrap" class="hidden">
-                        <label class="block text-sm text-gray-600 mb-1">Department / Program / Institution</label>
-                        <input id="createDepartment" type="text" placeholder="e.g., Bachelor of Elementary Education (BEED)" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
-                    </div>
+                    <div id="departmentWrap" class="hidden"><label class="block text-sm text-gray-600 mb-1">Department / Program</label><input id="createDepartment" type="text" placeholder="e.g., BEED, BSED, BSNED, BCAED, BPED" class="w-full px-3 py-2 border border-gray-200 rounded-lg"></div>
+                    
+                    <!-- Password field with toggle -->
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Password</label>
-                        <input id="createPassword" type="password" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                        <div class="relative">
+                            <input id="createPassword" type="password" class="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500" required>
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700" data-target="createPassword">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="md:col-span-2">
+                    
+                    <!-- Confirm Password field with toggle -->
+                    <div>
                         <label class="block text-sm text-gray-600 mb-1">Confirm Password</label>
-                        <input id="createConfirmPassword" type="password" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                        <div class="relative">
+                            <input id="createConfirmPassword" type="password" class="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500" required>
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700" data-target="createConfirmPassword">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div id="evaluatorExpiryWrap" class="md:col-span-2 hidden">
-                        <label class="block text-sm text-gray-600 mb-1">Evaluator Access Expires At</label>
-                        <input id="createEvaluatorExpiresAt" type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
-                        <p class="text-xs text-amber-600 mt-1">External Evaluator accounts require an expiration date/time.</p>
-                    </div>
+                    
+                    <div id="evaluatorExpiryWrap" class="md:col-span-2 hidden"><label class="block text-sm text-gray-600 mb-1">Evaluator Access Expires At</label><input id="createEvaluatorExpiresAt" type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg"><p class="text-xs text-amber-600 mt-1">External Evaluator accounts require an expiration date.</p></div>
                 </div>
                 <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2">
                     <button id="cancelCreateUserBtn" type="button" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">Cancel</button>
@@ -272,7 +249,7 @@
     <script src="js/users.js"></script>
     
     <script>
-        // Mobile Sidebar Toggle (preserved for responsiveness without interfering with users.js)
+        // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
         if (menuToggle && sidebar) {
@@ -286,7 +263,29 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
         
-        // Role select handler for modal (added separately so users.js doesn't need to change)
+        // Password toggle functionality
+        document.querySelectorAll('.password-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (input) {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    
+                    // Toggle eye icon
+                    const svg = this.querySelector('svg');
+                    if (svg) {
+                        if (type === 'text') {
+                            svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
+                        } else {
+                            svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Role select handler
         const roleSelect = document.getElementById('createRole');
         const departmentWrap = document.getElementById('departmentWrap');
         const evaluatorExpiryWrap = document.getElementById('evaluatorExpiryWrap');

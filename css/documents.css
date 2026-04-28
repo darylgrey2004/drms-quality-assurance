@@ -371,3 +371,29 @@ td {
         border: 1px solid #ddd;
     }
 }
+/* New Category Badges */
+.badge-instruction {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-research {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-extension {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.badge-employment {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+}
+
+/* Department Badge */
+.badge-department {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}

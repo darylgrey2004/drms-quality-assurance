@@ -85,7 +85,6 @@
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 overflow-y-auto bg-dashboard-bg">
-            <!-- Mobile header with spacing for burger button -->
             <div class="mobile-header-spacer md:hidden"></div>
             
             <div class="p-4 md:p-7">
@@ -96,7 +95,7 @@
                         <p class="text-sm text-gray-500 mt-1">College of Teacher Education · Quality Assurance</p>
                     </div>
                     <div class="bg-white rounded-full px-4 py-2 text-sm shadow-sm text-gray-600 border whitespace-nowrap">
-                        26 Apr 2026 · <span class="text-teal-700">QA cycle 1</span>
+                        28 Apr 2026 · <span class="text-teal-700">QA cycle 1</span>
                     </div>
                 </div>
 
@@ -136,37 +135,47 @@
                     </div>
                 </div>
 
-                <!-- compliance bars -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
+                <!-- Category Stats Cards (replacing compliance bars) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-7">
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-700">ISO 9001:2015</span>
-                            <span class="text-sm font-semibold text-teal-700">92%</span>
+                            <span class="font-medium text-gray-700">Instruction</span>
+                            <span class="text-sm font-semibold text-blue-600">245</span>
                         </div>
                         <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
-                            <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
+                            <div class="bg-blue-500 h-2 rounded-full" style="width:65%"></div>
                         </div>
-                        <div class="text-xs text-gray-500 mt-2">166 of 180 documents verified</div>
+                        <div class="text-xs text-gray-500 mt-2">245 documents</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between">
-                            <span class="font-medium text-gray-700">AACCUP Areas I-X</span>
-                            <span class="text-sm font-semibold text-amber-700">78%</span>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">Research</span>
+                            <span class="text-sm font-semibold text-green-600">312</span>
                         </div>
                         <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
-                            <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
+                            <div class="bg-green-500 h-2 rounded-full" style="width:82%"></div>
                         </div>
-                        <div class="text-xs text-gray-500 mt-2">328 of 420 documents verified</div>
+                        <div class="text-xs text-gray-500 mt-2">312 documents</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between">
-                            <span class="font-medium text-gray-700">COE Indicators</span>
-                            <span class="text-sm font-semibold text-indigo-700">85%</span>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">Extension</span>
+                            <span class="text-sm font-semibold text-amber-600">156</span>
                         </div>
                         <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
-                            <div class="bg-indigo-500 h-2 rounded-full" style="width:85%"></div>
+                            <div class="bg-amber-500 h-2 rounded-full" style="width:41%"></div>
                         </div>
-                        <div class="text-xs text-gray-500 mt-2">210 of 247 documents verified</div>
+                        <div class="text-xs text-gray-500 mt-2">156 documents</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">Employment</span>
+                            <span class="text-sm font-semibold text-purple-600">134</span>
+                        </div>
+                        <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width:35%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">134 documents</div>
                     </div>
                 </div>
 
@@ -178,14 +187,14 @@
                             <a href="documents.html" class="text-sm text-teal-700 hover:text-teal-800 font-medium">View All →</a>
                         </div>
 
-                        <!-- Desktop Table View (hidden on mobile) -->
+                        <!-- Desktop Table View -->
                         <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-gray-200 text-gray-500 text-xs">
                                         <th class="text-left py-3">DOCUMENT</th>
                                         <th class="text-left py-3">CATEGORY</th>
-                                        <th class="text-left py-3">AREA / CLAUSE</th>
+                                        <th class="text-left py-3">DEPARTMENT</th>
                                         <th class="text-left py-3">STATUS</th>
                                         <th class="text-left py-3">VERSION</th>
                                         <th class="text-left py-3">ACTIONS</th>
@@ -194,11 +203,11 @@
                                 <tbody class="divide-y divide-gray-100">
                                     <tr>
                                         <td class="py-3">
-                                            <div class="font-medium text-gray-800">Quality Management System Manual</div>
+                                            <div class="font-medium text-gray-800">Syllabus - Elementary Education</div>
                                             <div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div>
                                         </td>
-                                        <td class="py-3"><span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">ISO 9001:2015</span></td>
-                                        <td class="py-3 text-gray-600">Clause 4 - Context</td>
+                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
+                                        <td class="py-3 text-gray-600">BEED</td>
                                         <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
                                         <td class="py-3 text-gray-600">v3.2</td>
                                         <td class="py-3">
@@ -206,47 +215,47 @@
                                                 <button class="view-btn">View</button>
                                                 <button class="download-btn">Download</button>
                                             </div>
-                                        </td>
+                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="py-3">
-                                            <div class="font-medium text-gray-800">Curriculum Development Framework</div>
-                                            <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
-                                        </td>
-                                        <td class="py-3"><span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">AACCUP</span></td>
-                                        <td class="py-3 text-gray-600">Area II - Faculty</td>
-                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></td>
-                                        <td class="py-3 text-gray-600">v1.0</td>
-                                        <td class="py-3">
-                                            <div class="flex gap-2">
-                                                <button class="view-btn">View</button>
-                                                <button class="download-btn">Download</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3">
-                                            <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
+                                            <div class="font-medium text-gray-800">Research Publication 2025</div>
                                             <div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div>
-                                        </td>
-                                        <td class="py-3"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">COE</span></td>
-                                        <td class="py-3 text-gray-600">Research & Extension</td>
-                                        <td class="py-3"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></td>
+                                         </td>
+                                        <td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td>
+                                        <td class="py-3 text-gray-600">BSED</td>
+                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></td>
                                         <td class="py-3 text-gray-600">v0.3</td>
                                         <td class="py-3">
                                             <div class="flex gap-2">
                                                 <button class="view-btn">View</button>
                                                 <button class="download-btn">Download</button>
                                             </div>
-                                        </td>
+                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="py-3">
-                                            <div class="font-medium text-gray-800">Faculty Profile and Qualifications</div>
+                                            <div class="font-medium text-gray-800">Community Extension Program</div>
+                                            <div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div>
+                                         </td>
+                                        <td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td>
+                                        <td class="py-3 text-gray-600">BPED</td>
+                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span></td>
+                                        <td class="py-3 text-gray-600">v1.1</td>
+                                        <td class="py-3">
+                                            <div class="flex gap-2">
+                                                <button class="view-btn">View</button>
+                                                <button class="download-btn">Download</button>
+                                            </div>
+                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="font-medium text-gray-800">Faculty Employment Contract</div>
                                             <div class="text-xs text-gray-400">by Dean Cruz · 2026-01-10</div>
-                                        </td>
-                                        <td class="py-3"><span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">AACCUP</span></td>
-                                        <td class="py-3 text-gray-600">Area III - Curriculum</td>
+                                         </td>
+                                        <td class="py-3"><span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span></td>
+                                        <td class="py-3 text-gray-600">BEED</td>
                                         <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
                                         <td class="py-3 text-gray-600">v2.1</td>
                                         <td class="py-3">
@@ -254,7 +263,23 @@
                                                 <button class="view-btn">View</button>
                                                 <button class="download-btn">Download</button>
                                             </div>
-                                        </td>
+                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="font-medium text-gray-800">Inclusive Education Module</div>
+                                            <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
+                                         </td>
+                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
+                                        <td class="py-3 text-gray-600">BSNED</td>
+                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                                        <td class="py-3 text-gray-600">v1.0</td>
+                                        <td class="py-3">
+                                            <div class="flex gap-2">
+                                                <button class="view-btn">View</button>
+                                                <button class="download-btn">Download</button>
+                                            </div>
+                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -263,39 +288,39 @@
                         <!-- Mobile Card View -->
                         <div class="block md:hidden space-y-4">
                             <div class="border rounded-lg p-4 bg-white">
-                                <div class="font-medium text-gray-800">Quality Management System Manual</div>
+                                <div class="font-medium text-gray-800">Syllabus - Elementary Education</div>
                                 <div class="text-xs text-gray-400 mb-2">by Dr. Santos · 2026-02-15</div>
                                 <div class="flex flex-wrap gap-2 mb-2">
-                                    <span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">ISO 9001:2015</span>
+                                    <span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span>
                                     <span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span>
                                 </div>
-                                <div class="text-sm text-gray-600 mb-2">Clause 4 - Context · v3.2</div>
+                                <div class="text-sm text-gray-600 mb-2">BEED · v3.2</div>
                                 <div class="flex gap-2">
                                     <button class="view-btn-sm">View</button>
                                     <button class="download-btn-sm">Download</button>
                                 </div>
                             </div>
                             <div class="border rounded-lg p-4 bg-white">
-                                <div class="font-medium text-gray-800">Curriculum Development Framework</div>
-                                <div class="text-xs text-gray-400 mb-2">by Prof. Garcia · 2026-02-20</div>
-                                <div class="flex flex-wrap gap-2 mb-2">
-                                    <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">AACCUP</span>
-                                    <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span>
-                                </div>
-                                <div class="text-sm text-gray-600 mb-2">Area II - Faculty · v1.0</div>
-                                <div class="flex gap-2">
-                                    <button class="view-btn-sm">View</button>
-                                    <button class="download-btn-sm">Download</button>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4 bg-white">
-                                <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
+                                <div class="font-medium text-gray-800">Research Publication 2025</div>
                                 <div class="text-xs text-gray-400 mb-2">by Dr. Reyes · 2026-02-25</div>
                                 <div class="flex flex-wrap gap-2 mb-2">
-                                    <span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">COE</span>
-                                    <span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span>
+                                    <span class="badge-research px-2 py-1 rounded-full text-xs">Research</span>
+                                    <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span>
                                 </div>
-                                <div class="text-sm text-gray-600 mb-2">Research & Extension · v0.3</div>
+                                <div class="text-sm text-gray-600 mb-2">BSED · v0.3</div>
+                                <div class="flex gap-2">
+                                    <button class="view-btn-sm">View</button>
+                                    <button class="download-btn-sm">Download</button>
+                                </div>
+                            </div>
+                            <div class="border rounded-lg p-4 bg-white">
+                                <div class="font-medium text-gray-800">Community Extension Program</div>
+                                <div class="text-xs text-gray-400 mb-2">by Prof. Mendoza · 2026-02-22</div>
+                                <div class="flex flex-wrap gap-2 mb-2">
+                                    <span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span>
+                                    <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending Review</span>
+                                </div>
+                                <div class="text-sm text-gray-600 mb-2">BPED · v1.1</div>
                                 <div class="flex gap-2">
                                     <button class="view-btn-sm">View</button>
                                     <button class="download-btn-sm">Download</button>
@@ -332,19 +357,19 @@
                             <div class="space-y-3">
                                 <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
                                     <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-800 text-xs font-bold">D</span>
-                                    <div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved QMS Manual v3.2</p><p class="text-xs text-gray-400">2h ago</p></div>
+                                    <div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved Syllabus - Elementary Education</p><p class="text-xs text-gray-400">2h ago</p></div>
                                 </div>
                                 <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
                                     <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-800 text-xs font-bold">P</span>
-                                    <div><p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded Curriculum Framework</p><p class="text-xs text-gray-400">4h ago</p></div>
+                                    <div><p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded Research Publication</p><p class="text-xs text-gray-400">4h ago</p></div>
                                 </div>
                                 <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
                                     <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-800 text-xs font-bold">D</span>
-                                    <div><p class="text-sm"><span class="font-medium">Dean Cruz</span> commented on Faculty Profiles</p><p class="text-xs text-gray-400">6h ago</p></div>
+                                    <div><p class="text-sm"><span class="font-medium">Dean Cruz</span> approved Employment Contract</p><p class="text-xs text-gray-400">6h ago</p></div>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <span class="w-6 h-6 bg-rose-100 rounded-full flex items-center justify-center text-rose-800 text-xs font-bold">Q</span>
-                                    <div><p class="text-sm"><span class="font-medium">QA Office</span> flagged Audit Report Q4</p><p class="text-xs text-gray-400">1d ago</p></div>
+                                    <div><p class="text-sm"><span class="font-medium">QA Office</span> reviewed Extension Program</p><p class="text-xs text-gray-400">1d ago</p></div>
                                 </div>
                             </div>
                         </div>

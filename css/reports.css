@@ -192,3 +192,8 @@ input:focus, select:focus {
 /* Progress bar */
 .w-20 { width: 5rem; }
 .w-24 { width: 6rem; }
+/* New Category Colors */
+.bg-blue-600 { background-color: #2563eb; }
+.bg-green-600 { background-color: #16a34a; }
+.bg-amber-600 { background-color: #d97706; }
+.bg-purple-600 { background-color: #9333ea; }

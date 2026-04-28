@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · My Approvals</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,23 +13,29 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-user-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Area Chair Portal</p>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Area Chair Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">RG</span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
-                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
+                        <div class="text-sm font-medium text-white">Dr. Roberto Gomez</div>
+                        <div class="text-xs text-teal-300">Program Head · Elementary Ed</div>
                     </div>
                 </div>
             </div>
@@ -60,137 +66,280 @@
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
-                <button id="logoutBtn" class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
-                    🚪 Logout
-                </button>
-                <div class="text-xs text-teal-200/50 mt-3">
+                <div class="text-xs text-teal-200/50">
                     <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                        <span id="sidebarAccess">Access</span>
+                        <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span>Area Chair Access</span>
                     </div>
-                    <div class="mt-1">© CTE · v.DRMS‑QA</div>
+                    <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
             </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="mb-6">
-                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">My Approvals</h1>
-                <p class="text-sm text-gray-500 mt-1">Review and approve documents submitted by faculty</p>
-            </div>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">My Approvals</h1>
+                    <p class="text-sm text-gray-500 mt-1">Review and approve documents submitted by faculty</p>
+                </div>
 
-            <!-- Approval stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="text-gray-500 text-sm">Pending Review</div>
-                    <div class="text-3xl font-bold text-gray-800 mt-2">8</div>
-                    <div class="text-xs text-amber-600 mt-2">2 urgent</div>
-                </div>
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="text-gray-500 text-sm">Approved (This Month)</div>
-                    <div class="text-3xl font-bold text-gray-800 mt-2">24</div>
-                    <div class="text-xs text-green-600 mt-2">+6 from last month</div>
-                </div>
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="text-gray-500 text-sm">Returned for Revision</div>
-                    <div class="text-3xl font-bold text-gray-800 mt-2">5</div>
-                    <div class="text-xs text-blue-600 mt-2">Awaiting resubmission</div>
-                </div>
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="text-gray-500 text-sm">Average Processing</div>
-                    <div class="text-3xl font-bold text-gray-800 mt-2">2.4d</div>
-                    <div class="text-xs text-teal-600 mt-2">Within SLA</div>
-                </div>
-            </div>
-
-            <!-- Filters -->
-            <div class="bg-white rounded-xl p-4 stat-card mb-6">
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <input type="text" id="searchApprovals" placeholder="Search by document or faculty..." 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                <!-- Approval stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Pending Review</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">8</div>
+                        <div class="text-xs text-amber-600 mt-2">2 urgent</div>
                     </div>
-                    <select id="priorityFilter" class="px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="all">All Priorities</option>
-                        <option value="urgent">Urgent</option>
-                        <option value="normal">Normal</option>
-                    </select>
-                    <select id="areaFilter" class="px-4 py-2 border border-gray-200 rounded-lg">
-                        <option value="all">All Areas</option>
-                        <option value="area2">Area II - Faculty</option>
-                        <option value="area3">Area III - Curriculum</option>
-                        <option value="area4">Area IV - Students</option>
-                    </select>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Approved (This Month)</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div>
+                        <div class="text-xs text-green-600 mt-2">+6 from last month</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Returned for Revision</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">5</div>
+                        <div class="text-xs text-blue-600 mt-2">Awaiting resubmission</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Average Processing</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">2.4d</div>
+                        <div class="text-xs text-teal-600 mt-2">Within SLA</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Approvals list -->
-            <div class="bg-white rounded-xl p-5 stat-card">
-                <div class="space-y-4">
-                    <!-- Approval item 1 - Urgent -->
-                    <div class="border-l-4 border-red-500 bg-red-50/30 p-4 rounded-r-lg">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Urgent</span>
-                                    <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">AACCUP Area II</span>
-                                </div>
-                                <h3 class="font-medium text-gray-800">Faculty Qualification Documents</h3>
-                                <p class="text-sm text-gray-600">Submitted by: Prof. Maria Reyes</p>
-                                <p class="text-xs text-gray-400 mt-1">Submitted: Feb 26, 2026 · Due in 2 days</p>
+                <!-- Filters -->
+                <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                <input type="text" id="searchApprovals" placeholder="Search by document or faculty..." 
+                                       class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
                             </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <button class="action-link hover:underline view-btn">👁 View</button>
-                                <button class="action-link hover:underline validate-btn">✓ Validate</button>
-                                <button class="action-link-danger hover:underline reject-btn">✕</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="priorityFilter" class="px-4 py-2 border border-gray-200 rounded-lg">
+                                <option value="all">All Priorities</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="normal">Normal</option>
+                            </select>
+                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg">
+                                <option value="all">All Categories</option>
+                                <option value="instruction">Instruction</option>
+                                <option value="research">Research</option>
+                                <option value="extension">Extension</option>
+                                <option value="employment">Employment</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approvals list - Desktop Table View -->
+                <div class="hidden md:block bg-white rounded-xl p-5 stat-card overflow-x-auto">
+                    <div class="min-w-[800px]">
+                        <div class="divide-y">
+                            <!-- Approval item 1 - Urgent -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-urgent text-xs px-2 py-1 rounded-full">Urgent</span>
+                                            <span class="badge-instruction text-xs px-2 py-1 rounded-full">Instruction</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Syllabus - Elementary Education</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Prof. Maria Reyes</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 26, 2026 · Due in 2 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 2 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-research text-xs px-2 py-1 rounded-full">Research</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BSED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Research Publication 2025</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Dr. Ana Santos</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 25, 2026 · Due in 5 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 3 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-extension text-xs px-2 py-1 rounded-full">Extension</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BPED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Community Extension Program</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Prof. Mendoza</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 24, 2026 · Due in 6 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 4 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-employment text-xs px-2 py-1 rounded-full">Employment</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Faculty Employment Contract</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Dean Cruz</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 23, 2026 · Due in 3 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Approval item 2 -->
-                    <div class="border-l-4 border-amber-500 bg-amber-50/30 p-4 rounded-r-lg">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">ISO Clause 7</span>
-                                </div>
-                                <h3 class="font-medium text-gray-800">Training Records 2026</h3>
-                                <p class="text-sm text-gray-600">Submitted by: Dr. Ana Santos</p>
-                                <p class="text-xs text-gray-400 mt-1">Submitted: Feb 25, 2026 · Due in 5 days</p>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <button class="action-link hover:underline view-btn">👁 View</button>
-                                <button class="action-link hover:underline validate-btn">✓ Validate</button>
-                                <button class="action-link-danger hover:underline reject-btn">✕</button>
-                            </div>
+                <!-- Approvals list - Mobile Card View -->
+                <div id="mobileApprovalsList" class="block md:hidden space-y-4">
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-urgent text-xs px-2 py-1 rounded-full">Urgent</span>
+                            <span class="badge-instruction text-xs px-2 py-1 rounded-full">Instruction</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                        </div>
+                        <div class="font-medium text-gray-800">Syllabus - Elementary Education</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Prof. Maria Reyes · Apr 26, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
                         </div>
                     </div>
-
-                    <!-- Approval item 3 -->
-                    <div class="border-l-4 border-green-500 bg-green-50/30 p-4 rounded-r-lg">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">COE Indicator 2</span>
-                                </div>
-                                <h3 class="font-medium text-gray-800">Research Publication - Journal Article</h3>
-                                <p class="text-sm text-gray-600">Submitted by: Dr. Juan Dela Cruz</p>
-                                <p class="text-xs text-gray-400 mt-1">Submitted: Feb 24, 2026 · Due in 6 days</p>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <button class="action-link hover:underline view-btn">👁 View</button>
-                                <button class="action-link hover:underline validate-btn">✓ Validate</button>
-                                <button class="action-link-danger hover:underline reject-btn">✕</button>
-                            </div>
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-research text-xs px-2 py-1 rounded-full">Research</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BSED</span>
                         </div>
+                        <div class="font-medium text-gray-800">Research Publication 2025</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Dr. Ana Santos · Apr 25, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-extension text-xs px-2 py-1 rounded-full">Extension</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BPED</span>
+                        </div>
+                        <div class="font-medium text-gray-800">Community Extension Program</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Prof. Mendoza · Apr 24, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                    <div class="text-sm text-gray-500">Showing 1 to 4 of 8 results</div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
+                        <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg">1</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="js/user-session.js"></script>
-    <script src="js/user-approvals.js"></script>
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Action buttons
+        document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => {
+            btn.addEventListener('click', () => alert('Viewing document details'));
+        });
+        document.querySelectorAll('.btn-approve, .btn-approve-sm').forEach(btn => {
+            btn.addEventListener('click', () => alert('Document approved!'));
+        });
+        document.querySelectorAll('.btn-reject, .btn-reject-sm').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const comment = prompt('Please provide reason for rejection:');
+                if (comment) alert(`Document rejected. Reason: ${comment}`);
+            });
+        });
+
+        // Filters
+        const searchInput = document.getElementById('searchApprovals');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+
+        function filterApprovals() {
+            const searchTerm = searchInput?.value.toLowerCase() || '';
+            const priority = priorityFilter?.value || 'all';
+            const category = categoryFilter?.value || 'all';
+            
+            const desktopItems = document.querySelectorAll('.md\\:block .divide-y > div');
+            const mobileItems = document.querySelectorAll('#mobileApprovalsList .border');
+            
+            const allItems = [...desktopItems, ...mobileItems];
+            allItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const hasUrgent = text.includes('urgent');
+                const categoryMatch = category === 'all' || text.includes(category);
+                const priorityMatch = priority === 'all' || (priority === 'urgent' && hasUrgent) || (priority === 'normal' && !hasUrgent);
+                const searchMatch = searchTerm === '' || text.includes(searchTerm);
+                
+                item.style.display = (searchMatch && priorityMatch && categoryMatch) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterApprovals);
+        if (priorityFilter) priorityFilter.addEventListener('change', filterApprovals);
+        if (categoryFilter) categoryFilter.addEventListener('change', filterApprovals);
+    </script>
 </body>
 </html>

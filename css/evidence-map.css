@@ -220,3 +220,19 @@ input:focus, select:focus {
     button, a, .view-clause-btn { min-height: 44px; min-width: 44px; }
     body { font-size: 14px; }
 }
+/* New Category Badges for Evidence Map */
+.bg-blue-100 { background-color: #dbeafe; }
+.text-blue-800 { color: #1e40af; }
+.bg-blue-600 { background-color: #2563eb; }
+
+.bg-green-100 { background-color: #dcfce7; }
+.text-green-800 { color: #166534; }
+.bg-green-600 { background-color: #16a34a; }
+
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-800 { color: #92400e; }
+.bg-amber-600 { background-color: #d97706; }
+
+.bg-purple-100 { background-color: #f3e8ff; }
+.text-purple-800 { color: #6b21a5; }
+.bg-purple-600 { background-color: #9333ea; }

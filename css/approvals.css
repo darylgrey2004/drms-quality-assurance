@@ -416,3 +416,43 @@ body { background-color: #f4f7fb; }
 
 /* Mobile header spacer */
 .mobile-header-spacer { height: 60px; width: 100%; }
+/* New Category Badges for Approvals */
+.status-instruction {
+    background-color: #dbeafe;
+    color: #1e40af;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-research {
+    background-color: #dcfce7;
+    color: #166534;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-extension {
+    background-color: #fef3c7;
+    color: #92400e;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-employment {
+    background-color: #f3e8ff;
+    color: #6b21a5;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}

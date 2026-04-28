@@ -14,7 +14,7 @@
 <body class="min-h-screen">
 
     <!-- Mobile Menu Toggle Button -->
-    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2.5 rounded-lg shadow-lg text-xl">
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
         ☰
     </button>
     <div class="sidebar-overlay"></div>
@@ -92,7 +92,7 @@
                 <!-- header row -->
                 <div class="mb-6">
                     <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Upload Document</h1>
-                    <p class="text-sm text-gray-500 mt-1">Add new QA records · ISO, AACCUP, COE</p>
+                    <p class="text-sm text-gray-500 mt-1">Add new QA records · Instruction, Research, Extension, Employment</p>
                 </div>
 
                 <!-- upload form card -->
@@ -127,23 +127,28 @@
                             <div class="space-y-4">
                                 <div>
                                     <label for="docTitle" class="block text-sm font-medium text-gray-700 mb-1">Document Title <span class="text-red-500">*</span></label>
-                                    <input type="text" id="docTitle" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., Quality Management System Manual" required>
+                                    <input type="text" id="docTitle" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., Research Publication 2025" required>
                                 </div>
 
                                 <div>
                                     <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category <span class="text-red-500">*</span></label>
                                     <select id="category" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
                                         <option value="">Select category</option>
-                                        <option value="iso">ISO 9001:2015</option>
-                                        <option value="aaccup">AACCUP</option>
-                                        <option value="coe">COE</option>
+                                        <option value="instruction">Instruction</option>
+                                        <option value="research">Research</option>
+                                        <option value="extension">Extension</option>
+                                        <option value="employment">Employment Related Documents</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label for="area" class="block text-sm font-medium text-gray-700 mb-1">Area / Clause <span class="text-red-500">*</span></label>
-                                    <select id="area" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
-                                        <option value="">Select category first</option>
+                                    <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department <span class="text-red-500">*</span></label>
+                                    <select id="department" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                                        <option value="">Select department</option>
+                                        <option value="beed">BEED (Bachelor of Elementary Education)</option>
+                                        <option value="bsed">BSED (Bachelor of Secondary Education)</option>
+                                        <option value="bsned">BSNED (Bachelor of Special Needs Education)</option>
+                                        <option value="bcaed">BCAED (Bachelor of Culture and Arts Education)</option>
                                     </select>
                                 </div>
                             </div>
@@ -175,7 +180,7 @@
                         <!-- keywords -->
                         <div>
                             <label for="keywords" class="block text-sm font-medium text-gray-700 mb-1">Keywords (comma separated)</label>
-                            <input type="text" id="keywords" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., QMS, manual, quality, policy">
+                            <input type="text" id="keywords" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., syllabus, research paper, extension program">
                         </div>
 
                         <!-- approval workflow -->
@@ -213,42 +218,62 @@
                             <div class="text-xs text-gray-500 grid grid-cols-12 pb-2 border-b border-gray-100">
                                 <div class="col-span-5">DOCUMENT</div>
                                 <div class="col-span-2">CATEGORY</div>
-                                <div class="col-span-2">VERSION</div>
+                                <div class="col-span-2">DEPARTMENT</div>
                                 <div class="col-span-3">UPLOADED</div>
                             </div>
                             <div class="divide-y divide-gray-100">
                                 <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Curriculum Development Framework</div>
-                                    <div class="col-span-2 text-gray-600">AACCUP</div>
-                                    <div class="col-span-2 text-gray-600">v1.0</div>
+                                    <div class="col-span-5 text-gray-700">Syllabus - Elementary Education</div>
+                                    <div class="col-span-2 text-gray-600">Instruction</div>
+                                    <div class="col-span-2 text-gray-600">BEED</div>
                                     <div class="col-span-3 text-gray-400 text-xs">20 Feb 2026</div>
                                 </div>
                                 <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Research Output Compilation 2025</div>
-                                    <div class="col-span-2 text-gray-600">COE</div>
-                                    <div class="col-span-2 text-gray-600">v0.3</div>
+                                    <div class="col-span-5 text-gray-700">Research Publication 2025</div>
+                                    <div class="col-span-2 text-gray-600">Research</div>
+                                    <div class="col-span-2 text-gray-600">BSED</div>
                                     <div class="col-span-3 text-gray-400 text-xs">25 Feb 2026</div>
                                 </div>
                                 <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Internal Audit Report Q4</div>
-                                    <div class="col-span-2 text-gray-600">ISO</div>
-                                    <div class="col-span-2 text-gray-600">v1.5</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">01 Dec 2025</div>
+                                    <div class="col-span-5 text-gray-700">Inclusive Education Module</div>
+                                    <div class="col-span-2 text-gray-600">Instruction</div>
+                                    <div class="col-span-2 text-gray-600">BSNED</div>
+                                    <div class="col-span-3 text-gray-400 text-xs">22 Feb 2026</div>
+                                </div>
+                                <div class="grid grid-cols-12 py-2 text-sm items-center">
+                                    <div class="col-span-5 text-gray-700">Cultural Heritage Documentation</div>
+                                    <div class="col-span-2 text-gray-600">Extension</div>
+                                    <div class="col-span-2 text-gray-600">BCAED</div>
+                                    <div class="col-span-3 text-gray-400 text-xs">18 Feb 2026</div>
+                                </div>
+                                <div class="grid grid-cols-12 py-2 text-sm items-center">
+                                    <div class="col-span-5 text-gray-700">Faculty Employment Contract</div>
+                                    <div class="col-span-2 text-gray-600">Employment</div>
+                                    <div class="col-span-2 text-gray-600">BEED</div>
+                                    <div class="col-span-3 text-gray-400 text-xs">15 Feb 2026</div>
                                 </div>
                             </div>
                         </div>
                         <div class="block md:hidden space-y-3">
                             <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Curriculum Development Framework</div>
-                                <div class="text-xs text-gray-500">AACCUP · v1.0 · 20 Feb 2026</div>
+                                <div class="font-medium text-gray-800 text-sm">Syllabus - Elementary Education</div>
+                                <div class="text-xs text-gray-500">Instruction · BEED · 20 Feb 2026</div>
                             </div>
                             <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Research Output Compilation 2025</div>
-                                <div class="text-xs text-gray-500">COE · v0.3 · 25 Feb 2026</div>
+                                <div class="font-medium text-gray-800 text-sm">Research Publication 2025</div>
+                                <div class="text-xs text-gray-500">Research · BSED · 25 Feb 2026</div>
                             </div>
                             <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Internal Audit Report Q4</div>
-                                <div class="text-xs text-gray-500">ISO · v1.5 · 01 Dec 2025</div>
+                                <div class="font-medium text-gray-800 text-sm">Inclusive Education Module</div>
+                                <div class="text-xs text-gray-500">Instruction · BSNED · 22 Feb 2026</div>
+                            </div>
+                            <div class="border-b pb-2">
+                                <div class="font-medium text-gray-800 text-sm">Cultural Heritage Documentation</div>
+                                <div class="text-xs text-gray-500">Extension · BCAED · 18 Feb 2026</div>
+                            </div>
+                            <div class="border-b pb-2">
+                                <div class="font-medium text-gray-800 text-sm">Faculty Employment Contract</div>
+                                <div class="text-xs text-gray-500">Employment · BEED · 15 Feb 2026</div>
                             </div>
                         </div>
                     </div>
@@ -324,71 +349,6 @@
                 if (window.innerWidth > 768) {
                     closeSidebar();
                 }
-            });
-        }
-        
-        // Area options mapping
-        const areaOptions = {
-            iso: [
-                { value: 'clause4', label: 'Clause 4 - Context of the Organization' },
-                { value: 'clause5', label: 'Clause 5 - Leadership' },
-                { value: 'clause6', label: 'Clause 6 - Planning' },
-                { value: 'clause7', label: 'Clause 7 - Support' },
-                { value: 'clause8', label: 'Clause 8 - Operation' },
-                { value: 'clause9', label: 'Clause 9 - Performance Evaluation' },
-                { value: 'clause10', label: 'Clause 10 - Improvement' }
-            ],
-            aaccup: [
-                { value: 'area1', label: 'Area I - Vision, Mission, Goals' },
-                { value: 'area2', label: 'Area II - Faculty' },
-                { value: 'area3', label: 'Area III - Curriculum' },
-                { value: 'area4', label: 'Area IV - Students' },
-                { value: 'area5', label: 'Area V - Research' },
-                { value: 'area6', label: 'Area VI - Extension' },
-                { value: 'area7', label: 'Area VII - Library' },
-                { value: 'area8', label: 'Area VIII - Facilities' },
-                { value: 'area9', label: 'Area IX - Laboratories' },
-                { value: 'area10', label: 'Area X - Administration' }
-            ],
-            coe: [
-                { value: 'indicator1', label: 'Indicator 1 - Quality of Teaching' },
-                { value: 'indicator2', label: 'Indicator 2 - Research Output' },
-                { value: 'indicator3', label: 'Indicator 3 - Extension Services' },
-                { value: 'indicator4', label: 'Indicator 4 - Curriculum Development' },
-                { value: 'indicator5', label: 'Indicator 5 - Faculty Development' },
-                { value: 'indicator6', label: 'Indicator 6 - Student Performance' },
-                { value: 'indicator7', label: 'Indicator 7 - International Linkages' }
-            ]
-        };
-        
-        // Update area dropdown
-        const categorySelect = document.getElementById('category');
-        const areaSelect = document.getElementById('area');
-        
-        if (categorySelect && areaSelect) {
-            categorySelect.addEventListener('change', function() {
-                const category = this.value;
-                areaSelect.innerHTML = '';
-                
-                if (!category) {
-                    areaSelect.innerHTML = '<option value="">Select category first</option>';
-                    return;
-                }
-                
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Select area / clause';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                areaSelect.appendChild(defaultOption);
-                
-                const options = areaOptions[category] || [];
-                options.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt.value;
-                    option.textContent = opt.label;
-                    areaSelect.appendChild(option);
-                });
             });
         }
         
@@ -516,7 +476,7 @@
                 
                 const title = document.getElementById('docTitle')?.value;
                 const category = document.getElementById('category')?.value;
-                const area = document.getElementById('area')?.value;
+                const department = document.getElementById('department')?.value;
                 const author = document.getElementById('author')?.value;
                 
                 if (selectedFiles.length === 0) {
@@ -524,7 +484,7 @@
                     return;
                 }
                 
-                if (!title || !category || !area || !author) {
+                if (!title || !category || !department || !author) {
                     alert('Please fill in all required fields');
                     return;
                 }
@@ -541,9 +501,6 @@
                     selectedFiles = [];
                     renderFileList();
                     fileInput.value = '';
-                    if (areaSelect) {
-                        areaSelect.innerHTML = '<option value="">Select category first</option>';
-                    }
                 }, 1500);
             });
         }
@@ -565,14 +522,6 @@
         
         if (closeSuccessBtn) closeSuccessBtn.addEventListener('click', closeModal);
         if (successBackdrop) successBackdrop.addEventListener('click', closeModal);
-        
-        // View and Download button handlers
-        document.querySelectorAll('.view-btn, .view-btn-sm').forEach(btn => {
-            btn.addEventListener('click', () => alert('Document viewer would open here'));
-        });
-        document.querySelectorAll('.download-btn, .download-btn-sm').forEach(btn => {
-            btn.addEventListener('click', () => alert('Document download would start here'));
-        });
     </script>
 </body>
 </html>
