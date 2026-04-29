@@ -41,11 +41,17 @@ async function createSession(userId, req) {
 // @desc    Register a new user
 // @access  Public
 router.post('/register', async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, middleInitial, email, password, role } = req.body;
 
   // Basic validation
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !role) {
     return res.status(400).json({ msg: 'Please enter all fields' });
+  }
+
+  // Validate role against ENUM values
+  const validRoles = ['admin', 'dean', 'area-chair', 'faculty', 'evaluator'];
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({ msg: 'Invalid role selected' });
   }
 
   try {
@@ -63,8 +69,10 @@ router.post('/register', async (req, res) => {
     const newUser = {
       firstName,
       lastName,
+      middleInitial: middleInitial || null,
       email,
       password: hashedPassword,
+      role,
       status: 'pending', // Default status
     };
 

@@ -1,59 +1,13 @@
 // js/user-dashboard.js
 
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('User Dashboard JS loaded successfully');
 
-    // ── Sidebar: load user info + logout + heartbeat ──
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
-    const role = (user.role || '').toLowerCase().trim();
-    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
-    const el = (id) => document.getElementById(id);
-    if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
-    if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || 'Faculty Member';
-    const portalLabels = {
-        'faculty member': 'Faculty Portal',
-        'area chair/program head': 'Area Chair Portal'
-    };
-    if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${user.role} Portal`;
-    const accessLabels = { 'faculty member': 'Faculty Access', 'area chair/program head': 'Area Chair Access' };
-    if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${user.role} Access`;
-    // Fetch department from profile to match user-profile.html display
-    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
-        headers: { 'x-auth-token': token }
-    }).then(r => r.json()).then(data => {
-        if (el('sidebarRole')) {
-            const dept = data.department ? ` · ${data.department}` : '';
-            el('sidebarRole').textContent = `${data.role || user.role || 'Faculty Member'}${dept}`;
-        }
-    }).catch(() => {});
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-    }
-    function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-        }).catch(() => {});
-    }
-    sendHeartbeat();
-    setInterval(sendHeartbeat, 2 * 60 * 1000);
-    // Hide My Approvals link for Faculty Member
-    if (role === 'faculty member') {
-        const approvalsLink = document.querySelector('a[href="user-approvals.html"]');
-        if (approvalsLink) approvalsLink.style.display = 'none';
-    }
-    // ─────────────────────────────────────────────────
+    // Initialize user session (handled by user-session.js)
+    const session = await initializeUserPage();
+    if (!session) return;
     
+    const { token, user, role } = session;
     // Notification button
     const notificationBtn = document.querySelector('button[class*="bg-white p-2 rounded-full"]');
     if (notificationBtn) {

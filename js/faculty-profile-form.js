@@ -16,6 +16,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form submission
     const form = document.getElementById('facultyProfileForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    // Handle cancel button
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel? You will lose your registration progress.')) {
+                localStorage.removeItem('registrationData');
+                window.location.href = 'registration.html';
+            }
+        });
+    }
     
     if (form) {
         form.addEventListener('submit', async function(e) {
@@ -30,6 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Validate all 4 fields are filled
             if (!employeeId || !position || !department || !employmentStatus) {
                 alert('Please fill in all required employment fields.');
+                return;
+            }
+
+            // Validate employee ID is numeric
+            if (!/^\d{1,6}$/.test(employeeId)) {
+                alert('Employee ID must be numeric (1-6 digits).');
                 return;
             }
 
@@ -49,9 +66,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 employmentStatus: employmentStatus
             };
 
+            // Disable submit button during processing
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
             // Send to backend
             try {
-                const response = await fetch('http://localhost:3000/api/profile/faculty', {
+                console.log('Sending faculty profile data to backend:', finalPayload);
+                const response = await fetch('http://127.0.0.1:3000/api/profile/faculty', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -59,12 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify(finalPayload),
                 });
 
+                console.log('Response status:', response.status);
                 const contentType = response.headers.get('content-type') || '';
                 const isJson = contentType.includes('application/json');
                 const data = isJson ? await response.json() : { msg: await response.text() };
 
+                console.log('Response data:', data);
                 if (!response.ok) {
-                    throw new Error(data.msg || 'An unknown error occurred during profile setup.');
+                    throw new Error(data.msg || `Server error: ${response.status}`);
                 }
 
                 // Success - Clear localStorage and redirect
@@ -73,8 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = 'landing.html';
 
             } catch (error) {
-                console.error('Profile setup failed:', error.message);
+                console.error('Profile setup failed:', error);
                 alert(`Profile setup failed: ${error.message}`);
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
     }

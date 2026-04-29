@@ -85,7 +85,7 @@ router.put('/profile/:userId', auth, async (req, res) => {
       await db.query('UPDATE users SET ? WHERE id = ?', [userUpdates, userId]);
     }
 
-    // Update faculty_profiles table
+    // Update or insert faculty_profiles table
     const [result] = await db.query(
       'UPDATE faculty_profiles SET ? WHERE user_id = ?',
       [profileData, userId]
@@ -94,12 +94,20 @@ router.put('/profile/:userId', auth, async (req, res) => {
     console.log('Update result:', result);
     console.log('Affected rows:', result.affectedRows);
 
+    // If no rows were affected, try to insert a new profile record
     if (result.affectedRows === 0) {
-      console.log('Profile not found for user_id:', userId);
-      return res.status(404).json({ msg: 'Profile not found' });
+      console.log('Profile not found, attempting to insert new profile for user_id:', userId);
+      try {
+        const insertData = { user_id: userId, ...profileData };
+        await db.query('INSERT INTO faculty_profiles SET ?', [insertData]);
+        console.log('New profile created successfully');
+      } catch (insertErr) {
+        console.error('Failed to create profile:', insertErr.message);
+        return res.status(400).json({ msg: 'Unable to create or update profile. Please try again.' });
+      }
     }
 
-    console.log('Profile updated successfully');
+    console.log('Profile updated/created successfully');
     const [updatedUsers] = await db.query(
       'SELECT id, firstName, lastName, middleInitial, email, role FROM users WHERE id = ?',
       [userId]

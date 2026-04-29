@@ -67,7 +67,7 @@ body {
 .border-teal-400 { border-color: #2dd4bf; }
 
 /* badge styles */
-.badge-approved, .badge-pending, .badge-draft, .badge-expired,
+.badge-approved, .badge-pending, .badge-draft, .badge-expired, .badge-validated, .badge-rejected, .badge-locked,
 .badge-iso, .badge-aaccup, .badge-coe {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -78,7 +78,10 @@ body {
 
 .badge-approved { background-color: #e3f7ec; color: #0f7b4b; }
 .badge-pending { background-color: #fef9e7; color: #b78103; }
+.badge-validated { background-color: #dbeafe; color: #1e40af; }
 .badge-draft { background-color: #edf2f7; color: #385d7a; }
+.badge-rejected { background-color: #fee2e2; color: #dc2626; }
+.badge-locked { background-color: #f3f4f6; color: #6b7280; }
 .badge-expired { background-color: #fee9e7; color: #b33f2f; }
 .badge-iso { background-color: #f0fdfa; color: #0f766e; }
 .badge-aaccup { background-color: #fef3c7; color: #b45309; }

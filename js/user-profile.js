@@ -1,27 +1,22 @@
 // js/user-profile.js
 
 document.addEventListener('DOMContentLoaded', async function () {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const resolvedUserId = resolveUserId(user, token);
-
-    if (!token || !resolvedUserId) {
-        alert('Please login to view your profile.');
-        window.location.href = 'landing.html';
-        return;
-    }
+    // Wait for user-session.js to initialize
+    const session = await initializeUserPage();
+    if (!session) return;
+    
+    const { token, user } = session;
+    const resolvedUserId = user.id;
 
     let originalData = {};
 
     const editProfileBtn = document.getElementById('editProfileBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
     const dobInput = document.getElementById('dob');
     const ageInput = document.getElementById('age');
 
     const editableFields = [
-        'lastName', 'firstName', 'middleInitial',
         'dob', 'gender', 'civilStatus', 'nationality', 'phone', 'address',
         'employeeId', 'position', 'department', 'employmentStatus',
         'highestDegree', 'specialization', 'institution', 'gradYear', 'license', 'continuingEd',
@@ -29,18 +24,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         'researchInterests', 'publications'
     ];
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-    }
-
     if (editProfileBtn) editProfileBtn.addEventListener('click', enableEditMode);
-    if (saveProfileBtn) saveProfileBtn.addEventListener('click', async () => saveUserProfile(resolvedUserId));
+    if (saveProfileBtn) saveProfileBtn.addEventListener('click', async () => await saveUserProfile(resolvedUserId));
     if (cancelEditBtn) {
         cancelEditBtn.addEventListener('click', function () {
             if (confirm('Discard all changes?')) {
@@ -67,34 +52,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     await loadUserProfile(resolvedUserId);
 
-    function resolveUserId(userData, authToken) {
-        try {
-            if (authToken) {
-                const base64Url = authToken.split('.')[1] || '';
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-                const payload = JSON.parse(atob(padded));
-                const tokenId = Number(payload?.user?.id ?? payload?.id ?? null);
-                if (Number.isFinite(tokenId) && tokenId > 0) return tokenId;
-            }
-        } catch (_error) {
-            // Fall back to localStorage user object when token parsing fails.
-        }
-
-        const idFromStorage = Number(userData?.id ?? userData?.userId ?? userData?._id ?? null);
-        if (Number.isFinite(idFromStorage) && idFromStorage > 0) {
-            return idFromStorage;
-        }
-
-        return null;
-    }
-
-    // Self-heal stale/missing localStorage user id using token-derived id.
-    localStorage.setItem('user', JSON.stringify({
-        ...user,
-        id: resolvedUserId
-    }));
-
     function enableEditMode() {
         editProfileBtn.classList.add('hidden');
         saveProfileBtn.classList.remove('hidden');
@@ -106,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             field.removeAttribute('readonly');
             field.removeAttribute('disabled');
             field.classList.remove('bg-gray-50');
-            field.classList.add('bg-white');
+            field.classList.add('bg-white', 'border-teal-200');
         });
     }
 
@@ -123,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             } else {
                 field.setAttribute('readonly', 'readonly');
             }
-            field.classList.remove('bg-white');
+            field.classList.remove('bg-white', 'border-teal-200');
             field.classList.add('bg-gray-50');
         });
     }
@@ -159,9 +116,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         const displayRole = data.role || 'Faculty Member';
         const roleDept = `${displayRole} · ${data.department || 'N/A'}`;
 
-        document.getElementById('sidebarInitials').textContent = initials;
-        document.getElementById('sidebarName').textContent = fullName;
-        document.getElementById('sidebarRole').textContent = roleDept;
         document.getElementById('profileInitials').textContent = initials;
         document.getElementById('profileName').textContent = fullName;
         document.getElementById('profileRoleDept').textContent = roleDept;
@@ -186,11 +140,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                     : 'bg-gray-100 text-gray-700'
         ) + ' text-xs px-2 py-1 rounded-full';
 
+        // Personal Information (read-only fields)
         document.getElementById('lastName').value = data.lastName || '';
         document.getElementById('firstName').value = data.firstName || '';
         document.getElementById('middleInitial').value = data.middleInitial || '';
         document.getElementById('email').value = data.email || '';
 
+        // Editable fields
         if (data.dateOfBirth) document.getElementById('dob').value = new Date(data.dateOfBirth).toISOString().split('T')[0];
         if (data.age !== null && data.age !== undefined) document.getElementById('age').value = data.age;
         if (data.gender) document.getElementById('gender').value = data.gender;
@@ -223,34 +179,35 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function saveUserProfile(userId) {
         const profileData = {
-            firstName: document.getElementById('firstName')?.value?.trim() || null,
-            lastName: document.getElementById('lastName')?.value?.trim() || null,
-            middleInitial: document.getElementById('middleInitial')?.value?.trim() || null,
             dateOfBirth: document.getElementById('dob')?.value || null,
             age: document.getElementById('age')?.value || null,
             gender: document.getElementById('gender')?.value || null,
             civilStatus: document.getElementById('civilStatus')?.value || null,
-            nationality: document.getElementById('nationality')?.value || null,
-            phone: document.getElementById('phone')?.value || null,
-            address: document.getElementById('address')?.value || null,
-            employeeId: document.getElementById('employeeId')?.value || null,
-            position: document.getElementById('position')?.value || null,
-            department: document.getElementById('department')?.value || null,
-            employmentStatus: document.getElementById('employmentStatus')?.value || null,
+            nationality: document.getElementById('nationality')?.value?.trim() || null,
+            phone: document.getElementById('phone')?.value?.trim() || null,
+            address: document.getElementById('address')?.value?.trim() || null,
+            employeeId: document.getElementById('employeeId')?.value?.trim() || null,
+            position: document.getElementById('position')?.value?.trim() || null,
+            department: document.getElementById('department')?.value?.trim() || null,
+            employmentStatus: document.getElementById('employmentStatus')?.value?.trim() || null,
             highestDegree: document.getElementById('highestDegree')?.value || null,
-            specialization: document.getElementById('specialization')?.value || null,
-            institution: document.getElementById('institution')?.value || null,
+            specialization: document.getElementById('specialization')?.value?.trim() || null,
+            institution: document.getElementById('institution')?.value?.trim() || null,
             gradYear: document.getElementById('gradYear')?.value || null,
-            license: document.getElementById('license')?.value || null,
-            continuingEd: document.getElementById('continuingEd')?.value || null,
-            subjectsTaught: document.getElementById('subjectsTaught')?.value || null,
-            yearLevel: document.getElementById('yearLevel')?.value || null,
-            loadUnits: document.getElementById('loadUnits')?.value || null,
-            advising: document.getElementById('advising')?.value || null,
-            committeeRoles: document.getElementById('committeeRoles')?.value || null,
-            researchInterests: document.getElementById('researchInterests')?.value || null,
-            publications: document.getElementById('publications')?.value || null
+            license: document.getElementById('license')?.value?.trim() || null,
+            continuingEd: document.getElementById('continuingEd')?.value?.trim() || null,
+            subjectsTaught: document.getElementById('subjectsTaught')?.value?.trim() || null,
+            yearLevel: document.getElementById('yearLevel')?.value?.trim() || null,
+            loadUnits: document.getElementById('loadUnits')?.value?.trim() || null,
+            advising: document.getElementById('advising')?.value?.trim() || null,
+            committeeRoles: document.getElementById('committeeRoles')?.value?.trim() || null,
+            researchInterests: document.getElementById('researchInterests')?.value?.trim() || null,
+            publications: document.getElementById('publications')?.value?.trim() || null
         };
+
+        // Disable save button during save
+        saveProfileBtn.disabled = true;
+        saveProfileBtn.textContent = 'Saving...';
 
         try {
             const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
@@ -268,6 +225,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             const result = await response.json().catch(() => ({}));
+            
+            // Update localStorage with new department info
             if (result.user) {
                 const existingUser = JSON.parse(localStorage.getItem('user') || '{}');
                 localStorage.setItem('user', JSON.stringify({
@@ -279,9 +238,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             alert(result.msg || 'Profile updated successfully!');
             await loadUserProfile(userId);
+
+            // Reload page to refresh sidebar with updated user data
+            location.reload();
         } catch (error) {
             console.error('Error saving profile:', error);
             alert(`Failed to save profile: ${error.message}`);
+        } finally {
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.textContent = 'Save Changes';
         }
     }
 });

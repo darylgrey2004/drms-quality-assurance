@@ -25,9 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropZoneFiles = document.getElementById('dropZoneFiles');
     const uploadFileList = document.getElementById('uploadFileList');
     const addMoreBtn = document.getElementById('addMoreBtn');
-    const categorySelect = document.getElementById('category');
-    const areaSelect = document.getElementById('area');
-    const uploadForm = document.getElementById('uploadForm');
+
     const cancelBtn = document.getElementById('cancelBtn');
     const uploadSuccessModal = document.getElementById('uploadSuccessModal');
     const uploadSuccessBackdrop = document.getElementById('uploadSuccessBackdrop');
@@ -48,72 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (closeUploadSuccessBtn) closeUploadSuccessBtn.addEventListener('click', hideUploadSuccessModal);
     if (uploadSuccessBackdrop) uploadSuccessBackdrop.addEventListener('click', hideUploadSuccessModal);
-    
-    // Area options mapping based on category
-    const areaOptions = {
-        iso: [
-            { value: 'clause4', label: 'Clause 4 - Context of the Organization' },
-            { value: 'clause5', label: 'Clause 5 - Leadership' },
-            { value: 'clause6', label: 'Clause 6 - Planning' },
-            { value: 'clause7', label: 'Clause 7 - Support' },
-            { value: 'clause8', label: 'Clause 8 - Operation' },
-            { value: 'clause9', label: 'Clause 9 - Performance Evaluation' },
-            { value: 'clause10', label: 'Clause 10 - Improvement' }
-        ],
-        aaccup: [
-            { value: 'area1', label: 'Area I - Vision, Mission, Goals and Objectives' },
-            { value: 'area2', label: 'Area II - Faculty' },
-            { value: 'area3', label: 'Area III - Curriculum and Instruction' },
-            { value: 'area4', label: 'Area IV - Students' },
-            { value: 'area5', label: 'Area V - Research' },
-            { value: 'area6', label: 'Area VI - Extension and Community Involvement' },
-            { value: 'area7', label: 'Area VII - Library' },
-            { value: 'area8', label: 'Area VIII - Physical Facilities' },
-            { value: 'area9', label: 'Area IX - Laboratories' },
-            { value: 'area10', label: 'Area X - Administration' }
-        ],
-        coe: [
-            { value: 'indicator1', label: 'Indicator 1 - Quality of Teaching' },
-            { value: 'indicator2', label: 'Indicator 2 - Research Output' },
-            { value: 'indicator3', label: 'Indicator 3 - Extension Services' },
-            { value: 'indicator4', label: 'Indicator 4 - Curriculum Development' },
-            { value: 'indicator5', label: 'Indicator 5 - Faculty Development' },
-            { value: 'indicator6', label: 'Indicator 6 - Student Performance' },
-            { value: 'indicator7', label: 'Indicator 7 - International Linkages' }
-        ]
-    };
-    
-    // Update area dropdown based on category selection
-    if (categorySelect && areaSelect) {
-        categorySelect.addEventListener('change', function() {
-            const category = this.value;
-            
-            // Clear current options
-            areaSelect.innerHTML = '';
-            
-            if (!category) {
-                areaSelect.innerHTML = '<option value="">Select category first</option>';
-                return;
-            }
-            
-            // Add default option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select area / clause';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            areaSelect.appendChild(defaultOption);
-            
-            // Add options based on category
-            const options = areaOptions[category] || [];
-            options.forEach(opt => {
-                const option = document.createElement('option');
-                option.value = opt.value;
-                option.textContent = opt.label;
-                areaSelect.appendChild(option);
-            });
-        });
-    }
+
     
     // File drop zone functionality
     if (dropZone && fileInput) {
@@ -248,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Basic validation
             const title = document.getElementById('docTitle')?.value;
             const category = document.getElementById('category')?.value;
-            const area = document.getElementById('area')?.value;
+            const department = document.getElementById('department')?.value;
             const author = document.getElementById('author')?.value;
             const files = selectedFiles;
             
@@ -257,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            if (!title || !category || !area || !author) {
+            if (!title || !category || !department || !author) {
                 alert('Please fill in all required fields');
                 return;
             }
@@ -293,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         uploadForm.reset();
                         selectedFiles = [];
                         renderFileList();
-                        if (areaSelect) areaSelect.innerHTML = '<option value="">Select category first</option>';
                     }, 250);
                     return;
                 }
@@ -304,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formData = new FormData();
                 formData.append('title', title);
                 formData.append('category', category);
-                formData.append('area', area);
+                formData.append('department', department);
                 formData.append('version', document.getElementById('version')?.value || 'v1.0');
                 formData.append('author', author);
                 formData.append('description', document.getElementById('description')?.value || '');
@@ -348,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateRowProgress(currentIndex, 0, msg);
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
+                        alert(`Upload failed: ${msg}`);
                     }
                 });
 
@@ -356,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateRowProgress(currentIndex, 0, 'Network error');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    alert('Network error occurred during upload');
                 });
 
                 xhr.send(formData);
@@ -366,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Uploading document(s):', {
                 title,
                 category,
-                area,
+                department,
                 author,
                 version: document.getElementById('version')?.value,
                 expiryDate: document.getElementById('expiryDate')?.value,
@@ -402,4 +336,54 @@ document.addEventListener('DOMContentLoaded', function() {
             link.style.background = '#1a4450';
         }
     });
+
+    // Mobile Sidebar Toggle
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.getElementById('mainSidebar');
+    
+    if (menuToggle && sidebar) {
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+        
+        function openSidebar() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.classList.add('sidebar-open');
+        }
+        
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+        
+        overlay.addEventListener('click', closeSidebar);
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+        
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+    }
 });

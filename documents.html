@@ -140,7 +140,7 @@
 
                 <!-- documents count -->
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm text-gray-600">Showing <span id="docCount">12</span> documents</span>
+                    <span class="text-sm text-gray-600">Showing <span id="docCount">0</span> documents</span>
                 </div>
 
                 <!-- Desktop Table View -->
@@ -167,7 +167,7 @@
 
                 <!-- pagination -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-                    <div class="text-sm text-gray-500">Showing <span id="paginationStart">1</span> to <span id="paginationEnd">12</span> of <span id="totalDocuments">12</span> documents</div>
+                    <div class="text-sm text-gray-500">Showing <span id="paginationStart">0</span> to <span id="paginationEnd">0</span> of <span id="totalDocuments">0</span> documents</div>
                     <div class="flex gap-2 flex-wrap justify-center">
                         <button id="prevPageBtn" class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm">Previous</button>
                         <button id="page1Btn" class="px-3 py-1.5 bg-teal-700 text-white rounded-lg text-sm">1</button>
@@ -179,127 +179,9 @@
         </main>
     </div>
 
-    <script>
-        // Document data with new categories and departments
-        let documents = [
-            { id: 1, title: "Syllabus - Elementary Education", author: "Dr. Santos", date: "2026-02-15", category: "Instruction", categoryClass: "instruction", department: "BEED", status: "Approved", statusClass: "approved", version: "v3.2", isLocked: false },
-            { id: 2, title: "Research Publication 2025", author: "Dr. Reyes", date: "2026-02-25", category: "Research", categoryClass: "research", department: "BSED", status: "Pending Review", statusClass: "pending", version: "v0.3", isLocked: false },
-            { id: 3, title: "Community Extension Program", author: "Prof. Mendoza", date: "2026-02-22", category: "Extension", categoryClass: "extension", department: "BPED", status: "Pending Review", statusClass: "pending", version: "v1.1", isLocked: false },
-            { id: 4, title: "Faculty Employment Contract", author: "Dean Cruz", date: "2026-01-10", category: "Employment Related Documents", categoryClass: "employment", department: "BEED", status: "Approved", statusClass: "approved", version: "v2.1", isLocked: true },
-            { id: 5, title: "Inclusive Education Module", author: "Prof. Garcia", date: "2026-02-20", category: "Instruction", categoryClass: "instruction", department: "BSNED", status: "Approved", statusClass: "approved", version: "v1.0", isLocked: false },
-            { id: 6, title: "Cultural Heritage Documentation", author: "Dr. Torres", date: "2026-02-18", category: "Extension", categoryClass: "extension", department: "BCAED", status: "Approved", statusClass: "approved", version: "v2.3", isLocked: true },
-            { id: 7, title: "Learning Materials - Secondary Math", author: "Prof. Lim", date: "2026-02-10", category: "Instruction", categoryClass: "instruction", department: "BSED", status: "Draft", statusClass: "draft", version: "v0.5", isLocked: false },
-            { id: 8, title: "Action Research Proposal", author: "Dr. Rivera", date: "2026-02-28", category: "Research", categoryClass: "research", department: "BEED", status: "Pending Review", statusClass: "pending", version: "v1.0", isLocked: false },
-            { id: 9, title: "Barangay Extension Report", author: "Prof. Santos", date: "2026-02-14", category: "Extension", categoryClass: "extension", department: "BSNED", status: "Approved", statusClass: "approved", version: "v2.0", isLocked: true },
-            { id: 10, title: "Employment Benefits Guide", author: "HR Office", date: "2026-01-20", category: "Employment Related Documents", categoryClass: "employment", department: "BCAED", status: "Approved", statusClass: "approved", version: "v1.2", isLocked: false },
-            { id: 11, title: "Physical Education Syllabus", author: "Prof. Cruz", date: "2026-02-05", category: "Instruction", categoryClass: "instruction", department: "BPED", status: "Draft", statusClass: "draft", version: "v0.8", isLocked: false },
-            { id: 12, title: "Research Journal Publication", author: "Dr. Mendoza", date: "2026-02-12", category: "Research", categoryClass: "research", department: "BSNED", status: "Approved", statusClass: "approved", version: "v1.5", isLocked: true }
-        ];
-
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
-
-        // Button action handlers
-        function handleView(e) { alert(`Viewing document: ${e.currentTarget.dataset.title}`); }
-        function handleDownload(e) { alert(`Downloading document: ${e.currentTarget.dataset.title}`); }
-        function handleEdit(e) { alert(`Editing document: ${e.currentTarget.dataset.title}`); }
-        function handleDelete(e) { const id = parseInt(e.currentTarget.dataset.id); const title = e.currentTarget.dataset.title; if (confirm(`Delete "${title}"?`)) { documents = documents.filter(d => d.id !== id); renderDocuments(); alert(`Document "${title}" deleted.`); } }
-        function handleLockToggle(e) { const id = parseInt(e.currentTarget.dataset.id); const title = e.currentTarget.dataset.title; const isLocked = e.currentTarget.dataset.locked === 'true'; if (confirm(`${isLocked ? 'Unlock' : 'Lock'} "${title}"?`)) { const doc = documents.find(d => d.id === id); if (doc) { doc.isLocked = !isLocked; renderDocuments(); alert(`Document "${title}" ${doc.isLocked ? 'locked' : 'unlocked'}.`); } } }
-
-        function renderDocuments() {
-            const tbody = document.getElementById('documentsTableBody');
-            const mobileContainer = document.getElementById('mobileDocumentsContainer');
-            if (tbody) {
-                tbody.innerHTML = documents.map(doc => `
-                    <tr class="doc-row hover:bg-gray-50 transition">
-                        <td class="py-3 px-4"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400">by ${escapeHtml(doc.author)} · ${doc.date}</div></td>
-                        <td class="py-3 px-4"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span></td>
-                        <td class="py-3 px-4"><span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(doc.department)}</span></td>
-                        <td class="py-3 px-4"><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></td>
-                        <td class="py-3 px-4 text-gray-600 text-sm">${doc.version}</td>
-                        <td class="py-3 px-4"><div class="flex flex-wrap gap-2"><button class="btn-view" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></td>
-                    </tr>
-                `).join('');
-            }
-            if (mobileContainer) {
-                mobileContainer.innerHTML = documents.map(doc => `
-                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400 mb-2">by ${escapeHtml(doc.author)} · ${doc.date}</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span><span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(doc.department)}</span><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></div><div class="text-sm text-gray-600 mb-3">Version: ${doc.version}</div><div class="flex flex-wrap gap-2"><button class="btn-view-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></div>
-                `).join('');
-            }
-            document.getElementById('docCount').textContent = documents.length;
-            document.getElementById('totalDocuments').textContent = documents.length;
-            document.getElementById('paginationEnd').textContent = documents.length;
-            
-            document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => { btn.removeEventListener('click', handleView); btn.addEventListener('click', handleView); });
-            document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => { btn.removeEventListener('click', handleDownload); btn.addEventListener('click', handleDownload); });
-            document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => { btn.removeEventListener('click', handleEdit); btn.addEventListener('click', handleEdit); });
-            document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => { btn.removeEventListener('click', handleDelete); btn.addEventListener('click', handleDelete); });
-            document.querySelectorAll('.btn-lock, .btn-lock-sm').forEach(btn => { btn.removeEventListener('click', handleLockToggle); btn.addEventListener('click', handleLockToggle); });
-        }
-        
-        renderDocuments();
-        
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        document.getElementById('uploadBtn')?.addEventListener('click', () => window.location.href = 'upload.html');
-        
-        function filterDocuments() {
-            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
-            const category = document.getElementById('categoryFilter')?.value || 'all';
-            const department = document.getElementById('departmentFilter')?.value || 'all';
-            const status = document.getElementById('statusFilter')?.value || 'all';
-            const filtered = documents.filter(doc => {
-                const matchesSearch = searchTerm === '' || doc.title.toLowerCase().includes(searchTerm) || doc.author.toLowerCase().includes(searchTerm);
-                const matchesCategory = category === 'all' || doc.categoryClass === category;
-                const matchesDepartment = department === 'all' || doc.department === department.toUpperCase();
-                const matchesStatus = status === 'all' || doc.statusClass === status;
-                return matchesSearch && matchesCategory && matchesDepartment && matchesStatus;
-            });
-            const tbody = document.getElementById('documentsTableBody');
-            const mobileContainer = document.getElementById('mobileDocumentsContainer');
-            if (tbody) {
-                tbody.innerHTML = filtered.map(doc => `<tr class="doc-row hover:bg-gray-50 transition"><td class="py-3 px-4"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400">by ${escapeHtml(doc.author)} · ${doc.date}</div></td><td class="py-3 px-4"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span></td><td class="py-3 px-4"><span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(doc.department)}</span></td><td class="py-3 px-4"><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></td><td class="py-3 px-4 text-gray-600 text-sm">${doc.version}</td><td class="py-3 px-4"><div class="flex flex-wrap gap-2"><button class="btn-view" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></td></tr>`).join('');
-            }
-            if (mobileContainer) {
-                mobileContainer.innerHTML = filtered.map(doc => `<div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div><div class="text-xs text-gray-400 mb-2">by ${escapeHtml(doc.author)} · ${doc.date}</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(doc.category)}</span><span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(doc.department)}</span><span class="badge-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span></div><div class="text-sm text-gray-600 mb-3">Version: ${doc.version}</div><div class="flex flex-wrap gap-2"><button class="btn-view-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">View</button><button class="btn-download-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Download</button><button class="btn-edit-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Edit</button><button class="btn-delete-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}">Delete</button><button class="btn-lock-sm" data-id="${doc.id}" data-title="${escapeHtml(doc.title)}" data-locked="${doc.isLocked}">${doc.isLocked ? 'Unlock' : 'Lock'}</button></div></div>`).join('');
-            }
-            document.getElementById('docCount').textContent = filtered.length;
-            document.getElementById('totalDocuments').textContent = filtered.length;
-            document.getElementById('paginationEnd').textContent = filtered.length;
-            document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => { btn.removeEventListener('click', handleView); btn.addEventListener('click', handleView); });
-            document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => { btn.removeEventListener('click', handleDownload); btn.addEventListener('click', handleDownload); });
-            document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => { btn.removeEventListener('click', handleEdit); btn.addEventListener('click', handleEdit); });
-            document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => { btn.removeEventListener('click', handleDelete); btn.addEventListener('click', handleDelete); });
-            document.querySelectorAll('.btn-lock, .btn-lock-sm').forEach(btn => { btn.removeEventListener('click', handleLockToggle); btn.addEventListener('click', handleLockToggle); });
-        }
-        
-        document.getElementById('searchInput')?.addEventListener('input', filterDocuments);
-        document.getElementById('categoryFilter')?.addEventListener('change', filterDocuments);
-        document.getElementById('departmentFilter')?.addEventListener('change', filterDocuments);
-        document.getElementById('statusFilter')?.addEventListener('change', filterDocuments);
-        
-        // Pagination
-        let currentPage = 1;
-        const itemsPerPage = 5;
-        
-        function updatePagination() {
-            // Simple pagination for demo
-            console.log('Page changed');
-        }
-        
-        document.getElementById('prevPageBtn')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; updatePagination(); } });
-        document.getElementById('nextPageBtn')?.addEventListener('click', () => { currentPage++; updatePagination(); });
-    </script>
+    <!-- Session Manager -->
+    <script src="js/session-manager.js"></script>
+    <!-- Documents JS -->
+    <script src="js/documents.js"></script>
 </body>
 </html>

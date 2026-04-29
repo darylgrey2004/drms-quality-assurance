@@ -4,8 +4,41 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Homepage JS loaded successfully');
     
-    // ── Heartbeat: Update lastActive status ──
+    // ── Role-based access control ──
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token || !user.id) {
+        window.location.href = 'landing.html';
+        return;
+    }
+    
+    // Validate user role - only admin and dean should access homepage
+    const role = (user.role || '').toLowerCase().trim();
+    const allowedRoles = ['admin', 'dean'];
+    
+    // Redirect faculty and area-chair to user-dashboard.html
+    if (role === 'faculty' || role === 'area-chair') {
+        window.location.href = 'user-dashboard.html';
+        return;
+    }
+    
+    // Redirect evaluator to evaluator-dashboard.html
+    if (role === 'evaluator') {
+        window.location.href = 'evaluator-dashboard.html';
+        return;
+    }
+    
+    // If role is not in allowed list, redirect to landing
+    if (!allowedRoles.includes(role)) {
+        alert('Access denied. Invalid role for this dashboard.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'landing.html';
+        return;
+    }
+    
+    // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
         fetch('http://localhost:3000/api/user/heartbeat', {
             method: 'POST', 
