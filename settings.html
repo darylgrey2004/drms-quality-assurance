@@ -79,6 +79,7 @@
                     <ul class="flex gap-1 text-sm font-medium" id="settingsTabs">
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="general">General</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="workflow">Workflow</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="requirements">Document Requirements</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="standards">Standards</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="notifications">Notifications</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="backup">Backup</a></li>
@@ -96,7 +97,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Institution Name</label><p class="text-xs text-gray-400">Your college/university name</p></div><div class="md:col-span-2"><input type="text" id="institutionName" placeholder="e.g., College of Teacher Education" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">System Email</label><p class="text-xs text-gray-400">For notifications and system messages</p></div><div class="md:col-span-2"><input type="email" id="systemEmail" placeholder="e.g., qa@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Timezone</label><p class="text-xs text-gray-400">System timezone for logs and records</p></div><div class="md:col-span-2"><select id="timezone" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="Asia/Manila" selected>Asia/Manila (UTC+8)</option><option value="UTC">UTC</option><option value="America/New_York">America/New York</option></select></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Date Format</label><p class="text-xs text-gray-400">How dates are displayed</p></div><div class="md:col-span-2"><select id="dateFormat" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="Y-m-d" selected>YYYY-MM-DD (2026-04-28)</option><option value="m/d/Y">MM/DD/YYYY (04/28/2026)</option><option value="d/m/Y">DD/MM/YYYY (28/04/2026)</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Date Format</label><p class="text-xs text-gray-400">How dates are displayed</p></div><div class="md:col-span-2"><select id="dateFormat" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="Y-m-d" selected>YYYY-MM-DD</option><option value="m/d/Y">MM/DD/YYYY</option><option value="d/m/Y">DD/MM/YYYY</option></select></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Default Language</label><p class="text-xs text-gray-400">System interface language</p></div><div class="md:col-span-2"><select id="language" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="en" selected>English</option><option value="fil">Filipino</option><option value="es">Spanish</option></select></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Maintenance Mode</label><p class="text-xs text-gray-400">Temporarily disable access for non-admins</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="maintenanceMode" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm text-gray-700">Enable maintenance mode</span></label></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Debug Mode</label><p class="text-xs text-gray-400">Show detailed error messages (developers only)</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="debugMode" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm text-gray-700">Enable debug mode</span></label></div></div>
@@ -119,60 +120,105 @@
                     </div>
                 </div>
 
-                <!-- Standards Tab - UPDATED with new categories -->
+                <!-- Document Requirements Tab (NEW - Admins set expected document counts) -->
+                <div id="requirementsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Document Requirements Configuration</h2>
+                        <p class="text-sm text-gray-500 mb-4">Set expected document counts per category and department. These targets determine completeness percentages in reports and dashboards.</p>
+                        
+                        <div class="space-y-6">
+                            <!-- Instruction Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Instruction</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="instructionTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="instruction_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="45" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="instruction_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="65" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="instruction_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="instruction_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="instruction_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Research Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Research</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="researchTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="research_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="research_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="55" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="research_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="research_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="research_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Extension Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Extension</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="extensionTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="extension_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="extension_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="extension_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="extension_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="extension_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Employment Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Employment</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="employmentTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="employment_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="employment_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="employment_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="employment_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="employment_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
+                                <p>⚠️ These expected document counts determine completeness percentages. When a department reaches 100% of its expected documents, it will be marked as "Complete".</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3">
+                            <button id="resetRequirements" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Reset to Defaults</button>
+                            <button id="saveRequirements" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Save Requirements</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Standards Tab -->
                 <div id="standardsTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Standards Configuration</h2>
                         <div class="space-y-4 md:space-y-6">
-                            <!-- Instruction Category -->
-                            <div class="border rounded-lg p-3 md:p-4">
-                                <h3 class="font-medium text-gray-800 mb-2 md:mb-3">Instruction</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Curriculum Development</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Teaching Materials</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Assessment Tools</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Learning Modules</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Syllabi</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Lesson Plans</span></label>
-                                </div>
-                            </div>
-                            
-                            <!-- Research Category -->
-                            <div class="border rounded-lg p-3 md:p-4">
-                                <h3 class="font-medium text-gray-800 mb-2 md:mb-3">Research</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Publications</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Proposals</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Ethics Clearance</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Outputs</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Grants and Funding</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Conference Presentations</span></label>
-                                </div>
-                            </div>
-                            
-                            <!-- Extension Category -->
-                            <div class="border rounded-lg p-3 md:p-4">
-                                <h3 class="font-medium text-gray-800 mb-2 md:mb-3">Extension</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Community Programs</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Outreach Documentation</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Impact Assessment</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Partnership Agreements</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Beneficiary Feedback</span></label>
-                                </div>
-                            </div>
-                            
-                            <!-- Employment Category -->
-                            <div class="border rounded-lg p-3 md:p-4">
-                                <h3 class="font-medium text-gray-800 mb-2 md:mb-3">Employment Related Documents</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Employment Contracts</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Personnel Records</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Benefits Documentation</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Performance Reviews</span></label>
-                                    <label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Leave Records</span></label>
-                                </div>
-                            </div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Instruction</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Curriculum Development</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Teaching Materials</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Assessment Tools</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Learning Modules</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Syllabi</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Lesson Plans</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Research</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Publications</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Proposals</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Ethics Clearance</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Outputs</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Grants and Funding</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Conference Presentations</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Extension</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Community Programs</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Outreach Documentation</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Impact Assessment</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Partnership Agreements</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Beneficiary Feedback</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Employment Related Documents</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Employment Contracts</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Personnel Records</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Benefits Documentation</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Performance Reviews</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Leave Records</span></label></div></div>
                         </div>
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveStandards">Save Changes</button></div>
                     </div>
@@ -273,6 +319,114 @@
             });
         });
         
+        // Function to update total expected counts
+        function updateTotals() {
+            const categories = ['instruction', 'research', 'extension', 'employment'];
+            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+            
+            categories.forEach(cat => {
+                let total = 0;
+                departments.forEach(dept => {
+                    const val = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
+                    total += val;
+                });
+                const totalSpan = document.getElementById(`${cat}Total`);
+                if (totalSpan) totalSpan.textContent = total;
+            });
+        }
+        
+        // Add event listeners to all expected docs inputs
+        document.querySelectorAll('.expected-docs').forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+        
+        // Reset to defaults
+        document.getElementById('resetRequirements')?.addEventListener('click', () => {
+            if (confirm('Reset all document requirements to default values?')) {
+                // Instruction defaults
+                document.getElementById('instruction_beed').value = 45;
+                document.getElementById('instruction_bsed').value = 65;
+                document.getElementById('instruction_bsned').value = 40;
+                document.getElementById('instruction_bcaed').value = 35;
+                document.getElementById('instruction_bped').value = 30;
+                
+                // Research defaults
+                document.getElementById('research_beed').value = 40;
+                document.getElementById('research_bsed').value = 55;
+                document.getElementById('research_bsned').value = 35;
+                document.getElementById('research_bcaed').value = 30;
+                document.getElementById('research_bped').value = 25;
+                
+                // Extension defaults
+                document.getElementById('extension_beed').value = 25;
+                document.getElementById('extension_bsed').value = 25;
+                document.getElementById('extension_bsned').value = 25;
+                document.getElementById('extension_bcaed').value = 25;
+                document.getElementById('extension_bped').value = 25;
+                
+                // Employment defaults
+                document.getElementById('employment_beed').value = 30;
+                document.getElementById('employment_bsed').value = 30;
+                document.getElementById('employment_bsned').value = 30;
+                document.getElementById('employment_bcaed').value = 30;
+                document.getElementById('employment_bped').value = 30;
+                
+                updateTotals();
+                alert('Document requirements reset to default values.');
+            }
+        });
+        
+        // Save requirements
+        document.getElementById('saveRequirements')?.addEventListener('click', () => {
+            // Collect all values
+            const requirements = {
+                instruction: {},
+                research: {},
+                extension: {},
+                employment: {}
+            };
+            
+            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+            const categories = ['instruction', 'research', 'extension', 'employment'];
+            
+            categories.forEach(cat => {
+                departments.forEach(dept => {
+                    requirements[cat][dept] = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
+                });
+            });
+            
+            // Save to localStorage (in a real app, this would be an API call)
+            localStorage.setItem('documentRequirements', JSON.stringify(requirements));
+            
+            alert('Document requirements saved successfully!\n\nThese targets will now determine completeness percentages in reports and dashboards.');
+        });
+        
+        // Load saved requirements on page load
+        function loadSavedRequirements() {
+            const saved = localStorage.getItem('documentRequirements');
+            if (saved) {
+                const requirements = JSON.parse(saved);
+                const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+                const categories = ['instruction', 'research', 'extension', 'employment'];
+                
+                categories.forEach(cat => {
+                    if (requirements[cat]) {
+                        departments.forEach(dept => {
+                            const input = document.getElementById(`${cat}_${dept}`);
+                            if (input && requirements[cat][dept]) {
+                                input.value = requirements[cat][dept];
+                            }
+                        });
+                    }
+                });
+                updateTotals();
+            }
+        }
+        
+        // Initialize totals on page load
+        updateTotals();
+        loadSavedRequirements();
+        
         // Logout button
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             if (confirm('Are you sure you want to logout?')) {
@@ -280,9 +434,11 @@
             }
         });
         
-        // Save buttons
+        // Save buttons for other tabs
         document.querySelectorAll('[id^="save"], #backupNowBtn').forEach(btn => {
-            btn.addEventListener('click', () => alert('Settings saved (demo)'));
+            if (btn.id !== 'saveRequirements' && btn.id !== 'resetRequirements') {
+                btn.addEventListener('click', () => alert('Settings saved (demo)'));
+            }
         });
     </script>
 </body>

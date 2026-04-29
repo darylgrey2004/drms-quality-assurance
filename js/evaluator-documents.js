@@ -2,15 +2,19 @@
 
 // Store document data for viewing
 let documentsData = {};
+let isLoading = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Evaluator Documents JS loaded');
     
     const token = localStorage.getItem('token');
-    const tbody = document.querySelector('tbody');
+    const tbody = document.querySelector('#documentsTableBody');
     
     if (!token) {
         console.error('No authentication token found');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Please login to view documents</td></tr>';
+        }
         return;
     }
 
@@ -30,17 +34,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModalBtn = document.getElementById('closeModalBtn');
 
     function closeDocumentModal() {
-        modal.classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
     }
 
-    closeModal?.addEventListener('click', closeDocumentModal);
-    closeModalBtn?.addEventListener('click', closeDocumentModal);
+    if (closeModal) closeModal.addEventListener('click', closeDocumentModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeDocumentModal);
     
-    modal?.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeDocumentModal();
-        }
-    });
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDocumentModal();
+            }
+        });
+    }
 
     function openDocumentViewer(docId) {
         const doc = documentsData[docId];
@@ -50,26 +56,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update modal header
-        document.getElementById('docViewerTitle').textContent = doc.title || 'Untitled Document';
-        document.getElementById('docViewerMeta').textContent = 
-            `${doc.category || 'N/A'} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+        const docViewerTitle = document.getElementById('docViewerTitle');
+        const docViewerMeta = document.getElementById('docViewerMeta');
+        if (docViewerTitle) docViewerTitle.textContent = doc.title || 'Untitled Document';
+        if (docViewerMeta) docViewerMeta.textContent = 
+            `${doc.category || 'N/A'} · ${doc.department || 'N/A'} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
 
         // Load document content
         const content = document.getElementById('docViewerContent');
         
         if (doc.file_url) {
-            // Determine file type
             const fileUrl = doc.file_url;
             const isPDF = fileUrl.toLowerCase().endsWith('.pdf');
             
-            if (isPDF) {
-                // For PDF, use iframe
+            if (isPDF && content) {
                 content.innerHTML = `
                     <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${doc.title}"></iframe>
                     <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${doc.title}</p>
                 `;
-            } else {
-                // For other files, show download prompt
+            } else if (content) {
                 content.innerHTML = `
                     <div class="text-center py-12">
                         <div class="text-4xl mb-4">📄</div>
@@ -82,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             }
-        } else {
+        } else if (content) {
             content.innerHTML = `
                 <div class="text-center py-12">
                     <div class="text-4xl mb-4">⚠️</div>
@@ -94,29 +99,71 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Setup download button
         const downloadBtn = document.getElementById('downloadDoc');
-        if (doc.file_url) {
-            downloadBtn.onclick = function() {
-                const link = document.createElement('a');
-                link.href = doc.file_url;
-                link.download = doc.title || 'document';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-            downloadBtn.style.display = 'block';
-        } else {
-            downloadBtn.style.display = 'none';
+        if (downloadBtn) {
+            if (doc.file_url) {
+                downloadBtn.onclick = function() {
+                    const link = document.createElement('a');
+                    link.href = doc.file_url;
+                    link.download = doc.title || 'document';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                downloadBtn.style.display = 'block';
+            } else {
+                downloadBtn.style.display = 'none';
+            }
         }
 
         // Show modal
-        modal.classList.remove('hidden');
+        if (modal) modal.classList.remove('hidden');
     }
 
-    // Fetch approved documents from API
-    async function loadApprovedDocuments() {
+    // Helper function to get category badge class
+    function getCategoryClass(category) {
+        const cat = (category || '').toLowerCase();
+        if (cat === 'instruction') return 'badge-instruction';
+        if (cat === 'research') return 'badge-research';
+        if (cat === 'extension') return 'badge-extension';
+        if (cat === 'employment') return 'badge-employment';
+        return 'badge-instruction'; // default
+    }
+
+    // Helper function to get status badge class
+    function getStatusClass(status) {
+        const stat = (status || '').toLowerCase();
+        if (stat === 'approved') return 'badge-approved';
+        if (stat === 'pending') return 'badge-pending';
+        if (stat === 'draft') return 'badge-draft';
+        if (stat === 'expired') return 'badge-expired';
+        return 'badge-pending';
+    }
+
+    // Helper function to get status text
+    function getStatusText(status) {
+        const stat = (status || '').toLowerCase();
+        if (stat === 'approved') return 'Approved';
+        if (stat === 'pending') return 'Pending';
+        if (stat === 'draft') return 'Draft';
+        if (stat === 'expired') return 'Expired';
+        return 'Pending';
+    }
+
+    // Fetch documents from API
+    async function loadDocuments() {
+        if (isLoading) return;
+        isLoading = true;
+        
+        const tbody = document.querySelector('#documentsTableBody');
+        
+        // Show loading state immediately to prevent flash
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center"><div class="inline-block animate-spin rounded-full h-6 w-6 border-3 border-teal-600 border-t-transparent"></div><p class="text-gray-500 mt-2">Loading documents...</p></td></tr>';
+        }
+        
         try {
-            console.log('Fetching approved documents...');
-            const response = await fetch('http://127.0.0.1:3000/api/documents?status=approved', {
+            console.log('Fetching documents...');
+            const response = await fetch('http://127.0.0.1:3000/api/documents', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -129,70 +176,140 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const documents = await response.json();
-            console.log('Documents fetched:', documents);
+            console.log('Documents fetched:', documents.length);
+            
+            // Filter to show only approved documents for evaluator
+            const approvedDocs = documents.filter(doc => doc.status === 'approved');
+            console.log('Approved documents:', approvedDocs.length);
 
-            if (tbody) {
-                // Clear existing rows
-                tbody.innerHTML = '';
+            if (!tbody) return;
 
-                if (documents.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-500">No approved documents available</td></tr>';
-                    return;
-                }
-
-                // Store documents data
-                documents.forEach(doc => {
-                    documentsData[doc.id] = doc;
-                });
-
-                // Populate table with documents
-                documents.forEach(doc => {
-                    const row = document.createElement('tr');
-                    const categoryBg = doc.category === 'ISO' ? 'teal' : doc.category === 'AACCUP' ? 'amber' : 'indigo';
-                    const categoryClass = categoryBg === 'teal' ? 'bg-teal-100 text-teal-700' : categoryBg === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700';
-                    
-                    row.innerHTML = `
-                        <td class="py-3">
-                            <div class="font-medium text-gray-800">${doc.title || 'Untitled'}</div>
-                        </td>
-                        <td class="py-3"><span class="${categoryClass} text-xs px-2 py-1 rounded-full">${doc.category || 'N/A'}</span></td>
-                        <td class="py-3 text-gray-600">${doc.area || 'N/A'}</td>
-                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                        <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
-                        <td class="py-3 text-gray-500 text-xs">${doc.author_name || 'Unknown'}</td>
-                        <td class="py-3 text-gray-500 text-xs">${new Date(doc.created_at).toLocaleDateString('en-CA')}</td>
-                        <td class="py-3">
-                            <button class="view-doc px-3 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 text-teal-600 hover:text-teal-700 font-medium" data-doc-id="${doc.id}">View</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-
-                // Attach event listeners to view buttons
-                document.querySelectorAll('.view-doc').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const docId = this.dataset.docId;
-                        openDocumentViewer(docId);
-                    });
-                });
+            if (approvedDocs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No approved documents available for review</td></tr>';
+                isLoading = false;
+                return;
             }
+
+            // Store documents data
+            documentsData = {};
+            approvedDocs.forEach(doc => {
+                documentsData[doc.id] = doc;
+            });
+
+            // Clear and populate table
+            tbody.innerHTML = '';
+            
+            approvedDocs.forEach(doc => {
+                const row = document.createElement('tr');
+                const categoryClass = getCategoryClass(doc.category);
+                const statusClass = getStatusClass(doc.status);
+                const statusText = getStatusText(doc.status);
+                const categoryDisplay = doc.category || 'N/A';
+                const departmentDisplay = doc.department || 'N/A';
+                const authorDisplay = doc.author_name || doc.author || 'Unknown';
+                const dateDisplay = doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-CA') : 'N/A';
+                const versionDisplay = doc.version || 'v1.0';
+                const titleDisplay = doc.title || 'Untitled Document';
+                
+                row.innerHTML = `
+                    <td class="py-3"><div class="font-medium text-gray-800">${escapeHtml(titleDisplay)}</div></td>
+                    <td class="py-3"><span class="${categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(categoryDisplay)}</span></td>
+                    <td class="py-3 text-gray-600">${escapeHtml(departmentDisplay)}</td>
+                    <td class="py-3"><span class="${statusClass} px-2 py-1 rounded-full text-xs">${statusText}</span></td>
+                    <td class="py-3 text-gray-600">${escapeHtml(versionDisplay)}</td>
+                    <td class="py-3 text-gray-500 text-xs">${escapeHtml(authorDisplay)}</td>
+                    <td class="py-3 text-gray-500 text-xs">${dateDisplay}</td>
+                    <td class="py-3"><button class="view-doc px-3 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 hover:text-teal-700 transition" data-doc-id="${doc.id}">View</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Attach event listeners to view buttons
+            document.querySelectorAll('.view-doc').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const docId = this.dataset.docId;
+                    openDocumentViewer(docId);
+                });
+            });
+            
         } catch (error) {
             console.error('Error loading documents:', error);
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading approved documents</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading documents. Please try again later.</td></tr>';
             }
+        } finally {
+            isLoading = false;
         }
     }
 
-    // Load documents on page load
-    loadApprovedDocuments();
-
-    // Filter input is disabled (view-only)
-    const filterInput = document.getElementById('filterDocuments');
-    if (filterInput) {
-        filterInput.addEventListener('click', function() {
-            alert('🔍 Filtering is disabled in view-only mode. All approved documents are visible for review.');
+    // Helper function to escape HTML
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
         });
     }
+
+    // Load documents on page load
+    loadDocuments();
+
+    // Filter functionality (now works with the loaded data)
+    const filterInput = document.getElementById('filterDocuments');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const departmentFilter = document.getElementById('departmentFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const applyBtn = document.getElementById('applyFiltersBtn');
+    
+    function applyFilters() {
+        const searchTerm = filterInput?.value.toLowerCase() || '';
+        const category = categoryFilter?.value || 'all';
+        const department = departmentFilter?.value || 'all';
+        const status = statusFilter?.value || 'all';
+        
+        const rows = document.querySelectorAll('#documentsTableBody tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowCategory = row.querySelector('.badge-instruction, .badge-research, .badge-extension, .badge-employment')?.textContent.toLowerCase() || '';
+            const rowDepartment = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+            const rowStatus = row.querySelector('.badge-approved, .badge-pending, .badge-draft, .badge-expired')?.textContent.toLowerCase() || '';
+            
+            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+            const matchesCategory = category === 'all' || rowCategory.includes(category);
+            const matchesDepartment = department === 'all' || rowDepartment.includes(department);
+            const matchesStatus = status === 'all' || rowStatus.includes(status);
+            
+            if (matchesSearch && matchesCategory && matchesDepartment && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update visible count if there's a counter element
+        const docCountElement = document.querySelector('.text-sm.text-gray-500');
+        if (docCountElement) {
+            docCountElement.textContent = `Showing ${visibleCount} of ${rows.length} documents`;
+        }
+    }
+    
+    if (applyBtn) {
+        applyBtn.addEventListener('click', applyFilters);
+    }
+    
+    if (filterInput) {
+        filterInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') applyFilters();
+        });
+    }
+    
+    if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
+    if (departmentFilter) departmentFilter.addEventListener('change', applyFilters);
+    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
 });

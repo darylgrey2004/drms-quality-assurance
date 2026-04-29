@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchUsers');
     const roleFilter = document.getElementById('roleFilter');
     const statusFilter = document.getElementById('statusFilter');
-    const token = localStorage.getItem('token');
+    let token = localStorage.getItem('token');
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const viewerRole = (currentUser.role || '').toString().toLowerCase().trim();
     const canDeleteUsers = viewerRole === 'admin';
@@ -20,15 +20,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const departmentWrap = document.getElementById('departmentWrap');
     const createDepartment = document.getElementById('createDepartment');
 
-    let allUsers = []; // Store all users for filtering
+    let allUsers = [];
+    let isRedirecting = false;
 
-    if (!token) {
+    // Function to check if token is expired
+    function isTokenExpired(token) {
+        if (!token) return true;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() >= exp;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    // Function to handle expired token
+    function handleExpiredToken() {
+        if (isRedirecting) return;
+        isRedirecting = true;
+        
+        alert('Your session has expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = 'landing.html';
+    }
+
+    // Check token expiration immediately
+    if (!token || isTokenExpired(token)) {
+        handleExpiredToken();
         return;
     }
 
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
+        if (isTokenExpired(token)) return;
+        
         fetch('http://localhost:3000/api/user/heartbeat', {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
@@ -58,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
         createEvaluatorExpiresAt.required = isEvaluator;
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
         
-        // Show department field for evaluators and deans
         if (departmentWrap && createDepartment) {
             const showDepartment = isEvaluator || selectedRole === 'dean' || selectedRole === 'area chair/program head';
             departmentWrap.classList.toggle('hidden', !showDepartment);
@@ -77,6 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
         createUserForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!canDeleteUsers) return;
+
+            // Check token again before submission
+            if (isTokenExpired(token)) {
+                handleExpiredToken();
+                return;
+            }
 
             const firstName = document.getElementById('createFirstName')?.value?.trim();
             const lastName = document.getElementById('createLastName')?.value?.trim();
@@ -123,6 +155,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 });
 
+                if (response.status === 401) {
+                    handleExpiredToken();
+                    return;
+                }
+
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.msg || 'Failed to create user account.');
 
@@ -136,8 +173,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Function to fetch users and render them in the table
     async function fetchAndRenderUsers() {
+        // Check token before fetching
+        if (isTokenExpired(token)) {
+            handleExpiredToken();
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:3000/api/admin/users', {
                 method: 'GET',
@@ -147,18 +189,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
             });
 
-            if (!response.ok) {
-                if (response.status === 401) {
-                    alert('Your session has expired. Please login again.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = 'landing.html';
-                    return;
-                }
+            if (response.status === 401) {
+                handleExpiredToken();
+                return;
+            }
 
+            if (!response.ok) {
                 if (response.status === 403) {
                     if (viewerRole === 'dean') {
-                        alert('Dean access to Users requires updated server permissions. Please restart the backend server.');
+                        alert('Dean access to Users requires updated server permissions.');
                         window.location.href = 'homepage.html';
                         return;
                     }
@@ -171,130 +210,92 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const users = await response.json();
-            allUsers = users; // Store for filtering
+            allUsers = users;
             renderUsers(users);
             updateStats(users);
 
         } catch (error) {
             console.error('Error fetching users:', error);
-            usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Error loading users. Please try again.</td></tr>`;
+            if (usersTableBody) {
+                usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading users. Please refresh the page or login again.</td></tr>`;
+            }
         }
     }
 
-    // Function to update statistics cards
     function updateStats(users) {
         const totalUsers = users.length;
         const approvedUsers = users.filter(u => u.status === 'approved').length;
         const pendingUsers = users.filter(u => u.status === 'pending').length;
         const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
 
-        // Update stat cards
-        document.querySelector('.stat-card:nth-child(1) .text-3xl').textContent = totalUsers;
-        document.querySelector('.stat-card:nth-child(2) .text-3xl').textContent = approvedUsers;
-        document.querySelector('.stat-card:nth-child(3) .text-3xl').textContent = pendingUsers;
-        document.querySelector('.stat-card:nth-child(4) .text-3xl').textContent = uniqueRoles;
+        const totalEl = document.querySelector('.stat-card:nth-child(1) .text-3xl');
+        const approvedEl = document.querySelector('.stat-card:nth-child(2) .text-3xl');
+        const pendingEl = document.querySelector('.stat-card:nth-child(3) .text-3xl');
+        const rolesEl = document.querySelector('.stat-card:nth-child(4) .text-3xl');
+        
+        if (totalEl) totalEl.textContent = totalUsers;
+        if (approvedEl) approvedEl.textContent = approvedUsers;
+        if (pendingEl) pendingEl.textContent = pendingUsers;
+        if (rolesEl) rolesEl.textContent = uniqueRoles;
 
-        // Update percentages
         const activeRate = totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0;
-        document.querySelector('.stat-card:nth-child(2) .text-xs').textContent = `${activeRate}% approved rate`;
-        document.querySelector('.stat-card:nth-child(1) .text-xs').textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+        const approvedRateEl = document.querySelector('.stat-card:nth-child(2) .text-xs');
+        const totalLabelEl = document.querySelector('.stat-card:nth-child(1) .text-xs');
+        
+        if (approvedRateEl) approvedRateEl.textContent = `${activeRate}% approved rate`;
+        if (totalLabelEl) totalLabelEl.textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
     }
 
-    // Function to render the users in the table
     function renderUsers(users) {
-        usersTableBody.innerHTML = ''; // Clear existing rows
+        if (!usersTableBody) return;
+        usersTableBody.innerHTML = '';
 
         if (users.length === 0) {
             usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-500">No users found matching your criteria.</td></tr>`;
             return;
         }
 
-        // Helper function to determine if user is currently active
         function isCurrentlyActive(lastActive) {
             if (!lastActive) return false;
             const lastActiveDate = new Date(lastActive);
-            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); // 5 minutes
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
             return lastActiveDate > fiveMinutesAgo;
         }
 
-        // Helper function to format last active display with relative time (like Messenger)
         function formatLastActive(lastActive, role) {
             if (!lastActive) return 'Never';
-            
-            // Check if evaluator is expired
-            if (role && (role.toLowerCase() === 'evaluator' || role.toLowerCase() === 'external evaluator')) {
-                return 'Never';
-            }
-            
-            // If currently active, show "active now"
+            if (role && role.toLowerCase() === 'evaluator') return 'Never';
             if (isCurrentlyActive(lastActive)) {
                 return '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">🟢 active now</span>';
             }
             
-            // Calculate relative time
             const lastActiveDate = new Date(lastActive);
             const now = new Date();
             const diffMs = now - lastActiveDate;
             const diffMins = Math.floor(diffMs / 60000);
             const diffHours = Math.floor(diffMs / 3600000);
             const diffDays = Math.floor(diffMs / 86400000);
-            const diffWeeks = Math.floor(diffMs / 604800000);
-            const diffMonths = Math.floor(diffMs / 2592000000);
             
-            if (diffMins < 1) {
-                return 'just now';
-            } else if (diffMins < 60) {
-                return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-            } else if (diffHours < 24) {
-                return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-            } else if (diffDays < 7) {
-                return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-            } else if (diffWeeks < 4) {
-                return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
-            } else if (diffMonths < 12) {
-                return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
-            } else {
-                return lastActiveDate.toLocaleDateString();
-            }
-        }
-
-        // Helper function to check if evaluator is expired
-        function getEvaluatorStatus(role, expiresAt) {
-            if (!role || (role.toLowerCase() !== 'evaluator' && role.toLowerCase() !== 'external evaluator')) {
-                return null;
-            }
-            
-            if (!expiresAt) return null;
-            
-            const expiresDate = new Date(expiresAt);
-            const now = new Date();
-            
-            if (expiresDate <= now) {
-                return '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">❌ expired</span>';
-            }
-            
-            return null;
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            return lastActiveDate.toLocaleDateString();
         }
 
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'user-row hover:bg-gray-50 transition-colors';
 
-            // Define status badge based on user status
             const statusBadge = user.status === 'approved' 
                 ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Approved</span>`
                 : user.status === 'rejected'
                 ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
                 : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
 
-            // Check if evaluator is expired
-            const evaluatorExpiredStatus = getEvaluatorStatus(user.role, user.evaluatorExpiresAt);
-            const finalStatusBadge = evaluatorExpiredStatus || statusBadge;
-
-            // Format last active display
             const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
-            
             const userId = user.id || user._id;
+            
             const actionButtons = userId
                 ? `
                     <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View Profile</a>
@@ -302,22 +303,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 `
                 : '<span class="text-gray-400">N/A</span>';
 
-            // Construct the table row
             row.innerHTML = `
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-sm">
+                            ${(user.firstName?.charAt(0) || '')}${(user.lastName?.charAt(0) || '')}
+                        </div>
                         <div>
-                            <div class="font-medium text-gray-800">${user.firstName} ${user.lastName}</div>
+                            <div class="font-medium text-gray-800">${user.firstName || ''} ${user.lastName || ''}</div>
+                            <div class="text-xs text-gray-400">${user.role || 'User'}</div>
                         </div>
                     </div>
                 </td>
-                <td class="py-3 px-2 text-gray-600">${user.email}</td>
-                <td class="py-3 px-2 text-gray-600">${user.role || 'User'}</td>
-                <td class="py-3 px-2 text-gray-600">${user.department || 'N/A'}</td>
-                <td class="py-3 px-2">${finalStatusBadge}</td>
-                <td class="py-3 px-2">${lastActiveDisplay}</td>
+                <td class="py-3 px-2 text-gray-600 text-sm">${user.email || ''}</td>
+                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${user.role || 'User'}</span></td>
+                <td class="py-3 px-2 text-gray-600 text-sm">${user.department || 'N/A'}</td>
+                <td class="py-3 px-2">${statusBadge}</td>
+                <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
                 <td class="py-3 px-2">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         ${actionButtons}
                     </div>
                 </td>
@@ -331,10 +335,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!deleteButton) return;
 
         const userId = deleteButton.getAttribute('data-id');
-        if (!userId) return;
-        if (!canDeleteUsers) return;
+        if (!userId || !canDeleteUsers) return;
 
         if (confirm('Are you sure you want to delete this user?')) {
+            if (isTokenExpired(token)) {
+                handleExpiredToken();
+                return;
+            }
             await deleteUser(userId);
         }
     });
@@ -349,6 +356,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
             });
 
+            if (response.status === 401) {
+                handleExpiredToken();
+                return;
+            }
+
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.msg || 'Failed to delete user.');
@@ -362,64 +374,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initial fetch and render of users
     fetchAndRenderUsers();
 
-    // Search functionality
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            filterUsers();
-        });
-    }
+    if (searchInput) searchInput.addEventListener('input', filterUsers);
+    if (roleFilter) roleFilter.addEventListener('change', filterUsers);
+    if (statusFilter) statusFilter.addEventListener('change', filterUsers);
 
-    // Role filter functionality
-    if (roleFilter) {
-        roleFilter.addEventListener('change', function() {
-            filterUsers();
-        });
-    }
-
-    // Status filter functionality
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            filterUsers();
-        });
-    }
-
-    // Filter users based on search and filters
     function filterUsers() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const selectedRole = roleFilter.value;
-        const selectedStatus = statusFilter.value;
+        const searchTerm = searchInput?.value?.toLowerCase().trim() || '';
+        const selectedRole = roleFilter?.value || 'all';
+        const selectedStatus = statusFilter?.value || 'all';
 
         let filteredUsers = allUsers;
 
-        // Filter by search term (name, email, or role)
         if (searchTerm) {
             filteredUsers = filteredUsers.filter(user => {
-                const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+                const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
                 const email = (user.email || '').toLowerCase();
                 const role = (user.role || '').toLowerCase();
-                const department = (user.department || '').toLowerCase();
-                
-                return fullName.includes(searchTerm) || 
-                       email.includes(searchTerm) || 
-                       role.includes(searchTerm) ||
-                       department.includes(searchTerm);
+                return fullName.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
             });
         }
 
-        // Filter by role
         if (selectedRole !== 'all') {
             filteredUsers = filteredUsers.filter(user => user.role === selectedRole);
         }
 
-        // Filter by status
         if (selectedStatus !== 'all') {
             filteredUsers = filteredUsers.filter(user => user.status === selectedStatus);
         }
 
-        // Render filtered users
         renderUsers(filteredUsers);
     }
 });
