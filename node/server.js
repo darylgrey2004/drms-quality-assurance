@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/user');
 const profileRoutes = require('./routes/profile');
 const documentRoutes = require('./routes/documents');
+const approvalsRoutes = require('./routes/approvals');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/approvals', approvalsRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

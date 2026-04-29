@@ -70,10 +70,10 @@
 
                 <!-- stats cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending My Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">12</div></div><span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span></div><div class="text-xs text-amber-600 mt-2">3 urgent · 2 overdue</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Awaiting Validation</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">8</div></div><span class="bg-blue-100 text-blue-700 p-2 rounded-lg">🔍</span></div><div class="text-xs text-blue-600 mt-2">QA Coordinator</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending Approval</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">15</div></div><span class="bg-purple-100 text-purple-700 p-2 rounded-lg">✅</span></div><div class="text-xs text-purple-600 mt-2">Dean / QA Head</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Approved (This Month)</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">📊</span></div><div class="text-xs text-green-600 mt-2">+8 from last month</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending My Review</span><div id="statPendingReview" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span></div><div class="text-xs text-amber-600 mt-2">Needs action</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Awaiting Validation</span><div id="statAwaitingValidation" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-blue-100 text-blue-700 p-2 rounded-lg">🔍</span></div><div class="text-xs text-blue-600 mt-2">QA Coordinator</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending Approval</span><div id="statPendingApproval" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-purple-100 text-purple-700 p-2 rounded-lg">✅</span></div><div class="text-xs text-purple-600 mt-2">Dean / QA Head</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Approved (This Month)</span><div id="statApprovedMonth" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">📊</span></div><div class="text-xs text-green-600 mt-2">This month</div></div>
                 </div>
 
                 <!-- filters -->
@@ -106,161 +106,26 @@
                             <div class="col-span-1"><input type="checkbox" id="headerCheckbox" class="rounded border-gray-300 text-teal-600"></div>
                             <div class="col-span-3">DOCUMENT</div>
                             <div class="col-span-2">CATEGORY</div>
-                            <div class="col-span-2">DEPARTMENT</div>
-                            <div class="col-span-1">STATUS</div>
+                            <div class="col-span-1">DEPARTMENT</div>
+                            <div class="col-span-2">STATUS</div>
                             <div class="col-span-1">VERSION</div>
                             <div class="col-span-2">ACTIONS</div>
                         </div>
                         <div id="approvalsList" class="divide-y divide-gray-100">
-                            <!-- Instruction - Needs Validation -->
-                            <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending">
-                                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                                <div class="col-span-3">
-                                    <div class="font-medium text-gray-800">Syllabus - Elementary Education</div>
-                                    <div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div>
-                                    <input type="hidden" class="doc-title" value="Syllabus - Elementary Education">
-                                    <input type="hidden" class="doc-author" value="Dr. Santos">
-                                    <input type="hidden" class="doc-date" value="2026-02-15">
-                                    <input type="hidden" class="doc-category" value="Instruction">
-                                    <input type="hidden" class="doc-department" value="BEED">
-                                </div>
-                                <div class="col-span-2"><span class="status-badge status-instruction">Instruction</span></div>
-                                <div class="col-span-2"><span class="stage-badge stage-validation">Validation</span></div>
-                                <div class="col-span-1"><span class="status-badge status-pending">Pending</span></div>
-                                <div class="col-span-1 text-gray-600">v3.2</div>
-                                <div class="col-span-2">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="btn-view">View</button>
-                                        <button class="btn-validate">Validate</button>
-                                        <button class="btn-reject" data-title="Syllabus - Elementary Education" data-author="Dr. Santos" data-date="2026-02-15" data-category="Instruction" data-department="BEED">Reject</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Research - Needs Approval -->
-                            <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="approve" data-status="review">
-                                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                                <div class="col-span-3">
-                                    <div class="font-medium text-gray-800">Research Publication 2025</div>
-                                    <div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div>
-                                    <input type="hidden" class="doc-title" value="Research Publication 2025">
-                                    <input type="hidden" class="doc-author" value="Dr. Reyes">
-                                    <input type="hidden" class="doc-date" value="2026-02-25">
-                                    <input type="hidden" class="doc-category" value="Research">
-                                    <input type="hidden" class="doc-department" value="BSED">
-                                </div>
-                                <div class="col-span-2"><span class="status-badge status-research">Research</span></div>
-                                <div class="col-span-2"><span class="stage-badge stage-approval">Approval</span></div>
-                                <div class="col-span-1"><span class="status-badge status-review">Under Review</span></div>
-                                <div class="col-span-1 text-gray-600">v0.3</div>
-                                <div class="col-span-2">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="btn-view">View</button>
-                                        <button class="btn-approve">Approve</button>
-                                        <button class="btn-reject" data-title="Research Publication 2025" data-author="Dr. Reyes" data-date="2026-02-25" data-category="Research" data-department="BSED">Reject</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Extension - Needs Validation -->
-                            <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending">
-                                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                                <div class="col-span-3">
-                                    <div class="font-medium text-gray-800">Community Extension Program</div>
-                                    <div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div>
-                                    <input type="hidden" class="doc-title" value="Community Extension Program">
-                                    <input type="hidden" class="doc-author" value="Prof. Mendoza">
-                                    <input type="hidden" class="doc-date" value="2026-02-22">
-                                    <input type="hidden" class="doc-category" value="Extension">
-                                    <input type="hidden" class="doc-department" value="BPED">
-                                </div>
-                                <div class="col-span-2"><span class="status-badge status-extension">Extension</span></div>
-                                <div class="col-span-2"><span class="stage-badge stage-validation">Validation</span></div>
-                                <div class="col-span-1"><span class="status-badge status-pending">Pending</span></div>
-                                <div class="col-span-1 text-gray-600">v1.1</div>
-                                <div class="col-span-2">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="btn-view">View</button>
-                                        <button class="btn-validate">Validate</button>
-                                        <button class="btn-reject" data-title="Community Extension Program" data-author="Prof. Mendoza" data-date="2026-02-22" data-category="Extension" data-department="BPED">Reject</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Employment - Locked -->
-                            <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="lock" data-status="locked">
-                                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                                <div class="col-span-3">
-                                    <div class="font-medium text-gray-800">Faculty Employment Contract</div>
-                                    <div class="text-xs text-gray-400">by Dean Cruz · 2026-01-10</div>
-                                    <input type="hidden" class="doc-title" value="Faculty Employment Contract">
-                                    <input type="hidden" class="doc-author" value="Dean Cruz">
-                                    <input type="hidden" class="doc-date" value="2026-01-10">
-                                    <input type="hidden" class="doc-category" value="Employment">
-                                    <input type="hidden" class="doc-department" value="BEED">
-                                </div>
-                                <div class="col-span-2"><span class="status-badge status-employment">Employment</span></div>
-                                <div class="col-span-2"><span class="stage-badge stage-locked">Locked</span></div>
-                                <div class="col-span-1"><span class="status-badge status-locked">Locked</span></div>
-                                <div class="col-span-1 text-gray-600">v2.1</div>
-                                <div class="col-span-2">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="btn-view">View</button>
-                                        <button class="btn-unlock">Unlock</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Instruction - Needs Approval -->
-                            <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="approve" data-status="review">
-                                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                                <div class="col-span-3">
-                                    <div class="font-medium text-gray-800">Inclusive Education Module</div>
-                                    <div class="text-xs text-gray-400">by Prof. Garcia · 2026-02-20</div>
-                                    <input type="hidden" class="doc-title" value="Inclusive Education Module">
-                                    <input type="hidden" class="doc-author" value="Prof. Garcia">
-                                    <input type="hidden" class="doc-date" value="2026-02-20">
-                                    <input type="hidden" class="doc-category" value="Instruction">
-                                    <input type="hidden" class="doc-department" value="BSNED">
-                                </div>
-                                <div class="col-span-2"><span class="status-badge status-instruction">Instruction</span></div>
-                                <div class="col-span-2"><span class="stage-badge stage-approval">Approval</span></div>
-                                <div class="col-span-1"><span class="status-badge status-review">Under Review</span></div>
-                                <div class="col-span-1 text-gray-600">v1.0</div>
-                                <div class="col-span-2">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="btn-view">View</button>
-                                        <button class="btn-approve">Approve</button>
-                                        <button class="btn-reject" data-title="Inclusive Education Module" data-author="Prof. Garcia" data-date="2026-02-20" data-category="Instruction" data-department="BSNED">Reject</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Dynamic content loaded from backend -->
                         </div>
                     </div>
                 </div>
 
                 <!-- Mobile Card View -->
                 <div id="mobileApprovalsList" class="block md:hidden space-y-4">
-                    <div class="border rounded-lg p-4 bg-white">
-                        <div class="flex items-start gap-2 mb-2"><input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600"><div class="flex-1"><div class="font-medium text-gray-800">Syllabus - Elementary Education</div><div class="text-xs text-gray-400">by Dr. Santos · 2026-02-15</div></div></div>
-                        <div class="flex flex-wrap gap-2 mb-2"><span class="status-badge status-instruction">Instruction</span><span class="stage-badge stage-validation">Validation</span><span class="status-badge status-pending">Pending</span></div>
-                        <div class="text-sm text-gray-600 mb-3">v3.2</div>
-                        <div class="flex flex-wrap gap-2"><button class="btn-view-sm">View</button><button class="btn-validate-sm">Validate</button><button class="btn-reject-sm" data-title="Syllabus - Elementary Education" data-author="Dr. Santos" data-date="2026-02-15" data-category="Instruction" data-department="BEED">Reject</button></div>
-                    </div>
-                    <div class="border rounded-lg p-4 bg-white">
-                        <div class="flex items-start gap-2 mb-2"><input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600"><div class="flex-1"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400">by Dr. Reyes · 2026-02-25</div></div></div>
-                        <div class="flex flex-wrap gap-2 mb-2"><span class="status-badge status-research">Research</span><span class="stage-badge stage-approval">Approval</span><span class="status-badge status-review">Under Review</span></div>
-                        <div class="text-sm text-gray-600 mb-3">v0.3</div>
-                        <div class="flex flex-wrap gap-2"><button class="btn-view-sm">View</button><button class="btn-approve-sm">Approve</button><button class="btn-reject-sm" data-title="Research Publication 2025" data-author="Dr. Reyes" data-date="2026-02-25" data-category="Research" data-department="BSED">Reject</button></div>
-                    </div>
-                    <div class="border rounded-lg p-4 bg-white">
-                        <div class="flex items-start gap-2 mb-2"><input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600"><div class="flex-1"><div class="font-medium text-gray-800">Community Extension Program</div><div class="text-xs text-gray-400">by Prof. Mendoza · 2026-02-22</div></div></div>
-                        <div class="flex flex-wrap gap-2 mb-2"><span class="status-badge status-extension">Extension</span><span class="stage-badge stage-validation">Validation</span><span class="status-badge status-pending">Pending</span></div>
-                        <div class="text-sm text-gray-600 mb-3">v1.1</div>
-                        <div class="flex flex-wrap gap-2"><button class="btn-view-sm">View</button><button class="btn-validate-sm">Validate</button><button class="btn-reject-sm" data-title="Community Extension Program" data-author="Prof. Mendoza" data-date="2026-02-22" data-category="Extension" data-department="BPED">Reject</button></div>
-                    </div>
+                    <!-- Dynamic content loaded from backend -->
                 </div>
 
                 <!-- bulk actions -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
                     <div class="flex flex-wrap items-center gap-3"><input type="checkbox" id="selectAll" class="rounded border-gray-300 text-teal-600"><label for="selectAll" class="text-sm text-gray-600">Select All</label><select id="bulkAction" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"><option value="">Bulk Actions</option><option value="validate">Validate Selected</option><option value="approve">Approve Selected</option><option value="reject">Reject Selected</option><option value="lock">Lock Selected</option><option value="unlock">Unlock Selected</option></select><button id="applyBulk" class="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg transition">Apply</button></div>
-                    <div class="flex flex-wrap items-center gap-2"><span class="text-sm text-gray-500">Showing 1 to 5 of 23</span><div class="flex gap-1"><button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm">Previous</button><button class="px-3 py-1 bg-teal-600 text-white rounded-lg text-sm">1</button><button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm">2</button><button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm">3</button><button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm">Next</button></div></div>
+                    <div class="flex flex-wrap items-center gap-2"><span id="paginationInfo" class="text-sm text-gray-500">Showing 0 to 0 of 0</span><div id="paginationButtons" class="flex gap-1"></div></div>
                 </div>
 
                 <!-- timeline -->
@@ -314,145 +179,47 @@
         </div>
     </div>
 
-    <script>
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        // ========== REJECTION MODAL FUNCTIONS ==========
-        const rejectionModal = document.getElementById('rejectionModal');
-        const closeRejectionModal = document.getElementById('closeRejectionModal');
-        const cancelRejection = document.getElementById('cancelRejection');
-        const submitRejection = document.getElementById('submitRejection');
-        const rejectionComment = document.getElementById('rejectionComment');
-        
-        const modalDocTitle = document.getElementById('modalDocTitle');
-        const modalDocDate = document.getElementById('modalDocDate');
-        const modalDocCategory = document.getElementById('modalDocCategory');
-        const modalDocAuthor = document.getElementById('modalDocAuthor');
-        
-        let currentRejectedDoc = null;
-        
-        function openRejectionModal(docData) {
-            currentRejectedDoc = docData;
-            modalDocTitle.textContent = docData.title;
-            modalDocDate.textContent = docData.date;
-            modalDocCategory.textContent = `${docData.category} / ${docData.department}`;
-            modalDocAuthor.textContent = docData.author;
-            rejectionComment.value = '';
-            rejectionModal.classList.remove('hidden');
-            rejectionModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeRejectionModalFunc() {
-            rejectionModal.classList.add('hidden');
-            rejectionModal.classList.remove('active');
-            document.body.style.overflow = '';
-            currentRejectedDoc = null;
-        }
-        
-        // Event listeners for reject buttons
-        document.querySelectorAll('.btn-reject, .btn-reject-sm').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const title = this.getAttribute('data-title');
-                const author = this.getAttribute('data-author');
-                const date = this.getAttribute('data-date');
-                const category = this.getAttribute('data-category');
-                const department = this.getAttribute('data-department');
-                
-                if (title && author && date && category) {
-                    openRejectionModal({
-                        title: title,
-                        author: author,
-                        date: date,
-                        category: category,
-                        department: department || 'N/A'
-                    });
-                } else {
-                    alert('Error: Could not load document information');
-                }
-            });
-        });
-        
-        // Close modal events
-        if (closeRejectionModal) closeRejectionModal.addEventListener('click', closeRejectionModalFunc);
-        if (cancelRejection) cancelRejection.addEventListener('click', closeRejectionModalFunc);
-        rejectionModal?.addEventListener('click', (e) => { if (e.target === rejectionModal) closeRejectionModalFunc(); });
-        
-        // Submit rejection
-        if (submitRejection) {
-            submitRejection.addEventListener('click', function() {
-                const comment = rejectionComment.value.trim();
-                if (!comment) {
-                    alert('Please provide a reason for rejection.');
-                    return;
-                }
-                alert(`Document "${currentRejectedDoc?.title}" has been rejected.\n\nReason: ${comment}\n\nThe uploader (${currentRejectedDoc?.author}) will be notified.`);
-                closeRejectionModalFunc();
-            });
-        }
-        
-        // Other action buttons
-        document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => btn.addEventListener('click', () => alert('Viewing document')));
-        document.querySelectorAll('.btn-validate, .btn-validate-sm').forEach(btn => btn.addEventListener('click', () => alert('Document validated and moved to Approval stage')));
-        document.querySelectorAll('.btn-approve, .btn-approve-sm').forEach(btn => btn.addEventListener('click', () => alert('Document approved and ready to lock')));
-        document.querySelectorAll('.btn-unlock, .btn-unlock-sm').forEach(btn => btn.addEventListener('click', () => alert('Document unlocked and can be edited')));
-        
-        // Refresh button
-        document.getElementById('refreshApprovals')?.addEventListener('click', () => alert('Approval list refreshed'));
-        
-        // Select All functionality
-        const selectAllCheckbox = document.getElementById('selectAll');
-        const docCheckboxes = () => document.querySelectorAll('.doc-checkbox');
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() { docCheckboxes().forEach(cb => cb.checked = this.checked); });
-        }
-        
-        function updateSelectAll() {
-            if (selectAllCheckbox) {
-                const allChecked = Array.from(docCheckboxes()).every(cb => cb.checked);
-                const anyChecked = Array.from(docCheckboxes()).some(cb => cb.checked);
-                selectAllCheckbox.checked = allChecked;
-                selectAllCheckbox.indeterminate = !allChecked && anyChecked;
-            }
-        }
-        
-        docCheckboxes().forEach(cb => cb.addEventListener('change', updateSelectAll));
-        
-        // Bulk action
-        document.getElementById('applyBulk')?.addEventListener('click', () => {
-            const selected = Array.from(docCheckboxes()).filter(cb => cb.checked).length;
-            if (selected === 0) { alert('Please select at least one document'); return; }
-            const action = document.getElementById('bulkAction')?.value;
-            if (!action) { alert('Please select a bulk action'); return; }
-            alert(`Bulk ${action} applied to ${selected} document(s)`);
-        });
-        
-        // Tab switching
-        document.querySelectorAll('#workflowTabs a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('#workflowTabs a').forEach(l => {
-                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
-                    l.classList.add('border-transparent', 'text-gray-500');
-                });
-                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-                alert(`Filtering: ${this.textContent}`);
-            });
-        });
-    </script>
+    <!-- DOCUMENT PREVIEW MODAL -->
+    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docPreviewTitle" class="text-lg font-semibold text-gray-800">Document Preview</h3>
+                <button id="docPreviewCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <iframe id="docPreviewFrame" class="w-full h-full border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOCK CONFIRMATION MODAL -->
+    <div id="lockModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-md">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Lock Document</h3>
+                <button id="lockModalCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-2">You are about to lock:</p>
+                    <p id="lockDocTitle" class="font-semibold text-gray-900 mb-4"></p>
+                    <p class="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+                        ⚠️ Warning: Locking this document will finalize it and prevent further modifications. This is the final stage of the approval workflow.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <label for="lockComment" class="block text-sm font-medium text-gray-700 mb-2">Comments (Optional)</label>
+                    <textarea id="lockComment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Add any final comments..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t bg-gray-50">
+                <button id="lockModalCancelBtn" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                <button id="lockModalConfirmBtn" class="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700">Lock Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/approvals.js"></script>
 </body>
 </html>

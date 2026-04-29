@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>DRMS-QA · My Approvals</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/user-approvals.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-user-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside id="mainSidebar" class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+            <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                    <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
+                </div>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Area Chair Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Area Chair Portal</p>
+            </div>
+
+            <div class="px-5 py-4 border-b border-teal-900/40">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">RG</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">RG</span>
+                    <div>
+                        <div class="text-sm font-medium text-white">Dr. Roberto Gomez</div>
+                        <div class="text-xs text-teal-300">Program Head · Elementary Ed</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Roberto Gomez</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">Program Head · Elementary Ed</div>
+                    </div>
+                </div>
+            </div>
+
+@@ -58,7 +58,7 @@
+                </a>
+                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300">✅</span> My Approvals
+                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full" id="approvalsBadge">0</span>
+                </a>
+                <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+
+@@ -69,7 +69,7 @@
+                <div class="text-xs text-teal-200/50">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span>Area Chair Access</span>
+                        <span id="sidebarAccess">Area Chair Access</span>
+                    </div>
+                    <div class="mt-1">© CTE · v.DRMS-QA</div>
+                </div>
+
+@@ -90,23 +90,23 @@
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Pending Review</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">8</div>
+                        <div class="text-xs text-amber-600 mt-2">2 urgent</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div>
+                        <div class="text-xs text-amber-600 mt-2" id="urgentCount">Loading...</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Approved (This Month)</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div>
+                        <div class="text-xs text-green-600 mt-2">+6 from last month</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div>
+                        <div class="text-xs text-green-600 mt-2" id="approvedChange">Loading...</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Returned for Revision</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">5</div>
+                        <div class="text-xs text-blue-600 mt-2">Awaiting resubmission</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div>
+                        <div class="text-xs text-blue-600 mt-2" id="rejectedNote">Loading...</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="text-gray-500 text-sm">Average Processing</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">2.4d</div>
+                        <div class="text-xs text-teal-600 mt-2">Within SLA</div>
+                        <div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0d</div>
+                        <div class="text-xs text-teal-600 mt-2" id="slaNote">Loading...</div>
+                    </div>
+                </div>
+
+
+
+@@ -141,142 +141,21 @@
+                <div class="hidden md:block bg-white rounded-xl p-5 stat-card overflow-x-auto">
+                    <div class="min-w-[800px]">
+                        <div class="divide-y">
+                            <!-- Approval item 1 - Urgent -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-urgent text-xs px-2 py-1 rounded-full">Urgent</span>
+                                            <span class="badge-instruction text-xs px-2 py-1 rounded-full">Instruction</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Syllabus - Elementary Education</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Prof. Maria Reyes</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 26, 2026 · Due in 2 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 2 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-research text-xs px-2 py-1 rounded-full">Research</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BSED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Research Publication 2025</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Dr. Ana Santos</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 25, 2026 · Due in 5 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 3 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-extension text-xs px-2 py-1 rounded-full">Extension</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BPED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Community Extension Program</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Prof. Mendoza</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 24, 2026 · Due in 6 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approval item 4 -->
+                            <div class="py-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <span class="badge-employment text-xs px-2 py-1 rounded-full">Employment</span>
+                                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                                        </div>
+                                        <h3 class="font-medium text-gray-800">Faculty Employment Contract</h3>
+                                        <p class="text-sm text-gray-600">Submitted by: Dean Cruz</p>
+                                        <p class="text-xs text-gray-400 mt-1">Submitted: Apr 23, 2026 · Due in 3 days</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button class="btn-view">View</button>
+                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-reject">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Documents will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approvals list - Mobile Card View -->
+                <div id="mobileApprovalsList" class="block md:hidden space-y-4">
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-urgent text-xs px-2 py-1 rounded-full">Urgent</span>
+                            <span class="badge-instruction text-xs px-2 py-1 rounded-full">Instruction</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BEED</span>
+                        </div>
+                        <div class="font-medium text-gray-800">Syllabus - Elementary Education</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Prof. Maria Reyes · Apr 26, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-research text-xs px-2 py-1 rounded-full">Research</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BSED</span>
+                        </div>
+                        <div class="font-medium text-gray-800">Research Publication 2025</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Dr. Ana Santos · Apr 25, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 bg-white">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="badge-extension text-xs px-2 py-1 rounded-full">Extension</span>
+                            <span class="badge-dept text-xs px-2 py-1 rounded-full">BPED</span>
+                        </div>
+                        <div class="font-medium text-gray-800">Community Extension Program</div>
+                        <div class="text-xs text-gray-400 mb-2">Submitted by: Prof. Mendoza · Apr 24, 2026</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button class="btn-view-sm">View</button>
+                            <button class="btn-approve-sm">Approve</button>
+                            <button class="btn-reject-sm">Reject</button>
+                        </div>
+                    </div>
+                    <!-- Documents will be loaded here dynamically -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                    <div class="text-sm text-gray-500">Showing 1 to 4 of 8 results</div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
+                        <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg">1</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                    <div class="text-sm text-gray-500" id="paginationInfo">Loading...</div>
+                    <div class="flex flex-wrap gap-2 justify-center" id="paginationButtons">
+                        <!-- Pagination buttons will be generated dynamically -->
+                    </div>
+                </div>
+            </div>
+

@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userId = deleteButton.getAttribute('data-id');
         if (!userId || !canDeleteUsers) return;
 
-        if (confirm('Are you sure you want to delete this user?')) {
+        if (confirm('Delete this user? Their uploaded documents will be retained but unlinked from their account.')) {
             if (isTokenExpired(token)) {
                 handleExpiredToken();
                 return;
@@ -350,23 +350,15 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch(`http://localhost:3000/api/admin/users/${encodeURIComponent(userId)}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token,
-                },
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
             });
 
-            if (response.status === 401) {
-                handleExpiredToken();
-                return;
-            }
+            if (response.status === 401) { handleExpiredToken(); return; }
 
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.msg || 'Failed to delete user.');
-            }
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.msg || 'Failed to delete user.');
 
-            alert('User has been deleted.');
+            alert(data.msg || 'User has been deleted. Their documents have been retained.');
             fetchAndRenderUsers();
         } catch (error) {
             console.error('Error deleting user:', error);

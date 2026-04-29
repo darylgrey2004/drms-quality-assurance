@@ -67,7 +67,7 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
 
     const {
       title,
-      category,
+      category_id,
       department,
       author,
       version,
@@ -79,7 +79,7 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
 
     const files = req.files || [];
     if (!files.length) return res.status(400).json({ msg: 'No files uploaded' });
-    if (!title || !category || !department || !author) {
+    if (!title || !category_id || !department || !author) {
       return res.status(400).json({ msg: 'Missing required fields: title, category, department, author' });
     }
 
@@ -91,19 +91,22 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
     };
     const status = workflowMap[String(workflow || 'submit')] || 'pending';
 
-    // Get category_id from categories table
+    // Get category name from categories table using category_id
     const [categories] = await db.query(
-      'SELECT id FROM categories WHERE name = ? LIMIT 1',
-      [category]
+      'SELECT id, name, display_name FROM categories WHERE id = ? LIMIT 1',
+      [category_id]
     );
-    const categoryId = categories.length > 0 ? categories[0].id : null;
+    const categoryRow = categories.length > 0 ? categories[0] : null;
+    const categoryName = categoryRow ? categoryRow.name : String(category_id);
+    const resolvedCategoryId = categoryRow ? categoryRow.id : null;
 
-    // Get department_id from departments table
+    // Get department_id from departments table — try code first, then name
     const [departments] = await db.query(
-      'SELECT id FROM departments WHERE code = ? LIMIT 1',
-      [department.toUpperCase()]
+      'SELECT id, code FROM departments WHERE code = ? OR name = ? LIMIT 1',
+      [department.toUpperCase(), department]
     );
     const departmentId = departments.length > 0 ? departments[0].id : null;
+    const departmentCode = departments.length > 0 ? departments[0].code : department.toUpperCase();
 
     // Insert document record
     const [result] = await db.query(
@@ -113,9 +116,9 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
-        category,
-        categoryId,
-        department, // area field stores department for now
+        categoryName,
+        resolvedCategoryId,
+        department,
         departmentId,
         version || 'v1.0',
         description || null,
@@ -123,12 +126,17 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
         status,
         req.user.id,
         author,
-        category,
+        categoryName,
         department.toUpperCase()
       ]
     );
 
     const documentId = result.insertId;
+
+    // Log a warning if department_id could not be resolved — helps debugging
+    if (!departmentId) {
+      console.warn(`Upload warning: could not resolve department_id for value "${department}". Document ${documentId} stored with null department_id.`);
+    }
 
     // Insert all uploaded files
     for (const f of files) {
@@ -148,31 +156,21 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       );
     }
 
-    // Create audit log
     try {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       await db.query(
         `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, new_values, ip_address, user_agent)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          req.user.id,
-          'DOCUMENT_UPLOAD',
-          'document',
-          documentId,
-          JSON.stringify({ title, category, department, status }),
-          req.headers['x-forwarded-for']?.split(',')[0] || req.connection.remoteAddress || 'Unknown',
-          req.headers['user-agent'] || 'Unknown'
-        ]
+         VALUES (?, 'DOCUMENT_UPLOAD', 'document', ?, ?, ?, ?)`,
+        [req.user.id, documentId, JSON.stringify({ title, category: categoryName, department, status }), ip, req.headers['user-agent'] || 'Unknown']
       );
-    } catch (auditErr) {
-      console.log('Audit log skipped:', auditErr.message);
-    }
+    } catch (auditErr) { console.log('Audit log skipped:', auditErr.message); }
 
     res.status(201).json({
       msg: 'Document uploaded successfully',
       document: {
         id: documentId,
         title,
-        category,
+        category: categoryName,
         department,
         version: version || 'v1.0',
         workflow_status: status,
@@ -193,6 +191,7 @@ router.get('/', auth, async (req, res) => {
     const { scope, status, category, department } = req.query || {};
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
+    const isAreaChair = normalizedRole === 'area-chair';
     const viewAll = canViewAll(req.user.role);
 
     const where = [];
@@ -202,6 +201,36 @@ router.get('/', auth, async (req, res) => {
     if (isEvaluator) {
       where.push('d.workflow_status = ?');
       params.push('approved');
+    } else if (isAreaChair) {
+      // Area-chair can see their own documents + documents from their department faculty
+      // First get the area-chair's department
+      const [areaChairProfile] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ?',
+        [req.user.id]
+      );
+      
+      if (areaChairProfile.length > 0 && areaChairProfile[0].department) {
+        const deptName = areaChairProfile[0].department;
+        // Get department_id from departments table
+        const [deptInfo] = await db.query(
+          'SELECT id FROM departments WHERE name = ?',
+          [deptName]
+        );
+        
+        if (deptInfo.length > 0) {
+          // Show documents uploaded by area-chair OR documents from their department
+          where.push('(d.uploader_id = ? OR d.department_id = ?)');
+          params.push(req.user.id, deptInfo[0].id);
+        } else {
+          // If department not found, only show their own documents
+          where.push('d.uploader_id = ?');
+          params.push(req.user.id);
+        }
+      } else {
+        // If no department profile, only show their own documents
+        where.push('d.uploader_id = ?');
+        params.push(req.user.id);
+      }
     } else if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
       // Regular users see only their own documents unless they have viewAll permission
       where.push('d.uploader_id = ?');
@@ -247,6 +276,120 @@ router.get('/', auth, async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error('Get documents error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/categories
+// @desc    Get all active categories
+// @access  Private
+router.get('/categories', auth, async (req, res) => {
+  try {
+    const [categories] = await db.query(
+      'SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC'
+    );
+    res.json(categories);
+  } catch (err) {
+    console.error('Categories error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/departments
+// @desc    Get all active departments
+// @access  Private
+router.get('/departments', auth, async (req, res) => {
+  try {
+    const [departments] = await db.query(
+      'SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC'
+    );
+    res.json(departments);
+  } catch (err) {
+    console.error('Departments error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/user/department
+// @desc    Get current user's department from faculty_profiles
+// @access  Private
+router.get('/user/department', auth, async (req, res) => {
+  try {
+    // First try joining faculty_profiles to departments
+    const [profile] = await db.query(
+      `SELECT fp.department AS raw_department,
+              d.id AS department_id, d.name AS department_name, d.code AS department_code
+       FROM faculty_profiles fp
+       LEFT JOIN departments d ON (
+         d.name = fp.department OR
+         d.code = fp.department OR
+         d.name LIKE CONCAT('%', fp.department, '%') OR
+         fp.department LIKE CONCAT('%', d.code, '%')
+       )
+       WHERE fp.user_id = ?
+       ORDER BY d.id IS NOT NULL DESC
+       LIMIT 1`,
+      [req.user.id]
+    );
+
+    if (profile.length > 0) {
+      // If join resolved a real department row, return it
+      if (profile[0].department_id) {
+        return res.json(profile[0]);
+      }
+      // Join didn't resolve — try a direct lookup using the raw stored value
+      const raw = (profile[0].raw_department || '').trim();
+      if (raw) {
+        const [dept] = await db.query(
+          'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE name = ? OR code = ? OR name LIKE ? LIMIT 1',
+          [raw, raw.toUpperCase(), `%${raw}%`]
+        );
+        if (dept.length) return res.json(dept[0]);
+      }
+      // Return raw value so the upload form at least shows something
+      return res.json({ department_id: null, department_name: profile[0].raw_department, department_code: null });
+    }
+
+    res.json({ department_id: null, department_name: null, department_code: null });
+  } catch (err) {
+    console.error('User department error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/approvals
+// @desc    Get documents pending approval
+// @access  Private (Admin, Dean)
+router.get('/approvals', auth, async (req, res) => {
+  try {
+    if (!canApprove(req.user.role)) {
+      return res.status(403).json({ msg: 'Not authorized to view approvals' });
+    }
+    
+    const [rows] = await db.query(
+      `
+      SELECT 
+        d.*,
+        u.firstName AS uploader_firstName,
+        u.lastName AS uploader_lastName,
+        u.email AS uploader_email,
+        c.display_name AS category_display_name,
+        dept.name AS department_name,
+        (SELECT COUNT(*) FROM document_files df WHERE df.document_id = d.id) AS files_count,
+        (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
+      FROM documents d
+      LEFT JOIN users u ON d.uploader_id = u.id
+      LEFT JOIN categories c ON d.category_id = c.id
+      LEFT JOIN departments dept ON d.department_id = dept.id
+      WHERE d.workflow_status IN ('pending','validated')
+      ORDER BY d.created_at DESC
+      LIMIT 200
+      `
+    );
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Approvals error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -311,98 +454,6 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/documents/stats
-// @desc    Get document statistics
-// @access  Private
-router.get('/stats', auth, async (req, res) => {
-  try {
-    const viewAll = canViewAll(req.user.role);
-    const params = [];
-    let whereSql = '';
-    
-    if (!viewAll) {
-      whereSql = 'WHERE uploader_id = ?';
-      params.push(req.user.id);
-    }
-    
-    const [statusStats] = await db.query(
-      `
-      SELECT workflow_status, COUNT(*) AS count
-      FROM documents
-      ${whereSql}
-      GROUP BY workflow_status
-      `,
-      params
-    );
-
-    const [categoryStats] = await db.query(
-      `
-      SELECT category, COUNT(*) AS count
-      FROM documents
-      ${whereSql}
-      GROUP BY category
-      `,
-      params
-    );
-
-    const [departmentStats] = await db.query(
-      `
-      SELECT department_code, COUNT(*) AS count
-      FROM documents
-      ${whereSql}
-      GROUP BY department_code
-      `,
-      params
-    );
-
-    res.json({
-      by_status: statusStats,
-      by_category: categoryStats,
-      by_department: departmentStats
-    });
-  } catch (err) {
-    console.error('Stats error:', err);
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
-
-// @route   GET /api/documents/approvals
-// @desc    Get documents pending approval
-// @access  Private (Admin, Dean)
-router.get('/approvals', auth, async (req, res) => {
-  try {
-    if (!canApprove(req.user.role)) {
-      return res.status(403).json({ msg: 'Not authorized to view approvals' });
-    }
-    
-    const [rows] = await db.query(
-      `
-      SELECT 
-        d.*,
-        u.firstName AS uploader_firstName,
-        u.lastName AS uploader_lastName,
-        u.email AS uploader_email,
-        c.display_name AS category_display_name,
-        dept.name AS department_name,
-        (SELECT COUNT(*) FROM document_files df WHERE df.document_id = d.id) AS files_count,
-        (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
-      FROM documents d
-      LEFT JOIN users u ON d.uploader_id = u.id
-      LEFT JOIN categories c ON d.category_id = c.id
-      LEFT JOIN departments dept ON d.department_id = dept.id
-      WHERE d.workflow_status IN ('pending','validated')
-      ORDER BY d.created_at DESC
-      LIMIT 200
-      `
-    );
-    
-    res.json(rows);
-  } catch (err) {
-    console.error('Approvals error:', err);
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
-
 // @route   PUT /api/documents/:id/status
 // @desc    Update document workflow status
 // @access  Private (Admin, Dean)
@@ -440,25 +491,14 @@ router.put('/:id/status', auth, async (req, res) => {
       console.log('Workflow log skipped:', workflowErr.message);
     }
 
-    // Create audit log
     try {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       await db.query(
         `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          req.user.id,
-          'DOCUMENT_STATUS_UPDATE',
-          'document',
-          docId,
-          JSON.stringify({ workflow_status: oldDoc[0].workflow_status }),
-          JSON.stringify({ workflow_status: status, comments }),
-          req.headers['x-forwarded-for']?.split(',')[0] || req.connection.remoteAddress || 'Unknown',
-          req.headers['user-agent'] || 'Unknown'
-        ]
+         VALUES (?, 'DOCUMENT_STATUS_UPDATE', 'document', ?, ?, ?, ?, ?)`,
+        [req.user.id, docId, JSON.stringify({ workflow_status: oldDoc[0].workflow_status }), JSON.stringify({ workflow_status: status, comments }), ip, req.headers['user-agent'] || 'Unknown']
       );
-    } catch (auditErr) {
-      console.log('Audit log skipped:', auditErr.message);
-    }
+    } catch (auditErr) { console.log('Audit log skipped:', auditErr.message); }
 
     res.json({ msg: 'Document status updated successfully', status });
   } catch (err) {
@@ -507,58 +547,18 @@ router.delete('/:id', auth, async (req, res) => {
       }
     }
 
-    // Create audit log
     try {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       await db.query(
         `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, old_values, ip_address, user_agent)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          req.user.id,
-          'DOCUMENT_DELETE',
-          'document',
-          docId,
-          JSON.stringify(document),
-          req.headers['x-forwarded-for']?.split(',')[0] || req.connection.remoteAddress || 'Unknown',
-          req.headers['user-agent'] || 'Unknown'
-        ]
+         VALUES (?, 'DOCUMENT_DELETE', 'document', ?, ?, ?, ?)`,
+        [req.user.id, docId, JSON.stringify(document), ip, req.headers['user-agent'] || 'Unknown']
       );
-    } catch (auditErr) {
-      console.log('Audit log skipped:', auditErr.message);
-    }
+    } catch (auditErr) { console.log('Audit log skipped:', auditErr.message); }
 
     res.json({ msg: 'Document deleted successfully' });
   } catch (err) {
     console.error('Delete error:', err);
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
-
-// @route   GET /api/documents/categories
-// @desc    Get all active categories
-// @access  Private
-router.get('/categories', auth, async (req, res) => {
-  try {
-    const [categories] = await db.query(
-      'SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC'
-    );
-    res.json(categories);
-  } catch (err) {
-    console.error('Categories error:', err);
-    res.status(500).json({ msg: 'Server error' });
-  }
-});
-
-// @route   GET /api/documents/departments
-// @desc    Get all active departments
-// @access  Private
-router.get('/departments', auth, async (req, res) => {
-  try {
-    const [departments] = await db.query(
-      'SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC'
-    );
-    res.json(departments);
-  } catch (err) {
-    console.error('Departments error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

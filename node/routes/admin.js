@@ -174,26 +174,49 @@ router.put('/users/:userId/status', adminAuth, async (req, res) => {
 });
 
 // @route   DELETE api/admin/users/:userId
-// @desc    Delete a user and their profile
+// @desc    Delete a user but retain their documents
 // @access  Private (Admin only)
 router.delete('/users/:userId', adminAuth, async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Delete faculty profile first (foreign key constraint)
-    await db.query('DELETE FROM faculty_profiles WHERE user_id = ?', [userId]);
-    
-    // Delete user
+    const [users] = await db.query('SELECT id, firstName, lastName FROM users WHERE id = ?', [userId]);
+    if (users.length === 0) return res.status(404).json({ msg: 'User not found' });
+
+    const { firstName, lastName } = users[0];
+    const displayName = `${firstName || ''} ${lastName || ''}`.trim() || 'Deleted User';
+
+    // Snapshot author_name on documents before breaking the FK
+    await db.query(
+      `UPDATE documents SET author_name = COALESCE(NULLIF(author_name,''), ?) WHERE uploader_id = ?`,
+      [displayName, userId]
+    );
+
+    // Alter the FK so uploader_id can be set to NULL instead of cascade-deleting documents
+    await db.query('ALTER TABLE documents DROP FOREIGN KEY documents_ibfk_1');
+    await db.query('ALTER TABLE documents MODIFY uploader_id INT(11) NULL');
+    await db.query('ALTER TABLE documents ADD CONSTRAINT documents_ibfk_1 FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE SET NULL');
+
+    // Now safely nullify the uploader reference
+    await db.query('UPDATE documents SET uploader_id = NULL WHERE uploader_id = ?', [userId]);
+
+    // Nullify other non-cascade FKs that reference users.id
+    await db.query('UPDATE approval_workflow SET action_by = NULL WHERE action_by = ?', [userId]).catch(() => {});
+    await db.query('UPDATE audit_logs SET user_id = NULL WHERE user_id = ?', [userId]).catch(() => {});
+    await db.query('UPDATE document_comments SET user_id = NULL WHERE user_id = ?', [userId]).catch(() => {});
+    await db.query('UPDATE document_versions SET created_by = NULL WHERE created_by = ?', [userId]).catch(() => {});
+
+    // Delete rows that cascade or have no further use
+    await db.query('DELETE FROM notifications WHERE user_id = ?', [userId]).catch(() => {});
+    await db.query('DELETE FROM user_sessions WHERE user_id = ?', [userId]).catch(() => {});
+
     const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
+    if (result.affectedRows === 0) return res.status(404).json({ msg: 'User not found' });
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ msg: 'User not found' });
-    }
-
-    res.json({ msg: 'User deleted successfully' });
+    res.json({ msg: 'User deleted successfully. Their documents have been retained.' });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Delete user error:', err.message);
+    res.status(500).json({ msg: err.message || 'Server error' });
   }
 });
 

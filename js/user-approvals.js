@@ -1,111 +1,500 @@
 // js/user-approvals.js
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('User Approvals JS loaded');
-    
-    // Initialize user session (handled by user-session.js)
     const session = await initializeUserPage();
     if (!session) return;
-    
+
     const { token, user, role } = session;
-    
-    // Additional role guard for approvals page (only area-chair can access)
-    if (role !== 'area-chair') {
-        alert('Access denied. Only Area Chairs can access approvals.');
+    const API_BASE = 'http://localhost:3000';
+    const normalizedRole = (role || '').toLowerCase();
+
+    // Only area-chair, dean, and admin can access
+    if (normalizedRole !== 'area-chair' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
         window.location.href = 'user-dashboard.html';
         return;
     }
 
-    // DOM elements
-    const searchInput = document.getElementById('searchApprovals');
-    const priorityFilter = document.getElementById('priorityFilter');
-    const areaFilter = document.getElementById('areaFilter');
-    const viewBtns = document.querySelectorAll('.view-btn');
-    const validateBtns = document.querySelectorAll('.validate-btn');
-    const rejectBtns = document.querySelectorAll('.reject-btn');
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const searchInput       = document.getElementById('searchApprovals');
+    const workflowStage     = document.getElementById('workflowStage');
+    const approvalStatus    = document.getElementById('approvalStatus');
+    const refreshBtn        = document.getElementById('refreshApprovals');
+    const tabLinks          = document.querySelectorAll('#workflowTabs a');
+    const desktopContainer  = document.getElementById('desktopApprovalsList');
+    const mobileContainer   = document.getElementById('mobileApprovalsList');
+    const paginationInfo    = document.getElementById('paginationInfo');
+    const paginationButtons = document.getElementById('paginationButtons');
 
-    // Filter function
-    function filterApprovals() {
-        const searchTerm = searchInput?.value.toLowerCase() || '';
-        const priority = priorityFilter?.value || 'all';
-        const area = areaFilter?.value || 'all';
+    // Preview modal
+    const docPreviewModal    = document.getElementById('docPreviewModal');
+    const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
+    const docPreviewFrame    = document.getElementById('docPreviewFrame');
+    const docPreviewTitle    = document.getElementById('docPreviewTitle');
 
-        document.querySelectorAll('.border-l-4').forEach(item => {
-            const text = item.textContent.toLowerCase();
-            const hasUrgent = item.classList.contains('border-red-500');
-            const areaText = item.querySelector('.bg-amber-100, .bg-blue-100, .bg-indigo-100')?.textContent.toLowerCase() || '';
+    // Rejection modal
+    const rejectionModal    = document.getElementById('rejectionModal');
+    const closeRejectionBtn = document.getElementById('closeRejectionModal');
+    const cancelRejection   = document.getElementById('cancelRejection');
+    const submitRejection   = document.getElementById('submitRejection');
+    const rejectionComment  = document.getElementById('rejectionComment');
+    const modalDocTitle     = document.getElementById('modalDocTitle');
+    const modalDocDate      = document.getElementById('modalDocDate');
+    const modalDocCategory  = document.getElementById('modalDocCategory');
+    const modalDocAuthor    = document.getElementById('modalDocAuthor');
 
-            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-            const matchesPriority = priority === 'all' || 
-                (priority === 'urgent' && hasUrgent) ||
-                (priority === 'normal' && !hasUrgent);
-            const matchesArea = area === 'all' || areaText.includes(area);
+    // Lock modal
+    const lockModal          = document.getElementById('lockModal');
+    const lockModalCloseBtn  = document.getElementById('lockModalCloseBtn');
+    const lockModalCancelBtn = document.getElementById('lockModalCancelBtn');
+    const lockModalConfirmBtn= document.getElementById('lockModalConfirmBtn');
+    const lockDocTitle       = document.getElementById('lockDocTitle');
+    const lockComment        = document.getElementById('lockComment');
 
-            item.style.display = (matchesSearch && matchesPriority && matchesArea) ? 'block' : 'none';
+    // Toast
+    const actionToast     = document.getElementById('actionToast');
+    const actionToastMsg  = document.getElementById('actionToastMsg');
+    const actionToastIcon = document.getElementById('actionToastIcon');
+    const actionErrorModal    = document.getElementById('actionErrorModal');
+    const actionErrorMessage  = document.getElementById('actionErrorMessage');
+    const closeActionErrorBtn = document.getElementById('closeActionErrorBtn');
+
+    let allDocuments = [], filteredDocuments = [];
+    let currentPage = 1, currentTab = 'all';
+    const itemsPerPage = 10;
+    let pendingRejectDocId = null, currentLockDocId = null;
+    let toastTimer;
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showToast(msg, isError = false) {
+        if (!actionToast) return;
+        actionToastIcon.textContent = isError ? '✕' : '✓';
+        actionToastMsg.textContent = msg;
+        actionToast.querySelector('div').className = `flex items-center gap-3 ${isError ? 'bg-red-700' : 'bg-gray-900'} text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm`;
+        actionToast.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => actionToast.classList.add('hidden'), 3500);
+    }
+
+    function showErrorModal(msg) {
+        if (!actionErrorModal) { alert(msg); return; }
+        actionErrorMessage.textContent = msg;
+        actionErrorModal.classList.remove('hidden');
+        actionErrorModal.classList.add('flex');
+    }
+
+    if (closeActionErrorBtn) closeActionErrorBtn.addEventListener('click', () => {
+        actionErrorModal.classList.add('hidden');
+        actionErrorModal.classList.remove('flex');
+    });
+
+    // ── Preview modal ─────────────────────────────────────────────────────────
+    function openPreviewModal(url, title) {
+        if (!docPreviewModal || !docPreviewFrame) { window.open(url, '_blank'); return; }
+        if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
+        docPreviewFrame.src = url;
+        docPreviewModal.classList.remove('hidden');
+        docPreviewModal.classList.add('flex');
+    }
+    function closePreviewModal() {
+        if (!docPreviewModal) return;
+        docPreviewModal.classList.add('hidden');
+        docPreviewModal.classList.remove('flex');
+        if (docPreviewFrame) docPreviewFrame.src = 'about:blank';
+    }
+    if (docPreviewCloseBtn) docPreviewCloseBtn.addEventListener('click', closePreviewModal);
+    if (docPreviewModal) docPreviewModal.addEventListener('click', e => { if (e.target === docPreviewModal) closePreviewModal(); });
+
+    // ── Rejection modal ───────────────────────────────────────────────────────
+    function openRejectionModal(doc) {
+        pendingRejectDocId = doc.id;
+        if (modalDocTitle)    modalDocTitle.textContent    = doc.title;
+        if (modalDocDate)     modalDocDate.textContent     = new Date(doc.created_at).toLocaleDateString();
+        if (modalDocCategory) modalDocCategory.textContent = `${doc.category_name || doc.category || 'N/A'} / ${doc.department_code || 'N/A'}`;
+        if (modalDocAuthor)   modalDocAuthor.textContent   = doc.author_name || 'Unknown';
+        if (rejectionComment) rejectionComment.value = '';
+        if (rejectionModal) {
+            rejectionModal.classList.remove('hidden');
+            setTimeout(() => rejectionModal.classList.add('active'), 10);
+        }
+    }
+    function closeRejectionModal() {
+        pendingRejectDocId = null;
+        if (rejectionModal) {
+            rejectionModal.classList.remove('active');
+            setTimeout(() => rejectionModal.classList.add('hidden'), 300);
+        }
+    }
+    if (closeRejectionBtn) closeRejectionBtn.addEventListener('click', closeRejectionModal);
+    if (cancelRejection)   cancelRejection.addEventListener('click', closeRejectionModal);
+    if (rejectionModal)    rejectionModal.addEventListener('click', e => { if (e.target === rejectionModal) closeRejectionModal(); });
+
+    if (submitRejection) {
+        submitRejection.addEventListener('click', async () => {
+            const reason = rejectionComment?.value?.trim();
+            if (!reason) { showToast('Please provide a rejection reason.', true); return; }
+            if (!pendingRejectDocId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/approvals/${pendingRejectDocId}/reject`, {
+                    method: 'POST',
+                    headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to reject');
+                closeRejectionModal();
+                showToast('Document rejected successfully.');
+                updateDocumentStatus(pendingRejectDocId, 'rejected');
+                loadStats();
+            } catch (err) {
+                showErrorModal(err.message);
+            }
         });
     }
 
-    if (searchInput) searchInput.addEventListener('input', filterApprovals);
-    if (priorityFilter) priorityFilter.addEventListener('change', filterApprovals);
-    if (areaFilter) areaFilter.addEventListener('change', filterApprovals);
+    // ── Lock modal ────────────────────────────────────────────────────────────
+    function openLockModal(docId, title) {
+        currentLockDocId = docId;
+        if (lockDocTitle) lockDocTitle.textContent = title;
+        if (lockComment)  lockComment.value = '';
+        if (lockModal) {
+            lockModal.classList.remove('hidden');
+            lockModal.classList.add('flex');
+        }
+    }
+    function closeLockModal() {
+        currentLockDocId = null;
+        if (lockModal) {
+            lockModal.classList.add('hidden');
+            lockModal.classList.remove('flex');
+        }
+    }
+    if (lockModalCloseBtn)  lockModalCloseBtn.addEventListener('click', closeLockModal);
+    if (lockModalCancelBtn) lockModalCancelBtn.addEventListener('click', closeLockModal);
+    if (lockModal) lockModal.addEventListener('click', e => { if (e.target === lockModal) closeLockModal(); });
 
-    // Validate button
-    validateBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            if (confirm(`Validate "${title}"?`)) {
-                alert('Document validated successfully!');
-                item.remove();
-                updateStats();
+    if (lockModalConfirmBtn) {
+        lockModalConfirmBtn.addEventListener('click', async () => {
+            if (!currentLockDocId) return;
+            const comments = lockComment?.value || '';
+            try {
+                const res = await fetch(`${API_BASE}/api/approvals/${currentLockDocId}/lock`, {
+                    method: 'POST',
+                    headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comments })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to lock');
+                closeLockModal();
+                showToast('Document locked successfully.');
+                updateDocumentStatus(currentLockDocId, 'locked');
+                loadStats();
+            } catch (err) {
+                closeLockModal();
+                showErrorModal(err.message);
             }
         });
-    });
+    }
 
-    // View button
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            alert(`Opening review panel for: ${title}\n\nThis would show the document for detailed review.`);
-        });
-    });
+    // ── Data loading ──────────────────────────────────────────────────────────
+    loadStats();
+    loadDocuments();
 
-    // Reject button
-    rejectBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.border-l-4');
-            const title = item.querySelector('h3')?.textContent || 'Document';
-            
-            const reason = prompt(`Provide feedback for returning "${title}":`);
-            if (reason) {
-                alert(`Document returned to faculty.\nFeedback: ${reason}`);
-                item.remove();
-                updateStats();
+    async function loadStats() {
+        try {
+            const res = await fetch(`${API_BASE}/api/approvals/stats`, { headers: { 'x-auth-token': token } });
+            if (!res.ok) throw new Error();
+            const stats = await res.json();
+            document.getElementById('statPendingReview').textContent  = (stats.pending || 0) + (stats.validated || 0);
+            document.getElementById('statApprovedMonth').textContent  = stats.approved_month || 0;
+            document.getElementById('statRejected').textContent       = stats.rejected || 0;
+            document.getElementById('statAvgProcessing').textContent  = stats.avg_days ? `${stats.avg_days}d` : '—';
+            document.getElementById('urgentCount').textContent        = stats.pending > 0 ? `${stats.pending} pending` : 'No pending';
+            document.getElementById('approvedChange').textContent     = stats.approved_month > 0 ? `${stats.approved_month} this month` : 'None this month';
+            document.getElementById('rejectedNote').textContent       = stats.rejected > 0 ? 'Awaiting resubmission' : 'None rejected';
+            document.getElementById('slaNote').textContent            = 'Within SLA';
+            const badge = document.getElementById('approvalsBadge');
+            if (badge) {
+                badge.textContent = stats.pending || 0;
+                badge.style.display = stats.pending > 0 ? 'inline-block' : 'none';
             }
-        });
-    });
+        } catch { /* keep previous values */ }
+    }
 
-    // Update stats after actions
-    function updateStats() {
-        const pendingCount = document.querySelectorAll('.border-l-4').length;
-        const pendingElement = document.querySelector('.grid .stat-card:first-child .text-3xl');
-        if (pendingElement) {
-            pendingElement.textContent = pendingCount;
+    async function loadDocuments() {
+        try {
+            const res = await fetch(`${API_BASE}/api/approvals/pending`, { headers: { 'x-auth-token': token } });
+            if (!res.ok) throw new Error('Failed to load documents');
+            allDocuments = await res.json();
+            applyFilters();
+        } catch (err) {
+            const msg = '<div class="col-span-12 py-8 text-center text-red-500">Failed to load documents</div>';
+            if (desktopContainer) desktopContainer.innerHTML = msg;
+            if (mobileContainer)  mobileContainer.innerHTML  = msg;
         }
     }
 
-    // Stats cards click (for demo)
-    document.querySelectorAll('.stat-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const label = this.querySelector('.text-gray-500')?.textContent;
-            if (label === 'Pending Review') {
-                alert('Showing all pending approvals');
-            } else if (label === 'Approved (This Month)') {
-                alert('Showing approved documents this month');
+    // ── Filtering ─────────────────────────────────────────────────────────────
+    function applyFilters() {
+        const searchTerm = searchInput?.value.toLowerCase() || '';
+        const stage  = workflowStage?.value  || 'all';
+        const status = approvalStatus?.value || 'all';
+
+        filteredDocuments = allDocuments.filter(doc => {
+            const matchesSearch = !searchTerm ||
+                doc.title.toLowerCase().includes(searchTerm) ||
+                (doc.author_name    || '').toLowerCase().includes(searchTerm) ||
+                (doc.department_name|| '').toLowerCase().includes(searchTerm) ||
+                (doc.department_code|| '').toLowerCase().includes(searchTerm);
+
+            const matchesStage =
+                stage === 'all' ||
+                (stage === 'upload'   && doc.workflow_status === 'draft')     ||
+                (stage === 'validate' && doc.workflow_status === 'pending')   ||
+                (stage === 'approve'  && doc.workflow_status === 'validated') ||
+                (stage === 'lock'     && doc.workflow_status === 'approved');
+
+            const matchesStatus =
+                status === 'all' ||
+                (status === 'pending'  && doc.workflow_status === 'pending')   ||
+                (status === 'review'   && doc.workflow_status === 'validated') ||
+                (status === 'approved' && doc.workflow_status === 'approved')  ||
+                (status === 'locked'   && doc.workflow_status === 'locked')    ||
+                (status === 'rejected' && doc.workflow_status === 'rejected');
+
+            const matchesTab =
+                currentTab === 'all' ||
+                (currentTab === 'pending'   && (doc.workflow_status === 'pending' || doc.workflow_status === 'validated')) ||
+                (currentTab === 'validating'&& doc.workflow_status === 'pending')   ||
+                (currentTab === 'approving' && doc.workflow_status === 'validated') ||
+                (currentTab === 'recent'    && (doc.workflow_status === 'approved' || doc.workflow_status === 'locked'));
+
+            return matchesSearch && matchesStage && matchesStatus && matchesTab;
+        });
+
+        currentPage = 1;
+        renderDocuments();
+        renderPagination();
+    }
+
+    // ── Rendering ─────────────────────────────────────────────────────────────
+    const statusBadges = {
+        draft:     'bg-gray-100 text-gray-700',
+        pending:   'bg-amber-100 text-amber-700',
+        validated: 'bg-blue-100 text-blue-700',
+        approved:  'bg-green-100 text-green-700',
+        locked:    'bg-purple-100 text-purple-700',
+        rejected:  'bg-red-100 text-red-700'
+    };
+    const statusTexts = {
+        draft: 'Draft', pending: 'Pending Validation', validated: 'Pending Approval',
+        approved: 'Approved', locked: 'Locked', rejected: 'Rejected'
+    };
+
+    function getActionButtons(doc, mobile = false) {
+        const s = doc.workflow_status;
+        const isAreaChair = normalizedRole === 'area-chair';
+        const isAdmin     = normalizedRole === 'admin';
+        const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
+
+        const cls = mobile
+            ? { view: 'btn-view text-xs px-2 py-1', validate: 'btn-validate text-xs px-2 py-1', approve: 'btn-approve text-xs px-2 py-1', lock: 'btn-lock text-xs px-2 py-1', reject: 'btn-reject text-xs px-2 py-1', awaiting: 'btn-awaiting text-xs px-2 py-1' }
+            : { view: 'btn-view text-xs', validate: 'btn-validate text-xs', approve: 'btn-approve text-xs', lock: 'btn-lock text-xs', reject: 'btn-reject text-xs', awaiting: 'btn-awaiting text-xs' };
+
+        let btns = `<button class="${cls.view} btn-view-action" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
+
+        if (s === 'draft' || s === 'pending') {
+            // Area-chair and above can validate
+            btns += ` <button class="${cls.validate} btn-validate-action" data-id="${doc.id}">Validate</button>`;
+            btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
+        } else if (s === 'validated') {
+            if (isAreaChair) {
+                // Area-chair cannot approve — show informational badge
+                btns += ` <span class="${cls.awaiting}" title="Awaiting Dean/Admin approval">Awaiting Approval</span>`;
+            } else {
+                // Dean / Admin can approve
+                btns += ` <button class="${cls.approve} btn-approve-action" data-id="${doc.id}">Approve</button>`;
+                btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
             }
+        } else if (s === 'approved') {
+            // Area-chair, dean, admin can lock
+            btns += ` <button class="${cls.lock} btn-lock-action" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+        } else if (s === 'locked' && isAdmin) {
+            btns += ` <button class="btn-unlock text-xs btn-unlock-action" data-id="${doc.id}">Unlock</button>`;
+        }
+
+        return btns;
+    }
+
+    function renderDocuments() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const page  = filteredDocuments.slice(start, start + itemsPerPage);
+
+        if (!desktopContainer || !mobileContainer) return;
+
+        if (page.length === 0) {
+            desktopContainer.innerHTML = '<div class="col-span-12 py-8 text-center text-gray-500">No documents found</div>';
+            mobileContainer.innerHTML  = '<div class="py-8 text-center text-gray-500">No documents found</div>';
+            return;
+        }
+
+        desktopContainer.innerHTML = page.map(doc => `
+            <div class="grid grid-cols-12 py-3 text-sm items-center" data-id="${doc.id}">
+                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
+                <div class="col-span-3">
+                    <div class="font-medium text-gray-800">${doc.title}</div>
+                    <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
+                </div>
+                <div class="col-span-2"><span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span></div>
+                <div class="col-span-1"><span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${doc.department_code || 'N/A'}</span></div>
+                <div class="col-span-2"><span class="${statusBadges[doc.workflow_status] || 'bg-gray-100 text-gray-700'} text-xs px-2 py-1 rounded-full font-medium">${statusTexts[doc.workflow_status] || doc.workflow_status}</span></div>
+                <div class="col-span-1 text-gray-600">${doc.version || 'v1.0'}</div>
+                <div class="col-span-2"><div class="flex flex-wrap gap-1">${getActionButtons(doc)}</div></div>
+            </div>`).join('');
+
+        mobileContainer.innerHTML = page.map(doc => `
+            <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
+                <div class="flex items-start gap-2 mb-2">
+                    <input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600">
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-800">${doc.title}</div>
+                        <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span>
+                    <span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${doc.department_code || 'N/A'}</span>
+                    <span class="${statusBadges[doc.workflow_status] || 'bg-gray-100 text-gray-700'} text-xs px-2 py-1 rounded-full font-medium">${statusTexts[doc.workflow_status] || doc.workflow_status}</span>
+                </div>
+                <div class="text-sm text-gray-600 mb-3">${doc.version || 'v1.0'}</div>
+                <div class="flex flex-wrap gap-2">${getActionButtons(doc, true)}</div>
+            </div>`).join('');
+
+        attachActionHandlers();
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end   = Math.min(currentPage * itemsPerPage, filteredDocuments.length);
+        if (paginationInfo) paginationInfo.textContent = `Showing ${start} to ${end} of ${filteredDocuments.length}`;
+        if (!paginationButtons) return;
+
+        let html = '<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm" data-page="prev">Previous</button>';
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="px-3 py-1 ${i === currentPage ? 'bg-teal-600 text-white' : 'bg-white border text-gray-600'} rounded-lg text-sm" data-page="${i}">${i}</button>`;
+        }
+        html += '<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm" data-page="next">Next</button>';
+        paginationButtons.innerHTML = html;
+
+        paginationButtons.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const p = btn.getAttribute('data-page');
+                if (p === 'prev' && currentPage > 1) currentPage--;
+                else if (p === 'next' && currentPage < totalPages) currentPage++;
+                else if (!isNaN(p)) currentPage = parseInt(p);
+                renderDocuments();
+                renderPagination();
+            });
+        });
+    }
+
+    function updateDocumentStatus(docId, newStatus) {
+        const doc = allDocuments.find(d => d.id === docId || d.id === parseInt(docId));
+        if (doc) { doc.workflow_status = newStatus; applyFilters(); }
+    }
+
+    // ── Action handlers ───────────────────────────────────────────────────────
+    function attachActionHandlers() {
+        document.querySelectorAll('.btn-view-action').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                openPreviewModal(btn.getAttribute('data-url'), btn.getAttribute('data-title'));
+            });
+        });
+
+        document.querySelectorAll('.btn-validate-action').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                if (!confirm('Validate this document? It will move to the approval stage.')) return;
+                try {
+                    const res = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
+                        method: 'POST', headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.msg || 'Failed to validate');
+                    showToast('Document validated successfully.');
+                    updateDocumentStatus(parseInt(docId), 'validated');
+                    loadStats();
+                } catch (err) { showErrorModal(err.message); }
+            });
+        });
+
+        document.querySelectorAll('.btn-approve-action').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                if (!confirm('Approve this document?')) return;
+                try {
+                    const res = await fetch(`${API_BASE}/api/approvals/${docId}/approve`, {
+                        method: 'POST', headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.msg || 'Failed to approve');
+                    showToast('Document approved successfully.');
+                    updateDocumentStatus(parseInt(docId), 'approved');
+                    loadStats();
+                } catch (err) { showErrorModal(err.message); }
+            });
+        });
+
+        document.querySelectorAll('.btn-lock-action').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openLockModal(btn.getAttribute('data-id'), btn.getAttribute('data-title'));
+            });
+        });
+
+        document.querySelectorAll('.btn-unlock-action').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                if (!confirm('Unlock this document? It will return to approved status.')) return;
+                try {
+                    const res = await fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
+                        method: 'POST', headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.msg || 'Failed to unlock');
+                    showToast('Document unlocked.');
+                    updateDocumentStatus(parseInt(docId), 'approved');
+                    loadStats();
+                } catch (err) { showErrorModal(err.message); }
+            });
+        });
+
+        document.querySelectorAll('.btn-reject-action').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const docId = parseInt(btn.getAttribute('data-id'));
+                const doc = allDocuments.find(d => d.id === docId);
+                if (doc) openRejectionModal(doc);
+            });
+        });
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+    if (searchInput)    searchInput.addEventListener('input', applyFilters);
+    if (workflowStage)  workflowStage.addEventListener('change', applyFilters);
+    if (approvalStatus) approvalStatus.addEventListener('change', applyFilters);
+    if (refreshBtn)     refreshBtn.addEventListener('click', () => { loadStats(); loadDocuments(); });
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentTab = this.getAttribute('data-tab');
+            tabLinks.forEach(l => {
+                l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                l.classList.add('border-transparent', 'text-gray-500');
+            });
+            this.classList.remove('border-transparent', 'text-gray-500');
+            this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+            applyFilters();
         });
     });
 });

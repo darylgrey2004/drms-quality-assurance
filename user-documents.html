@@ -27,15 +27,15 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Faculty Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Faculty Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">JD</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div class="text-sm font-medium text-white">Dr. Juan Dela Cruz</div>
-                        <div class="text-xs text-teal-300">Faculty · Science Education</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,6 @@
                 </a>
                 <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">✅</span> My Approvals
-                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
                 </a>
                 <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70">👤</span> Profile
@@ -69,7 +68,7 @@
                 <div class="text-xs text-teal-200/50">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                        <span>Faculty Access</span>
+                        <span id="sidebarAccess">Faculty Access</span>
                     </div>
                     <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
@@ -101,14 +100,15 @@
                                 <option value="all">All Status</option>
                                 <option value="approved">Approved</option>
                                 <option value="pending">Pending</option>
-                                <option value="revision">Needs Revision</option>
+                                <option value="validated">Validated</option>
+                                <option value="draft">Draft</option>
+                                <option value="rejected">Rejected</option>
                             </select>
                             <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
                                 <option value="all">All Categories</option>
-                                <option value="instruction">Instruction</option>
-                                <option value="research">Research</option>
-                                <option value="extension">Extension</option>
-                                <option value="employment">Employment</option>
+                            </select>
+                            <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
+                                <option value="all">All Departments</option>
                             </select>
                             <button id="filterBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Filter</button>
                         </div>
@@ -131,11 +131,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100" id="documentsTable">
-                                <tr><td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400">by Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td><td class="py-3 text-gray-600">BSED</span></td><td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td><td class="py-3 text-gray-600">v2.1</td><td class="py-3 text-gray-400">Apr 20, 2026</td><td class="py-3"><div class="flex gap-2"><button class="action-btn view-doc">View</button><button class="action-btn download-doc">Download</button></div></td></tr>
-                                <tr><td class="py-3"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400">by Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td><td class="py-3 text-gray-600">BSED</span></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td><td class="py-3 text-gray-600">v1.0</td><td class="py-3 text-gray-400">Apr 22, 2026</td><td class="py-3"><div class="flex gap-2"><button class="action-btn view-doc">View</button><button class="action-btn edit-doc">Edit</button></div></td></tr>
-                                <tr><td class="py-3"><div class="font-medium text-gray-800">Faculty Development Plan 2026</div><div class="text-xs text-gray-400">by Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span></td><td class="py-3 text-gray-600">BEED</span></td><td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></table><td class="py-3 text-gray-600">v2.0</td><td class="py-3 text-gray-400">Apr 18, 2026</td><td class="py-3"><div class="flex gap-2"><button class="action-btn view-doc">View</button><button class="action-btn download-doc">Download</button></div></td></tr>
-                                <tr><td class="py-3"><div class="font-medium text-gray-800">Community Extension Report</div><div class="text-xs text-gray-400">by Dr. Juan Dela Cruz</div></tr><td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td><td class="py-3 text-gray-600">BPED</span></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td><td class="py-3 text-gray-600">v0.5</td><td class="py-3 text-gray-400">Apr 15, 2026</td><td class="py-3"><div class="flex gap-2"><button class="action-btn view-doc">View</button><button class="action-btn edit-doc">Edit</button></div></td></tr>
-                                <tr><td class="py-3"><div class="font-medium text-gray-800">Inclusive Education Module</div><div class="text-xs text-gray-400">by Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td><td class="py-3 text-gray-600">BSNED</span></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td><td class="py-3 text-gray-600">v1.2</td><td class="py-3 text-gray-400">Apr 10, 2026</td><td class="py-3"><div class="flex gap-2"><button class="action-btn view-doc">View</button><button class="action-btn edit-doc">Edit</button></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -143,25 +138,24 @@
 
                 <!-- documents - Mobile Card View -->
                 <div id="mobileDocumentsContainer" class="block md:hidden space-y-4">
-                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400 mb-2">by Dr. Juan Dela Cruz · Apr 20, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div><div class="text-sm text-gray-600 mb-2">BSED · v2.1</div><div class="flex gap-2"><button class="action-btn-sm view-doc">View</button><button class="action-btn-sm download-doc">Download</button></div></div>
-                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400 mb-2">by Dr. Juan Dela Cruz · Apr 22, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div><div class="text-sm text-gray-600 mb-2">BSED · v1.0</div><div class="flex gap-2"><button class="action-btn-sm view-doc">View</button><button class="action-btn-sm edit-doc">Edit</button></div></div>
-                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Faculty Development Plan 2026</div><div class="text-xs text-gray-400 mb-2">by Dr. Juan Dela Cruz · Apr 18, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div><div class="text-sm text-gray-600 mb-2">BEED · v2.0</div><div class="flex gap-2"><button class="action-btn-sm view-doc">View</button><button class="action-btn-sm download-doc">Download</button></div></div>
-                    <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Community Extension Report</div><div class="text-xs text-gray-400 mb-2">by Dr. Juan Dela Cruz · Apr 15, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div><div class="text-sm text-gray-600 mb-2">BPED · v0.5</div><div class="flex gap-2"><button class="action-btn-sm view-doc">View</button><button class="action-btn-sm edit-doc">Edit</button></div></div>
                 </div>
 
                 <!-- pagination -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-                    <div class="text-sm text-gray-500">Showing 1 to 5 of 24 documents</div>
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
-                        <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg">1</button>
-                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
-                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
-                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                    <div class="text-sm text-gray-500" id="paginationInfo"></div>
+                    <div class="flex flex-wrap gap-2 justify-center" id="paginationButtons">
                     </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Action feedback toast -->
+    <div id="actionToast" class="fixed bottom-6 right-6 z-[9999] hidden">
+        <div class="flex items-center gap-3 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm">
+            <span id="actionToastIcon">✓</span>
+            <span id="actionToastMsg"></span>
+        </div>
     </div>
 
     <script>
@@ -179,17 +173,7 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
         
-        // Action buttons
-        document.querySelectorAll('.view-doc').forEach(btn => btn.addEventListener('click', () => alert('Document viewer would open')));
-        document.querySelectorAll('.download-doc').forEach(btn => btn.addEventListener('click', () => alert('Downloading document')));
-        document.querySelectorAll('.edit-doc').forEach(btn => btn.addEventListener('click', () => alert('Editing document')));
-        
-        // Filter button
-        document.getElementById('filterBtn')?.addEventListener('click', () => {
-            const category = document.getElementById('categoryFilter')?.value;
-            const status = document.getElementById('statusFilter')?.value;
-            alert(`Filtering by: Category=${category}, Status=${status}`);
-        });
+
     </script>
 </body>
 <script src="js/user-session.js"></script>
