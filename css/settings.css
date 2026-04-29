@@ -48,10 +48,10 @@ body {
 }
 
 /* form elements */
-input[type="text"], input[type="email"], input[type="number"], input[type="url"], select {
+input[type="text"], input[type="email"], input[type="number"], input[type="url"], select, textarea {
     transition: all 0.2s ease;
 }
-input:focus, select:focus {
+input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #14b8a6;
     box-shadow: 0 0 0 1px #14b8a6;
@@ -64,6 +64,10 @@ input[type="radio"] { accent-color: #0f766e; }
 /* button styling */
 .bg-teal-700 { background-color: #0f766e; }
 .bg-teal-700:hover { background-color: #115e59; }
+
+/* delete button */
+.bg-red-600 { background-color: #dc2626; }
+.bg-red-600:hover { background-color: #b91c1c; }
 
 /* code block */
 code {
@@ -82,6 +86,33 @@ code {
 
 /* mobile header spacer */
 .mobile-header-spacer { height: 60px; width: 100%; }
+
+/* Department table styling */
+#departmentsTableBody tr:hover {
+    background-color: #f9fafb;
+}
+
+.action-icon {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.action-edit {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+.action-edit:hover {
+    background-color: #bae6fd;
+}
+.action-delete {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+.action-delete:hover {
+    background-color: #fecaca;
+}
 
 /* ============================================ */
 /* RESPONSIVE DESIGN */
