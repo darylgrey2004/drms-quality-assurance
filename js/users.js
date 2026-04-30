@@ -19,9 +19,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const createEvaluatorExpiresAt = document.getElementById('createEvaluatorExpiresAt');
     const departmentWrap = document.getElementById('departmentWrap');
     const createDepartment = document.getElementById('createDepartment');
+    
+    // Delete Modal Elements
+    const deleteUserModal = document.getElementById('deleteUserModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    let userIdToDelete = null;
 
     let allUsers = [];
     let isRedirecting = false;
+
+    // Role mapping for display
+    function getRoleDisplayName(role) {
+        const roleMap = {
+            'admin': 'Administrator',
+            'dean': 'Dean',
+            'department-head': 'Department Head',
+            'area-chair': 'Area Chair',
+            'faculty': 'Faculty',
+            'evaluator': 'External Evaluator'
+        };
+        return roleMap[role] || role || 'User';
+    }
 
     // Function to check if token is expired
     function isTokenExpired(token) {
@@ -75,18 +94,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (createUserForm) createUserForm.reset();
         if (evaluatorExpiryWrap) evaluatorExpiryWrap.classList.add('hidden');
         if (createEvaluatorExpiresAt) createEvaluatorExpiresAt.required = false;
+        if (departmentWrap) departmentWrap.classList.add('hidden');
     }
 
-    function syncEvaluatorExpiryField() {
-        if (!createRole || !evaluatorExpiryWrap || !createEvaluatorExpiresAt) return;
+    function syncRoleFields() {
+        if (!createRole) return;
         const selectedRole = (createRole.value || '').toLowerCase().trim();
-        const isEvaluator = selectedRole === 'evaluator' || selectedRole === 'external evaluator';
-        evaluatorExpiryWrap.classList.toggle('hidden', !isEvaluator);
-        createEvaluatorExpiresAt.required = isEvaluator;
-        if (!isEvaluator) createEvaluatorExpiresAt.value = '';
+        const isEvaluator = selectedRole === 'evaluator';
         
+        // Show/hide evaluator expiry
+        if (evaluatorExpiryWrap) {
+            evaluatorExpiryWrap.classList.toggle('hidden', !isEvaluator);
+            if (createEvaluatorExpiresAt) createEvaluatorExpiresAt.required = isEvaluator;
+            if (!isEvaluator && createEvaluatorExpiresAt) createEvaluatorExpiresAt.value = '';
+        }
+        
+        // Show department for faculty, area chair, department head, and dean
         if (departmentWrap && createDepartment) {
-            const showDepartment = isEvaluator || selectedRole === 'dean' || selectedRole === 'area chair/program head';
+            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head' || selectedRole === 'dean';
             departmentWrap.classList.toggle('hidden', !showDepartment);
         }
     }
@@ -97,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (closeCreateUserModalBtn) closeCreateUserModalBtn.addEventListener('click', closeCreateUserModal);
     if (cancelCreateUserBtn) cancelCreateUserBtn.addEventListener('click', closeCreateUserModal);
-    if (createRole) createRole.addEventListener('change', syncEvaluatorExpiryField);
+    if (createRole) createRole.addEventListener('change', syncRoleFields);
 
     if (createUserForm) {
         createUserForm.addEventListener('submit', async function (e) {
@@ -128,9 +153,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Passwords do not match.');
                 return;
             }
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return;
+            }
 
             const normalizedRole = role.toLowerCase().trim();
-            const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
+            const isEvaluator = normalizedRole === 'evaluator';
+            const needsDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head' || normalizedRole === 'dean';
+            
+            if (needsDepartment && !department) {
+                alert('Please select a department/program for this role.');
+                return;
+            }
+            
             if (isEvaluator && !evaluatorExpiresAt) {
                 alert('Please set an expiration date/time for External Evaluator.');
                 return;
@@ -170,6 +206,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error creating user:', error);
                 alert(`Failed to create user: ${error.message}`);
             }
+        });
+    }
+
+    // Delete User Functions
+    function openDeleteModal(userId) {
+        userIdToDelete = userId;
+        if (deleteUserModal) deleteUserModal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        userIdToDelete = null;
+        if (deleteUserModal) deleteUserModal.classList.add('hidden');
+    }
+
+    async function deleteUser() {
+        if (!userIdToDelete) return;
+        
+        if (isTokenExpired(token)) {
+            handleExpiredToken();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/users/${userIdToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token,
+                },
+            });
+
+            if (response.status === 401) {
+                handleExpiredToken();
+                return;
+            }
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.msg || 'Failed to delete user.');
+            }
+
+            alert('User has been deleted successfully.');
+            closeDeleteModal();
+            fetchAndRenderUsers();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert(`Failed to delete user: ${error.message}`);
+        }
+    }
+
+    if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', deleteUser);
+    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+    if (deleteUserModal) {
+        deleteUserModal.addEventListener('click', (e) => {
+            if (e.target === deleteUserModal) closeDeleteModal();
         });
     }
 
@@ -228,9 +319,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const pendingUsers = users.filter(u => u.status === 'pending').length;
         const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
 
-        const totalEl = document.querySelector('.stat-card:nth-child(1) .text-3xl');
-        const approvedEl = document.querySelector('.stat-card:nth-child(2) .text-3xl');
-        const pendingEl = document.querySelector('.stat-card:nth-child(3) .text-3xl');
+        const totalEl = document.getElementById('totalUsersCount');
+        const approvedEl = document.getElementById('approvedUsersCount');
+        const pendingEl = document.getElementById('pendingUsersCount');
         const rolesEl = document.querySelector('.stat-card:nth-child(4) .text-3xl');
         
         if (totalEl) totalEl.textContent = totalUsers;
@@ -244,6 +335,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (approvedRateEl) approvedRateEl.textContent = `${activeRate}% approved rate`;
         if (totalLabelEl) totalLabelEl.textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+    }
+
+    function getRoleBadge(role) {
+        const colors = {
+            'admin': 'bg-purple-100 text-purple-700',
+            'dean': 'bg-indigo-100 text-indigo-700',
+            'department-head': 'bg-blue-100 text-blue-700',
+            'area-chair': 'bg-amber-100 text-amber-700',
+            'faculty': 'bg-green-100 text-green-700',
+            'evaluator': 'bg-gray-100 text-gray-700'
+        };
+        const color = colors[role] || 'bg-gray-100 text-gray-700';
+        return `<span class="${color} text-xs px-2 py-1 rounded-full">${getRoleDisplayName(role)}</span>`;
     }
 
     function renderUsers(users) {
@@ -295,11 +399,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
             const userId = user.id || user._id;
+            const roleDisplay = getRoleDisplayName(user.role);
+            const departmentDisplay = user.department || (user.role === 'faculty' || user.role === 'area-chair' || user.role === 'department-head' || user.role === 'dean' ? 'Not Assigned' : 'N/A');
             
             const actionButtons = userId
                 ? `
-                    <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View Profile</a>
-                    ${canDeleteUsers ? `<button class="action-pill action-pill-delete delete-user" data-id="${userId}" title="Delete User">Delete</button>` : ''}
+                    <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View</a>
+                    ${canDeleteUsers && user.id !== currentUser?.id ? `<button class="action-pill action-pill-delete delete-user" data-id="${userId}" title="Delete User">Delete</button>` : ''}
                 `
                 : '<span class="text-gray-400">N/A</span>';
 
@@ -311,13 +417,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div>
                             <div class="font-medium text-gray-800">${user.firstName || ''} ${user.lastName || ''}</div>
-                            <div class="text-xs text-gray-400">${user.role || 'User'}</div>
+                            <div class="text-xs text-gray-400">${roleDisplay}</div>
                         </div>
                     </div>
                 </td>
                 <td class="py-3 px-2 text-gray-600 text-sm">${user.email || ''}</td>
-                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${user.role || 'User'}</span></td>
-                <td class="py-3 px-2 text-gray-600 text-sm">${user.department || 'N/A'}</td>
+                <td class="py-3 px-2">${getRoleBadge(user.role)}</td>
+                <td class="py-3 px-2 text-gray-600 text-sm">${escapeHtml(departmentDisplay)}</td>
                 <td class="py-3 px-2">${statusBadge}</td>
                 <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
                 <td class="py-3 px-2">
@@ -351,7 +457,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`http://localhost:3000/api/admin/users/${encodeURIComponent(userId)}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+
+      
             });
+        });
+    }
 
             if (response.status === 401) { handleExpiredToken(); return; }
 
@@ -364,6 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error deleting user:', error);
             alert(`Failed to delete user: ${error.message}`);
         }
+
     }
 
     fetchAndRenderUsers();

@@ -34,10 +34,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AD</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Admin User</div>
-                        <div class="text-xs text-teal-300">Administrator</div>
+                        <div class="text-sm font-medium text-white" id="userName">Admin User</div>
+                        <div class="text-xs text-teal-300" id="userRole">Administrator</div>
                     </div>
                 </div>
             </div>
@@ -78,6 +78,7 @@
                 <div class="mb-4 border-b border-gray-200 overflow-x-auto">
                     <ul class="flex gap-1 text-sm font-medium" id="settingsTabs">
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="general">General</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="departments">Departments</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="workflow">Workflow</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="requirements">Document Requirements</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="standards">Standards</a></li>
@@ -106,13 +107,109 @@
                     </div>
                 </div>
 
+                <!-- DEPARTMENTS MANAGEMENT TAB (NEW) -->
+                <div id="departmentsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h2 class="text-base md:text-lg font-semibold text-gray-800">Departments / Programs</h2>
+                                <p class="text-sm text-gray-500 mt-1">Manage academic departments and programs in the system</p>
+                            </div>
+                            <button id="addDepartmentBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                                <span>+</span> Add Department
+                            </button>
+                        </div>
+
+                        <!-- Departments Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                        <th class="text-left py-3 px-2">Code</th>
+                                        <th class="text-left py-3 px-2">Department Name</th>
+                                        <th class="text-left py-3 px-2">Description</th>
+                                        <th class="text-left py-3 px-2">Status</th>
+                                        <th class="text-left py-3 px-2">Created</th>
+                                        <th class="text-left py-3 px-2">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="departmentsTableBody" class="divide-y divide-gray-100">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div id="departmentsEmptyState" class="hidden text-center py-8 text-gray-400">
+                            <div class="text-4xl mb-2">🏫</div>
+                            <p>No departments added yet</p>
+                            <p class="text-xs mt-1">Click "Add Department" to create your first department</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Department Modal -->
+                <div id="departmentModal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
+                    <div class="max-w-md w-full bg-white rounded-xl p-6 shadow-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800" id="departmentModalTitle">Add Department</h3>
+                            <button id="closeDepartmentModalBtn" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
+                        </div>
+                        <form id="departmentForm">
+                            <input type="hidden" id="departmentId">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Department Code *</label>
+                                    <input type="text" id="deptCode" placeholder="e.g., BEED, BSED, CED" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                                    <p class="text-xs text-gray-400 mt-1">Unique identifier (max 10 characters)</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Department Name *</label>
+                                    <input type="text" id="deptName" placeholder="e.g., Bachelor of Elementary Education" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Description</label>
+                                    <textarea id="deptDescription" rows="3" placeholder="Department description..." class="w-full px-3 py-2 border border-gray-200 rounded-lg"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Status</label>
+                                    <select id="deptStatus" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 justify-end mt-6">
+                                <button type="button" id="cancelDepartmentBtn" class="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-800">Save Department</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Delete Department Confirmation Modal -->
+                <div id="deleteDeptModal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 flex items-center justify-center">
+                    <div class="max-w-md w-full bg-white rounded-xl p-6 shadow-xl">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">⚠️</div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Delete Department</h3>
+                            <p class="text-gray-600 mb-4">Are you sure you want to delete <span id="deleteDeptName" class="font-bold"></span>?</p>
+                            <p class="text-xs text-red-600 mb-6">This will also remove this department from all associated users and documents.</p>
+                            <div class="flex gap-3 justify-center">
+                                <button id="confirmDeleteDeptBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+                                <button id="cancelDeleteDeptBtn" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Workflow Tab -->
                 <div id="workflowTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Workflow Configuration</h2>
                         <div class="space-y-4 md:space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Approval Workflow</label><p class="text-xs text-gray-400">Configure the document approval stages</p></div><div class="md:col-span-2"><div class="space-y-2"><label class="flex items-center"><input type="radio" name="workflowType" value="standard" class="mr-2 text-teal-600" checked><span class="text-sm">Standard (Upload → Validate → Approve → Lock)</span></label><label class="flex items-center"><input type="radio" name="workflowType" value="simple" class="mr-2 text-teal-600"><span class="text-sm">Simple (Upload → Approve → Lock)</span></label></div></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Auto-approval</label><p class="text-xs text-gray-400">Automatically approve documents from specific roles</p></div><div class="md:col-span-2"><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveAdmin" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Administrator uploads</span></label><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveDean" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Dean uploads</span></label><label class="flex items-center"><input type="checkbox" id="autoApproveQA" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">QA Coordinator uploads</span></label></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Auto-approval</label><p class="text-xs text-gray-400">Automatically approve documents from specific roles</p></div><div class="md:col-span-2"><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveAdmin" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Administrator uploads</span></label><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveDean" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Dean uploads</span></label><label class="flex items-center"><input type="checkbox" id="autoApproveDeptHead" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Department Head uploads</span></label></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">SLA (Hours)</label><p class="text-xs text-gray-400">Time limits for each stage</p></div><div class="md:col-span-2"><div class="grid grid-cols-2 gap-4"><div><label class="block text-xs text-gray-500 mb-1">Validation</label><input type="number" id="slaValidation" value="48" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div><div><label class="block text-xs text-gray-500 mb-1">Approval</label><input type="number" id="slaApproval" value="72" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Version Control</label><p class="text-xs text-gray-400">Maximum versions to keep</p></div><div class="md:col-span-2"><input type="number" id="maxVersions" value="10" min="1" max="50" class="w-32 px-4 py-2 border border-gray-200 rounded-lg"><span class="text-sm text-gray-500 ml-2">versions per document</span></div></div>
                         </div>
@@ -120,89 +217,16 @@
                     </div>
                 </div>
 
-                <!-- Document Requirements Tab (NEW - Admins set expected document counts) -->
+                <!-- Document Requirements Tab -->
                 <div id="requirementsTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Document Requirements Configuration</h2>
                         <p class="text-sm text-gray-500 mb-4">Set expected document counts per category and department. These targets determine completeness percentages in reports and dashboards.</p>
                         
-                        <div class="space-y-6">
-                            <!-- Instruction Category -->
-                            <div class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="font-semibold text-gray-800 text-base">Instruction</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="instructionTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="instruction_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="45" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="instruction_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="65" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="instruction_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="instruction_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="instruction_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                </div>
-                            </div>
-
-                            <!-- Research Category -->
-                            <div class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="font-semibold text-gray-800 text-base">Research</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="researchTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="research_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="research_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="55" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="research_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="research_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="research_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                </div>
-                            </div>
-
-                            <!-- Extension Category -->
-                            <div class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="font-semibold text-gray-800 text-base">Extension</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="extensionTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="extension_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="extension_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="extension_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="extension_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="extension_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
-                                </div>
-                            </div>
-
-                            <!-- Employment Category -->
-                            <div class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="font-semibold text-gray-800 text-base">Employment</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="employmentTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="employment_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="employment_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="employment_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="employment_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="employment_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
-                                <p>⚠️ These expected document counts determine completeness percentages. When a department reaches 100% of its expected documents, it will be marked as "Complete".</p>
-                            </div>
+                        <div class="space-y-6" id="requirementsContainer">
+                            <!-- Dynamic content from departments -->
                         </div>
+
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3">
                             <button id="resetRequirements" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Reset to Defaults</button>
                             <button id="saveRequirements" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Save Requirements</button>
@@ -229,9 +253,9 @@
                     <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Notification Settings</h2>
                         <div class="space-y-4 md:space-y-6">
-                            <div><h3 class="font-medium text-gray-700 mb-2 md:mb-3">Email Notifications</h3><div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document uploaded (to QA Coordinator)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document validated (to Dean/Approver)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document approved (to uploader)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document rejected (to uploader)</span></label></div></div>
+                            <div><h3 class="font-medium text-gray-700 mb-2 md:mb-3">Email Notifications</h3><div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document uploaded (to Department Head)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document validated (to Dean/Approver)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document approved (to uploader)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document rejected (to uploader)</span></label></div></div>
                             <div><h3 class="font-medium text-gray-700 mb-2 md:mb-3">System Notifications</h3><div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Backup completion alerts</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Storage space warnings</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">New user registration alerts</span></label></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Notification Email</label><p class="text-xs text-gray-400">Where to send system alerts</p></div><div class="md:col-span-2"><input type="email" value="admin@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Notification Email</label><p class="text-xs text-gray-400">Where to send system alerts</p></div><div class="md:col-span-2"><input type="email" id="notificationEmail" value="admin@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
                         </div>
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveNotifications">Save Changes</button></div>
                     </div>
@@ -242,8 +266,8 @@
                     <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Backup & Security</h2>
                         <div class="space-y-4 md:space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Automatic Backup</label><p class="text-xs text-gray-400">Schedule regular system backups</p></div><div class="md:col-span-2"><select class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="daily">Daily at 03:00 AM</option><option value="weekly" selected>Weekly (Sunday 03:00 AM)</option><option value="monthly">Monthly (1st of month)</option></select></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Backup Retention</label><p class="text-xs text-gray-400">How long to keep backups</p></div><div class="md:col-span-2"><select class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Automatic Backup</label><p class="text-xs text-gray-400">Schedule regular system backups</p></div><div class="md:col-span-2"><select id="backupSchedule" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="daily">Daily at 03:00 AM</option><option value="weekly" selected>Weekly (Sunday 03:00 AM)</option><option value="monthly">Monthly (1st of month)</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Backup Retention</label><p class="text-xs text-gray-400">How long to keep backups</p></div><div class="md:col-span-2"><select id="backupRetention" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option></select></div></div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Manual Backup</label><p class="text-xs text-gray-400">Create a backup immediately</p></div><div class="md:col-span-2"><button id="backupNowBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Create Backup Now</button></div></div>
                         </div>
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveBackup">Save Changes</button></div>
@@ -256,8 +280,8 @@
                         <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">API & Integration</h2>
                         <div class="space-y-4 md:space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">API Access</label><p class="text-xs text-gray-400">Enable REST API for integrations</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="apiEnabled" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Enable API</span></label></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">API Keys</label><p class="text-xs text-gray-400">Manage integration keys</p></div><div class="md:col-span-2"><div class="bg-gray-50 p-3 md:p-4 rounded-lg"><div class="flex justify-between items-center mb-2"><span class="text-sm font-medium">Production Key</span><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span></div><div class="flex items-center gap-2 flex-wrap"><code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">••••••••••••••••••••</code><button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button></div></div></div></div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Webhooks</label><p class="text-xs text-gray-400">Send events to external systems</p></div><div class="md:col-span-2"><div class="space-y-2"><input type="url" placeholder="https://example.com/webhook" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><div class="flex flex-col sm:flex-row gap-2"><select class="px-4 py-2 border border-gray-200 rounded-lg"><option value="all">All events</option></select><button class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Add</button></div></div></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">API Keys</label><p class="text-xs text-gray-400">Manage integration keys</p></div><div class="md:col-span-2"><div class="bg-gray-50 p-3 md:p-4 rounded-lg"><div class="flex justify-between items-center mb-2"><span class="text-sm font-medium">Production Key</span><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span></div><div class="flex items-center gap-2 flex-wrap"><code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">••••••••••••••••••••</code><button id="regenerateApiKey" class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button></div></div></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Webhooks</label><p class="text-xs text-gray-400">Send events to external systems</p></div><div class="md:col-span-2"><div class="space-y-2"><input type="url" id="webhookUrl" placeholder="https://example.com/webhook" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><div class="flex flex-col sm:flex-row gap-2"><select id="webhookEvent" class="px-4 py-2 border border-gray-200 rounded-lg"><option value="all">All events</option><option value="document">Document events</option><option value="user">User events</option></select><button id="addWebhookBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Add</button></div><div id="webhooksList" class="mt-3 space-y-2"></div></div></div></div>
                         </div>
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveApi">Save Changes</button></div>
                     </div>
@@ -272,7 +296,7 @@
                                 <div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Log Out</label><p class="text-xs text-gray-400">End your current session</p></div>
                                 <div class="md:col-span-2"><button id="logoutBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Log Out</button></div>
                             </div>
-                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600">Admin User</span> (Administrator)</p></div>
+                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600" id="loggedInUser">Admin User</span> (Administrator)</p></div>
                         </div>
                     </div>
                 </div>
@@ -281,165 +305,14 @@
                 <div class="mt-6 bg-white rounded-xl p-3 md:p-4 stat-card text-xs text-gray-400">
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
                         <div>DRMS-QA Version: <span class="text-gray-600">2.1.0</span></div>
-                        <div>Last updated: <span class="text-gray-600">April 28, 2026</span></div>
-                        <div>Database: <span class="text-gray-600">PostgreSQL 14.5</span></div>
+                        <div>Last updated: <span class="text-gray-600">April 29, 2026</span></div>
+                        <div>Database: <span class="text-gray-600">MySQL 10.4.32</span></div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script>
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        // Tab switching
-        document.querySelectorAll('#settingsTabs a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const tabId = this.dataset.tab;
-                document.querySelectorAll('#settingsTabs a').forEach(l => {
-                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
-                    l.classList.add('border-transparent', 'text-gray-500');
-                });
-                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(tabId + 'Tab').classList.remove('hidden');
-            });
-        });
-        
-        // Function to update total expected counts
-        function updateTotals() {
-            const categories = ['instruction', 'research', 'extension', 'employment'];
-            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-            
-            categories.forEach(cat => {
-                let total = 0;
-                departments.forEach(dept => {
-                    const val = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
-                    total += val;
-                });
-                const totalSpan = document.getElementById(`${cat}Total`);
-                if (totalSpan) totalSpan.textContent = total;
-            });
-        }
-        
-        // Add event listeners to all expected docs inputs
-        document.querySelectorAll('.expected-docs').forEach(input => {
-            input.addEventListener('input', updateTotals);
-        });
-        
-        // Reset to defaults
-        document.getElementById('resetRequirements')?.addEventListener('click', () => {
-            if (confirm('Reset all document requirements to default values?')) {
-                // Instruction defaults
-                document.getElementById('instruction_beed').value = 45;
-                document.getElementById('instruction_bsed').value = 65;
-                document.getElementById('instruction_bsned').value = 40;
-                document.getElementById('instruction_bcaed').value = 35;
-                document.getElementById('instruction_bped').value = 30;
-                
-                // Research defaults
-                document.getElementById('research_beed').value = 40;
-                document.getElementById('research_bsed').value = 55;
-                document.getElementById('research_bsned').value = 35;
-                document.getElementById('research_bcaed').value = 30;
-                document.getElementById('research_bped').value = 25;
-                
-                // Extension defaults
-                document.getElementById('extension_beed').value = 25;
-                document.getElementById('extension_bsed').value = 25;
-                document.getElementById('extension_bsned').value = 25;
-                document.getElementById('extension_bcaed').value = 25;
-                document.getElementById('extension_bped').value = 25;
-                
-                // Employment defaults
-                document.getElementById('employment_beed').value = 30;
-                document.getElementById('employment_bsed').value = 30;
-                document.getElementById('employment_bsned').value = 30;
-                document.getElementById('employment_bcaed').value = 30;
-                document.getElementById('employment_bped').value = 30;
-                
-                updateTotals();
-                alert('Document requirements reset to default values.');
-            }
-        });
-        
-        // Save requirements
-        document.getElementById('saveRequirements')?.addEventListener('click', () => {
-            // Collect all values
-            const requirements = {
-                instruction: {},
-                research: {},
-                extension: {},
-                employment: {}
-            };
-            
-            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-            const categories = ['instruction', 'research', 'extension', 'employment'];
-            
-            categories.forEach(cat => {
-                departments.forEach(dept => {
-                    requirements[cat][dept] = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
-                });
-            });
-            
-            // Save to localStorage (in a real app, this would be an API call)
-            localStorage.setItem('documentRequirements', JSON.stringify(requirements));
-            
-            alert('Document requirements saved successfully!\n\nThese targets will now determine completeness percentages in reports and dashboards.');
-        });
-        
-        // Load saved requirements on page load
-        function loadSavedRequirements() {
-            const saved = localStorage.getItem('documentRequirements');
-            if (saved) {
-                const requirements = JSON.parse(saved);
-                const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-                const categories = ['instruction', 'research', 'extension', 'employment'];
-                
-                categories.forEach(cat => {
-                    if (requirements[cat]) {
-                        departments.forEach(dept => {
-                            const input = document.getElementById(`${cat}_${dept}`);
-                            if (input && requirements[cat][dept]) {
-                                input.value = requirements[cat][dept];
-                            }
-                        });
-                    }
-                });
-                updateTotals();
-            }
-        }
-        
-        // Initialize totals on page load
-        updateTotals();
-        loadSavedRequirements();
-        
-        // Logout button
-        document.getElementById('logoutBtn')?.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = 'landing.html';
-            }
-        });
-        
-        // Save buttons for other tabs
-        document.querySelectorAll('[id^="save"], #backupNowBtn').forEach(btn => {
-            if (btn.id !== 'saveRequirements' && btn.id !== 'resetRequirements') {
-                btn.addEventListener('click', () => alert('Settings saved (demo)'));
-            }
-        });
-    </script>
+    <script src="js/settings.js"></script>
 </body>
 </html>
