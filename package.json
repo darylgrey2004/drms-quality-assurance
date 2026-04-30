@@ -1,0 +1,21 @@
+{
+  "name": "drms-quality-assurance",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darylgrey2004/drms-quality-assurance.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/darylgrey2004/drms-quality-assurance/issues"
+  },
+  "homepage": "https://github.com/darylgrey2004/drms-quality-assurance#readme"
+}

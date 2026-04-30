@@ -85,7 +85,7 @@ router.put('/profile/:userId', auth, async (req, res) => {
       await db.query('UPDATE users SET ? WHERE id = ?', [userUpdates, userId]);
     }
 
-    // Update faculty_profiles table
+    // Update or insert faculty_profiles table
     const [result] = await db.query(
       'UPDATE faculty_profiles SET ? WHERE user_id = ?',
       [profileData, userId]
@@ -94,12 +94,20 @@ router.put('/profile/:userId', auth, async (req, res) => {
     console.log('Update result:', result);
     console.log('Affected rows:', result.affectedRows);
 
+    // If no rows were affected, try to insert a new profile record
     if (result.affectedRows === 0) {
-      console.log('Profile not found for user_id:', userId);
-      return res.status(404).json({ msg: 'Profile not found' });
+      console.log('Profile not found, attempting to insert new profile for user_id:', userId);
+      try {
+        const insertData = { user_id: userId, ...profileData };
+        await db.query('INSERT INTO faculty_profiles SET ?', [insertData]);
+        console.log('New profile created successfully');
+      } catch (insertErr) {
+        console.error('Failed to create profile:', insertErr.message);
+        return res.status(400).json({ msg: 'Unable to create or update profile. Please try again.' });
+      }
     }
 
-    console.log('Profile updated successfully');
+    console.log('Profile updated/created successfully');
     const [updatedUsers] = await db.query(
       'SELECT id, firstName, lastName, middleInitial, email, role FROM users WHERE id = ?',
       [userId]
@@ -195,6 +203,116 @@ router.post('/verify-otp', auth, async (req, res) => {
 
     res.json({ msg: 'Account verified successfully!' });
 
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/user/heartbeat
+// @desc    Update user's lastActive timestamp and session activity
+// @access  Private
+router.post('/heartbeat', auth, async (req, res) => {
+  const { sessionToken } = req.body;
+  
+  try {
+    // Update both user and session lastActive
+    await db.query(
+      'UPDATE users SET lastActive = NOW() WHERE id = ?',
+      [req.user.id]
+    );
+
+    // If sessionToken provided, update session activity
+    if (sessionToken) {
+      const [result] = await db.query(
+        'UPDATE sessions SET lastActive = NOW(), isActive = TRUE WHERE session_token = ? AND user_id = ?',
+        [sessionToken, req.user.id]
+      );
+      
+      if (result.affectedRows > 0) {
+        return res.json({ msg: 'Session heartbeat recorded' });
+      }
+    }
+    
+    res.json({ msg: 'Heartbeat recorded' });
+  } catch (err) {
+    if (err.message && err.message.includes('Unknown column')) {
+      console.warn('Session tracking columns not found');
+      res.json({ msg: 'Heartbeat acknowledged' });
+    } else {
+      console.error(err.message);
+      res.status(500).send('Server error');
+    }
+  }
+});
+
+// @route   GET api/user/sessions
+// @desc    Get all active sessions for the logged-in user
+// @access  Private
+router.get('/sessions', auth, async (req, res) => {
+  try {
+    const [sessions] = await db.query(
+      'SELECT id, session_token, browser_info, device_info, ip_address, lastActive, isActive, createdAt FROM sessions WHERE user_id = ? ORDER BY lastActive DESC',
+      [req.user.id]
+    );
+
+    res.json({
+      msg: 'Sessions retrieved successfully',
+      sessions: sessions,
+      totalSessions: sessions.length,
+      activeSessions: sessions.filter(s => s.isActive).length
+    });
+  } catch (err) {
+    if (err.message && err.message.includes('Unknown table')) {
+      console.warn('Sessions table not found');
+      return res.status(404).json({ msg: 'Session tracking not available yet' });
+    }
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/user/logout-session
+// @desc    Logout from a specific session
+// @access  Private
+router.post('/logout-session', auth, async (req, res) => {
+  const { sessionToken } = req.body;
+
+  if (!sessionToken) {
+    return res.status(400).json({ msg: 'Session token required' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'UPDATE sessions SET isActive = FALSE WHERE session_token = ? AND user_id = ?',
+      [sessionToken, req.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ msg: 'Session not found' });
+    }
+
+    res.json({ msg: 'Logged out from session successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/user/logout-all-sessions
+// @desc    Logout from all sessions
+// @access  Private
+router.post('/logout-all-sessions', auth, async (req, res) => {
+  try {
+    const [result] = await db.query(
+      'UPDATE sessions SET isActive = FALSE WHERE user_id = ?',
+      [req.user.id]
+    );
+
+    res.json({ 
+      msg: 'Logged out from all sessions successfully',
+      sessionsDeactivated: result.affectedRows
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

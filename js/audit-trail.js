@@ -4,6 +4,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Audit Trail page JS loaded successfully');
     
+    // ── Heartbeat: Update session activity ──
+    const token = localStorage.getItem('token');
+    if (token && sessionManager) {
+        sessionManager.initializeHeartbeat(2 * 60 * 1000);
+    }
+    
     // DOM elements
     const searchInput = document.getElementById('searchAudit');
     const actionTypeFilter = document.getElementById('actionTypeFilter');

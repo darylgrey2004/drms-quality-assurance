@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Settings</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,841 +13,433 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2.5 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <!-- main grid: sidebar + content -->
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
-        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
-            <!-- logo / title area -->
+        <!-- SIDEBAR -->
+        <aside id="mainSidebar" class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
-                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
+                        <div class="text-sm font-medium text-white">Admin User</div>
+                        <div class="text-xs text-teal-300">Administrator</div>
                     </div>
                 </div>
             </div>
 
-            <!-- navigation menu as functional links to actual pages -->
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
-                <!-- Dashboard -->
-                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
-                </a>
-                <!-- Documents -->
-                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> Documents
-                </a>
-                <!-- Upload -->
-                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
-                </a>
-                <!-- Evidence Map -->
-                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
-                </a>
-                <!-- Search -->
-                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <!-- Approvals -->
-                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
-                </a>
-                <!-- Reports -->
-                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
-                </a>
-                <!-- Users -->
-                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👥</span> Users
-                </a>
-                <!-- Audit Trail -->
-                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
-                </a>
-                <!-- Settings (active) -->
-                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">⚙️</span> Settings
-                </a>
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📊</span> Dashboard</a>
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📄</span> Documents</a>
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⬆️</span> Upload</a>
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map</a>
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🔍</span> Search</a>
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">✅</span> Approvals</a>
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📈</span> Reports</a>
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">👥</span> Users</a>
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📋</span> Audit Trail</a>
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav"><span class="mr-3 text-teal-300">⚙️</span> Settings</a>
             </nav>
 
-            <!-- footer in sidebar -->
             <div class="border-t border-teal-900/40 p-4">
-                <button id="logoutBtn" class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
-                    🚪 Logout
-                </button>
-                <div class="text-xs text-teal-200/50 mt-3">
-                    <div id="adminAccessLabel" class="text-teal-300">Admin · Full Access</div>
-                    <div class="mt-1">© CTE · v.DRMS-QA</div>
+                <div class="text-xs text-teal-200/50">
+                    <div class="text-teal-300 mb-1">Admin · Full Access</div>
+                    <div>© CTE · v.DRMS-QA</div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT (settings) -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <!-- header row -->
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">System Settings</h1>
+                    <p class="text-sm text-gray-500 mt-1">Configure system parameters, workflows, and preferences</p>
+                </div>
 
-            <!-- header row -->
-            <div class="mb-6">
-                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">System Settings</h1>
-                <p class="text-sm text-gray-500 mt-1">Configure system parameters, workflows, and preferences</p>
-            </div>
+                <!-- settings tabs -->
+                <div class="mb-4 border-b border-gray-200 overflow-x-auto">
+                    <ul class="flex gap-1 text-sm font-medium" id="settingsTabs">
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="general">General</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="workflow">Workflow</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="requirements">Document Requirements</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="standards">Standards</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="notifications">Notifications</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="backup">Backup</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="api">API</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="account">Account</a></li>
+                    </ul>
+                </div>
 
-            <!-- settings tabs -->
-            <div class="mb-4 border-b border-gray-200">
-                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="settingsTabs">
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-teal-600 text-teal-700 rounded-t-lg active-tab" data-tab="general">General</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="workflow">Workflow</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="standards">Standards</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="notifications">Notifications</a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- General Settings Tab (default visible) -->
-            <div id="generalTab" class="tab-content block">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">General Configuration</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- System Name -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">System Name</label>
-                                <p class="text-xs text-gray-400">The name displayed throughout the system</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="text" id="systemName" placeholder="e.g., DRMS-QA" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            </div>
+                <!-- General Settings Tab -->
+                <div id="generalTab" class="tab-content block">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">General Configuration</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">System Name</label><p class="text-xs text-gray-400">The name displayed throughout the system</p></div><div class="md:col-span-2"><input type="text" id="systemName" placeholder="e.g., DRMS-QA" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Institution Name</label><p class="text-xs text-gray-400">Your college/university name</p></div><div class="md:col-span-2"><input type="text" id="institutionName" placeholder="e.g., College of Teacher Education" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">System Email</label><p class="text-xs text-gray-400">For notifications and system messages</p></div><div class="md:col-span-2"><input type="email" id="systemEmail" placeholder="e.g., qa@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Timezone</label><p class="text-xs text-gray-400">System timezone for logs and records</p></div><div class="md:col-span-2"><select id="timezone" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="Asia/Manila" selected>Asia/Manila (UTC+8)</option><option value="UTC">UTC</option><option value="America/New_York">America/New York</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Date Format</label><p class="text-xs text-gray-400">How dates are displayed</p></div><div class="md:col-span-2"><select id="dateFormat" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="Y-m-d" selected>YYYY-MM-DD</option><option value="m/d/Y">MM/DD/YYYY</option><option value="d/m/Y">DD/MM/YYYY</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Default Language</label><p class="text-xs text-gray-400">System interface language</p></div><div class="md:col-span-2"><select id="language" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="en" selected>English</option><option value="fil">Filipino</option><option value="es">Spanish</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Maintenance Mode</label><p class="text-xs text-gray-400">Temporarily disable access for non-admins</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="maintenanceMode" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm text-gray-700">Enable maintenance mode</span></label></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Debug Mode</label><p class="text-xs text-gray-400">Show detailed error messages (developers only)</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="debugMode" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm text-gray-700">Enable debug mode</span></label></div></div>
                         </div>
-                        
-                        <!-- Institution Name -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Institution Name</label>
-                                <p class="text-xs text-gray-400">Your college/university name</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="text" id="institutionName" placeholder="e.g., College of Teacher Education" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            </div>
-                        </div>
-                        
-                        <!-- System Email -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">System Email</label>
-                                <p class="text-xs text-gray-400">For notifications and system messages</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="email" id="systemEmail" placeholder="e.g., qa@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            </div>
-                        </div>
-                        
-                        <!-- Timezone -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Timezone</label>
-                                <p class="text-xs text-gray-400">System timezone for logs and records</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <select id="timezone" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="Asia/Manila" selected>Asia/Manila (UTC+8)</option>
-                                    <option value="UTC">UTC</option>
-                                    <option value="America/New_York">America/New York</option>
-                                    <option value="Europe/London">Europe/London</option>
-                                    <option value="Asia/Tokyo">Asia/Tokyo</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Date Format -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Date Format</label>
-                                <p class="text-xs text-gray-400">How dates are displayed</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <select id="dateFormat" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="Y-m-d" selected>YYYY-MM-DD (2026-02-27)</option>
-                                    <option value="m/d/Y">MM/DD/YYYY (02/27/2026)</option>
-                                    <option value="d/m/Y">DD/MM/YYYY (27/02/2026)</option>
-                                    <option value="F j, Y">February 27, 2026</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Language -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Default Language</label>
-                                <p class="text-xs text-gray-400">System interface language</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <select id="language" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="en" selected>English</option>
-                                    <option value="fil">Filipino</option>
-                                    <option value="es">Spanish</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Maintenance Mode -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Maintenance Mode</label>
-                                <p class="text-xs text-gray-400">Temporarily disable access for non-admins</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="maintenanceMode" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">Enable maintenance mode</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Debug Mode -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Debug Mode</label>
-                                <p class="text-xs text-gray-400">Show detailed error messages (developers only)</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="debugMode" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">Enable debug mode</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveGeneral">Save Changes</button>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveGeneral">Save Changes</button></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Account Section -->
-            <div id="accountTab" class="mt-6">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Account</h2>
-                    <div class="space-y-6">
-                        <!-- Log Out -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Log Out</label>
-                                <p class="text-xs text-gray-400">End your current session</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <button id="logoutBtn" class="w-full md:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Log Out</button>
-                            </div>
+                <!-- Workflow Tab -->
+                <div id="workflowTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Workflow Configuration</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Approval Workflow</label><p class="text-xs text-gray-400">Configure the document approval stages</p></div><div class="md:col-span-2"><div class="space-y-2"><label class="flex items-center"><input type="radio" name="workflowType" value="standard" class="mr-2 text-teal-600" checked><span class="text-sm">Standard (Upload → Validate → Approve → Lock)</span></label><label class="flex items-center"><input type="radio" name="workflowType" value="simple" class="mr-2 text-teal-600"><span class="text-sm">Simple (Upload → Approve → Lock)</span></label></div></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Auto-approval</label><p class="text-xs text-gray-400">Automatically approve documents from specific roles</p></div><div class="md:col-span-2"><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveAdmin" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Administrator uploads</span></label><label class="flex items-center mb-2"><input type="checkbox" id="autoApproveDean" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Dean uploads</span></label><label class="flex items-center"><input type="checkbox" id="autoApproveQA" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">QA Coordinator uploads</span></label></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">SLA (Hours)</label><p class="text-xs text-gray-400">Time limits for each stage</p></div><div class="md:col-span-2"><div class="grid grid-cols-2 gap-4"><div><label class="block text-xs text-gray-500 mb-1">Validation</label><input type="number" id="slaValidation" value="48" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div><div><label class="block text-xs text-gray-500 mb-1">Approval</label><input type="number" id="slaApproval" value="72" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Version Control</label><p class="text-xs text-gray-400">Maximum versions to keep</p></div><div class="md:col-span-2"><input type="number" id="maxVersions" value="10" min="1" max="50" class="w-32 px-4 py-2 border border-gray-200 rounded-lg"><span class="text-sm text-gray-500 ml-2">versions per document</span></div></div>
                         </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveWorkflow">Save Changes</button></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Workflow Settings Tab (hidden by default) -->
-            <div id="workflowTab" class="tab-content hidden">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Workflow Configuration</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- Approval Workflow -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Approval Workflow</label>
-                                <p class="text-xs text-gray-400">Configure the document approval stages</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <div class="space-y-3">
-                                    <label class="flex items-center">
-                                        <input type="radio" name="workflowType" value="standard" class="mr-2 text-teal-600" checked>
-                                        <span class="text-sm text-gray-700">Standard (Upload → Validate → Approve → Lock)</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" name="workflowType" value="simple" class="mr-2 text-teal-600">
-                                        <span class="text-sm text-gray-700">Simple (Upload → Approve → Lock)</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" name="workflowType" value="advanced" class="mr-2 text-teal-600">
-                                        <span class="text-sm text-gray-700">Advanced (Upload → Review → Validate → Approve → Lock)</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Document Requirements Tab (NEW - Admins set expected document counts) -->
+                <div id="requirementsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Document Requirements Configuration</h2>
+                        <p class="text-sm text-gray-500 mb-4">Set expected document counts per category and department. These targets determine completeness percentages in reports and dashboards.</p>
                         
-                        <!-- Auto-approval -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Auto-approval</label>
-                                <p class="text-xs text-gray-400">Automatically approve documents from specific roles</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="flex items-center mb-2">
-                                    <input type="checkbox" id="autoApproveAdmin" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Administrator uploads</span>
-                                </label>
-                                <label class="flex items-center mb-2">
-                                    <input type="checkbox" id="autoApproveDean" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Dean uploads</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="autoApproveQA" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">QA Coordinator uploads</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- SLA Settings -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">SLA (Hours)</label>
-                                <p class="text-xs text-gray-400">Time limits for each stage</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs text-gray-500 mb-1">Validation</label>
-                                        <input type="number" id="slaValidation" value="48" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-500 mb-1">Approval</label>
-                                        <input type="number" id="slaApproval" value="72" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Reminders -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Reminders</label>
-                                <p class="text-xs text-gray-400">Send reminder emails</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="flex items-center mb-2">
-                                    <input type="checkbox" id="reminderDue" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">When approaching SLA deadline</span>
-                                </label>
-                                <label class="flex items-center mb-2">
-                                    <input type="checkbox" id="reminderOverdue" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">When overdue</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="reminderDaily" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">Daily digest of pending items</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Version Control -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Version Control</label>
-                                <p class="text-xs text-gray-400">Maximum versions to keep</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="number" id="maxVersions" value="10" min="1" max="50" class="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <span class="text-sm text-gray-500 ml-2">versions per document</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveWorkflow">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Standards Settings Tab (hidden by default) -->
-            <div id="standardsTab" class="tab-content hidden">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Standards Configuration</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- ISO Clauses -->
-                        <div class="border border-gray-100 rounded-lg p-4">
-                            <h3 class="font-medium text-gray-800 mb-3">ISO 9001:2015 Clauses</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 4 - Context</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 5 - Leadership</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 6 - Planning</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 7 - Support</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 8 - Operation</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 9 - Evaluation</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Clause 10 - Improvement</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- AACCUP Areas -->
-                        <div class="border border-gray-100 rounded-lg p-4">
-                            <h3 class="font-medium text-gray-800 mb-3">AACCUP Areas I-X</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area I - VMGO</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area II - Faculty</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area III - Curriculum</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area IV - Students</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area V - Research</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area VI - Extension</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area VII - Library</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area VIII - Facilities</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area IX - Laboratories</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Area X - Administration</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- COE Indicators -->
-                        <div class="border border-gray-100 rounded-lg p-4">
-                            <h3 class="font-medium text-gray-800 mb-3">COE Indicators</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 1 - Teaching Quality</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 2 - Research Output</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 3 - Extension</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 4 - Curriculum</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 5 - Faculty Dev</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 6 - Student Performance</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm">Indicator 7 - International</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Required Documents per Standard -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Required Documents</label>
-                                <p class="text-xs text-gray-400">Expected document counts per standard</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-xs text-gray-500 mb-1">ISO</label>
-                                        <input type="number" value="180" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-500 mb-1">AACCUP</label>
-                                        <input type="number" value="420" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-500 mb-1">COE</label>
-                                        <input type="number" value="247" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveStandards">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notifications Tab (hidden by default) -->
-            <div id="notificationsTab" class="tab-content hidden">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Notification Settings</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- Email Notifications -->
-                        <div>
-                            <h3 class="font-medium text-gray-700 mb-3">Email Notifications</h3>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Document uploaded (to QA Coordinator)</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Document validated (to Dean/Approver)</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Document approved (to uploader)</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Document rejected (to uploader)</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Pending review reminder (daily)</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">Weekly summary report</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- System Notifications -->
-                        <div class="pt-4 border-t border-gray-100">
-                            <h3 class="font-medium text-gray-700 mb-3">System Notifications</h3>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Backup completion alerts</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Storage space warnings</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">New user registration alerts</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2">
-                                    <span class="text-sm text-gray-700">System error notifications</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- Notification Email -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-4">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Notification Email</label>
-                                <p class="text-xs text-gray-400">Where to send system alerts</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="email" value="admin@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveNotifications">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Backup & Security Tab (hidden by default) -->
-            <div id="backupTab" class="tab-content hidden">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Backup & Security</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- Auto Backup -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Automatic Backup</label>
-                                <p class="text-xs text-gray-400">Schedule regular system backups</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="daily">Daily at 03:00 AM</option>
-                                    <option value="weekly" selected>Weekly (Sunday 03:00 AM)</option>
-                                    <option value="monthly">Monthly (1st of month 03:00 AM)</option>
-                                    <option value="none">Manual only</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Retention Period -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Backup Retention</label>
-                                <p class="text-xs text-gray-400">How long to keep backups</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="30">30 days</option>
-                                    <option value="60">60 days</option>
-                                    <option value="90" selected>90 days</option>
-                                    <option value="180">180 days</option>
-                                    <option value="365">1 year</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Backup Now Button -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Manual Backup</label>
-                                <p class="text-xs text-gray-400">Create a backup immediately</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <button id="backupNowBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">
-                                    Create Backup Now
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Security Settings -->
-                        <div class="pt-4 border-t border-gray-100">
-                            <h3 class="font-medium text-gray-700 mb-3">Security Settings</h3>
-                            
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                                    <div class="md:col-span-1">
-                                        <label class="block text-sm font-medium text-gray-700">Password Policy</label>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                            <option value="standard">Standard (8+ chars)</option>
-                                            <option value="strong" selected>Strong (10+ chars, mixed case, numbers, symbols)</option>
-                                            <option value="strict">Strict (12+ chars, all requirements)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                                    <div class="md:col-span-1">
-                                        <label class="block text-sm font-medium text-gray-700">Session Timeout</label>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                            <option value="30">30 minutes</option>
-                                            <option value="60" selected>1 hour</option>
-                                            <option value="120">2 hours</option>
-                                            <option value="240">4 hours</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                                    <div class="md:col-span-1">
-                                        <label class="block text-sm font-medium text-gray-700">2FA Enforcement</label>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                            <option value="optional">Optional for all users</option>
-                                            <option value="admin" selected>Required for admins only</option>
-                                            <option value="all">Required for all users</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                                    <div class="md:col-span-1">
-                                        <label class="block text-sm font-medium text-gray-700">Login Attempts</label>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <input type="number" value="5" min="3" max="10" class="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                        <span class="text-sm text-gray-500 ml-2">before lockout</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveBackup">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- API & Integration Tab (hidden by default) -->
-            <div id="apiTab" class="tab-content hidden">
-                <div class="bg-white rounded-xl p-6 stat-card">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">API & Integration</h2>
-                    
-                    <div class="space-y-6">
-                        <!-- API Status -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">API Access</label>
-                                <p class="text-xs text-gray-400">Enable REST API for integrations</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="apiEnabled" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 mr-2" checked>
-                                    <span class="text-sm text-gray-700">Enable API</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- API Keys -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">API Keys</label>
-                                <p class="text-xs text-gray-400">Manage integration keys</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm font-medium">Production Key</span>
-                                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span>
-                                    </div>
+                        <div class="space-y-6">
+                            <!-- Instruction Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Instruction</h3>
                                     <div class="flex items-center gap-2">
-                                        <code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">••••••••••••••••••••</code>
-                                        <button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button>
-                                    </div>
-                                    
-                                    <div class="flex justify-between items-center mt-4 mb-2">
-                                        <span class="text-sm font-medium">Development Key</span>
-                                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Testing</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">dev_••••••••••••••••</code>
-                                        <button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button>
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="instructionTotal" class="font-bold text-teal-700 text-lg">0</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Webhooks -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <label class="block text-sm font-medium text-gray-700">Webhooks</label>
-                                <p class="text-xs text-gray-400">Send events to external systems</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <div class="space-y-2">
-                                    <input type="url" placeholder="https://example.com/webhook" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <div class="flex gap-2">
-                                        <select class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                            <option value="all">All events</option>
-                                            <option value="upload">Upload only</option>
-                                            <option value="approval">Approval only</option>
-                                        </select>
-                                        <button class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Add</button>
-                                    </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="instruction_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="45" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="instruction_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="65" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="instruction_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="instruction_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="instruction_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Integration Options -->
-                        <div class="pt-4 border-t border-gray-100">
-                            <h3 class="font-medium text-gray-700 mb-3">Available Integrations</h3>
-                            <div class="space-y-2">
-                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <span class="text-sm font-medium text-gray-700">Google Drive</span>
-                                        <p class="text-xs text-gray-400">Sync documents to Google Drive</p>
-                                    </div>
-                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
-                                </label>
-                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <span class="text-sm font-medium text-gray-700">Microsoft OneDrive</span>
-                                        <p class="text-xs text-gray-400">Sync documents to OneDrive</p>
-                                    </div>
-                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
-                                </label>
-                                <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <span class="text-sm font-medium text-gray-700">Slack</span>
-                                        <p class="text-xs text-gray-400">Send notifications to Slack channel</p>
-                                    </div>
-                                    <button class="px-3 py-1 border border-teal-600 text-teal-700 rounded-lg hover:bg-teal-50">Connect</button>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-5 border-t border-gray-100 flex justify-end gap-3">
-                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                        <button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveApi">Save Changes</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- system information footer -->
-            <div class="mt-6 bg-white rounded-xl p-4 stat-card text-xs text-gray-400">
-                <div class="flex flex-wrap justify-between items-center">
-                    <div>DRMS-QA Version: <span class="text-gray-600">2.1.0</span></div>
-                    <div>Last updated: <span class="text-gray-600">February 27, 2026</span></div>
-                    <div>Database: <span class="text-gray-600">PostgreSQL 14.5</span></div>
-                    <div>PHP Version: <span class="text-gray-600">8.1.20</span></div>
+                            <!-- Research Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Research</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="researchTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="research_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="research_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="55" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="research_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="35" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="research_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="research_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Extension Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Extension</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="extensionTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="extension_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="extension_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="extension_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="extension_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="extension_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Employment Category -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-semibold text-gray-800 text-base">Employment</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">Total Expected:</span>
+                                        <span id="employmentTotal" class="font-bold text-teal-700 text-lg">0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="employment_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSED</label><input type="number" id="employment_bsed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BSNED</label><input type="number" id="employment_bsned" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BCAED</label><input type="number" id="employment_bcaed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                    <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="employment_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
+                                <p>⚠️ These expected document counts determine completeness percentages. When a department reaches 100% of its expected documents, it will be marked as "Complete".</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3">
+                            <button id="resetRequirements" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Reset to Defaults</button>
+                            <button id="saveRequirements" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Save Requirements</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Standards Tab -->
+                <div id="standardsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Standards Configuration</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Instruction</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Curriculum Development</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Teaching Materials</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Assessment Tools</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Learning Modules</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Syllabi</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Lesson Plans</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Research</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Publications</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Proposals</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Ethics Clearance</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Research Outputs</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Grants and Funding</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Conference Presentations</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Extension</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Community Programs</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Outreach Documentation</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Impact Assessment</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Partnership Agreements</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Beneficiary Feedback</span></label></div></div>
+                            <div class="border rounded-lg p-3 md:p-4"><h3 class="font-medium text-gray-800 mb-2 md:mb-3">Employment Related Documents</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Employment Contracts</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Personnel Records</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Benefits Documentation</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Performance Reviews</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2"><span class="text-sm">Leave Records</span></label></div></div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveStandards">Save Changes</button></div>
+                    </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="notificationsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Notification Settings</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div><h3 class="font-medium text-gray-700 mb-2 md:mb-3">Email Notifications</h3><div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document uploaded (to QA Coordinator)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document validated (to Dean/Approver)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document approved (to uploader)</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Document rejected (to uploader)</span></label></div></div>
+                            <div><h3 class="font-medium text-gray-700 mb-2 md:mb-3">System Notifications</h3><div class="space-y-2"><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Backup completion alerts</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Storage space warnings</span></label><label class="flex items-center"><input type="checkbox" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">New user registration alerts</span></label></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Notification Email</label><p class="text-xs text-gray-400">Where to send system alerts</p></div><div class="md:col-span-2"><input type="email" value="admin@cte.edu" class="w-full px-4 py-2 border border-gray-200 rounded-lg"></div></div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveNotifications">Save Changes</button></div>
+                    </div>
+                </div>
+
+                <!-- Backup Tab -->
+                <div id="backupTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Backup & Security</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Automatic Backup</label><p class="text-xs text-gray-400">Schedule regular system backups</p></div><div class="md:col-span-2"><select class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="daily">Daily at 03:00 AM</option><option value="weekly" selected>Weekly (Sunday 03:00 AM)</option><option value="monthly">Monthly (1st of month)</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Backup Retention</label><p class="text-xs text-gray-400">How long to keep backups</p></div><div class="md:col-span-2"><select class="w-full px-4 py-2 border border-gray-200 rounded-lg"><option value="30">30 days</option><option value="60">60 days</option><option value="90" selected>90 days</option></select></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Manual Backup</label><p class="text-xs text-gray-400">Create a backup immediately</p></div><div class="md:col-span-2"><button id="backupNowBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Create Backup Now</button></div></div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveBackup">Save Changes</button></div>
+                    </div>
+                </div>
+
+                <!-- API Tab -->
+                <div id="apiTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">API & Integration</h2>
+                        <div class="space-y-4 md:space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start md:items-center"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">API Access</label><p class="text-xs text-gray-400">Enable REST API for integrations</p></div><div class="md:col-span-2"><label class="flex items-center"><input type="checkbox" id="apiEnabled" class="rounded border-gray-300 text-teal-600 mr-2" checked><span class="text-sm">Enable API</span></label></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">API Keys</label><p class="text-xs text-gray-400">Manage integration keys</p></div><div class="md:col-span-2"><div class="bg-gray-50 p-3 md:p-4 rounded-lg"><div class="flex justify-between items-center mb-2"><span class="text-sm font-medium">Production Key</span><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span></div><div class="flex items-center gap-2 flex-wrap"><code class="bg-gray-100 px-3 py-2 rounded text-sm flex-1">••••••••••••••••••••</code><button class="text-teal-600 hover:text-teal-800 text-sm">Regenerate</button></div></div></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-start"><div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Webhooks</label><p class="text-xs text-gray-400">Send events to external systems</p></div><div class="md:col-span-2"><div class="space-y-2"><input type="url" placeholder="https://example.com/webhook" class="w-full px-4 py-2 border border-gray-200 rounded-lg"><div class="flex flex-col sm:flex-row gap-2"><select class="px-4 py-2 border border-gray-200 rounded-lg"><option value="all">All events</option></select><button class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Add</button></div></div></div></div>
+                        </div>
+                        <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3"><button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors" id="saveApi">Save Changes</button></div>
+                    </div>
+                </div>
+
+                <!-- Account Tab -->
+                <div id="accountTab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Account</h2>
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start md:items-center">
+                                <div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Log Out</label><p class="text-xs text-gray-400">End your current session</p></div>
+                                <div class="md:col-span-2"><button id="logoutBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Log Out</button></div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600">Admin User</span> (Administrator)</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- system information footer -->
+                <div class="mt-6 bg-white rounded-xl p-3 md:p-4 stat-card text-xs text-gray-400">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                        <div>DRMS-QA Version: <span class="text-gray-600">2.1.0</span></div>
+                        <div>Last updated: <span class="text-gray-600">April 28, 2026</span></div>
+                        <div>Database: <span class="text-gray-600">PostgreSQL 14.5</span></div>
+                    </div>
                 </div>
             </div>
-        </main>
         </main>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="js/admin-session.js"></script>
-    <script src="js/settings.js"></script>
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+        
+        // Tab switching
+        document.querySelectorAll('#settingsTabs a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('#settingsTabs a').forEach(l => {
+                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                    l.classList.add('border-transparent', 'text-gray-500');
+                });
+                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(tabId + 'Tab').classList.remove('hidden');
+            });
+        });
+        
+        // Function to update total expected counts
+        function updateTotals() {
+            const categories = ['instruction', 'research', 'extension', 'employment'];
+            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+            
+            categories.forEach(cat => {
+                let total = 0;
+                departments.forEach(dept => {
+                    const val = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
+                    total += val;
+                });
+                const totalSpan = document.getElementById(`${cat}Total`);
+                if (totalSpan) totalSpan.textContent = total;
+            });
+        }
+        
+        // Add event listeners to all expected docs inputs
+        document.querySelectorAll('.expected-docs').forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+        
+        // Reset to defaults
+        document.getElementById('resetRequirements')?.addEventListener('click', () => {
+            if (confirm('Reset all document requirements to default values?')) {
+                // Instruction defaults
+                document.getElementById('instruction_beed').value = 45;
+                document.getElementById('instruction_bsed').value = 65;
+                document.getElementById('instruction_bsned').value = 40;
+                document.getElementById('instruction_bcaed').value = 35;
+                document.getElementById('instruction_bped').value = 30;
+                
+                // Research defaults
+                document.getElementById('research_beed').value = 40;
+                document.getElementById('research_bsed').value = 55;
+                document.getElementById('research_bsned').value = 35;
+                document.getElementById('research_bcaed').value = 30;
+                document.getElementById('research_bped').value = 25;
+                
+                // Extension defaults
+                document.getElementById('extension_beed').value = 25;
+                document.getElementById('extension_bsed').value = 25;
+                document.getElementById('extension_bsned').value = 25;
+                document.getElementById('extension_bcaed').value = 25;
+                document.getElementById('extension_bped').value = 25;
+                
+                // Employment defaults
+                document.getElementById('employment_beed').value = 30;
+                document.getElementById('employment_bsed').value = 30;
+                document.getElementById('employment_bsned').value = 30;
+                document.getElementById('employment_bcaed').value = 30;
+                document.getElementById('employment_bped').value = 30;
+                
+                updateTotals();
+                alert('Document requirements reset to default values.');
+            }
+        });
+        
+        // Save requirements
+        document.getElementById('saveRequirements')?.addEventListener('click', () => {
+            // Collect all values
+            const requirements = {
+                instruction: {},
+                research: {},
+                extension: {},
+                employment: {}
+            };
+            
+            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+            const categories = ['instruction', 'research', 'extension', 'employment'];
+            
+            categories.forEach(cat => {
+                departments.forEach(dept => {
+                    requirements[cat][dept] = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
+                });
+            });
+            
+            // Save to localStorage (in a real app, this would be an API call)
+            localStorage.setItem('documentRequirements', JSON.stringify(requirements));
+            
+            alert('Document requirements saved successfully!\n\nThese targets will now determine completeness percentages in reports and dashboards.');
+        });
+        
+        // Load saved requirements on page load
+        function loadSavedRequirements() {
+            const saved = localStorage.getItem('documentRequirements');
+            if (saved) {
+                const requirements = JSON.parse(saved);
+                const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+                const categories = ['instruction', 'research', 'extension', 'employment'];
+                
+                categories.forEach(cat => {
+                    if (requirements[cat]) {
+                        departments.forEach(dept => {
+                            const input = document.getElementById(`${cat}_${dept}`);
+                            if (input && requirements[cat][dept]) {
+                                input.value = requirements[cat][dept];
+                            }
+                        });
+                    }
+                });
+                updateTotals();
+            }
+        }
+        
+        // Initialize totals on page load
+        updateTotals();
+        loadSavedRequirements();
+        
+        // Logout button
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'landing.html';
+            }
+        });
+        
+        // Save buttons for other tabs
+        document.querySelectorAll('[id^="save"], #backupNowBtn').forEach(btn => {
+            if (btn.id !== 'saveRequirements' && btn.id !== 'resetRequirements') {
+                btn.addEventListener('click', () => alert('Settings saved (demo)'));
+            }
+        });
+    </script>
 </body>
 </html>

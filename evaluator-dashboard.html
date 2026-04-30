@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Evaluator Dashboard</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,15 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-evaluator-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR - Evaluator Version -->
-        <aside class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -26,10 +32,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -78,232 +84,262 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header with view-only indicator -->
-                <div class="flex justify-between items-center mb-6">
-                    <div>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Header with view-only indicator -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Evaluator Dashboard</h1>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only Mode</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Welcome, External Evaluator · Accreditation Review Access</p>
+                        </div>
                         <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Evaluator Dashboard</h1>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only Mode</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-1">Welcome, External Evaluator · Accreditation Review Access</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white rounded-full px-4 py-2 text-sm shadow-sm text-gray-600 border">
-                            📅 10 Mar 2026
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Info banner -->
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 text-sm text-gray-600 flex items-center">
-                    <span class="text-2xl mr-3">👁️</span>
-                    <div>
-                        <span class="font-medium">View-Only Access:</span> You are logged in as an External Evaluator. All documents are available for review only - no upload, edit, or approval actions are available.
-                    </div>
-                </div>
-
-                <!-- Stats cards - Summary view only -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">Total Documents</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">847</div>
-                            </div>
-                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📄</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-2">All QA records</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">ISO Documents</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">312</div>
-                            </div>
-                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">🔍</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-2">37% of total</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">AACCUP Documents</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">328</div>
-                            </div>
-                            <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">📑</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-2">39% of total</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-gray-500 text-sm">COE Documents</span>
-                                <div class="text-3xl font-bold text-gray-800 mt-2">207</div>
-                            </div>
-                            <span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg">⭐</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-2">24% of total</div>
-                    </div>
-                </div>
-
-                <!-- Recent Documents (View Only) -->
-                <div class="bg-white rounded-xl p-5 stat-card mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-semibold text-gray-800 text-lg">Recent Documents</h2>
-                        <a href="evaluator-documents.html" class="text-sm text-teal-700 hover:text-teal-800 font-medium">View All →</a>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-200 text-gray-500 text-xs">
-                                    <th class="text-left py-3">Document</th>
-                                    <th class="text-left py-3">Category</th>
-                                    <th class="text-left py-3">Area/Clause</th>
-                                    <th class="text-left py-3">Status</th>
-                                    <th class="text-left py-3">Version</th>
-                                    <th class="text-left py-3">Uploaded By</th>
-                                    <th class="text-left py-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <tr>
-                                    <td class="py-3">
-                                        <div class="font-medium text-gray-800">Quality Management System Manual</div>
-                                    </td>
-                                    <td class="py-3"><span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">ISO</span></td>
-                                    <td class="py-3 text-gray-600">Clause 4</td>
-                                    <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                    <td class="py-3 text-gray-600">v3.2</td>
-                                    <td class="py-3 text-gray-500 text-xs">Dr. Santos</td>
-                                    <td class="py-3">
-                                        <button class="text-teal-600 hover:text-teal-800 view-doc" title="View Document (Read Only)">👁️ View</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3">
-                                        <div class="font-medium text-gray-800">Curriculum Development Framework</div>
-                                    </td>
-                                    <td class="py-3"><span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">AACCUP</span></td>
-                                    <td class="py-3 text-gray-600">Area II</td>
-                                    <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
-                                    <td class="py-3 text-gray-600">v1.0</td>
-                                    <td class="py-3 text-gray-500 text-xs">Prof. Garcia</td>
-                                    <td class="py-3">
-                                        <button class="text-teal-600 hover:text-teal-800 view-doc">👁️ View</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3">
-                                        <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
-                                    </td>
-                                    <td class="py-3"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">COE</span></td>
-                                    <td class="py-3 text-gray-600">Indicator 2</td>
-                                    <td class="py-3"><span class="badge-draft px-2 py-1 rounded-full text-xs">Draft</span></td>
-                                    <td class="py-3 text-gray-600">v0.3</td>
-                                    <td class="py-3 text-gray-500 text-xs">Dr. Reyes</td>
-                                    <td class="py-3">
-                                        <button class="text-teal-600 hover:text-teal-800 view-doc">👁️ View</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Two column layout for evaluator -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Accreditation Progress -->
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h2 class="font-semibold text-gray-800 text-lg mb-3">Accreditation Progress</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-600">ISO 9001:2015</span>
-                                    <span class="font-medium text-teal-700">92%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 h-2 rounded-full">
-                                    <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-600">AACCUP Areas I-X</span>
-                                    <span class="font-medium text-amber-700">78%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 h-2 rounded-full">
-                                    <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-600">COE Indicators</span>
-                                    <span class="font-medium text-indigo-700">85%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 h-2 rounded-full">
-                                    <div class="bg-indigo-600 h-2 rounded-full" style="width:85%"></div>
-                                </div>
+                            <div class="bg-white rounded-full px-4 py-2 text-sm shadow-sm text-gray-600 border whitespace-nowrap">
+                                📅 29 Apr 2026
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quick Links (View Only) -->
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h2 class="font-semibold text-gray-800 text-lg mb-3">Evaluation Resources</h2>
+                    <!-- Info banner -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 text-sm text-gray-600 flex items-center flex-wrap gap-3">
+                        <span class="text-2xl">👁️</span>
+                        <div class="flex-1">
+                            <span class="font-medium">View-Only Access:</span> You are logged in as an External Evaluator. All documents are available for review only - no upload, edit, or approval actions are available.
+                        </div>
+                    </div>
+
+                    <!-- Stats cards - Updated with new categories -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Total Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div>
+                                <span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📄</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">All QA records</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Instruction</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">245</div></div>
+                                <span class="bg-blue-100 text-blue-700 p-2 rounded-lg">📚</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">29% of total</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Research</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">312</div></div>
+                                <span class="bg-green-100 text-green-700 p-2 rounded-lg">🔬</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">37% of total</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Extension</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">156</div></div>
+                                <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">🌱</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">18% of total</div>
+                        </div>
+                    </div>
+
+                    <!-- Second row of stats -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Employment</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">134</div></div>
+                                <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">📋</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">16% of total</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">692</div></div>
+                                <span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span>
+                            </div>
+                            <div class="text-xs text-green-600 mt-2">81.7% approved</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Pending</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">38</div></div>
+                                <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
+                            </div>
+                            <div class="text-xs text-amber-600 mt-2">Awaiting review</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Departments</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">5</div></div>
+                                <span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg">🏛️</span>
+                            </div>
+                            <div class="text-xs text-indigo-600 mt-2">BEED, BSED, BSNED, BCAED, BPED</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Documents (View Only) - Updated with new categories -->
+                    <div class="bg-white rounded-xl p-5 stat-card mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-semibold text-gray-800 text-lg">Recent Documents</h2>
+                            <a href="evaluator-documents.html" class="text-sm text-teal-700 hover:text-teal-800 font-medium">View All →</a>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <div class="min-w-[800px]">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                            <th class="text-left py-3">Document</th>
+                                            <th class="text-left py-3">Category</th>
+                                            <th class="text-left py-3">Department</th>
+                                            <th class="text-left py-3">Status</th>
+                                            <th class="text-left py-3">Version</th>
+                                            <th class="text-left py-3">Uploaded By</th>
+                                            <th class="text-left py-3">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr>
+                                            <td class="py-3"><div class="font-medium text-gray-800">Syllabus - Elementary Education</div></td>
+                                            <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
+                                            <td class="py-3 text-gray-600">BEED</span></td>
+                                            <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                                            <td class="py-3 text-gray-600">v3.2</span></td>
+                                            <td class="py-3 text-gray-500 text-xs">Dr. Santos</span></td>
+                                            <td class="py-3"><button class="view-doc" data-title="Syllabus - Elementary Education">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div></td>
+                                            <td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td>
+                                            <td class="py-3 text-gray-600">BSED</span></td>
+                                            <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
+                                            <td class="py-3 text-gray-600">v0.3</span></td>
+                                            <td class="py-3 text-gray-500 text-xs">Dr. Reyes</span></td>
+                                            <td class="py-3"><button class="view-doc" data-title="Research Publication 2025">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3"><div class="font-medium text-gray-800">Community Extension Program</div></td>
+                                            <td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td>
+                                            <td class="py-3 text-gray-600">BPED</span></td>
+                                            <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                                            <td class="py-3 text-gray-600">v1.1</span></td>
+                                            <td class="py-3 text-gray-500 text-xs">Prof. Mendoza</span></td>
+                                            <td class="py-3"><button class="view-doc" data-title="Community Extension Program">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3"><div class="font-medium text-gray-800">Faculty Employment Contract</div></td>
+                                            <td class="py-3"><span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span></td>
+                                            <td class="py-3 text-gray-600">BEED</span></td>
+                                            <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                                            <td class="py-3 text-gray-600">v2.1</span></td>
+                                            <td class="py-3 text-gray-500 text-xs">Dean Cruz</span></td>
+                                            <td class="py-3"><button class="view-doc" data-title="Faculty Employment Contract">View</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Two column layout for evaluator -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Accreditation Progress - Updated with new categories -->
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h2 class="font-semibold text-gray-800 text-lg mb-3">Accreditation Progress</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Instruction</span>
+                                        <span class="font-medium text-blue-700">77%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 h-2 rounded-full">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">245 of 320 documents</div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Research</span>
+                                        <span class="font-medium text-green-700">78%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 h-2 rounded-full">
+                                        <div class="bg-green-600 h-2 rounded-full" style="width:78%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">312 of 400 documents</div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Extension</span>
+                                        <span class="font-medium text-amber-700">74%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 h-2 rounded-full">
+                                        <div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">156 of 210 documents</div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Employment</span>
+                                        <span class="font-medium text-purple-700">74%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 h-2 rounded-full">
+                                        <div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">134 of 180 documents</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links (View Only) -->
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h2 class="font-semibold text-gray-800 text-lg mb-3">Evaluation Resources</h2>
+                            <div class="space-y-3">
+                                <a href="evaluator-evidence-map.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
+                                    <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">🗺️</span>
+                                    <div>
+                                        <div class="font-medium text-sm">View Evidence Map</div>
+                                        <div class="text-xs text-gray-400">See document mapping to standards</div>
+                                    </div>
+                                </a>
+                                <a href="evaluator-reports.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
+                                    <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">📊</span>
+                                    <div>
+                                        <div class="font-medium text-sm">View Reports</div>
+                                        <div class="text-xs text-gray-400">Accreditation readiness reports</div>
+                                    </div>
+                                </a>
+                                <a href="evaluator-search.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
+                                    <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">🔍</span>
+                                    <div>
+                                        <div class="font-medium text-sm">Search Documents</div>
+                                        <div class="text-xs text-gray-400">Find specific evidence</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Feed (View Only) -->
+                    <div class="mt-6 bg-white rounded-xl p-5 stat-card">
+                        <h2 class="font-semibold text-gray-800 text-lg mb-3">Recent Activity</h2>
                         <div class="space-y-3">
-                            <a href="evaluator-evidence-map.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
-                                <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">🗺️</span>
-                                <div>
-                                    <div class="font-medium text-sm">View Evidence Map</div>
-                                    <div class="text-xs text-gray-400">See document mapping to standards</div>
-                                </div>
-                            </a>
-                            <a href="evaluator-reports.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
-                                <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">📊</span>
-                                <div>
-                                    <div class="font-medium text-sm">View Reports</div>
-                                    <div class="text-xs text-gray-400">Accreditation readiness reports</div>
-                                </div>
-                            </a>
-                            <a href="evaluator-search.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
-                                <span class="bg-gray-100 text-gray-700 p-2 rounded-lg mr-3">🔍</span>
-                                <div>
-                                    <div class="font-medium text-sm">Search Documents</div>
-                                    <div class="text-xs text-gray-400">Find specific evidence</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity Feed (View Only) -->
-                <div class="mt-6 bg-white rounded-xl p-5 stat-card">
-                    <h2 class="font-semibold text-gray-800 text-lg mb-3">Recent Activity</h2>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
-                            <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs">✓</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">Document Approved:</span> QMS Manual v3.2</p>
-                                <p class="text-xs text-gray-400">2 hours ago by Dr. Santos</p>
+                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs">✓</span>
+                                <div class="flex-1"><p class="text-sm"><span class="font-medium">Document Approved:</span> Syllabus - Elementary Education v3.2</p><p class="text-xs text-gray-400">2 hours ago by Dr. Santos</p></div>
                             </div>
-                        </div>
-                        <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
-                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs">📄</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">Document Uploaded:</span> Curriculum Framework v1.0</p>
-                                <p class="text-xs text-gray-400">4 hours ago by Prof. Garcia</p>
+                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs">📄</span>
+                                <div class="flex-1"><p class="text-sm"><span class="font-medium">Document Uploaded:</span> Research Publication 2025 v0.3</p><p class="text-xs text-gray-400">4 hours ago by Dr. Reyes</p></div>
                             </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs">⏳</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">Pending Review:</span> Research Output 2025</p>
-                                <p class="text-xs text-gray-400">1 day ago</p>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs">⏳</span>
+                                <div class="flex-1"><p class="text-sm"><span class="font-medium">Pending Review:</span> Extension Program Report</p><p class="text-xs text-gray-400">1 day ago</p></div>
                             </div>
                         </div>
                     </div>
@@ -312,6 +348,46 @@
         </main>
     </div>
 
+    <!-- Document Viewer Modal -->
+    <div id="documentModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 my-8 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 shrink-0">
+                <div><h2 id="docViewerTitle" class="text-2xl font-semibold text-gray-800">Document Title</h2><p id="docViewerMeta" class="text-sm text-gray-500 mt-1">Category · Department · Version · Author</p></div>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto bg-gray-50 p-6"><div id="docViewerContent" class="bg-white rounded-lg shadow p-6"><div class="flex items-center justify-center h-96"><div class="text-center"><div class="animate-spin inline-block w-8 h-8 border-4 border-gray-300 border-t-teal-600 rounded-full"></div><p class="text-gray-500 mt-4">Loading document...</p></div></div></div></div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-200 shrink-0">
+                <button id="downloadDoc" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">📥 Download</button>
+                <button id="closeModalBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/evaluator-session.js"></script>
     <script src="js/evaluator-dashboard.js"></script>
+    
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+        
+        // View Document buttons
+        document.querySelectorAll('.view-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const title = this.getAttribute('data-title') || 'Document';
+                alert(`View-Only Mode\n\nOpening: ${title}\n\nThis would display the document content in a modal. As an External Evaluator, you have full view access.`);
+            });
+        });
+    </script>
 </body>
 </html>
