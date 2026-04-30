@@ -58,6 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('User role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Store session token for multi-device tracking
+                if (data.sessionToken) {
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    console.log('Session token stored for multi-device tracking');
+                }
 
                 // Redirect based on role
                 redirectToDashboard(data.user.role);
@@ -105,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function redirectToDashboard(role) {
         console.log('Redirecting user with role:', role);
         
-        // Normalize role for comparison (handle both old and new formats)
+        // Normalize role for comparison
         const normalizedRole = role?.toLowerCase().trim();
         
         // Admin access - goes to admin dashboard (homepage.html)
@@ -115,16 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Faculty Member access - goes to faculty dashboard (user-dashboard.html)
-        if (normalizedRole === 'faculty member' || normalizedRole === 'faculty') {
+        // Faculty access - goes to faculty dashboard (user-dashboard.html)
+        if (normalizedRole === 'faculty') {
             console.log('Redirecting to faculty dashboard (user-dashboard.html)');
             window.location.href = 'user-dashboard.html';
             return;
         }
         
-        // Area Chair/Program Head - goes to faculty dashboard for now
-        if (normalizedRole === 'area chair/program head' || normalizedRole === 'area-chair') {
-            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
+        // Area Chair - goes to faculty dashboard for now
+        if (normalizedRole === 'area-chair') {
+            console.log('Redirecting to area chair dashboard (user-dashboard.html)');
             window.location.href = 'user-dashboard.html';
             return;
         }
@@ -136,15 +142,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // QA Coordinator - goes to faculty dashboard for now
-        if (normalizedRole === 'qa coordinator' || normalizedRole === 'qa-coordinator') {
-            console.log('Redirecting to faculty dashboard (user-dashboard.html)');
-            window.location.href = 'user-dashboard.html';
-            return;
-        }
-        
         // External Evaluator - goes to evaluator dashboard
-        if (normalizedRole === 'external evaluator' || normalizedRole === 'evaluator') {
+        if (normalizedRole === 'evaluator') {
             console.log('Redirecting to evaluator dashboard (evaluator-dashboard.html)');
             window.location.href = 'evaluator-dashboard.html';
             return;
@@ -236,6 +235,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('OTP verified, user role:', data.user.role);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Store session token for multi-device tracking
+                if (data.sessionToken) {
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    console.log('Session token stored for multi-device tracking');
+                }
                 
                 // Redirect based on role
                 redirectToDashboard(data.user.role);

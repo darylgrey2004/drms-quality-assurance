@@ -1,55 +1,14 @@
 // js/user-upload.js
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('User Upload JS loaded');
 
-    // ── Sidebar: load user info + logout + heartbeat ──
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!token || !user.id) { window.location.href = 'landing.html'; return; }
-    const role = (user.role || '').toLowerCase().trim();
-    const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
-    const el = (id) => document.getElementById(id);
-    if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
-    if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || 'Faculty Member';
-    const portalLabels = {
-        'faculty member': 'Faculty Portal',
-        'area chair/program head': 'Area Chair Portal'
-    };
-    if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${user.role} Portal`;
-    const accessLabels = { 'faculty member': 'Faculty Access', 'area chair/program head': 'Area Chair Access' };
-    if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${user.role} Access`;
-    fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
-        headers: { 'x-auth-token': token }
-    }).then(r => r.json()).then(data => {
-        if (el('sidebarRole')) {
-            const dept = data.department ? ` · ${data.department}` : '';
-            el('sidebarRole').textContent = `${data.role || user.role || 'Faculty Member'}${dept}`;
-        }
-    }).catch(() => {});
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-    }
-    function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-        }).catch(() => {});
-    }
-    sendHeartbeat();
-    setInterval(sendHeartbeat, 2 * 60 * 1000);
-    if (role === 'faculty member') {
-        const approvalsLink = document.querySelector('a[href="user-approvals.html"]');
-        if (approvalsLink) approvalsLink.style.display = 'none';
-    }
-    // ─────────────────────────────────────────────────
+    // Initialize user session (handled by user-session.js)
+    const session = await initializeUserPage();
+    if (!session) return;
+    
+    const { token, user, role } = session;
+    const API_BASE = 'http://localhost:3000';
 
     // DOM elements
     const dropZone = document.getElementById('dropZone');
@@ -62,76 +21,91 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadStatusText = document.getElementById('uploadStatusText');
     const uploadPercentText = document.getElementById('uploadPercentText');
     const categorySelect = document.getElementById('category');
-    const areaSelect = document.getElementById('area');
+    const departmentInput = document.getElementById('department');
+    const authorInput = document.getElementById('author');
+    const validateOption = document.getElementById('validateImmediatelyOption');
     const uploadForm = document.getElementById('uploadForm');
-    const cancelBtn = document.querySelector('.border.border-gray-300');
+    const cancelBtn = document.getElementById('cancelBtn');
     const uploadLoadingOverlay = document.getElementById('uploadLoadingOverlay');
     const uploadSuccessModal = document.getElementById('uploadSuccessModal');
     const uploadSuccessBackdrop = document.getElementById('uploadSuccessBackdrop');
     const closeUploadSuccessBtn = document.getElementById('closeUploadSuccessBtn');
-    const STORAGE_KEY = 'userUploadedDocuments';
-    let progressTimer = null;
+    const uploadErrorModal = document.getElementById('uploadErrorModal');
+    const uploadErrorMessage = document.getElementById('uploadErrorMessage');
+    const closeUploadErrorBtn = document.getElementById('closeUploadErrorBtn');
 
-    // Area options
-    const areaOptions = {
-        iso: [
-            { value: 'clause4', label: 'Clause 4 - Context of the Organization' },
-            { value: 'clause5', label: 'Clause 5 - Leadership' },
-            { value: 'clause6', label: 'Clause 6 - Planning' },
-            { value: 'clause7', label: 'Clause 7 - Support' },
-            { value: 'clause8', label: 'Clause 8 - Operation' },
-            { value: 'clause9', label: 'Clause 9 - Performance Evaluation' },
-            { value: 'clause10', label: 'Clause 10 - Improvement' }
-        ],
-        aaccup: [
-            { value: 'area1', label: 'Area I - Vision, Mission, Goals' },
-            { value: 'area2', label: 'Area II - Faculty' },
-            { value: 'area3', label: 'Area III - Curriculum' },
-            { value: 'area4', label: 'Area IV - Students' },
-            { value: 'area5', label: 'Area V - Research' },
-            { value: 'area6', label: 'Area VI - Extension' },
-            { value: 'area7', label: 'Area VII - Library' },
-            { value: 'area8', label: 'Area VIII - Facilities' },
-            { value: 'area9', label: 'Area IX - Laboratories' },
-            { value: 'area10', label: 'Area X - Administration' }
-        ],
-        coe: [
-            { value: 'indicator1', label: 'Indicator 1 - Quality of Teaching' },
-            { value: 'indicator2', label: 'Indicator 2 - Research Output' },
-            { value: 'indicator3', label: 'Indicator 3 - Extension Services' },
-            { value: 'indicator4', label: 'Indicator 4 - Curriculum Development' },
-            { value: 'indicator5', label: 'Indicator 5 - Faculty Development' },
-            { value: 'indicator6', label: 'Indicator 6 - Student Performance' },
-            { value: 'indicator7', label: 'Indicator 7 - International Linkages' }
-        ]
-    };
+    function showErrorModal(msg) {
+        if (!uploadErrorModal || !uploadErrorMessage) { alert(msg); return; }
+        uploadErrorMessage.textContent = msg;
+        uploadErrorModal.classList.remove('hidden');
+        uploadErrorModal.classList.add('flex');
+    }
 
-    // Update area dropdown
-    if (categorySelect && areaSelect) {
-        categorySelect.addEventListener('change', function() {
-            const category = this.value;
-            areaSelect.innerHTML = '';
+    function hideErrorModal() {
+        if (!uploadErrorModal) return;
+        uploadErrorModal.classList.add('hidden');
+        uploadErrorModal.classList.remove('flex');
+    }
 
-            if (!category) {
-                areaSelect.innerHTML = '<option value="">Select category first</option>';
-                return;
+    if (closeUploadErrorBtn) closeUploadErrorBtn.addEventListener('click', hideErrorModal);
+
+    // Load categories and departments
+    loadCategories();
+    autoFillUserData();
+
+    function loadCategories() {
+        fetch(`${API_BASE}/api/documents/categories`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(categories => {
+            if (categorySelect) {
+                categorySelect.innerHTML = '<option value="">Select category</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    categorySelect.appendChild(option);
+                });
             }
+        })
+        .catch(err => console.error('Load categories error:', err));
+    }
 
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select area / clause';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            areaSelect.appendChild(defaultOption);
-
-            const options = areaOptions[category] || [];
-            options.forEach(opt => {
-                const option = document.createElement('option');
-                option.value = opt.value;
-                option.textContent = opt.label;
-                areaSelect.appendChild(option);
+    function autoFillUserData() {
+        // Auto-fill author name (read-only)
+        if (authorInput && user) {
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            authorInput.value = fullName || user.username || 'User';
+        }
+        
+        // Fetch and auto-fill department from database
+        if (departmentInput) {
+            fetch(`${API_BASE}/api/documents/user/department`, {
+                headers: { 'x-auth-token': token }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.department_name || data.department_code) {
+                    departmentInput.value = data.department_name || data.department_code;
+                    departmentInput.setAttribute('data-department-id',   data.department_id   || '');
+                    departmentInput.setAttribute('data-department-code', data.department_code || '');
+                    departmentInput.setAttribute('data-department-name', data.department_name || '');
+                } else {
+                    departmentInput.value = 'No department assigned';
+                }
+            })
+            .catch(err => {
+                console.error('Load department error:', err);
+                departmentInput.value = 'Error loading department';
             });
-        });
+        }
+        
+        // Show "Validate Immediately" option for area-chair only
+        const normalizedRole = (role || '').toLowerCase();
+        if (validateOption && normalizedRole === 'area-chair') {
+            validateOption.style.display = 'flex';
+        }
     }
 
     // File drop zone
@@ -152,23 +126,32 @@ document.addEventListener('DOMContentLoaded', function() {
             dropZone.classList.remove('border-teal-500', 'bg-teal-50');
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
-                updateFileInfo(e.dataTransfer.files[0]);
+                updateFileInfo(e.dataTransfer.files);
             }
         });
 
         fileInput.addEventListener('change', function() {
-            if (this.files.length) updateFileInfo(this.files[0]);
+            if (this.files.length) updateFileInfo(this.files);
         });
     }
 
-    function updateFileInfo(file) {
+    function updateFileInfo(files) {
         if (!fileInfo || !fileName || !fileSize) return;
         
-        fileName.textContent = file.name;
-        const size = file.size;
-        if (size < 1024) fileSize.textContent = `(${size} B)`;
-        else if (size < 1024 * 1024) fileSize.textContent = `(${(size / 1024).toFixed(1)} KB)`;
-        else fileSize.textContent = `(${(size / (1024 * 1024)).toFixed(1)} MB)`;
+        if (files.length === 1) {
+            fileName.textContent = files[0].name;
+            const size = files[0].size;
+            if (size < 1024) fileSize.textContent = `(${size} B)`;
+            else if (size < 1024 * 1024) fileSize.textContent = `(${(size / 1024).toFixed(1)} KB)`;
+            else fileSize.textContent = `(${(size / (1024 * 1024)).toFixed(1)} MB)`;
+        } else {
+            fileName.textContent = `${files.length} files selected`;
+            let totalSize = 0;
+            for (let i = 0; i < files.length; i++) {
+                totalSize += files[i].size;
+            }
+            fileSize.textContent = `(${(totalSize / (1024 * 1024)).toFixed(1)} MB total)`;
+        }
         
         fileInfo.classList.remove('hidden');
         dropZone.classList.add('border-teal-500', 'bg-teal-50');
@@ -203,10 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (removeFile) {
         removeFile.addEventListener('click', () => {
-            if (progressTimer) {
-                clearInterval(progressTimer);
-                progressTimer = null;
-            }
             fileInput.value = '';
             fileInfo.classList.add('hidden');
             dropZone.classList.remove('border-teal-500', 'bg-teal-50');
@@ -216,23 +195,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form submission
     if (uploadForm) {
-        uploadForm.addEventListener('submit', (e) => {
+        uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const title = document.getElementById('docTitle')?.value;
             const category = document.getElementById('category')?.value;
-            const area = document.getElementById('area')?.value;
+            const author = document.getElementById('author')?.value;
+            const department = document.getElementById('department')?.value;
             const version = document.getElementById('version')?.value || 'v1.0';
+            const expiryDate = document.getElementById('expiryDate')?.value || '';
             const description = document.getElementById('description')?.value || '';
-            const submitOption = document.querySelector('input[name="submitOption"]:checked')?.value || 'submit';
-            const file = fileInput?.files[0];
+            const keywords = document.getElementById('keywords')?.value || '';
+            const workflow = document.querySelector('input[name="workflow"]:checked')?.value || 'submit';
+            const files = fileInput?.files;
 
-            if (!file) {
-                alert('Please select a file');
+            if (!files || files.length === 0) {
+                showErrorModal('Please select at least one file before uploading.');
                 return;
             }
-            if (!title || !category || !area) {
-                alert('Please fill in all required fields');
+            if (!title || !category || !author || !department) {
+                const missing = [];
+                if (!title) missing.push('Document Title');
+                if (!category) missing.push('Category');
+                if (!author) missing.push('Author');
+                if (!department) missing.push('Department');
+                showErrorModal(`Please fill in the following required fields: ${missing.join(', ')}`);
                 return;
             }
 
@@ -241,64 +228,81 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
             submitBtn.disabled = true;
             if (uploadLoadingOverlay) uploadLoadingOverlay.classList.remove('hidden');
-            updateProgressUI(3, 'Preparing upload...');
+            updateProgressUI(10, 'Preparing upload...');
 
-            if (progressTimer) clearInterval(progressTimer);
-            let progress = 3;
-            progressTimer = setInterval(() => {
-                if (progress >= 92) return;
-                progress += Math.random() * 12;
-                updateProgressUI(progress, 'Uploading...');
-            }, 180);
+            // Resolve department: prefer code, fall back to name, then raw input value
+            const departmentCode = departmentInput?.getAttribute('data-department-code')
+                || departmentInput?.getAttribute('data-department-name')
+                || department;
 
-            setTimeout(() => {
-                if (progressTimer) {
-                    clearInterval(progressTimer);
-                    progressTimer = null;
-                }
-                updateProgressUI(100, 'Upload completed');
-                const uploadDate = new Date().toISOString();
-                const currentUserId = String(user.id || '');
-                const categoryLabelMap = { iso: 'ISO', aaccup: 'AACCUP', coe: 'COE' };
-                const statusLabel = submitOption === 'draft' ? 'Draft' : 'Pending';
-                const statusClass = submitOption === 'draft'
-                    ? 'bg-gray-100 text-gray-700'
-                    : 'badge-pending';
-                const storedDocs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-                storedDocs.unshift({
-                    id: Date.now(),
-                    ownerId: currentUserId,
-                    title,
-                    category,
-                    categoryLabel: categoryLabelMap[category] || String(category || '').toUpperCase(),
-                    area,
-                    status: statusLabel,
-                    statusClass,
-                    version,
-                    description,
-                    fileName: file.name,
-                    fileSize: file.size,
-                    uploadedAt: uploadDate
+            // Create FormData
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category_id', category);   // numeric id from <select>
+            formData.append('author', author);
+            formData.append('department', departmentCode);
+            formData.append('version', version);
+            formData.append('expiry_date', expiryDate);
+            formData.append('description', description);
+            formData.append('keywords', keywords);
+            formData.append('workflow', workflow === 'draft' ? 'draft' : workflow === 'validate' ? 'approve' : 'submit');
+
+            // Append all files
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            try {
+                updateProgressUI(30, 'Uploading files...');
+
+                const response = await fetch(`${API_BASE}/api/documents/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'x-auth-token': token
+                    },
+                    body: formData
                 });
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(storedDocs));
+
+                updateProgressUI(80, 'Processing...');
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Upload failed');
+                }
+
+                updateProgressUI(100, 'Upload completed');
+                console.log('Upload successful:', data);
 
                 showUploadSuccessModal();
                 uploadForm.reset();
                 if (fileInfo) fileInfo.classList.add('hidden');
                 if (dropZone) dropZone.classList.remove('border-teal-500', 'bg-teal-50');
-                if (areaSelect) areaSelect.innerHTML = '<option value="">Select category first</option>';
+                resetProgressUI();
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showErrorModal('Upload failed: ' + error.message);
+                updateProgressUI(0, 'Upload failed');
+            } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 if (uploadLoadingOverlay) uploadLoadingOverlay.classList.add('hidden');
-                resetProgressUI();
-            }, 1500);
+            }
         });
     }
 
     // Cancel button
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
-            if (confirm('Discard upload?')) window.location.href = 'user-dashboard.html';
+            if (confirm('Discard upload? Any unsaved progress will be lost.')) {
+                uploadForm.reset();
+                if (fileInfo) fileInfo.classList.add('hidden');
+                if (dropZone) dropZone.classList.remove('border-teal-500', 'bg-teal-50');
+                resetProgressUI();
+                // Re-fill auto-filled fields
+                autoFillUserData();
+            }
         });
     }
 });

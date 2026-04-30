@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Search (Evaluator)</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,15 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-evaluator-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -26,10 +32,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -71,116 +77,259 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Search Documents</h1>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Header -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Search Documents</h1>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Find and review QA documents across Instruction, Research, Extension, and Employment</p>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Find and review QA documents</p>
                     </div>
-                </div>
 
-                <!-- Search Bar -->
-                <div class="bg-white rounded-xl p-6 stat-card mb-6">
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
-                                <input type="text" id="searchInput" placeholder="Search by title, author, keywords..." 
-                                       class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    <!-- Search Bar -->
+                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card mb-6">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+                                    <input type="text" id="searchInput" placeholder="Search by title, author, keywords..." 
+                                           class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+                            <button id="searchBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Search</button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <select id="filterCategory" class="px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Categories</option>
+                                    <option value="instruction">Instruction</option>
+                                    <option value="research">Research</option>
+                                    <option value="extension">Extension</option>
+                                    <option value="employment">Employment</option>
+                                </select>
+                                <select id="filterDepartment" class="px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Departments</option>
+                                    <option value="beed">BEED</option>
+                                    <option value="bsed">BSED</option>
+                                    <option value="bsned">BSNED</option>
+                                    <option value="bcaed">BCAED</option>
+                                    <option value="bped">BPED</option>
+                                </select>
+                                <select id="filterStatus" class="px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Statuses</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending Review</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                                <button id="clearFilters" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                                    Clear Filters
+                                </button>
                             </div>
                         </div>
-                        <button id="searchBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">
-                            Search
-                        </button>
                     </div>
 
-                    <!-- Filters -->
-                    <div class="mt-4 pt-4 border-t border-gray-100">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <select id="filterCategory" class="px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Categories</option>
-                                <option value="iso">ISO 9001:2015</option>
-                                <option value="aaccup">AACCUP</option>
-                                <option value="coe">COE</option>
-                            </select>
-                            <select id="filterStatus" class="px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Statuses</option>
-                                <option value="approved">Approved</option>
-                                <option value="pending">Pending Review</option>
-                                <option value="draft">Draft</option>
-                                <option value="expired">Expired</option>
-                            </select>
-                            <select id="filterDate" class="px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Time</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="year">This Year</option>
-                            </select>
-                            <button id="clearFilters" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-                                Clear Filters
-                            </button>
+                    <!-- Results Count -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <span class="text-sm text-gray-600">Found <span id="resultCount">6</span> documents</span>
+                        <select id="sortResults" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                            <option value="relevance">Sort by: Relevance</option>
+                            <option value="date_desc">Newest First</option>
+                            <option value="date_asc">Oldest First</option>
+                            <option value="title_asc">Title A-Z</option>
+                            <option value="title_desc">Title Z-A</option>
+                        </select>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div id="searchResults" class="space-y-3"></div>
+
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="hidden text-center py-8">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-teal-600 border-t-transparent"></div>
+                        <p class="text-sm text-gray-500 mt-2">Searching documents...</p>
+                    </div>
+
+                    <!-- No Results -->
+                    <div id="noResults" class="hidden text-center py-12 bg-white rounded-xl stat-card">
+                        <span class="text-5xl mb-4 block">🔍</span>
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">No documents found</h3>
+                        <p class="text-sm text-gray-500">Try adjusting your search terms or filters</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                        <div class="text-sm text-gray-500" id="paginationInfo">Showing 1 to 5 of 6 documents</div>
+                        <div class="flex flex-wrap gap-2 justify-center" id="pagination">
+                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50" data-page="prev" disabled>Previous</button>
+                            <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg" data-page="1">1</button>
+                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="2">2</button>
+                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="next">Next</button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Results Count -->
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm text-gray-600">Found <span id="resultCount">847</span> documents</span>
-                    <select id="sortResults" class="px-3 py-1 border border-gray-200 rounded-lg text-sm">
-                        <option value="relevance">Sort by: Relevance</option>
-                        <option value="date_desc">Newest First</option>
-                        <option value="date_asc">Oldest First</option>
-                        <option value="title_asc">Title A-Z</option>
-                        <option value="title_desc">Title Z-A</option>
-                    </select>
-                </div>
-
-                <!-- Search Results -->
-                <div id="searchResults" class="space-y-3">
-                    <!-- Results will be populated by JavaScript -->
-                </div>
-
-                <!-- Loading Indicator (hidden by default) -->
-                <div id="loadingIndicator" class="hidden text-center py-8">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-teal-600 border-t-transparent"></div>
-                    <p class="text-sm text-gray-500 mt-2">Searching documents...</p>
-                </div>
-
-                <!-- No Results (hidden by default) -->
-                <div id="noResults" class="hidden text-center py-12 bg-white rounded-xl stat-card">
-                    <span class="text-5xl mb-4 block">🔍</span>
-                    <h3 class="text-lg font-medium text-gray-800 mb-2">No documents found</h3>
-                    <p class="text-sm text-gray-500">Try adjusting your search terms or filters</p>
-                </div>
-
-                <!-- Pagination -->
-                <div class="flex justify-between items-center mt-6">
-                    <div class="text-sm text-gray-500" id="paginationInfo">Showing 1 to 10 of 847 documents</div>
-                    <div class="flex gap-2" id="pagination">
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="prev" disabled>Previous</button>
-                        <button class="px-3 py-1 bg-teal-700 text-white rounded-lg" data-page="1">1</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="2">2</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="3">3</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="4">4</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" data-page="next">Next</button>
+                    <!-- View-only notice -->
+                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
+                        <span class="text-lg mr-2">👁️</span>
+                        Search results are view-only. Click on any document to review its contents.
                     </div>
-                </div>
-
-                <!-- View-only notice -->
-                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center">
-                    <span class="text-lg mr-2">👁️</span>
-                    Search results are view-only. Click on any document to review its contents.
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/evaluator-session.js"></script>
     <script src="js/evaluator-search.js"></script>
+    
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Mock document data
+        const mockDocuments = [
+            { id: 1, title: "Syllabus - Elementary Education", author: "Dr. Santos", date: "2026-04-20", category: "Instruction", categoryClass: "instruction", department: "BEED", status: "Approved", statusClass: "approved", version: "v3.2", description: "Comprehensive syllabus for elementary education covering all learning competencies." },
+            { id: 2, title: "Research Publication 2025", author: "Dr. Reyes", date: "2026-04-25", category: "Research", categoryClass: "research", department: "BSED", status: "Pending", statusClass: "pending", version: "v0.3", description: "Research publication on innovative teaching strategies in secondary education." },
+            { id: 3, title: "Community Extension Program", author: "Prof. Mendoza", date: "2026-04-22", category: "Extension", categoryClass: "extension", department: "BPED", status: "Approved", statusClass: "approved", version: "v1.1", description: "Community outreach program documentation and impact assessment." },
+            { id: 4, title: "Faculty Employment Contract", author: "Dean Cruz", date: "2026-04-18", category: "Employment", categoryClass: "employment", department: "BEED", status: "Approved", statusClass: "approved", version: "v2.1", description: "Faculty employment contract and personnel documents." },
+            { id: 5, title: "Inclusive Education Module", author: "Prof. Garcia", date: "2026-04-15", category: "Instruction", categoryClass: "instruction", department: "BSNED", status: "Approved", statusClass: "approved", version: "v1.0", description: "Learning module for inclusive education and special needs." },
+            { id: 6, title: "Cultural Heritage Documentation", author: "Dr. Torres", date: "2026-04-10", category: "Extension", categoryClass: "extension", department: "BCAED", status: "Draft", statusClass: "draft", version: "v0.5", description: "Documentation of cultural heritage and arts programs." }
+        ];
+
+        const searchResults = document.getElementById('searchResults');
+        const resultCount = document.getElementById('resultCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const noResults = document.getElementById('noResults');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const filterCategory = document.getElementById('filterCategory');
+        const filterDepartment = document.getElementById('filterDepartment');
+        const filterStatus = document.getElementById('filterStatus');
+        const clearFilters = document.getElementById('clearFilters');
+        const sortResults = document.getElementById('sortResults');
+        const paginationInfo = document.getElementById('paginationInfo');
+
+        function displayResults(results) {
+            if (results.length === 0) {
+                searchResults.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                resultCount.textContent = '0';
+                paginationInfo.textContent = 'Showing 0 of 0 documents';
+                return;
+            }
+
+            searchResults.classList.remove('hidden');
+            noResults.classList.add('hidden');
+            resultCount.textContent = results.length;
+            paginationInfo.textContent = `Showing 1 to ${results.length} of ${results.length} documents`;
+
+            searchResults.innerHTML = results.map(doc => `
+                <div class="bg-white rounded-xl p-4 stat-card search-result">
+                    <div class="flex flex-col md:flex-row justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="badge-${doc.categoryClass} px-2 py-1 rounded-full text-xs">${doc.category}</span>
+                                <span class="status-${doc.statusClass} px-2 py-1 rounded-full text-xs">${doc.status}</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">${doc.title}</h3>
+                            <p class="text-xs text-gray-500 mt-1">by ${doc.author} · ${doc.date} · ${doc.version}</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">${doc.description}</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">${doc.department}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="view-btn px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition" data-doc-id="${doc.id}">View</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => alert('Document viewer would open here (view-only mode)'));
+            });
+        }
+
+        function performSearch() {
+            let results = [...mockDocuments];
+            
+            const searchTerm = searchInput?.value.toLowerCase() || '';
+            const category = filterCategory?.value || 'all';
+            const department = filterDepartment?.value || 'all';
+            const status = filterStatus?.value || 'all';
+
+            if (searchTerm) {
+                results = results.filter(doc => 
+                    doc.title.toLowerCase().includes(searchTerm) || 
+                    doc.author.toLowerCase().includes(searchTerm) ||
+                    doc.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (category !== 'all') {
+                results = results.filter(doc => doc.categoryClass === category);
+            }
+
+            if (department !== 'all') {
+                results = results.filter(doc => doc.department === department.toUpperCase());
+            }
+
+            if (status !== 'all') {
+                results = results.filter(doc => doc.statusClass === status);
+            }
+
+            const sortBy = sortResults?.value || 'relevance';
+            if (sortBy === 'date_desc') {
+                results.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortBy === 'date_asc') {
+                results.sort((a, b) => new Date(a.date) - new Date(b.date));
+            } else if (sortBy === 'title_asc') {
+                results.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (sortBy === 'title_desc') {
+                results.sort((a, b) => b.title.localeCompare(a.title));
+            }
+
+            displayResults(results);
+        }
+
+        if (searchBtn) searchBtn.addEventListener('click', performSearch);
+        if (searchInput) searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
+        if (filterCategory) filterCategory.addEventListener('change', performSearch);
+        if (filterDepartment) filterDepartment.addEventListener('change', performSearch);
+        if (filterStatus) filterStatus.addEventListener('change', performSearch);
+        if (sortResults) sortResults.addEventListener('change', performSearch);
+
+        if (clearFilters) {
+            clearFilters.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                if (filterCategory) filterCategory.value = 'all';
+                if (filterDepartment) filterDepartment.value = 'all';
+                if (filterStatus) filterStatus.value = 'all';
+                if (sortResults) sortResults.value = 'relevance';
+                performSearch();
+            });
+        }
+
+        // Initial display
+        displayResults(mockDocuments.slice(0, 5));
+    </script>
 </body>
 </html>

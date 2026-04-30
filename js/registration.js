@@ -1,5 +1,8 @@
 // js/registration.js
 
+// Use consistent API base URL (same as landing.js)
+const API_BASE = 'http://127.0.0.1:3000';
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Registration page loaded');
     
@@ -31,21 +34,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Save data to localStorage
-            const registrationData = {
-                firstName: firstName,
-                lastName: lastName,
-                middleInitial: middleInitial,
-                email: email,
-                password: password,
-                role: role
-            };
+            // Password strength validation
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long');
+                return;
+            }
 
-            localStorage.setItem('registrationData', JSON.stringify(registrationData));
+            // Email validation (WMSU email recommended)
+            if (!email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
 
-            // Redirect to faculty profile form
-            alert('Proceeding to profile setup.');
-            window.location.href = 'faculty-profile-form.html';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            const normalizedRole = role?.toLowerCase().trim();
+
+            // For faculty and area-chair roles, skip backend registration API
+            // They will complete registration through the employment form
+            if (normalizedRole === 'faculty' || normalizedRole === 'area-chair') {
+                // Store registration data in localStorage for faculty profile form
+                const registrationData = {
+                    firstName,
+                    lastName,
+                    middleInitial: middleInitial || '',
+                    email,
+                    password,
+                    role
+                };
+                localStorage.setItem('registrationData', JSON.stringify(registrationData));
+                
+                console.log('Faculty/Area-Chair registration - redirecting to employment form');
+                alert('Please complete your employment information to finish registration.');
+                window.location.href = 'faculty-profile-form.html';
+                return;
+            }
+
+            // For other roles (Admin, Dean, Evaluator), call the registration API
+            submitBtn.textContent = 'Creating account...';
+            submitBtn.disabled = true;
+
+            try {
+                console.log('Sending registration data to backend for role:', role);
+                // Call backend registration API (only for non-faculty roles)
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        middleInitial: middleInitial || null,
+                        email,
+                        password,
+                        role
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.msg || `Server error: ${response.status}`);
+                }
+
+                // Registration successful
+                console.log('Non-faculty registration successful - redirecting to login');
+                alert(data.msg || 'Registration successful! Please log in with your credentials.');
+                window.location.href = 'landing.html';
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert(`Registration failed: ${error.message}`);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
     }
 
@@ -63,38 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const eyeIcon = document.getElementById(eyeId);
         const eyeOffIcon = document.getElementById(eyeOffId);
 
+        if (!toggle || !input || !eyeIcon || !eyeOffIcon) return;
+
         toggle.addEventListener('click', function() {
             const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
             input.setAttribute('type', type);
             eyeIcon.classList.toggle('hidden');
             eyeOffIcon.classList.toggle('hidden');
         });
-    }
-    
-    // Helper function to parse full name (no longer needed but kept for compatibility)
-    function parseFullName(fullName) {
-        // Expected format: "Last, First Middle" or "First Middle Last"
-        let lastName = '', firstName = '', middleName = '';
-        
-        if (fullName.includes(',')) {
-            // Format: "Last, First Middle"
-            const parts = fullName.split(',');
-            lastName = parts[0].trim();
-            const firstParts = parts[1]?.trim().split(' ') || [];
-            firstName = firstParts[0] || '';
-            middleName = firstParts.slice(1).join(' ') || '';
-        } else {
-            // Format: "First Middle Last"
-            const parts = fullName.trim().split(' ');
-            if (parts.length >= 2) {
-                firstName = parts[0];
-                lastName = parts[parts.length - 1];
-                middleName = parts.slice(1, -1).join(' ');
-            } else {
-                firstName = fullName;
-            }
-        }
-        
-        return { firstName, lastName, middleName };
     }
 });

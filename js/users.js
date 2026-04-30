@@ -5,17 +5,181 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchUsers');
     const roleFilter = document.getElementById('roleFilter');
     const statusFilter = document.getElementById('statusFilter');
-    const token = localStorage.getItem('token');
+    let token = localStorage.getItem('token');
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const viewerRole = (currentUser.role || '').toString().toLowerCase().trim();
+    const canDeleteUsers = viewerRole === 'admin';
+    const openCreateUserModalBtn = document.getElementById('openCreateUserModalBtn');
+    const closeCreateUserModalBtn = document.getElementById('closeCreateUserModalBtn');
+    const cancelCreateUserBtn = document.getElementById('cancelCreateUserBtn');
+    const createUserModal = document.getElementById('createUserModal');
+    const createUserForm = document.getElementById('createUserForm');
+    const createRole = document.getElementById('createRole');
+    const evaluatorExpiryWrap = document.getElementById('evaluatorExpiryWrap');
+    const createEvaluatorExpiresAt = document.getElementById('createEvaluatorExpiresAt');
+    const departmentWrap = document.getElementById('departmentWrap');
+    const createDepartment = document.getElementById('createDepartment');
 
-    let allUsers = []; // Store all users for filtering
+    let allUsers = [];
+    let isRedirecting = false;
 
-    if (!token) {
+    // Function to check if token is expired
+    function isTokenExpired(token) {
+        if (!token) return true;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() >= exp;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    // Function to handle expired token
+    function handleExpiredToken() {
+        if (isRedirecting) return;
+        isRedirecting = true;
+        
+        alert('Your session has expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = 'landing.html';
+    }
+
+    // Check token expiration immediately
+    if (!token || isTokenExpired(token)) {
+        handleExpiredToken();
         return;
     }
 
-    // Function to fetch users and render them in the table
+    // ── Heartbeat: Update lastActive status ──
+    function sendHeartbeat() {
+        if (isTokenExpired(token)) return;
+        
+        fetch('http://localhost:3000/api/user/heartbeat', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+        }).catch(() => {});
+    }
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 2 * 60 * 1000);
+
+    function openCreateUserModal() {
+        if (!createUserModal || !canDeleteUsers) return;
+        createUserModal.classList.remove('hidden');
+    }
+
+    function closeCreateUserModal() {
+        if (!createUserModal) return;
+        createUserModal.classList.add('hidden');
+        if (createUserForm) createUserForm.reset();
+        if (evaluatorExpiryWrap) evaluatorExpiryWrap.classList.add('hidden');
+        if (createEvaluatorExpiresAt) createEvaluatorExpiresAt.required = false;
+    }
+
+    function syncEvaluatorExpiryField() {
+        if (!createRole || !evaluatorExpiryWrap || !createEvaluatorExpiresAt) return;
+        const selectedRole = (createRole.value || '').toLowerCase().trim();
+        const isEvaluator = selectedRole === 'evaluator' || selectedRole === 'external evaluator';
+        evaluatorExpiryWrap.classList.toggle('hidden', !isEvaluator);
+        createEvaluatorExpiresAt.required = isEvaluator;
+        if (!isEvaluator) createEvaluatorExpiresAt.value = '';
+        
+        if (departmentWrap && createDepartment) {
+            const showDepartment = isEvaluator || selectedRole === 'dean' || selectedRole === 'area chair/program head';
+            departmentWrap.classList.toggle('hidden', !showDepartment);
+        }
+    }
+
+    if (openCreateUserModalBtn) {
+        openCreateUserModalBtn.classList.toggle('hidden', !canDeleteUsers);
+        openCreateUserModalBtn.addEventListener('click', openCreateUserModal);
+    }
+    if (closeCreateUserModalBtn) closeCreateUserModalBtn.addEventListener('click', closeCreateUserModal);
+    if (cancelCreateUserBtn) cancelCreateUserBtn.addEventListener('click', closeCreateUserModal);
+    if (createRole) createRole.addEventListener('change', syncEvaluatorExpiryField);
+
+    if (createUserForm) {
+        createUserForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!canDeleteUsers) return;
+
+            // Check token again before submission
+            if (isTokenExpired(token)) {
+                handleExpiredToken();
+                return;
+            }
+
+            const firstName = document.getElementById('createFirstName')?.value?.trim();
+            const lastName = document.getElementById('createLastName')?.value?.trim();
+            const middleInitial = document.getElementById('createMiddleInitial')?.value?.trim() || null;
+            const email = document.getElementById('createEmail')?.value?.trim();
+            const role = document.getElementById('createRole')?.value;
+            const password = document.getElementById('createPassword')?.value;
+            const confirmPassword = document.getElementById('createConfirmPassword')?.value;
+            const department = document.getElementById('createDepartment')?.value?.trim() || null;
+            const evaluatorExpiresAt = createEvaluatorExpiresAt?.value || null;
+
+            if (!firstName || !lastName || !email || !role || !password || !confirmPassword) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
+
+            const normalizedRole = role.toLowerCase().trim();
+            const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
+            if (isEvaluator && !evaluatorExpiresAt) {
+                alert('Please set an expiration date/time for External Evaluator.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        middleInitial,
+                        email,
+                        role,
+                        password,
+                        department,
+                        evaluatorExpiresAt
+                    })
+                });
+
+                if (response.status === 401) {
+                    handleExpiredToken();
+                    return;
+                }
+
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.msg || 'Failed to create user account.');
+
+                alert(result.msg || 'User account created successfully.');
+                closeCreateUserModal();
+                fetchAndRenderUsers();
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert(`Failed to create user: ${error.message}`);
+            }
+        });
+    }
+
     async function fetchAndRenderUsers() {
+        // Check token before fetching
+        if (isTokenExpired(token)) {
+            handleExpiredToken();
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:3000/api/admin/users', {
                 method: 'GET',
@@ -25,108 +189,139 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
             });
 
+            if (response.status === 401) {
+                handleExpiredToken();
+                return;
+            }
+
             if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    alert('You are not authorized to view this page. Redirecting to login.');
-                    localStorage.removeItem('token');
-                    window.location.href = 'landing.html';
+                if (response.status === 403) {
+                    if (viewerRole === 'dean') {
+                        alert('Dean access to Users requires updated server permissions.');
+                        window.location.href = 'homepage.html';
+                        return;
+                    }
+                    alert('You are not authorized to view this page.');
+                    window.location.href = 'homepage.html';
+                    return;
                 }
+
                 throw new Error('Failed to fetch users.');
             }
 
             const users = await response.json();
-            allUsers = users; // Store for filtering
+            allUsers = users;
             renderUsers(users);
             updateStats(users);
 
         } catch (error) {
             console.error('Error fetching users:', error);
-            usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Error loading users. Please try again.</td></tr>`;
+            if (usersTableBody) {
+                usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading users. Please refresh the page or login again.</td></tr>`;
+            }
         }
     }
 
-    // Function to update statistics cards
     function updateStats(users) {
         const totalUsers = users.length;
         const approvedUsers = users.filter(u => u.status === 'approved').length;
         const pendingUsers = users.filter(u => u.status === 'pending').length;
         const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
 
-        // Update stat cards
-        document.querySelector('.stat-card:nth-child(1) .text-3xl').textContent = totalUsers;
-        document.querySelector('.stat-card:nth-child(2) .text-3xl').textContent = approvedUsers;
-        document.querySelector('.stat-card:nth-child(3) .text-3xl').textContent = pendingUsers;
-        document.querySelector('.stat-card:nth-child(4) .text-3xl').textContent = uniqueRoles;
+        const totalEl = document.querySelector('.stat-card:nth-child(1) .text-3xl');
+        const approvedEl = document.querySelector('.stat-card:nth-child(2) .text-3xl');
+        const pendingEl = document.querySelector('.stat-card:nth-child(3) .text-3xl');
+        const rolesEl = document.querySelector('.stat-card:nth-child(4) .text-3xl');
+        
+        if (totalEl) totalEl.textContent = totalUsers;
+        if (approvedEl) approvedEl.textContent = approvedUsers;
+        if (pendingEl) pendingEl.textContent = pendingUsers;
+        if (rolesEl) rolesEl.textContent = uniqueRoles;
 
-        // Update percentages
         const activeRate = totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0;
-        document.querySelector('.stat-card:nth-child(2) .text-xs').textContent = `${activeRate}% approved rate`;
-        document.querySelector('.stat-card:nth-child(1) .text-xs').textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+        const approvedRateEl = document.querySelector('.stat-card:nth-child(2) .text-xs');
+        const totalLabelEl = document.querySelector('.stat-card:nth-child(1) .text-xs');
+        
+        if (approvedRateEl) approvedRateEl.textContent = `${activeRate}% approved rate`;
+        if (totalLabelEl) totalLabelEl.textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
     }
 
-    // Function to render the users in the table
     function renderUsers(users) {
-        usersTableBody.innerHTML = ''; // Clear existing rows
+        if (!usersTableBody) return;
+        usersTableBody.innerHTML = '';
 
         if (users.length === 0) {
             usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-500">No users found matching your criteria.</td></tr>`;
             return;
         }
 
+        function isCurrentlyActive(lastActive) {
+            if (!lastActive) return false;
+            const lastActiveDate = new Date(lastActive);
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+            return lastActiveDate > fiveMinutesAgo;
+        }
+
+        function formatLastActive(lastActive, role) {
+            if (!lastActive) return 'Never';
+            if (role && role.toLowerCase() === 'evaluator') return 'Never';
+            if (isCurrentlyActive(lastActive)) {
+                return '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">🟢 active now</span>';
+            }
+            
+            const lastActiveDate = new Date(lastActive);
+            const now = new Date();
+            const diffMs = now - lastActiveDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            return lastActiveDate.toLocaleDateString();
+        }
+
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'user-row hover:bg-gray-50 transition-colors';
 
-            // Define status badge based on user status
             const statusBadge = user.status === 'approved' 
                 ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Approved</span>`
                 : user.status === 'rejected'
                 ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
                 : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
 
-            // Format last active date or show 'Never'
-            const lastActive = user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never';
+            const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
+            const userId = user.id || user._id;
             
-            // Determine which action buttons to show
-            let actionButtons = '';
-<<<<<<< Updated upstream
-            if (user.status === 'pending') {
-                actionButtons = `
-                    <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
-                    <button class="text-green-600 hover:text-green-800 approve-user" data-id="${user.id}" title="Approve User">✓ Approve</button>
-                    <button class="text-red-600 hover:text-red-800 reject-user" data-id="${user.id}" title="Reject User">✕ Reject</button>
-                `;
-=======
-            const isAdmin = (user.role || '').toLowerCase().trim() === 'admin';
-            if (isAdmin) {
-                actionButtons = '';
-            } else if (isViewOnly) {
-                actionButtons = `<a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>`;
->>>>>>> Stashed changes
-            } else {
-                actionButtons = `
-                    <a href="view-faculty-profile.html?userId=${user.id}" class="text-teal-600 hover:text-teal-800" title="View User">View</a>
-                    <button class="text-teal-600 hover:text-teal-800 edit-user" data-id="${user.id}" title="Edit User">✏️ Edit</button>
-                    <button class="text-red-600 hover:text-red-800 delete-user" data-id="${user.id}" title="Delete User">🗑️ Delete</button>
-                `;
-            }
+            const actionButtons = userId
+                ? `
+                    <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View Profile</a>
+                    ${canDeleteUsers ? `<button class="action-pill action-pill-delete delete-user" data-id="${userId}" title="Delete User">Delete</button>` : ''}
+                `
+                : '<span class="text-gray-400">N/A</span>';
 
-            // Construct the table row
             row.innerHTML = `
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-sm">
+                            ${(user.firstName?.charAt(0) || '')}${(user.lastName?.charAt(0) || '')}
+                        </div>
                         <div>
-                            <div class="font-medium text-gray-800">${user.firstName} ${user.lastName}</div>
+                            <div class="font-medium text-gray-800">${user.firstName || ''} ${user.lastName || ''}</div>
+                            <div class="text-xs text-gray-400">${user.role || 'User'}</div>
                         </div>
                     </div>
                 </td>
-                <td class="py-3 px-2 text-gray-600">${user.email}</td>
-                <td class="py-3 px-2 text-gray-600">${user.role || 'User'}</td>
-                <td class="py-3 px-2 text-gray-600">${user.department || 'N/A'}</td>
+                <td class="py-3 px-2 text-gray-600 text-sm">${user.email || ''}</td>
+                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${user.role || 'User'}</span></td>
+                <td class="py-3 px-2 text-gray-600 text-sm">${user.department || 'N/A'}</td>
                 <td class="py-3 px-2">${statusBadge}</td>
-                <td class="py-3 px-2 text-gray-400">${lastActive}</td>
+                <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
                 <td class="py-3 px-2">
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-2">
                         ${actionButtons}
                     </div>
                 </td>
@@ -136,103 +331,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     usersTableBody.addEventListener('click', async function(e) {
-        const target = e.target.closest('button'); // Ensure we get the button element
-        if (!target) return;
+        const deleteButton = e.target.closest('.delete-user');
+        if (!deleteButton) return;
 
-        const userId = target.getAttribute('data-id');
+        const userId = deleteButton.getAttribute('data-id');
+        if (!userId || !canDeleteUsers) return;
 
-        if (target.classList.contains('edit-user')) {
-            alert(`Edit functionality for user ID ${userId} is not yet implemented.`);
-        } else if (target.classList.contains('delete-user')) {
-            if (confirm('Are you sure you want to delete this user?')) {
-                await deleteUser(userId);
+        if (confirm('Delete this user? Their uploaded documents will be retained but unlinked from their account.')) {
+            if (isTokenExpired(token)) {
+                handleExpiredToken();
+                return;
             }
+            await deleteUser(userId);
         }
     });
 
-
     async function deleteUser(userId) {
         try {
-            const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+            const response = await fetch(`http://localhost:3000/api/admin/users/${encodeURIComponent(userId)}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token,
-                },
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
             });
 
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.msg || 'Failed to reject user.');
-            }
+            if (response.status === 401) { handleExpiredToken(); return; }
 
-            alert('User has been deleted.');
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.msg || 'Failed to delete user.');
+
+            alert(data.msg || 'User has been deleted. Their documents have been retained.');
             fetchAndRenderUsers();
-
         } catch (error) {
             console.error('Error deleting user:', error);
             alert(`Failed to delete user: ${error.message}`);
         }
     }
 
-    // Initial fetch and render of users
     fetchAndRenderUsers();
 
-    // Search functionality
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            filterUsers();
-        });
-    }
+    if (searchInput) searchInput.addEventListener('input', filterUsers);
+    if (roleFilter) roleFilter.addEventListener('change', filterUsers);
+    if (statusFilter) statusFilter.addEventListener('change', filterUsers);
 
-    // Role filter functionality
-    if (roleFilter) {
-        roleFilter.addEventListener('change', function() {
-            filterUsers();
-        });
-    }
-
-    // Status filter functionality
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            filterUsers();
-        });
-    }
-
-    // Filter users based on search and filters
     function filterUsers() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const selectedRole = roleFilter.value;
-        const selectedStatus = statusFilter.value;
+        const searchTerm = searchInput?.value?.toLowerCase().trim() || '';
+        const selectedRole = roleFilter?.value || 'all';
+        const selectedStatus = statusFilter?.value || 'all';
 
         let filteredUsers = allUsers;
 
-        // Filter by search term (name, email, or role)
         if (searchTerm) {
             filteredUsers = filteredUsers.filter(user => {
-                const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+                const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
                 const email = (user.email || '').toLowerCase();
                 const role = (user.role || '').toLowerCase();
-                const department = (user.department || '').toLowerCase();
-                
-                return fullName.includes(searchTerm) || 
-                       email.includes(searchTerm) || 
-                       role.includes(searchTerm) ||
-                       department.includes(searchTerm);
+                return fullName.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
             });
         }
 
-        // Filter by role
         if (selectedRole !== 'all') {
             filteredUsers = filteredUsers.filter(user => user.role === selectedRole);
         }
 
-        // Filter by status
         if (selectedStatus !== 'all') {
             filteredUsers = filteredUsers.filter(user => user.status === selectedStatus);
         }
 
-        // Render filtered users
         renderUsers(filteredUsers);
     }
 });

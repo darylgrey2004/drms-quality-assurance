@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Search Documents</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,15 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-user-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -26,10 +32,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">JD</span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
-                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Juan Dela Cruz</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">Faculty · Science Education</div>
                     </div>
                 </div>
             </div>
@@ -60,13 +66,10 @@
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
-                <button id="logoutBtn" class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
-                    🚪 Logout
-                </button>
-                <div class="text-xs text-teal-200/50 mt-3">
+                <div class="text-xs text-teal-200/50">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                        <span id="sidebarAccess">Access</span>
+                        <span id="sidebarAccess">Faculty Access</span>
                     </div>
                     <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
@@ -74,163 +77,303 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="mb-6">
-                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Search Documents</h1>
-                <p class="text-sm text-gray-500 mt-1">Find QA records across all standards</p>
-            </div>
-
-            <!-- Search bar -->
-            <div class="bg-white rounded-xl p-6 stat-card mb-6">
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
-                            <input type="text" id="mainSearch" placeholder="Search by title, author, keywords..." 
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
-                        </div>
-                    </div>
-                    <button id="searchBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">
-                        Search
-                    </button>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Search Documents</h1>
+                    <p class="text-sm text-gray-500 mt-1">Find QA records across Instruction, Research, Extension, and Employment categories</p>
                 </div>
 
-                <!-- Advanced filters toggle -->
-                <div class="mt-4">
-                    <button id="toggleFilters" class="text-sm text-teal-700 hover:text-teal-800 flex items-center">
-                        <span class="mr-1">▼</span> Advanced Filters
-                    </button>
-                </div>
-
-                <!-- Advanced filters (hidden by default) -->
-                <div id="advancedFilters" class="hidden mt-4 pt-4 border-t border-gray-100">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-1">Category</label>
-                            <select id="filterCategory" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Categories</option>
-                                <option value="iso">ISO 9001:2015</option>
-                                <option value="aaccup">AACCUP</option>
-                                <option value="coe">COE</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-1">Status</label>
-                            <select id="filterStatus" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Statuses</option>
-                                <option value="approved">Approved</option>
-                                <option value="pending">Pending Review</option>
-                                <option value="draft">Draft</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-1">Date Range</label>
-                            <select id="filterDate" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
-                                <option value="all">All Time</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="year">This Year</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Results header -->
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-sm text-gray-600">Found <span id="resultCount">12</span> results</span>
-                <select id="sortResults" class="px-3 py-1 border border-gray-200 rounded-lg text-sm">
-                    <option value="relevance">Sort by: Relevance</option>
-                    <option value="date_desc">Newest first</option>
-                    <option value="date_asc">Oldest first</option>
-                    <option value="title_asc">Title A-Z</option>
-                </select>
-            </div>
-
-            <!-- Search results -->
-            <div id="searchResults" class="space-y-3">
-                <!-- Result 1 -->
-                <div class="bg-white rounded-xl p-4 stat-card search-result">
-                    <div class="flex flex-col md:flex-row justify-between">
+                <!-- Search bar -->
+                <div class="bg-white rounded-xl p-4 md:p-6 stat-card mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
                         <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">ISO 9001:2015</span>
-                                <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Approved</span>
-                            </div>
-                            <h3 class="font-medium text-gray-800">Quality Management System Manual</h3>
-                            <p class="text-xs text-gray-500 mt-1">by Dr. Santos · Updated 2026-02-15 · v3.2</p>
-                            <p class="text-sm text-gray-600 mt-2">Comprehensive quality manual covering ISO 9001:2015 requirements...</p>
-                            <div class="flex gap-2 mt-2">
-                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 4</span>
-                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Clause 5</span>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+                                <input type="text" id="mainSearch" placeholder="Search by title, author, keywords..." 
+                                       class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
                             </div>
                         </div>
-                        <div class="flex gap-2 mt-3 md:mt-0">
-                            <button class="text-teal-600 hover:text-teal-800 view-result">View</button>
+                        <button id="searchBtn" class="px-6 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Search</button>
+                    </div>
+
+                    <!-- Advanced filters toggle -->
+                    <div class="mt-4">
+                        <button id="toggleFilters" class="text-sm text-teal-700 hover:text-teal-800 flex items-center">
+                            <span class="mr-1">▼</span> Advanced Filters
+                        </button>
+                    </div>
+
+                    <!-- Advanced filters -->
+                    <div id="advancedFilters" class="hidden mt-4 pt-4 border-t border-gray-100">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Category</label>
+                                <select id="filterCategory" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Categories</option>
+                                    <option value="instruction">Instruction</option>
+                                    <option value="research">Research</option>
+                                    <option value="extension">Extension</option>
+                                    <option value="employment">Employment</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Department</label>
+                                <select id="filterDepartment" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Departments</option>
+                                    <option value="beed">BEED</option>
+                                    <option value="bsed">BSED</option>
+                                    <option value="bsned">BSNED</option>
+                                    <option value="bcaed">BCAED</option>
+                                    <option value="bped">BPED</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Status</label>
+                                <select id="filterStatus" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                                    <option value="all">All Statuses</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending Review</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Date From</label>
+                                <input type="date" id="filterDateFrom" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Date To</label>
+                                <input type="date" id="filterDateTo" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Result 2 -->
-                <div class="bg-white rounded-xl p-4 stat-card search-result">
-                    <div class="flex flex-col md:flex-row justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">AACCUP</span>
-                                <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">Pending</span>
+                <!-- Results header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <span class="text-sm text-gray-600">Found <span id="resultCount">6</span> results</span>
+                    <select id="sortResults" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                        <option value="relevance">Sort by: Relevance</option>
+                        <option value="date_desc">Newest first</option>
+                        <option value="date_asc">Oldest first</option>
+                        <option value="title_asc">Title A-Z</option>
+                    </select>
+                </div>
+
+                <!-- Search results -->
+                <div id="searchResults" class="space-y-3">
+                    <!-- Result 1 -->
+                    <div class="bg-white rounded-xl p-4 stat-card search-result">
+                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span>
+                                    <span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Syllabus - Science Education</h3>
+                                <p class="text-xs text-gray-500 mt-1">by Dr. Santos · Updated 2026-04-20 · v3.2</p>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">Comprehensive syllabus for science education covering all learning competencies.</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">BSED</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Science</span>
+                                </div>
                             </div>
-                            <h3 class="font-medium text-gray-800">Curriculum Development Framework</h3>
-                            <p class="text-xs text-gray-500 mt-1">by Prof. Garcia · Updated 2026-02-20 · v1.0</p>
-                            <p class="text-sm text-gray-600 mt-2">Framework for curriculum development aligned with AACCUP requirements...</p>
-                            <div class="flex gap-2 mt-2">
-                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Area II</span>
-                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Area III</span>
+                            <div class="flex gap-2">
+                                <button class="view-result px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition">View</button>
                             </div>
                         </div>
-                        <div class="flex gap-2 mt-3 md:mt-0">
-                            <button class="text-teal-600 hover:text-teal-800 view-result">View</button>
+                    </div>
+
+                    <!-- Result 2 -->
+                    <div class="bg-white rounded-xl p-4 stat-card search-result">
+                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="badge-research px-2 py-1 rounded-full text-xs">Research</span>
+                                    <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Research Publication 2025</h3>
+                                <p class="text-xs text-gray-500 mt-1">by Dr. Reyes · Updated 2026-04-25 · v0.3</p>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">Research publication on innovative teaching strategies in secondary education.</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">BSED</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Research</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="view-result px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition">View</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result 3 -->
+                    <div class="bg-white rounded-xl p-4 stat-card search-result">
+                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span>
+                                    <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Community Extension Program</h3>
+                                <p class="text-xs text-gray-500 mt-1">by Prof. Mendoza · Updated 2026-04-22 · v1.1</p>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">Community outreach program documentation and impact assessment.</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">BPED</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Extension</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="view-result px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition">View</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result 4 -->
+                    <div class="bg-white rounded-xl p-4 stat-card search-result">
+                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span>
+                                    <span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Faculty Employment Contract</h3>
+                                <p class="text-xs text-gray-500 mt-1">by Dean Cruz · Updated 2026-04-10 · v2.1</p>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">Faculty employment contract and personnel documents.</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">BEED</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Employment</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="view-result px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition">View</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result 5 -->
+                    <div class="bg-white rounded-xl p-4 stat-card search-result">
+                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span>
+                                    <span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span>
+                                </div>
+                                <h3 class="font-medium text-gray-800">Inclusive Education Module</h3>
+                                <p class="text-xs text-gray-500 mt-1">by Prof. Garcia · Updated 2026-04-18 · v1.0</p>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">Learning module for inclusive education and special needs.</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">BSNED</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Module</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="view-result px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition">View</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Result 3 -->
-                <div class="bg-white rounded-xl p-4 stat-card search-result">
-                    <div class="flex flex-col md:flex-row justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">COE</span>
-                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Draft</span>
-                            </div>
-                            <h3 class="font-medium text-gray-800">Research Output Compilation 2025</h3>
-                            <p class="text-xs text-gray-500 mt-1">by Dr. Reyes · Updated 2026-02-25 · v0.3</p>
-                            <p class="text-sm text-gray-600 mt-2">Compilation of faculty research outputs for COE Indicator 2...</p>
-                            <div class="flex gap-2 mt-2">
-                                <span class="text-xs bg-gray-100 px-2 py-1 rounded">Indicator 2</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mt-3 md:mt-0">
-                            <button class="text-teal-600 hover:text-teal-800 view-result">View</button>
-                        </div>
+                <!-- Pagination -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                    <div class="text-sm text-gray-500">Showing 1 to 5 of 6 results</div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50">Previous</button>
+                        <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg">1</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            <div class="flex justify-between items-center mt-6">
-                <div class="text-sm text-gray-500">Showing 1 to 3 of 12 results</div>
-                <div class="flex gap-2">
-                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
-                    <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
-                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
-                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
-                    <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="js/user-session.js"></script>
-    <script src="js/user-search.js"></script>
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Toggle advanced filters
+        const toggleFilters = document.getElementById('toggleFilters');
+        const advancedFilters = document.getElementById('advancedFilters');
+        if (toggleFilters && advancedFilters) {
+            toggleFilters.addEventListener('click', () => {
+                advancedFilters.classList.toggle('hidden');
+                toggleFilters.querySelector('span').textContent = advancedFilters.classList.contains('hidden') ? '▼' : '▲';
+            });
+        }
+
+        // Search functionality
+        const searchBtn = document.getElementById('searchBtn');
+        const mainSearch = document.getElementById('mainSearch');
+        const filterCategory = document.getElementById('filterCategory');
+        const filterDepartment = document.getElementById('filterDepartment');
+        const filterStatus = document.getElementById('filterStatus');
+        const resultCount = document.getElementById('resultCount');
+        const searchResults = document.querySelectorAll('.search-result');
+
+        function performSearch() {
+            const searchTerm = mainSearch?.value.toLowerCase() || '';
+            const category = filterCategory?.value || 'all';
+            const department = filterDepartment?.value || 'all';
+            const status = filterStatus?.value || 'all';
+            
+            let visibleCount = 0;
+            searchResults.forEach(result => {
+                const text = result.textContent.toLowerCase();
+                const categoryBadge = result.querySelector('.badge-instruction, .badge-research, .badge-extension, .badge-employment')?.textContent.toLowerCase() || '';
+                const statusBadge = result.querySelector('.badge-approved, .badge-pending')?.textContent.toLowerCase() || '';
+                const deptSpan = result.querySelector('.bg-gray-100')?.textContent.toLowerCase() || '';
+                
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+                const matchesCategory = category === 'all' || categoryBadge.includes(category);
+                const matchesDepartment = department === 'all' || deptSpan.includes(department);
+                const matchesStatus = status === 'all' || statusBadge.includes(status);
+                
+                if (matchesSearch && matchesCategory && matchesDepartment && matchesStatus) {
+                    result.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    result.classList.add('hidden');
+                }
+            });
+            if (resultCount) resultCount.textContent = visibleCount;
+        }
+
+        if (searchBtn) searchBtn.addEventListener('click', performSearch);
+        if (mainSearch) mainSearch.addEventListener('input', () => setTimeout(performSearch, 300));
+        if (filterCategory) filterCategory.addEventListener('change', performSearch);
+        if (filterDepartment) filterDepartment.addEventListener('change', performSearch);
+        if (filterStatus) filterStatus.addEventListener('change', performSearch);
+
+        // View result buttons
+        document.querySelectorAll('.view-result').forEach(btn => {
+            btn.addEventListener('click', () => alert('Document viewer would open here'));
+        });
+
+        // Pagination
+        document.querySelectorAll('.flex.flex-wrap.gap-2 button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === 'Previous') alert('Previous page');
+                else if (this.textContent === 'Next') alert('Next page');
+                else if (this.textContent.match(/^\d+$/)) alert(`Page ${this.textContent}`);
+            });
+        });
+    </script>
 </body>
+<script src="js/user-session.js"></script>
+<script src="js/user-search.js"></script>
 </html>

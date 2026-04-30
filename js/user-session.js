@@ -1,9 +1,35 @@
 // Shared session UI for all user portal pages.
-document.addEventListener('DOMContentLoaded', function () {
+
+// Global function to initialize user pages with session data
+async function initializeUserPage() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     if (!token) {
+        console.warn('No token found, redirecting to landing page');
+        window.location.href = 'landing.html';
+        return null;
+    }
+
+    const normalizedRole = (user.role || '').toString().toLowerCase().trim();
+    
+    // Validate that the user has required fields
+    if (!normalizedRole) {
+        console.warn('No role found in user data, redirecting to landing page');
+        window.location.href = 'landing.html';
+        return null;
+    }
+
+    return { token, user, role: normalizedRole };
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Only redirect if token is completely missing - don't redirect if just user data is missing
+    if (!token || typeof token !== 'string' || token.trim() === '') {
+        console.warn('No valid token found');
         window.location.href = 'landing.html';
         return;
     }
@@ -11,12 +37,60 @@ document.addEventListener('DOMContentLoaded', function () {
     const el = (id) => document.getElementById(id);
     const resolvedUserId = resolveUserId(user, token);
     const normalizedRole = (user.role || '').toString().toLowerCase().trim();
+    const currentPage = window.location.pathname.split('/').pop().toLowerCase();
 
-    // Dean/Admin should use the admin-style pages/sidebar.
-    // Redirecting here temporarily hides old user sidebar for these roles.
-    if (normalizedRole === 'dean' || normalizedRole === 'admin') {
+    // Admin should always use admin-style pages/sidebar.
+    if (normalizedRole === 'admin') {
         window.location.href = 'homepage.html';
         return;
+    }
+
+    // Dean can access the shared profile page, but keeps admin-style pages elsewhere.
+    if (normalizedRole === 'dean' && currentPage !== 'user-profile.html') {
+        window.location.href = 'homepage.html';
+        return;
+    }
+
+    function syncDeanProfileSidebar() {
+        if (normalizedRole !== 'dean' || currentPage !== 'user-profile.html') return;
+        const nav = document.querySelector('aside nav');
+        if (!nav) return;
+
+        nav.innerHTML = `
+            <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+            </a>
+            <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📄</span> Documents
+            </a>
+            <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+            </a>
+            <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+            </a>
+            <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">🔍</span> Search
+            </a>
+            <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">✅</span> Approvals
+            </a>
+            <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📈</span> Reports
+            </a>
+            <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">👥</span> Users
+            </a>
+            <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+            </a>
+            <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+            </a>
+            <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                <span class="mr-3 text-teal-300">👤</span> Profile
+            </a>
+        `;
     }
 
     if (resolvedUserId) {
@@ -72,11 +146,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const portalLabels = {
             'faculty member': 'Faculty Portal',
-            'area chair/program head': 'Area Chair Portal'
+            'faculty': 'Faculty Portal',
+            'area chair/program head': 'Area Chair Portal',
+            'area-chair': 'Area Chair Portal'
         };
         const accessLabels = {
             'faculty member': 'Faculty Access',
-            'area chair/program head': 'Area Chair Access'
+            'faculty': 'Faculty Access',
+            'area chair/program head': 'Area Chair Access',
+            'area-chair': 'Area Chair Access'
         };
 
         if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${roleValue} Portal`;
@@ -89,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (el('welcomeUserText')) el('welcomeUserText').textContent = `Welcome back, ${first}`;
     }
 
+    syncDeanProfileSidebar();
     applyIdentity(user);
 
     // Re-apply after page-level scripts run to prevent blank sidebar identity.
@@ -105,16 +184,31 @@ document.addEventListener('DOMContentLoaded', function () {
             headers: { 'x-auth-token': token }
         })
             .then(async (response) => {
-                if (!response.ok) throw new Error('Failed to load profile');
+                // Only process successful responses
+                if (response.status === 401 || response.status === 403) {
+                    // Token invalid or unauthorized, clear session
+                    console.error('Token validation failed, clearing session');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'landing.html';
+                    return null;
+                }
+                if (!response.ok) {
+                    console.warn('Profile fetch failed with status:', response.status);
+                    throw new Error('Failed to load profile');
+                }
                 return response.json();
             })
             .then((profileData) => {
-                const mergedUser = { ...user, ...profileData };
-                localStorage.setItem('user', JSON.stringify(mergedUser));
-                applyIdentity(mergedUser);
+                if (profileData) {
+                    const mergedUser = { ...user, ...profileData };
+                    localStorage.setItem('user', JSON.stringify(mergedUser));
+                    applyIdentity(mergedUser);
+                }
             })
-            .catch(() => {
-                // Keep sidebar values from localStorage fallback when profile API is unavailable.
+            .catch((err) => {
+                // Keep sidebar values from localStorage fallback when profile API is unavailable
+                console.warn('Error fetching profile, using cached data:', err.message);
             });
     }
 

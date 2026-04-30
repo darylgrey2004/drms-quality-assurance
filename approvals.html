@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Approvals</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,471 +13,213 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- main grid: sidebar + content -->
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR (fixed width, navy) with clickable links to respective pages -->
-        <aside class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
-            <!-- logo / title area -->
+        <!-- SIDEBAR -->
+        <aside id="mainSidebar" class="w-72 bg-navy-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
+                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Quality Assurance Records</p>
             </div>
-
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
-                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
+                        <div class="text-sm font-medium text-white">Admin User</div>
+                        <div class="text-xs text-teal-300">Administrator</div>
                     </div>
                 </div>
             </div>
-
-            <!-- navigation menu as functional links to actual pages -->
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
-                <!-- Dashboard -->
-                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
-                </a>
-                <!-- Documents -->
-                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> Documents
-                </a>
-                <!-- Upload -->
-                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
-                </a>
-                <!-- Evidence Map -->
-                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
-                </a>
-                <!-- Search -->
-                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <!-- Approvals (active) -->
-                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">✅</span> Approvals
-                </a>
-                <!-- Reports -->
-                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
-                </a>
-                <!-- Users -->
-                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👥</span> Users
-                </a>
-                <!-- Audit Trail -->
-                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
-                </a>
-                <!-- Settings -->
-                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
-                </a>
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📊</span> Dashboard</a>
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📄</span> Documents</a>
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⬆️</span> Upload</a>
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map</a>
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🔍</span> Search</a>
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav"><span class="mr-3 text-teal-300">✅</span> Approvals</a>
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📈</span> Reports</a>
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">👥</span> Users</a>
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📋</span> Audit Trail</a>
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⚙️</span> Settings</a>
             </nav>
-
-            <!-- footer in sidebar -->
             <div class="border-t border-teal-900/40 p-4">
-                <button id="logoutBtn" class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors">
-                    🚪 Logout
-                </button>
-                <div class="text-xs text-teal-200/50 mt-3">
-                    <div id="adminAccessLabel" class="text-teal-300">Admin · Full Access</div>
-                    <div class="mt-1">© CTE · v.DRMS-QA</div>
+                <div class="text-xs text-teal-200/50">
+                    <div class="text-teal-300 mb-1">Admin · Full Access</div>
+                    <div>© CTE · v.DRMS-QA</div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT (approvals) -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-
-            <!-- header row -->
-            <div class="mb-6">
-                <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Approvals</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage document review and approval workflow · Upload → Validate → Approve → Lock</p>
-            </div>
-
-            <!-- approval stats cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
-                <!-- pending my review -->
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Pending My Review</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">12</div>
-                        </div>
-                        <span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span>
-                    </div>
-                    <div class="text-xs text-amber-600 mt-2">3 urgent · 2 overdue</div>
-                </div>
-                
-                <!-- awaiting validation -->
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Awaiting Validation</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">8</div>
-                        </div>
-                        <span class="bg-blue-100 text-blue-700 p-2 rounded-lg">🔍</span>
-                    </div>
-                    <div class="text-xs text-blue-600 mt-2">QA Coordinator</div>
-                </div>
-                
-                <!-- pending approval -->
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Pending Approval</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">15</div>
-                        </div>
-                        <span class="bg-purple-100 text-purple-700 p-2 rounded-lg">✅</span>
-                    </div>
-                    <div class="text-xs text-purple-600 mt-2">Dean / QA Head</div>
-                </div>
-                
-                <!-- approved this month -->
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-gray-500 text-sm">Approved (This Month)</span>
-                            <div class="text-3xl font-bold text-gray-800 mt-2">24</div>
-                        </div>
-                        <span class="bg-green-100 text-green-700 p-2 rounded-lg">📊</span>
-                    </div>
-                    <div class="text-xs text-green-600 mt-2">+8 from last month</div>
-                </div>
-            </div>
-
-            <!-- workflow status and filters -->
-            <div class="bg-white rounded-xl p-4 stat-card mb-6">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1">
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
-                            <input type="text" id="searchApprovals" placeholder="Search by document, author, or area..." 
-                                   class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="workflowStage" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Stages</option>
-                            <option value="upload">Upload</option>
-                            <option value="validate">Validate</option>
-                            <option value="approve">Approve</option>
-                            <option value="lock">Lock</option>
-                        </select>
-                        <select id="approvalStatus" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="all">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="review">Under Review</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="locked">Locked</option>
-                        </select>
-                        <button id="refreshApprovals" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors flex items-center">
-                            <span class="mr-2">🔄</span> Refresh
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- workflow tabs -->
-            <div class="mb-4 border-b border-gray-200">
-                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="workflowTabs">
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-teal-600 text-teal-700 rounded-t-lg active-tab" data-tab="all">All Items</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="pending">Pending Review</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="validating">Awaiting Validation</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="approving">Awaiting Approval</a>
-                    </li>
-                    <li class="mr-2">
-                        <a href="#" class="inline-block p-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 rounded-t-lg" data-tab="recent">Recently Approved</a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- approvals table -->
-            <div class="bg-white rounded-xl p-5 stat-card">
-                <!-- table header -->
-                <div class="grid grid-cols-12 text-xs font-medium text-gray-500 pb-2 border-b border-gray-100">
-                    <div class="col-span-4">DOCUMENT</div>
-                    <div class="col-span-2">CATEGORY</div>
-                    <div class="col-span-2">CURRENT STAGE</div>
-                    <div class="col-span-1">STATUS</div>
-                    <div class="col-span-1">VERSION</div>
-                    <div class="col-span-2">ACTIONS</div>
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            <div class="p-4 md:p-7">
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Approvals</h1>
+                    <p class="text-sm text-gray-500 mt-1">Manage document review and approval workflow · Upload → Validate → Approve → Lock</p>
                 </div>
 
-                <!-- approval items -->
-                <div id="approvalsList" class="divide-y divide-gray-100">
-                    <!-- Item 1: Curriculum Framework - Pending Review -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Curriculum Development Framework</div>
-                            <div class="text-xs text-gray-400">by Prof. Garcia · Submitted 2026-02-20</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2">
-                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Validation</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v1.0</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="curr-dev">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="curr-dev">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="curr-dev">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 2: Research Output - Pending Approval -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="approve" data-status="review">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Research Output Compilation 2025</div>
-                            <div class="text-xs text-gray-400">by Dr. Reyes · Submitted 2026-02-25</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">COE</div>
-                        <div class="col-span-2">
-                            <span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Approval</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Under Review</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v0.3</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="research-25">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="research-25">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="research-25">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 3: Faculty Profile - Pending Validation -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Faculty Profile Update 2026</div>
-                            <div class="text-xs text-gray-400">by Dr. Torres · Submitted 2026-02-23</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2">
-                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Validation</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v2.0</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="faculty-update">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="faculty-update">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="faculty-update">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 4: QMS Manual Update - Pending Approval -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="approve" data-status="review">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">QMS Manual Update - Clause 7 & 8</div>
-                            <div class="text-xs text-gray-400">by Dr. Santos · Submitted 2026-02-21</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
-                        <div class="col-span-2">
-                            <span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Approval</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Under Review</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v3.3</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="qms-update">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="qms-update">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="qms-update">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 5: Extension Report - Pending Validation -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending" data-urgent="true">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800 flex items-center">
-                                Extension Program Impact Assessment
-                                <span class="ml-2 bg-red-100 text-red-600 text-xs px-1.5 py-0.5 rounded-full">URGENT</span>
-                            </div>
-                            <div class="text-xs text-gray-400">by Prof. Mendoza · Submitted 2026-02-22</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">COE</div>
-                        <div class="col-span-2">
-                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Validation</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v1.1</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="extension-impact">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="extension-impact">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="extension-impact">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 6: Student Evaluation Forms - Recently Approved -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="lock" data-status="approved">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Student Teaching Evaluation Forms</div>
-                            <div class="text-xs text-gray-400">by Dr. Torres · Approved 2026-02-24</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">AACCUP</div>
-                        <div class="col-span-2">
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Locked</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v2.3</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="student-eval">👁️ View</button>
-                            <button class="hover:underline text-gray-400" disabled>✓</button>
-                        </div>
-                    </div>
-
-                    <!-- Item 7: Lab Safety Manual - Pending Validation -->
-                    <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-stage="validate" data-status="pending">
-                        <div class="col-span-4">
-                            <div class="font-medium text-gray-800">Laboratory Safety Manual</div>
-                            <div class="text-xs text-gray-400">by Prof. Lim · Submitted 2026-02-10</div>
-                        </div>
-                        <div class="col-span-2 text-gray-600">ISO 9001:2015</div>
-                        <div class="col-span-2">
-                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Validation</span>
-                        </div>
-                        <div class="col-span-1">
-                            <span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span>
-                        </div>
-                        <div class="col-span-1 text-gray-600">v0.5</div>
-                        <div class="col-span-2 text-teal-600 text-xs space-x-2">
-                            <button class="hover:underline view-approval" data-id="lab-safety">👁️ View</button>
-                            <button class="hover:underline validate-btn" data-id="lab-safety">✓ Validate</button>
-                            <button class="hover:underline text-red-600 reject-btn" data-id="lab-safety">✕</button>
-                        </div>
-                    </div>
+                <!-- stats cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending My Review</span><div id="statPendingReview" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span></div><div class="text-xs text-amber-600 mt-2">Needs action</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Awaiting Validation</span><div id="statAwaitingValidation" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-blue-100 text-blue-700 p-2 rounded-lg">🔍</span></div><div class="text-xs text-blue-600 mt-2">QA Coordinator</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending Approval</span><div id="statPendingApproval" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-purple-100 text-purple-700 p-2 rounded-lg">✅</span></div><div class="text-xs text-purple-600 mt-2">Dean / QA Head</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Approved (This Month)</span><div id="statApprovedMonth" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">📊</span></div><div class="text-xs text-green-600 mt-2">This month</div></div>
                 </div>
-            </div>
 
-            <!-- bulk actions and pagination -->
-            <div class="flex justify-between items-center mt-6">
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
-                    <label for="selectAll" class="text-sm text-gray-600">Select All</label>
-                    <select id="bulkAction" class="ml-4 px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white">
-                        <option value="">Bulk Actions</option>
-                        <option value="validate">Validate Selected</option>
-                        <option value="approve">Approve Selected</option>
-                        <option value="reject">Reject Selected</option>
-                        <option value="assign">Assign to Reviewer</option>
-                    </select>
-                    <button id="applyBulk" class="px-4 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-sm rounded-lg transition-colors">
-                        Apply
-                    </button>
-                </div>
-                <div class="flex gap-2">
-                    <span class="text-sm text-gray-500">Showing 1 to 7 of 23</span>
-                    <div class="flex gap-1">
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Previous</button>
-                        <button class="px-3 py-1 bg-teal-700 text-white rounded-lg">1</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- workflow timeline / recent activity -->
-            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <h3 class="font-semibold text-gray-800 text-lg mb-3">Workflow Timeline</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">✓</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">Dr. Santos</span> approved QMS Manual v3.2</p>
-                                <p class="text-xs text-gray-400">2 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">✓</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">QA Office</span> validated Curriculum Framework</p>
-                                <p class="text-xs text-gray-400">5 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 text-xs font-bold">!</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">Dean Cruz</span> requested changes on Faculty Profiles</p>
-                                <p class="text-xs text-gray-400">1 day ago</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">🔒</span>
-                            <div class="flex-1">
-                                <p class="text-sm"><span class="font-medium">System</span> locked approved documents for Q1</p>
-                                <p class="text-xs text-gray-400">2 days ago</p>
-                            </div>
+                <!-- filters -->
+                <div class="bg-white rounded-xl p-4 stat-card mb-6">
+                    <div class="flex flex-col lg:flex-row gap-4">
+                        <div class="flex-1"><div class="relative"><span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span><input type="text" id="searchApprovals" placeholder="Search by document, author, or department..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"></div></div>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="workflowStage" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm"><option value="all">All Stages</option><option value="upload">Upload</option><option value="validate">Validate</option><option value="approve">Approve</option><option value="lock">Lock</option></select>
+                            <select id="approvalStatus" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm"><option value="all">All Status</option><option value="pending">Pending</option><option value="review">Under Review</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="locked">Locked</option></select>
+                            <button id="refreshApprovals" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 transition">Refresh</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl p-5 stat-card">
-                    <h3 class="font-semibold text-gray-800 text-lg mb-3">Approval Guidelines</h3>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <p class="flex items-start gap-2">
-                            <span class="text-teal-600 font-bold">1.</span>
-                            <span><span class="font-medium">Upload → Validate:</span> QA Coordinator checks metadata and completeness</span>
-                        </p>
-                        <p class="flex items-start gap-2">
-                            <span class="text-teal-600 font-bold">2.</span>
-                            <span><span class="font-medium">Validate → Approve:</span> Dean/QA Head reviews content and compliance</span>
-                        </p>
-                        <p class="flex items-start gap-2">
-                            <span class="text-teal-600 font-bold">3.</span>
-                            <span><span class="font-medium">Approve → Lock:</span> Final version is locked and published</span>
-                        </p>
-                        <p class="flex items-start gap-2">
-                            <span class="text-teal-600 font-bold">4.</span>
-                            <span><span class="font-medium">Rejection:</span> Returns to uploader with comments</span>
-                        </p>
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <p class="text-xs text-gray-500">⏱️ SLA: Validation within 48h · Approval within 72h</p>
+                <!-- tabs -->
+                <div class="mb-4 border-b border-gray-200 overflow-x-auto">
+                    <ul class="flex gap-1 text-sm font-medium" id="workflowTabs">
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="all">All Items</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500" data-tab="pending">Pending Review</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500" data-tab="validating">Awaiting Validation</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500" data-tab="approving">Awaiting Approval</a></li>
+                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500" data-tab="recent">Recently Approved</a></li>
+                    </ul>
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block bg-white rounded-xl p-5 stat-card overflow-x-auto">
+                    <div class="min-w-[900px]">
+                        <div class="grid grid-cols-12 text-xs font-medium text-gray-500 pb-2 border-b border-gray-100">
+                            <div class="col-span-1"><input type="checkbox" id="headerCheckbox" class="rounded border-gray-300 text-teal-600"></div>
+                            <div class="col-span-3">DOCUMENT</div>
+                            <div class="col-span-2">CATEGORY</div>
+                            <div class="col-span-1">DEPARTMENT</div>
+                            <div class="col-span-2">STATUS</div>
+                            <div class="col-span-1">VERSION</div>
+                            <div class="col-span-2">ACTIONS</div>
+                        </div>
+                        <div id="approvalsList" class="divide-y divide-gray-100">
+                            <!-- Dynamic content loaded from backend -->
                         </div>
                     </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div id="mobileApprovalsList" class="block md:hidden space-y-4">
+                    <!-- Dynamic content loaded from backend -->
+                </div>
+
+                <!-- bulk actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                    <div class="flex flex-wrap items-center gap-3"><input type="checkbox" id="selectAll" class="rounded border-gray-300 text-teal-600"><label for="selectAll" class="text-sm text-gray-600">Select All</label><select id="bulkAction" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"><option value="">Bulk Actions</option><option value="validate">Validate Selected</option><option value="approve">Approve Selected</option><option value="reject">Reject Selected</option><option value="lock">Lock Selected</option><option value="unlock">Unlock Selected</option></select><button id="applyBulk" class="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg transition">Apply</button></div>
+                    <div class="flex flex-wrap items-center gap-2"><span id="paginationInfo" class="text-sm text-gray-500">Showing 0 to 0 of 0</span><div id="paginationButtons" class="flex gap-1"></div></div>
+                </div>
+
+                <!-- timeline -->
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-3">Workflow Timeline</h3><div class="space-y-3"><div class="flex items-start gap-3"><span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs">✓</span><div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved Syllabus v3.2</p><p class="text-xs text-gray-400">2 hours ago</p></div></div><div class="flex items-start gap-3"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs">✓</span><div><p class="text-sm"><span class="font-medium">QA Office</span> validated Research Publication</p><p class="text-xs text-gray-400">5 hours ago</p></div></div></div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-3">Approval Guidelines</h3><div class="space-y-2 text-sm text-gray-600"><p><span class="text-teal-600 font-bold">1.</span> Upload → Validate: QA Coordinator checks completeness</p><p><span class="text-teal-600 font-bold">2.</span> Validate → Approve: Dean reviews content</p><p><span class="text-teal-600 font-bold">3.</span> Approve → Lock: Final version published</p><p><span class="text-teal-600 font-bold">4.</span> Rejection: Returns to uploader with comments</p><div class="mt-3 pt-3 border-t"><p class="text-xs text-gray-500">⏱️ SLA: Validation 48h · Approval 72h</p></div></div></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Document preview modal -->
-    <div id="docPreviewModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
-        <div id="docPreviewBackdrop" class="absolute inset-0 bg-slate-900/60"></div>
-        <div class="relative bg-white w-[95vw] max-w-5xl h-[88vh] rounded-xl shadow-2xl overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h3 id="docPreviewTitle" class="text-sm font-semibold text-gray-800">Document Preview</h3>
-                <button id="docPreviewCloseBtn" type="button" class="text-gray-500 hover:text-gray-800 text-lg leading-none">✕</button>
+    <!-- REJECTION MODAL -->
+    <div id="rejectionModal" class="rejection-modal hidden">
+        <div class="rejection-modal-container">
+            <div class="rejection-modal-header">
+                <h2>Reject Document</h2>
+                <button id="closeRejectionModal" class="modal-close-btn">&times;</button>
             </div>
-            <iframe id="docPreviewFrame" class="w-full h-[calc(88vh-52px)]" title="Document Preview"></iframe>
+            <div class="rejection-modal-body">
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Document Title</div>
+                        <div class="info-value" id="modalDocTitle">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Date Uploaded</div>
+                        <div class="info-value" id="modalDocDate">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Category / Department</div>
+                        <div class="info-value" id="modalDocCategory">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Uploader</div>
+                        <div class="info-value" id="modalDocAuthor">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Reviewed By</div>
+                        <div class="info-value" id="modalReviewer">Admin User</div>
+                    </div>
+                </div>
+                <div class="comment-section">
+                    <label for="rejectionComment" class="comment-label">Reason for Rejection</label>
+                    <textarea id="rejectionComment" class="comment-textarea" rows="5" placeholder="Please provide detailed reason for rejecting this document..."></textarea>
+                </div>
+            </div>
+            <div class="rejection-modal-footer">
+                <button id="cancelRejection" class="btn-cancel">Cancel</button>
+                <button id="submitRejection" class="btn-submit">Submit Comment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT PREVIEW MODAL -->
+    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docPreviewTitle" class="text-lg font-semibold text-gray-800">Document Preview</h3>
+                <button id="docPreviewCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <iframe id="docPreviewFrame" class="w-full h-full border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOCK CONFIRMATION MODAL -->
+    <div id="lockModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-md">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Lock Document</h3>
+                <button id="lockModalCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-2">You are about to lock:</p>
+                    <p id="lockDocTitle" class="font-semibold text-gray-900 mb-4"></p>
+                    <p class="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+                        ⚠️ Warning: Locking this document will finalize it and prevent further modifications. This is the final stage of the approval workflow.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <label for="lockComment" class="block text-sm font-medium text-gray-700 mb-2">Comments (Optional)</label>
+                    <textarea id="lockComment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Add any final comments..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t bg-gray-50">
+                <button id="lockModalCancelBtn" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                <button id="lockModalConfirmBtn" class="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700">Lock Document</button>
+            </div>
         </div>
     </div>
 
     <!-- External JavaScript -->
-    <script src="js/admin-session.js"></script>
     <script src="js/approvals.js"></script>
 </body>
 </html>

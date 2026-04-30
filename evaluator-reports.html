@@ -2,20 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Reports (Evaluator)</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" referrerpolicy="no-referrer">
     <!-- External CSS -->
     <link rel="stylesheet" href="css/evaluator-reports.css">
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-evaluator-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -26,10 +32,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -71,269 +77,348 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Accreditation Reports</h1>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-1">Review QA readiness and compliance reports</p>
-                    </div>
-                </div>
-
-                <!-- Report Type Tabs -->
-                <div class="mb-4 border-b border-gray-200">
-                    <ul class="flex gap-4 text-sm font-medium" id="reportTabs">
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="compliance">Compliance Summary</a></li>
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="progress">Progress Reports</a></li>
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="gap">Gap Analysis</a></li>
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="history">Historical Data</a></li>
-                    </ul>
-                </div>
-
-                <!-- Compliance Summary Tab -->
-                <div id="complianceTab" class="tab-content block">
-                    <!-- Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 mb-2">ISO 9001:2015</h3>
-                            <div class="text-3xl font-bold text-teal-700 mb-2">92%</div>
-                            <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
-                                <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Header -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Accreditation Reports</h1>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
                             </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">166/180 documents</span>
-                                <span class="text-green-600">✅ Compliant</span>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 mb-2">AACCUP Level IV</h3>
-                            <div class="text-3xl font-bold text-amber-700 mb-2">78%</div>
-                            <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
-                                <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">328/420 documents</span>
-                                <span class="text-amber-600">⚠️ In Progress</span>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 mb-2">COE Candidate</h3>
-                            <div class="text-3xl font-bold text-indigo-700 mb-2">85%</div>
-                            <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
-                                <div class="bg-indigo-600 h-2 rounded-full" style="width:85%"></div>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">210/247 documents</span>
-                                <span class="text-green-600">✅ On Track</span>
-                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Review QA readiness and compliance reports for Instruction, Research, Extension, Employment</p>
                         </div>
                     </div>
 
-                    <!-- Detailed Report Cards -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- ISO Detailed -->
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-lg mb-4">ISO 9001:2015 Clause Status</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 4 - Context</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 5 - Leadership</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 6 - Planning</span>
-                                    <span class="text-sm font-medium text-amber-600">Partial (18/20)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 7 - Support</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 8 - Operation</span>
-                                    <span class="text-sm font-medium text-amber-600">Partial (28/35)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 9 - Evaluation</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Clause 10 - Improvement</span>
-                                    <span class="text-sm font-medium text-amber-600">Partial (14/18)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- AACCUP Detailed -->
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-lg mb-4">AACCUP Area Status</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Area I - VMGO</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Area II - Faculty</span>
-                                    <span class="text-sm font-medium text-amber-600">Partial (56/60)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Area III - Curriculum</span>
-                                    <span class="text-sm font-medium text-amber-600">Partial (48/55)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Area IV - Students</span>
-                                    <span class="text-sm font-medium text-red-600">Missing (35/48)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm">Area V - Research</span>
-                                    <span class="text-sm font-medium text-green-600">Complete</span>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Report Type Tabs -->
+                    <div class="mb-4 border-b border-gray-200 overflow-x-auto">
+                        <ul class="flex gap-2 text-sm font-medium" id="reportTabs">
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="compliance">Compliance Summary</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="progress">Progress Reports</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="gap">Gap Analysis</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="history">Historical Data</a></li>
+                        </ul>
                     </div>
-                </div>
 
-                <!-- Progress Reports Tab (hidden) -->
-                <div id="progressTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-lg mb-4">Monthly Progress Reports</h3>
-                        
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 February 2026 Progress Report\n\nOverall Completion: 85%\nNew Documents: +24\nApproved: 18\nPending: 4\nNeeds Revision: 2')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Feb 2026</span>
-                                        <h4 class="font-medium mt-2">Monthly Progress Report - February 2026</h4>
-                                    </div>
-                                    <span class="text-sm text-teal-600">View →</span>
+                    <!-- Compliance Summary Tab -->
+                    <div id="complianceTab" class="tab-content block">
+                        <!-- Summary Cards - Updated with new categories -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 mb-2">Instruction</h3>
+                                <div class="text-3xl font-bold text-blue-700 mb-2">77%</div>
+                                <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1">Overall completion: 85% · 24 new documents</p>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">245/320 documents</span>
+                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                </div>
                             </div>
                             
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 January 2026 Progress Report\n\nOverall Completion: 82%\nNew Documents: +18\nApproved: 15\nPending: 3')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Jan 2026</span>
-                                        <h4 class="font-medium mt-2">Monthly Progress Report - January 2026</h4>
-                                    </div>
-                                    <span class="text-sm text-teal-600">View →</span>
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 mb-2">Research</h3>
+                                <div class="text-3xl font-bold text-green-700 mb-2">78%</div>
+                                <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width:78%"></div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1">Overall completion: 82% · 18 new documents</p>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">312/400 documents</span>
+                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                </div>
                             </div>
                             
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 Q4 2025 Quarterly Report\n\nISO: 90% Complete\nAACCUP: 75% Complete\nCOE: 82% Complete\nKey Achievements: 45 documents approved')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Q4 2025</span>
-                                        <h4 class="font-medium mt-2">Quarterly Report - Q4 2025</h4>
-                                    </div>
-                                    <span class="text-sm text-teal-600">View →</span>
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 mb-2">Extension</h3>
+                                <div class="text-3xl font-bold text-amber-700 mb-2">74%</div>
+                                <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
+                                    <div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1">Quarterly summary of all QA activities</p>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">156/210 documents</span>
+                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 mb-2">Employment</h3>
+                                <div class="text-3xl font-bold text-purple-700 mb-2">74%</div>
+                                <div class="w-full bg-gray-200 h-2 rounded-full mb-3">
+                                    <div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">134/180 documents</span>
+                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Report Cards - Updated with new categories -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Instruction Detailed -->
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 text-lg mb-4">Instruction Department Status</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BEED</span>
+                                        <span class="text-sm font-medium text-green-600">Complete (42/45)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BSED</span>
+                                        <span class="text-sm font-medium text-green-600">Complete (58/65)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BSNED</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (28/40)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BCAED</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (25/35)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BPED</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (22/30)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Research Detailed -->
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 text-lg mb-4">Research Department Status</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BEED</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (35/40)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BSED</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (48/55)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BSNED</span>
+                                        <span class="text-sm font-medium text-red-600">Missing (25/35)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BCAED</span>
+                                        <span class="text-sm font-medium text-red-600">Missing (20/30)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">BPED</span>
+                                        <span class="text-sm font-medium text-red-600">Missing (22/35)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                            <!-- Extension Detailed -->
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 text-lg mb-4">Extension Department Status</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">All Departments</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (156/210)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">Community Engagement</span>
+                                        <span class="text-sm font-medium text-amber-600">In Progress</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">Outreach Programs</span>
+                                        <span class="text-sm font-medium text-amber-600">In Progress</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Employment Detailed -->
+                            <div class="bg-white rounded-xl p-5 stat-card">
+                                <h3 class="font-semibold text-gray-800 text-lg mb-4">Employment Department Status</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">All Departments</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial (134/180)</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">Employment Contracts</span>
+                                        <span class="text-sm font-medium text-green-600">Complete</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm">Personnel Records</span>
+                                        <span class="text-sm font-medium text-amber-600">Partial</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Gap Analysis Tab (hidden) -->
-                <div id="gapTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-lg mb-4">Gap Analysis by Standard</h3>
-                        
-                        <div class="space-y-6">
-                            <!-- ISO Gaps -->
-                            <div>
-                                <h4 class="font-medium mb-2">ISO 9001:2015 Gaps</h4>
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-red-600">⚠️</span>
+                    <!-- Progress Reports Tab (hidden) -->
+                    <div id="progressTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-lg mb-4">Monthly Progress Reports</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 April 2026 Progress Report\n\nInstruction: 77%\nResearch: 78%\nExtension: 74%\nEmployment: 74%\nNew Documents: +28\nApproved: 22\nPending: 6')">
+                                    <div class="flex justify-between items-center">
                                         <div>
-                                            <span class="font-medium text-sm">Clause 6 - Planning</span>
-                                            <p class="text-xs text-gray-600">Missing 2 documents: Risk Assessment Update, Quality Objectives Review</p>
+                                            <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Apr 2026</span>
+                                            <h4 class="font-medium mt-2">Monthly Progress Report - April 2026</h4>
+                                        </div>
+                                        <span class="text-sm text-teal-600">View →</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Overall completion: 76% · 28 new documents</p>
+                                </div>
+                                
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 March 2026 Progress Report\n\nInstruction: 75%\nResearch: 76%\nExtension: 72%\nEmployment: 72%\nNew Documents: +22\nApproved: 18\nPending: 4')">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Mar 2026</span>
+                                            <h4 class="font-medium mt-2">Monthly Progress Report - March 2026</h4>
+                                        </div>
+                                        <span class="text-sm text-teal-600">View →</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Overall completion: 74% · 22 new documents</p>
+                                </div>
+                                
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 Q1 2026 Quarterly Report\n\nInstruction: 73%\nResearch: 74%\nExtension: 70%\nEmployment: 70%\nKey Achievements: 15 faculty research publications')">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Q1 2026</span>
+                                            <h4 class="font-medium mt-2">Quarterly Report - Q1 2026</h4>
+                                        </div>
+                                        <span class="text-sm text-teal-600">View →</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Quarterly summary of all QA activities</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gap Analysis Tab (hidden) -->
+                    <div id="gapTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-lg mb-4">Gap Analysis by Category</h3>
+                            
+                            <div class="space-y-6">
+                                <!-- Instruction Gaps -->
+                                <div>
+                                    <h4 class="font-medium mb-2 text-blue-700">Instruction Gaps</h4>
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                                        <div class="flex items-start gap-2">
+                                            <span class="text-red-600">⚠️</span>
+                                            <div>
+                                                <span class="font-medium text-sm">BSNED - Special Needs Materials</span>
+                                                <p class="text-xs text-gray-600">Missing 12 documents: Inclusive Education Resources, Adaptive Learning Materials</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                        <div class="flex items-start gap-2">
+                                            <span class="text-red-600">⚠️</span>
+                                            <div>
+                                                <span class="font-medium text-sm">BCAED - Arts Curriculum</span>
+                                                <p class="text-xs text-gray-600">Missing 10 documents: Creative Arts Modules, Culture Studies</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-red-600">⚠️</span>
-                                        <div>
-                                            <span class="font-medium text-sm">Clause 8 - Operation</span>
-                                            <p class="text-xs text-gray-600">Missing 7 documents: Design Validation Records, Process Approval Forms</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- AACCUP Gaps -->
-                            <div>
-                                <h4 class="font-medium mb-2">AACCUP Area Gaps</h4>
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-red-600">⚠️</span>
-                                        <div>
-                                            <span class="font-medium text-sm">Area II - Faculty</span>
-                                            <p class="text-xs text-gray-600">Missing 4 documents: Faculty Development Records, Performance Evaluations</p>
+                                <!-- Research Gaps -->
+                                <div>
+                                    <h4 class="font-medium mb-2 text-green-700">Research Gaps</h4>
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                                        <div class="flex items-start gap-2">
+                                            <span class="text-red-600">⚠️</span>
+                                            <div>
+                                                <span class="font-medium text-sm">BSNED Research Outputs</span>
+                                                <p class="text-xs text-gray-600">Missing 10 documents: Special Education Research Papers</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-red-600">⚠️</span>
-                                        <div>
-                                            <span class="font-medium text-sm">Area IV - Students</span>
-                                            <p class="text-xs text-gray-600">Missing 13 documents: Student Satisfaction Surveys, Graduate Tracer Studies</p>
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                        <div class="flex items-start gap-2">
+                                            <span class="text-red-600">⚠️</span>
+                                            <div>
+                                                <span class="font-medium text-sm">BPED Research Publications</span>
+                                                <p class="text-xs text-gray-600">Missing 13 documents: Sports Science Studies, Physical Education Research</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Historical Data Tab (hidden) -->
-                <div id="historyTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-lg mb-4">Historical Performance</h3>
-                        
-                        <div class="space-y-4">
-                            <div class="border-l-4 border-teal-500 pl-4 py-2">
-                                <div class="text-sm text-gray-500">2026</div>
-                                <div class="text-lg font-semibold">92% ISO Compliance</div>
-                                <div class="text-xs text-gray-500">↑ +5% from 2025</div>
-                            </div>
+                    <!-- Historical Data Tab (hidden) -->
+                    <div id="historyTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-lg mb-4">Historical Performance</h3>
                             
-                            <div class="border-l-4 border-amber-500 pl-4 py-2">
-                                <div class="text-sm text-gray-500">2025</div>
-                                <div class="text-lg font-semibold">87% ISO Compliance</div>
-                                <div class="text-xs text-gray-500">↑ +8% from 2024</div>
-                            </div>
-                            
-                            <div class="border-l-4 border-indigo-500 pl-4 py-2">
-                                <div class="text-sm text-gray-500">2024</div>
-                                <div class="text-lg font-semibold">79% ISO Compliance</div>
-                                <div class="text-xs text-gray-500">Initial accreditation year</div>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-teal-500 pl-4 py-2">
+                                    <div class="text-sm text-gray-500">2026</div>
+                                    <div class="text-lg font-semibold">76% Overall Compliance</div>
+                                    <div class="text-xs text-gray-500">↑ +4% from 2025</div>
+                                </div>
+                                
+                                <div class="border-l-4 border-amber-500 pl-4 py-2">
+                                    <div class="text-sm text-gray-500">2025</div>
+                                    <div class="text-lg font-semibold">72% Overall Compliance</div>
+                                    <div class="text-xs text-gray-500">↑ +6% from 2024</div>
+                                </div>
+                                
+                                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                                    <div class="text-sm text-gray-500">2024</div>
+                                    <div class="text-lg font-semibold">66% Overall Compliance</div>
+                                    <div class="text-xs text-gray-500">Initial implementation year</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- View-only notice -->
-                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center">
-                    <span class="text-lg mr-2">👁️</span>
-                    All reports are view-only. Click on any report section to expand and review details.
+                    <!-- View-only notice -->
+                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
+                        <span class="text-lg mr-2">👁️</span>
+                        All reports are view-only. Click on any report section to expand and review details.
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/evaluator-session.js"></script>
     <script src="js/evaluator-reports.js"></script>
+    
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Tab switching
+        document.querySelectorAll('#reportTabs a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('#reportTabs a').forEach(l => {
+                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                    l.classList.add('border-transparent', 'text-gray-500');
+                });
+                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(tabId + 'Tab').classList.remove('hidden');
+            });
+        });
+    </script>
 </body>
 </html>

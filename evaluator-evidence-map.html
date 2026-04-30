@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Evidence Map (Evaluator)</title>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,15 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-evaluator-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
+        ☰
+    </button>
+    <div class="sidebar-overlay"></div>
+
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
+        <aside id="mainSidebar" class="w-72 bg-evaluator-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
@@ -26,10 +32,10 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
+                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -71,193 +77,281 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto bg-dashboard-bg p-7">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h1 class="text-3xl font-semibold text-gray-800 tracking-tight">Evidence Map</h1>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+        <main class="flex-1 overflow-y-auto bg-dashboard-bg">
+            <div class="mobile-header-spacer md:hidden"></div>
+            
+            <div class="p-4 md:p-7">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Header -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Evidence Map</h1>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Review document mapping to Instruction, Research, Extension, and Employment categories</p>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Review document mapping to ISO, AACCUP, and COE standards</p>
                     </div>
-                </div>
 
-                <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800">ISO 9001:2015</h3>
-                            <span class="bg-teal-100 text-teal-800 text-xs px-2.5 py-0.5 rounded-full">10 clauses</span>
+                    <!-- Summary Cards - Updated with new categories -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-800">Instruction</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">245 docs</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-500">Documents mapped:</span>
+                                <span class="font-medium">245/320</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div>
+                            </div>
+                            <div class="mt-2 text-xs text-blue-700">77% complete</div>
                         </div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">312/340</span>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-800">Research</h3>
+                                <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">312 docs</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-500">Documents mapped:</span>
+                                <span class="font-medium">312/400</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="bg-green-600 h-2 rounded-full" style="width:78%"></div>
+                            </div>
+                            <div class="mt-2 text-xs text-green-700">78% complete</div>
                         </div>
-                        <div class="w-full bg-gray-200 h-2 rounded-full">
-                            <div class="bg-teal-600 h-2 rounded-full" style="width:92%"></div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-800">Extension</h3>
+                                <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full">156 docs</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-500">Documents mapped:</span>
+                                <span class="font-medium">156/210</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div>
+                            </div>
+                            <div class="mt-2 text-xs text-amber-700">74% complete</div>
                         </div>
-                        <div class="mt-2 text-xs text-teal-700">92% complete</div>
+                        
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-800">Employment</h3>
+                                <span class="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full">134 docs</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-500">Documents mapped:</span>
+                                <span class="font-medium">134/180</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div>
+                            </div>
+                            <div class="mt-2 text-xs text-purple-700">74% complete</div>
+                        </div>
                     </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800">AACCUP Areas I-X</h3>
-                            <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full">10 areas</span>
-                        </div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">328/420</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-2 rounded-full">
-                            <div class="bg-amber-600 h-2 rounded-full" style="width:78%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-amber-700">78% complete</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800">COE Indicators</h3>
-                            <span class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full">7 indicators</span>
-                        </div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">210/247</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-2 rounded-full">
-                            <div class="bg-indigo-600 h-2 rounded-full" style="width:85%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-indigo-700">85% complete</div>
-                    </div>
-                </div>
 
-                <!-- Tabs -->
-                <div class="mb-4 border-b border-gray-200">
-                    <ul class="flex gap-4 text-sm font-medium" id="mapTabs">
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="iso">ISO 9001:2015</a></li>
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="aaccup">AACCUP Areas</a></li>
-                        <li><a href="#" class="inline-block p-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="coe">COE Indicators</a></li>
-                    </ul>
-                </div>
+                    <!-- Tabs - Updated with new categories -->
+                    <div class="mb-4 border-b border-gray-200 overflow-x-auto">
+                        <ul class="flex gap-2 text-sm font-medium" id="mapTabs">
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="instruction">Instruction</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="research">Research</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="extension">Extension</a></li>
+                            <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="employment">Employment</a></li>
+                        </ul>
+                    </div>
 
-                <!-- ISO Tab -->
-                <div id="isoTab" class="tab-content block">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="space-y-3">
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Clause 4 Documents\n\nViewing all documents mapped to Clause 4: Context of the Organization\n\n- Quality Manual\n- Context Analysis Report\n- Stakeholder Requirements')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 4</span>
-                                        <h4 class="font-medium mt-2">Context of the Organization</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">12/12 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Clause 5 Documents\n\nViewing all documents mapped to Clause 5: Leadership\n\n- Quality Policy\n- Organizational Roles\n- Responsibility Matrix')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 5</span>
-                                        <h4 class="font-medium mt-2">Leadership</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">15/15 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
+                    <!-- Instruction Tab -->
+                    <div id="instructionTab" class="tab-content block">
+                        <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Instruction Department Mapping</h3>
+                            <div class="space-y-3">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BEED Documents\n\nInstruction documents for BEED:\n- Elementary Syllabus\n- Learning Modules\n- Assessment Tools\n- Lesson Plans')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BEED</span>
+                                            <h4 class="font-medium mt-2">Bachelor of Elementary Education</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">42/45 docs</span>
+                                            <div class="text-xs text-green-600">Complete</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Clause 6 Documents\n\nViewing all documents mapped to Clause 6: Planning\n\n- Risk Assessment\n- Quality Objectives\n- Action Plans')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Clause 6</span>
-                                        <h4 class="font-medium mt-2">Planning</h4>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSED Documents\n\nInstruction documents for BSED:\n- Secondary Syllabus - English\n- Secondary Syllabus - Math\n- Secondary Syllabus - Science')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSED</span>
+                                            <h4 class="font-medium mt-2">Bachelor of Secondary Education</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">58/65 docs</span>
+                                            <div class="text-xs text-green-600">Complete</div>
+                                        </div>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">18/20 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSNED Documents\n\nInstruction documents for BSNED:\n- Inclusive Education Module\n- Special Needs Assessment\n- Individualized Education Plans')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSNED</span>
+                                            <h4 class="font-medium mt-2">Bachelor of Special Needs Education</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">28/40 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BCAED Documents\n\nInstruction documents for BCAED:\n- Arts and Culture Curriculum\n- Creative Arts Module\n- Cultural Heritage Studies')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BCAED</span>
+                                            <h4 class="font-medium mt-2">Bachelor of Culture and Arts Education</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">25/35 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BPED Documents\n\nInstruction documents for BPED:\n- Physical Education Curriculum\n- Sports Science Module\n- Fitness Assessment Tools')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BPED</span>
+                                            <h4 class="font-medium mt-2">Bachelor of Physical Education</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">22/30 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- AACCUP Tab (hidden) -->
-                <div id="aaccupTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="space-y-3">
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Area I Documents\n\nVMGO Documents:\n- Vision Statement\n- Mission Statement\n- Goals and Objectives')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Area I</span>
-                                        <h4 class="font-medium mt-2">Vision, Mission, Goals</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">42/42 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
+                    <!-- Research Tab (hidden) -->
+                    <div id="researchTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Research Department Mapping</h3>
+                            <div class="space-y-3">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BEED Research\n\nResearch documents for BEED:\n- Elementary Education Research Papers\n- Action Research Projects\n- Educational Studies')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BEED</span>
+                                            <h4 class="font-medium mt-2">Elementary Education Research</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">35/40 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Area II Documents\n\nFaculty Documents:\n- Faculty Profiles\n- Qualifications\n- Development Plans')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">Area II</span>
-                                        <h4 class="font-medium mt-2">Faculty</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">56/60 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSED Research\n\nResearch documents for BSED:\n- Secondary Education Studies\n- Curriculum Research\n- Teaching Methodologies')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BSED</span>
+                                            <h4 class="font-medium mt-2">Secondary Education Research</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">48/55 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- COE Tab (hidden) -->
-                <div id="coeTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="space-y-3">
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Indicator 1 Documents\n\nTeaching Quality:\n- Evaluation Forms\n- Teaching Portfolio\n- Student Feedback')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Indicator 1</span>
-                                        <h4 class="font-medium mt-2">Quality of Teaching</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">38/40 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 Indicator 2 Documents\n\nResearch Output:\n- Publications\n- Research Papers\n- Citations')">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Indicator 2</span>
-                                        <h4 class="font-medium mt-2">Research Output</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">42/45 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
+                    <!-- Extension Tab (hidden) -->
+                    <div id="extensionTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Extension Department Mapping</h3>
+                            <div class="space-y-3">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BPED Extension\n\nExtension documents for BPED:\n- Sports Outreach Programs\n- Community Sports Events\n- Youth Development Programs')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">BPED</span>
+                                            <h4 class="font-medium mt-2">Physical Education Extension</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">18/25 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- View-only notice -->
-                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center">
-                    <span class="text-lg mr-2">👁️</span>
-                    Click on any area to view the documents mapped to that standard. All views are read-only.
+                    <!-- Employment Tab (hidden) -->
+                    <div id="employmentTab" class="tab-content hidden">
+                        <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Employment Department Mapping</h3>
+                            <div class="space-y-3">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 All Departments\n\nEmployment documents across all departments:\n- Faculty Contracts\n- Personnel Records\n- Employment Benefits\n- Performance Reviews')">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div>
+                                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">All Depts</span>
+                                            <h4 class="font-medium mt-2">Employment Related Documents</h4>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium">134/180 docs</span>
+                                            <div class="text-xs text-amber-600">Partial</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- View-only notice -->
+                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
+                        <span class="text-lg">👁️</span>
+                        Click on any category/department to view the documents mapped to that standard. All views are read-only.
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/evaluator-session.js"></script>
     <script src="js/evaluator-evidence-map.js"></script>
+    
+    <script>
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Tab switching
+        document.querySelectorAll('#mapTabs a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('#mapTabs a').forEach(l => {
+                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                    l.classList.add('border-transparent', 'text-gray-500');
+                });
+                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(tabId + 'Tab').classList.remove('hidden');
+            });
+        });
+    </script>
 </body>
 </html>
