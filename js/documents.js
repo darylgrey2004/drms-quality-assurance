@@ -32,7 +32,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup event listeners
     setupEventListeners();
+    
+    // Setup preview modal
+    setupPreviewModal();
 });
+
+function setupPreviewModal() {
+    const docPreviewModal = document.getElementById('docPreviewModal');
+    const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
+    const docPreviewFrame = document.getElementById('docPreviewFrame');
+    
+    if (docPreviewCloseBtn) {
+        docPreviewCloseBtn.addEventListener('click', closePreviewModal);
+    }
+    
+    if (docPreviewModal) {
+        docPreviewModal.addEventListener('click', (e) => {
+            if (e.target === docPreviewModal) closePreviewModal();
+        });
+    }
+}
+
+function openPreviewModal(url, title) {
+    const docPreviewModal = document.getElementById('docPreviewModal');
+    const docPreviewFrame = document.getElementById('docPreviewFrame');
+    const docPreviewTitle = document.getElementById('docPreviewTitle');
+    
+    if (!docPreviewModal || !docPreviewFrame) {
+        window.open(url, '_blank');
+        return;
+    }
+    
+    if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
+    docPreviewFrame.src = url;
+    docPreviewModal.classList.remove('hidden');
+    docPreviewModal.classList.add('flex');
+}
+
+function closePreviewModal() {
+    const docPreviewModal = document.getElementById('docPreviewModal');
+    const docPreviewFrame = document.getElementById('docPreviewFrame');
+    
+    if (!docPreviewModal) return;
+    
+    docPreviewModal.classList.add('hidden');
+    docPreviewModal.classList.remove('flex');
+    if (docPreviewFrame) docPreviewFrame.src = 'about:blank';
+}
 
 function updateUserInfo(user) {
     const userInitials = document.querySelector('.w-10.h-10.bg-teal-600');
@@ -180,9 +226,11 @@ function createTableRow(doc) {
             <td class="py-3 px-4">
                 <div class="flex flex-wrap gap-2">
                     <button class="btn-view" data-id="${doc.id}">View</button>
+                    ${doc.workflow_status === 'rejected' ? `<button class="btn-comments" data-id="${doc.id}">Comments</button>` : ''}
+                    ${doc.workflow_status === 'rejected' ? `<button class="btn-delete" data-id="${doc.id}">Delete</button>` : ''}
                     <button class="btn-download" data-id="${doc.id}">Download</button>
                     <button class="btn-edit" data-id="${doc.id}">Edit</button>
-                    <button class="btn-delete" data-id="${doc.id}">Delete</button>
+                    ${doc.workflow_status !== 'rejected' ? `<button class="btn-delete" data-id="${doc.id}">Delete</button>` : ''}
                 </div>
             </td>
         </tr>
@@ -210,9 +258,11 @@ function createMobileCard(doc) {
             <div class="text-sm text-gray-600 mb-3">Version: ${escapeHtml(doc.version || 'v1.0')}</div>
             <div class="flex flex-wrap gap-2">
                 <button class="btn-view-sm" data-id="${doc.id}">View</button>
+                ${doc.workflow_status === 'rejected' ? `<button class="btn-comments-sm" data-id="${doc.id}">Comments</button>` : ''}
+                ${doc.workflow_status === 'rejected' ? `<button class="btn-delete-sm" data-id="${doc.id}">Delete</button>` : ''}
                 <button class="btn-download-sm" data-id="${doc.id}">Download</button>
                 <button class="btn-edit-sm" data-id="${doc.id}">Edit</button>
-                <button class="btn-delete-sm" data-id="${doc.id}">Delete</button>
+                ${doc.workflow_status !== 'rejected' ? `<button class="btn-delete-sm" data-id="${doc.id}">Delete</button>` : ''}
             </div>
         </div>
     `;
@@ -268,6 +318,11 @@ function attachRowEventListeners() {
         btn.addEventListener('click', handleView);
     });
 
+    // Comments buttons
+    document.querySelectorAll('.btn-comments, .btn-comments-sm').forEach(btn => {
+        btn.addEventListener('click', handleComments);
+    });
+
     // Download buttons
     document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => {
         btn.addEventListener('click', handleDownload);
@@ -292,10 +347,89 @@ async function handleView(e) {
 
     if (doc.file_url) {
         const fileUrl = `${API_BASE}${doc.file_url}`;
-        window.open(fileUrl, '_blank');
+        openPreviewModal(fileUrl, doc.title);
     } else {
         alert('No file available for this document');
     }
+}
+
+async function handleComments(e) {
+    const docId = e.target.dataset.id;
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch comments');
+        }
+        
+        const data = await response.json();
+        const doc = allDocuments.find(d => d.id == docId);
+        
+        openCommentsModal(doc, data.comments || []);
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        alert('Failed to load comments');
+    }
+}
+
+function openCommentsModal(doc, comments) {
+    const commentsModal = document.getElementById('commentsModal');
+    const commentsDocTitle = document.getElementById('commentsDocTitle');
+    const commentsDocDate = document.getElementById('commentsDocDate');
+    const commentsListContainer = document.getElementById('commentsListContainer');
+    
+    if (!commentsModal) return;
+    
+    if (commentsDocTitle) commentsDocTitle.textContent = doc?.title || 'Unknown';
+    if (commentsDocDate) commentsDocDate.textContent = doc?.created_at ? new Date(doc.created_at).toLocaleDateString() : 'N/A';
+    
+    if (commentsListContainer) {
+        if (comments.length === 0) {
+            commentsListContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No comments found</div>';
+        } else {
+            commentsListContainer.innerHTML = comments.map(c => {
+                const date = new Date(c.created_at).toLocaleString();
+                const reviewer = c.reviewer_name || 'Reviewer';
+                const text = c.reason || c.comments || 'No comment provided';
+                return `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-reviewer">${reviewer}</span>
+                            <span class="comment-date">${date}</span>
+                        </div>
+                        <div class="comment-text">${text}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    commentsModal.classList.remove('hidden');
+    setTimeout(() => commentsModal.classList.add('active'), 10);
+}
+
+function closeCommentsModal() {
+    const commentsModal = document.getElementById('commentsModal');
+    if (!commentsModal) return;
+    commentsModal.classList.remove('active');
+    setTimeout(() => commentsModal.classList.add('hidden'), 300);
+}
+
+// Setup comments modal event listeners
+const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
+const closeCommentsBtn = document.getElementById('closeCommentsBtn');
+if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
+if (closeCommentsBtn) closeCommentsBtn.addEventListener('click', closeCommentsModal);
+
+const commentsModal = document.getElementById('commentsModal');
+if (commentsModal) {
+    commentsModal.addEventListener('click', e => {
+        if (e.target === commentsModal) closeCommentsModal();
+    });
 }
 
 async function handleDownload(e) {

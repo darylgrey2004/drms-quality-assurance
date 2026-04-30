@@ -32,7 +32,8 @@ function auth(req, res, next) {
 
 function adminAuth(req, res, next) {
     auth(req, res, () => {
-        if (req.user.role !== 'admin') {
+        const userRole = (req.user?.role || '').toString().toLowerCase().trim();
+        if (userRole !== 'admin') {
             return res.status(403).json({ msg: 'Access denied. Admin privileges required.' });
         }
         next();

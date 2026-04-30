@@ -211,10 +211,14 @@ router.get('/', auth, async (req, res) => {
       
       if (areaChairProfile.length > 0 && areaChairProfile[0].department) {
         const deptName = areaChairProfile[0].department;
-        // Get department_id from departments table
+        // Get department_id from departments table - try multiple matching strategies
         const [deptInfo] = await db.query(
-          'SELECT id FROM departments WHERE name = ?',
-          [deptName]
+          `SELECT id FROM departments 
+           WHERE name = ? OR code = ? OR 
+           name LIKE CONCAT('%', ?, '%') OR 
+           ? LIKE CONCAT('%', code, '%')
+           LIMIT 1`,
+          [deptName, deptName.toUpperCase(), deptName, deptName]
         );
         
         if (deptInfo.length > 0) {
@@ -222,9 +226,9 @@ router.get('/', auth, async (req, res) => {
           where.push('(d.uploader_id = ? OR d.department_id = ?)');
           params.push(req.user.id, deptInfo[0].id);
         } else {
-          // If department not found, only show their own documents
-          where.push('d.uploader_id = ?');
-          params.push(req.user.id);
+          // If department not found by ID, try matching by department_code or area field
+          where.push('(d.uploader_id = ? OR d.department_code = ? OR d.area = ?)');
+          params.push(req.user.id, deptName.toUpperCase(), deptName);
         }
       } else {
         // If no department profile, only show their own documents
@@ -503,6 +507,50 @@ router.put('/:id/status', auth, async (req, res) => {
     res.json({ msg: 'Document status updated successfully', status });
   } catch (err) {
     console.error('Status update error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/:id/comments
+// @desc    Get rejection comments for a document
+// @access  Private
+router.get('/:id/comments', auth, async (req, res) => {
+  try {
+    const docId = Number(req.params.id);
+    
+    // Get document to check ownership
+    const [docs] = await db.query('SELECT uploader_id FROM documents WHERE id = ?', [docId]);
+    if (docs.length === 0) {
+      return res.status(404).json({ msg: 'Document not found' });
+    }
+    
+    const normalizedRole = normalizeRole(req.user.role);
+    const viewAll = canViewAll(req.user.role);
+    
+    // Check if user can view this document's comments
+    if (!viewAll && docs[0].uploader_id !== req.user.id) {
+      return res.status(403).json({ msg: 'Not authorized to view comments' });
+    }
+    
+    // Get rejection comments from approval_workflow table
+    const [comments] = await db.query(
+      `SELECT 
+        aw.comments as reason,
+        aw.created_at,
+        aw.completed_at,
+        u.firstName,
+        u.lastName,
+        CONCAT(u.firstName, ' ', u.lastName) as reviewer_name
+       FROM approval_workflow aw
+       LEFT JOIN users u ON aw.action_by = u.id
+       WHERE aw.document_id = ? AND aw.status = 'completed' AND aw.comments IS NOT NULL
+       ORDER BY aw.created_at DESC`,
+      [docId]
+    );
+    
+    res.json({ comments });
+  } catch (err) {
+    console.error('Get comments error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

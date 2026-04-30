@@ -222,12 +222,30 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     async function loadDocuments() {
         try {
-            const res = await fetch(`${API_BASE}/api/approvals/pending`, { headers: { 'x-auth-token': token } });
-            if (!res.ok) throw new Error('Failed to load documents');
+            console.log('Loading approval documents...');
+            console.log('API URL:', `${API_BASE}/api/approvals/pending`);
+            console.log('Token:', token ? 'Present' : 'Missing');
+            console.log('User role:', normalizedRole);
+            
+            const res = await fetch(`${API_BASE}/api/approvals/pending`, { 
+                headers: { 'x-auth-token': token } 
+            });
+            
+            console.log('Response status:', res.status);
+            
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ msg: 'Unknown error' }));
+                throw new Error(errorData.msg || `HTTP ${res.status}: ${res.statusText}`);
+            }
+            
             allDocuments = await res.json();
+            console.log('Approval documents loaded:', allDocuments);
+            console.log('Number of documents:', allDocuments.length);
             applyFilters();
         } catch (err) {
-            const msg = '<div class="col-span-12 py-8 text-center text-red-500">Failed to load documents</div>';
+            console.error('Load documents error:', err);
+            showToast('Failed to load documents: ' + err.message, true);
+            const msg = '<div class="col-span-12 py-8 text-center text-red-500">Failed to load documents: ' + err.message + '</div>';
             if (desktopContainer) desktopContainer.innerHTML = msg;
             if (mobileContainer)  mobileContainer.innerHTML  = msg;
         }
@@ -297,8 +315,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
 
         const cls = mobile
-            ? { view: 'btn-view text-xs px-2 py-1', validate: 'btn-validate text-xs px-2 py-1', approve: 'btn-approve text-xs px-2 py-1', lock: 'btn-lock text-xs px-2 py-1', reject: 'btn-reject text-xs px-2 py-1', awaiting: 'btn-awaiting text-xs px-2 py-1' }
-            : { view: 'btn-view text-xs', validate: 'btn-validate text-xs', approve: 'btn-approve text-xs', lock: 'btn-lock text-xs', reject: 'btn-reject text-xs', awaiting: 'btn-awaiting text-xs' };
+            ? { view: 'btn-view text-xs px-2 py-1', validate: 'btn-validate text-xs px-2 py-1', approve: 'btn-approve text-xs px-2 py-1', lock: 'btn-lock text-xs px-2 py-1', reject: 'btn-reject text-xs px-2 py-1', awaiting: 'btn-awaiting text-xs px-2 py-1', delete: 'btn-delete text-xs px-2 py-1' }
+            : { view: 'btn-view text-xs', validate: 'btn-validate text-xs', approve: 'btn-approve text-xs', lock: 'btn-lock text-xs', reject: 'btn-reject text-xs', awaiting: 'btn-awaiting text-xs', delete: 'btn-delete text-xs' };
 
         let btns = `<button class="${cls.view} btn-view-action" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
@@ -320,6 +338,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             btns += ` <button class="${cls.lock} btn-lock-action" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
         } else if (s === 'locked' && isAdmin) {
             btns += ` <button class="btn-unlock text-xs btn-unlock-action" data-id="${doc.id}">Unlock</button>`;
+        } else if (s === 'rejected') {
+            // Rejected documents: Show Comments and Delete
+            btns += ` <button class="btn-comments text-xs btn-comments-action" data-id="${doc.id}">Comments</button>`;
+            btns += ` <button class="${cls.delete} btn-delete-action" data-id="${doc.id}">Delete</button>`;
         }
 
         return btns;
@@ -475,6 +497,97 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const doc = allDocuments.find(d => d.id === docId);
                 if (doc) openRejectionModal(doc);
             });
+        });
+
+        document.querySelectorAll('.btn-comments-action').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                try {
+                    const res = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
+                        headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    const doc = allDocuments.find(d => d.id == docId);
+                    openCommentsModal(doc, data.comments || []);
+                } catch (err) {
+                    showErrorModal('Failed to load comments');
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-delete-action').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                if (!confirm('Delete this rejected document? This action cannot be undone.')) return;
+                try {
+                    const res = await fetch(`${API_BASE}/api/documents/${docId}`, {
+                        method: 'DELETE',
+                        headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.msg || 'Failed to delete');
+                    showToast('Document deleted successfully.');
+                    loadDocuments();
+                    loadStats();
+                } catch (err) {
+                    showErrorModal(err.message);
+                }
+            });
+        });
+    }
+
+    function openCommentsModal(doc, comments) {
+        const commentsModal = document.getElementById('commentsModal');
+        const commentsDocTitle = document.getElementById('commentsDocTitle');
+        const commentsDocDate = document.getElementById('commentsDocDate');
+        const commentsListContainer = document.getElementById('commentsListContainer');
+        
+        if (!commentsModal) return;
+        
+        if (commentsDocTitle) commentsDocTitle.textContent = doc?.title || 'Unknown';
+        if (commentsDocDate) commentsDocDate.textContent = doc?.created_at ? new Date(doc.created_at).toLocaleDateString() : 'N/A';
+        
+        if (commentsListContainer) {
+            if (comments.length === 0) {
+                commentsListContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No comments found</div>';
+            } else {
+                commentsListContainer.innerHTML = comments.map(c => {
+                    const date = new Date(c.created_at).toLocaleString();
+                    const reviewer = c.reviewer_name || 'Reviewer';
+                    const text = c.reason || c.comments || 'No comment provided';
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-reviewer">${reviewer}</span>
+                                <span class="comment-date">${date}</span>
+                            </div>
+                            <div class="comment-text">${text}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        commentsModal.classList.remove('hidden');
+        setTimeout(() => commentsModal.classList.add('active'), 10);
+    }
+
+    function closeCommentsModal() {
+        const commentsModal = document.getElementById('commentsModal');
+        if (!commentsModal) return;
+        commentsModal.classList.remove('active');
+        setTimeout(() => commentsModal.classList.add('hidden'), 300);
+    }
+
+    const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
+    const closeCommentsBtn = document.getElementById('closeCommentsBtn');
+    if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
+    if (closeCommentsBtn) closeCommentsBtn.addEventListener('click', closeCommentsModal);
+    
+    const commentsModal = document.getElementById('commentsModal');
+    if (commentsModal) {
+        commentsModal.addEventListener('click', e => {
+            if (e.target === commentsModal) closeCommentsModal();
         });
     }
 

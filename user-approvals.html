@@ -225,6 +225,37 @@
         </div>
     </div>
 
+    <!-- COMMENTS MODAL -->
+    <div id="commentsModal" class="rejection-modal hidden">
+        <div class="rejection-modal-container">
+            <div class="rejection-modal-header">
+                <h2>Rejection Comments</h2>
+                <button id="closeCommentsModal" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="rejection-modal-body">
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Document Title</div>
+                        <div class="info-value" id="commentsDocTitle">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Date Uploaded</div>
+                        <div class="info-value" id="commentsDocDate">-</div>
+                    </div>
+                </div>
+                <div class="comment-section">
+                    <label class="comment-label">Comments History</label>
+                    <div id="commentsListContainer" class="comments-list">
+                        <!-- Comments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="rejection-modal-footer">
+                <button id="closeCommentsBtn" class="btn-cancel">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- DOCUMENT PREVIEW MODAL -->
     <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">

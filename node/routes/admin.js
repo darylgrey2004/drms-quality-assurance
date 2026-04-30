@@ -70,8 +70,11 @@ router.post('/users', adminAuth, async (req, res) => {
     email,
     password,
     role,
+    department,
     evaluatorExpiresAt
   } = req.body || {};
+
+  console.log('Create user request received:', { firstName, lastName, email, role, department });
 
   if (!firstName || !lastName || !email || !password || !role) {
     return res.status(400).json({ msg: 'Please provide first name, last name, email, password, and role.' });
@@ -79,10 +82,15 @@ router.post('/users', adminAuth, async (req, res) => {
 
   const normalizedRole = String(role).toLowerCase().trim();
   const isEvaluatorRole = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
+  const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair';
   let parsedEvaluatorExpiration = null;
 
   if (isEvaluatorRole && !evaluatorExpiresAt) {
     return res.status(400).json({ msg: 'External Evaluator accounts require an expiration date/time.' });
+  }
+
+  if (requiresDepartment && !department) {
+    return res.status(400).json({ msg: 'Department is required for Faculty and Area Chair roles.' });
   }
 
   if (isEvaluatorRole) {
@@ -117,6 +125,23 @@ router.post('/users', adminAuth, async (req, res) => {
 
     const [createUserResult] = await db.query('INSERT INTO users SET ?', [newUserPayload]);
     const createdUserId = createUserResult.insertId;
+
+    // Create faculty_profiles entry if department is provided (for Faculty, Area Chair, or Dean with department)
+    if (department) {
+      console.log('Creating faculty_profiles entry with department:', department);
+      try {
+        await db.query(
+          'INSERT INTO faculty_profiles (user_id, department) VALUES (?, ?)',
+          [createdUserId, String(department).trim()]
+        );
+        console.log('Faculty profile created successfully');
+      } catch (profileErr) {
+        console.error('Failed to create faculty profile:', profileErr.message);
+        // Continue even if profile creation fails
+      }
+    } else {
+      console.log('No department provided, skipping faculty_profiles creation');
+    }
 
     if (isEvaluatorRole) {
       await db.query(`

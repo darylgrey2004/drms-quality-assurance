@@ -34,6 +34,29 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedFiles = [];
     const API_BASE = 'http://localhost:3000';
 
+    // Load categories dynamically
+    loadCategories();
+
+    function loadCategories() {
+        fetch(`${API_BASE}/api/documents/categories`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(categories => {
+            const categorySelect = document.getElementById('category');
+            if (categorySelect && categories.length > 0) {
+                categorySelect.innerHTML = '<option value="">Select category</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;  // Use numeric ID
+                    option.textContent = cat.display_name || cat.name;
+                    categorySelect.appendChild(option);
+                });
+            }
+        })
+        .catch(err => console.error('Load categories error:', err));
+    }
+
     function showUploadSuccessModal() {
         if (!uploadSuccessModal) return;
         uploadSuccessModal.classList.remove('hidden');
@@ -235,12 +258,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const formData = new FormData();
                 formData.append('title', title);
-                formData.append('category', category);
+                formData.append('category_id', category);
                 formData.append('department', department);
                 formData.append('version', document.getElementById('version')?.value || 'v1.0');
                 formData.append('author', author);
                 formData.append('description', document.getElementById('description')?.value || '');
                 formData.append('keywords', document.getElementById('keywords')?.value || '');
+                formData.append('expiryDate', document.getElementById('expiryDate')?.value || '');
                 formData.append('workflow', document.querySelector('input[name="workflow"]:checked')?.value || 'submit');
                 formData.append('files', file);
 

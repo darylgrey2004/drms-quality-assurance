@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 categorySelect.innerHTML = '<option value="">Select category</option>';
                 categories.forEach(cat => {
                     const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.name;
+                    option.value = cat.id;  // Use numeric ID
+                    option.textContent = cat.display_name || cat.name;
                     categorySelect.appendChild(option);
                 });
             }
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             formData.append('author', author);
             formData.append('department', departmentCode);
             formData.append('version', version);
-            formData.append('expiry_date', expiryDate);
+            formData.append('expiryDate', expiryDate);
             formData.append('description', description);
             formData.append('keywords', keywords);
             formData.append('workflow', workflow === 'draft' ? 'draft' : workflow === 'validate' ? 'approve' : 'submit');

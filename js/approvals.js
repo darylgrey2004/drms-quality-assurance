@@ -33,6 +33,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const docPreviewFrame = document.getElementById('docPreviewFrame');
     const docPreviewTitle = document.getElementById('docPreviewTitle');
     
+    // Rejection modal elements
+    const rejectionModal = document.getElementById('rejectionModal');
+    const closeRejectionBtn = document.getElementById('closeRejectionModal');
+    const cancelRejection = document.getElementById('cancelRejection');
+    const submitRejection = document.getElementById('submitRejection');
+    const rejectionComment = document.getElementById('rejectionComment');
+    const modalDocTitle = document.getElementById('modalDocTitle');
+    const modalDocDate = document.getElementById('modalDocDate');
+    const modalDocCategory = document.getElementById('modalDocCategory');
+    const modalDocAuthor = document.getElementById('modalDocAuthor');
+    
     // Lock modal elements
     const lockModal = document.getElementById('lockModal');
     const lockModalCloseBtn = document.getElementById('lockModalCloseBtn');
@@ -41,7 +52,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const lockDocTitle = document.getElementById('lockDocTitle');
     const lockComment = document.getElementById('lockComment');
     
+    // Toast elements
+    const actionToast = document.getElementById('actionToast');
+    const actionToastMsg = document.getElementById('actionToastMsg');
+    const actionToastIcon = document.getElementById('actionToastIcon');
+    const actionErrorModal = document.getElementById('actionErrorModal');
+    const actionErrorMessage = document.getElementById('actionErrorMessage');
+    const closeActionErrorBtn = document.getElementById('closeActionErrorBtn');
+    
     let currentLockDocId = null;
+    let pendingRejectDocId = null;
+    let toastTimer;
 
     let allDocuments = [];
     let filteredDocuments = [];
@@ -52,6 +73,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load stats and documents
     loadStats();
     loadDocuments();
+
+    // Helper functions
+    function showToast(msg, isError = false) {
+        if (!actionToast) return;
+        actionToastIcon.textContent = isError ? '✕' : '✓';
+        actionToastMsg.textContent = msg;
+        actionToast.querySelector('div').className = `flex items-center gap-3 ${isError ? 'bg-red-700' : 'bg-gray-900'} text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm`;
+        actionToast.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => actionToast.classList.add('hidden'), 3500);
+    }
+
+    function showErrorModal(msg) {
+        if (!actionErrorModal) { alert(msg); return; }
+        actionErrorMessage.textContent = msg;
+        actionErrorModal.classList.remove('hidden');
+        actionErrorModal.classList.add('flex');
+    }
+
+    if (closeActionErrorBtn) closeActionErrorBtn.addEventListener('click', () => {
+        actionErrorModal.classList.add('hidden');
+        actionErrorModal.classList.remove('flex');
+    });
 
     // Load statistics
     function loadStats() {
@@ -196,6 +240,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Rejection modal functions
+    function openRejectionModal(doc) {
+        pendingRejectDocId = doc.id;
+        if (modalDocTitle) modalDocTitle.textContent = doc.title;
+        if (modalDocDate) modalDocDate.textContent = new Date(doc.created_at).toLocaleDateString();
+        if (modalDocCategory) modalDocCategory.textContent = `${doc.category_name || doc.category || 'N/A'} / ${doc.department_code || 'N/A'}`;
+        if (modalDocAuthor) modalDocAuthor.textContent = doc.author_name || 'Unknown';
+        if (rejectionComment) rejectionComment.value = '';
+        if (rejectionModal) {
+            rejectionModal.classList.remove('hidden');
+            setTimeout(() => rejectionModal.classList.add('active'), 10);
+        }
+    }
+
+    function closeRejectionModal() {
+        pendingRejectDocId = null;
+        if (rejectionModal) {
+            rejectionModal.classList.remove('active');
+            setTimeout(() => rejectionModal.classList.add('hidden'), 300);
+        }
+    }
+
+    if (closeRejectionBtn) closeRejectionBtn.addEventListener('click', closeRejectionModal);
+    if (cancelRejection) cancelRejection.addEventListener('click', closeRejectionModal);
+    if (rejectionModal) rejectionModal.addEventListener('click', e => { if (e.target === rejectionModal) closeRejectionModal(); });
+
+    if (submitRejection) {
+        submitRejection.addEventListener('click', async () => {
+            const reason = rejectionComment?.value?.trim();
+            if (!reason) { showToast('Please provide a rejection reason.', true); return; }
+            if (!pendingRejectDocId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/approvals/${pendingRejectDocId}/reject`, {
+                    method: 'POST',
+                    headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to reject');
+                closeRejectionModal();
+                showToast('Document rejected successfully.');
+                updateDocumentStatus(pendingRejectDocId, 'rejected');
+                loadStats();
+            } catch (err) {
+                showErrorModal(err.message);
+            }
+        });
+    }
+    
     // Lock modal functions
     function openLockModal(docId, title) {
         currentLockDocId = docId;
@@ -256,6 +349,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (status === 'locked' && isAdmin) {
             // Locked documents: Show Unlock (admin only)
             buttons += ` <button class="btn-unlock text-xs text-orange-600 hover:underline font-medium px-1" data-id="${doc.id}">Unlock</button>`;
+        } else if (status === 'rejected') {
+            // Rejected documents: Show Comments and Delete
+            buttons += ` <button class="btn-comments text-xs text-blue-600 hover:underline font-medium px-1" data-id="${doc.id}">Comments</button>`;
+            buttons += ` <button class="btn-delete text-xs text-red-600 hover:underline font-medium px-1" data-id="${doc.id}">Delete</button>`;
         }
 
         return buttons;
@@ -280,6 +377,9 @@ document.addEventListener('DOMContentLoaded', function() {
             buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
         } else if (status === 'locked' && isAdmin) {
             buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-600 text-white rounded" data-id="${doc.id}">Unlock</button>`;
+        } else if (status === 'rejected') {
+            buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}">Comments</button>`;
+            buttons += ` <button class="btn-delete text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}">Delete</button>`;
         }
 
         return buttons;
@@ -426,7 +526,102 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         document.querySelectorAll('.btn-reject').forEach(btn => {
-            btn.addEventListener('click', () => handleReject(btn.getAttribute('data-id'), btn.getAttribute('data-title')));
+            btn.addEventListener('click', () => {
+                const docId = parseInt(btn.getAttribute('data-id'));
+                const doc = allDocuments.find(d => d.id === docId);
+                if (doc) openRejectionModal(doc);
+            });
+        });
+
+        document.querySelectorAll('.btn-comments').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                try {
+                    const res = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
+                        headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    const doc = allDocuments.find(d => d.id == docId);
+                    openCommentsModal(doc, data.comments || []);
+                } catch (err) {
+                    showErrorModal('Failed to load comments');
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const docId = btn.getAttribute('data-id');
+                if (!confirm('Delete this document? This action cannot be undone.')) return;
+                try {
+                    const res = await fetch(`${API_BASE}/api/documents/${docId}`, {
+                        method: 'DELETE',
+                        headers: { 'x-auth-token': token }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.msg || 'Failed to delete');
+                    showToast('Document deleted successfully.');
+                    loadDocuments();
+                    loadStats();
+                } catch (err) {
+                    showErrorModal(err.message);
+                }
+            });
+        });
+    }
+
+    function openCommentsModal(doc, comments) {
+        const commentsModal = document.getElementById('commentsModal');
+        const commentsDocTitle = document.getElementById('commentsDocTitle');
+        const commentsDocDate = document.getElementById('commentsDocDate');
+        const commentsListContainer = document.getElementById('commentsListContainer');
+        
+        if (!commentsModal) return;
+        
+        if (commentsDocTitle) commentsDocTitle.textContent = doc?.title || 'Unknown';
+        if (commentsDocDate) commentsDocDate.textContent = doc?.created_at ? new Date(doc.created_at).toLocaleDateString() : 'N/A';
+        
+        if (commentsListContainer) {
+            if (comments.length === 0) {
+                commentsListContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No comments found</div>';
+            } else {
+                commentsListContainer.innerHTML = comments.map(c => {
+                    const date = new Date(c.created_at).toLocaleString();
+                    const reviewer = c.reviewer_name || 'Reviewer';
+                    const text = c.reason || c.comments || 'No comment provided';
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-reviewer">${reviewer}</span>
+                                <span class="comment-date">${date}</span>
+                            </div>
+                            <div class="comment-text">${text}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        commentsModal.classList.remove('hidden');
+        setTimeout(() => commentsModal.classList.add('active'), 10);
+    }
+
+    function closeCommentsModal() {
+        const commentsModal = document.getElementById('commentsModal');
+        if (!commentsModal) return;
+        commentsModal.classList.remove('active');
+        setTimeout(() => commentsModal.classList.add('hidden'), 300);
+    }
+
+    const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
+    const closeCommentsBtn = document.getElementById('closeCommentsBtn');
+    if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
+    if (closeCommentsBtn) closeCommentsBtn.addEventListener('click', closeCommentsModal);
+    
+    const commentsModal = document.getElementById('commentsModal');
+    if (commentsModal) {
+        commentsModal.addEventListener('click', e => {
+            if (e.target === commentsModal) closeCommentsModal();
         });
     }
 
@@ -445,13 +640,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(r => {
             console.log('Validate response status:', r.status);
+            if (!r.ok) throw new Error('Validation failed');
             return r.json();
         })
         .then(data => {
             console.log('Validate response:', data);
-            if (data.msg) {
-                alert(data.msg);
-            }
+            showToast(data.msg || 'Document validated successfully.');
             if (data.document && data.document.workflow_status) {
                 updateDocumentStatus(parseInt(docId), data.document.workflow_status);
             } else {
@@ -461,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.error('Validate error:', err);
-            alert('Failed to validate document: ' + err.message);
+            showErrorModal('Failed to validate document: ' + err.message);
         });
     }
 
@@ -480,13 +674,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(r => {
             console.log('Approve response status:', r.status);
+            if (!r.ok) throw new Error('Approval failed');
             return r.json();
         })
         .then(data => {
             console.log('Approve response:', data);
-            if (data.msg) {
-                alert(data.msg);
-            }
+            showToast(data.msg || 'Document approved successfully.');
             if (data.document && data.document.workflow_status) {
                 updateDocumentStatus(parseInt(docId), data.document.workflow_status);
             } else {
@@ -496,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.error('Approve error:', err);
-            alert('Failed to approve document: ' + err.message);
+            showErrorModal('Failed to approve document: ' + err.message);
         });
     }
 
@@ -510,16 +703,19 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ comments })
         })
-        .then(r => r.json())
-        .then(() => {
+        .then(r => {
+            if (!r.ok) throw new Error('Lock failed');
+            return r.json();
+        })
+        .then(data => {
+            showToast(data.msg || 'Document locked successfully.');
             updateDocumentStatus(parseInt(docId), 'locked');
             loadStats();
         })
-        .catch(() => alert('Failed to lock document'));
+        .catch(err => {
+            showErrorModal('Failed to lock document: ' + err.message);
+        });
     }
-
-    // Handle lock - removed, now using modal
-    // function handleLock(docId) { ... }
 
     // Handle unlock
     function handleUnlock(docId) {
@@ -529,33 +725,18 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: { 'x-auth-token': token }
         })
-        .then(r => r.json())
-        .then(() => {
+        .then(r => {
+            if (!r.ok) throw new Error('Unlock failed');
+            return r.json();
+        })
+        .then(data => {
+            showToast(data.msg || 'Document unlocked successfully.');
             updateDocumentStatus(parseInt(docId), 'approved');
             loadStats();
         })
-        .catch(() => alert('Failed to unlock document'));
-    }
-
-    // Handle reject
-    function handleReject(docId, title) {
-        const reason = prompt(`Reject "${title}"?\n\nProvide reason:`);
-        if (!reason) return;
-
-        fetch(`${API_BASE}/api/approvals/${docId}/reject`, {
-            method: 'POST',
-            headers: { 
-                'x-auth-token': token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ reason })
-        })
-        .then(r => r.json())
-        .then(() => {
-            updateDocumentStatus(parseInt(docId), 'rejected');
-            loadStats();
-        })
-        .catch(() => alert('Failed to reject document'));
+        .catch(err => {
+            showErrorModal('Failed to unlock document: ' + err.message);
+        });
     }
 
     // Event listeners

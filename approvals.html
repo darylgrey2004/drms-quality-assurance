@@ -219,6 +219,62 @@
         </div>
     </div>
 
+    <!-- Action feedback toast -->
+    <div id="actionToast" class="fixed bottom-6 right-6 z-[9999] hidden">
+        <div class="flex items-center gap-3 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm">
+            <span id="actionToastIcon">✓</span>
+            <span id="actionToastMsg"></span>
+        </div>
+    </div>
+
+    <!-- Action error modal -->
+    <div id="actionErrorModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
+        <div class="absolute inset-0 bg-slate-900/50"></div>
+        <div class="relative bg-white w-[92vw] max-w-md rounded-2xl shadow-2xl p-6 mx-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-lg shrink-0">✕</div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-800">Action Failed</h3>
+                    <p id="actionErrorMessage" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" id="closeActionErrorBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMENTS MODAL -->
+    <div id="commentsModal" class="rejection-modal hidden">
+        <div class="rejection-modal-container">
+            <div class="rejection-modal-header">
+                <h2>Rejection Comments</h2>
+                <button id="closeCommentsModal" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="rejection-modal-body">
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Document Title</div>
+                        <div class="info-value" id="commentsDocTitle">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Date Uploaded</div>
+                        <div class="info-value" id="commentsDocDate">-</div>
+                    </div>
+                </div>
+                <div class="comment-section">
+                    <label class="comment-label">Comments History</label>
+                    <div id="commentsListContainer" class="comments-list">
+                        <!-- Comments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="rejection-modal-footer">
+                <button id="closeCommentsBtn" class="btn-cancel">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- External JavaScript -->
     <script src="js/approvals.js"></script>
 </body>

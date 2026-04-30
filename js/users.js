@@ -86,8 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
         
         if (departmentWrap && createDepartment) {
-            const showDepartment = isEvaluator || selectedRole === 'dean' || selectedRole === 'area chair/program head';
+            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair';
             departmentWrap.classList.toggle('hidden', !showDepartment);
+            createDepartment.required = showDepartment;
         }
     }
 
@@ -117,8 +118,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const role = document.getElementById('createRole')?.value;
             const password = document.getElementById('createPassword')?.value;
             const confirmPassword = document.getElementById('createConfirmPassword')?.value;
-            const department = document.getElementById('createDepartment')?.value?.trim() || null;
+            const departmentSelect = document.getElementById('createDepartment');
+            const department = departmentSelect && !departmentSelect.closest('#departmentWrap').classList.contains('hidden') 
+                ? (departmentSelect.value?.trim() || null) 
+                : null;
             const evaluatorExpiresAt = createEvaluatorExpiresAt?.value || null;
+
+            console.log('Form submission data:', { firstName, lastName, email, role, department, departmentVisible: !departmentSelect?.closest('#departmentWrap').classList.contains('hidden') });
 
             if (!firstName || !lastName || !email || !role || !password || !confirmPassword) {
                 alert('Please fill in all required fields.');
@@ -131,6 +137,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const normalizedRole = role.toLowerCase().trim();
             const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
+            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair';
+            
+            if (requiresDepartment && !department) {
+                alert('Please select a department for Faculty or Area Chair role.');
+                return;
+            }
+            
             if (isEvaluator && !evaluatorExpiresAt) {
                 alert('Please set an expiration date/time for External Evaluator.');
                 return;
@@ -283,6 +296,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return lastActiveDate.toLocaleDateString();
         }
 
+        function formatRoleName(role) {
+            if (!role) return 'User';
+            const roleMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'area-chair': 'Area Chair',
+                'faculty': 'Faculty',
+                'evaluator': 'External Evaluator'
+            };
+            return roleMap[role.toLowerCase()] || role;
+        }
+
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'user-row hover:bg-gray-50 transition-colors';
@@ -295,6 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
             const userId = user.id || user._id;
+            const displayRole = formatRoleName(user.role);
             
             const actionButtons = userId
                 ? `
@@ -311,12 +337,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div>
                             <div class="font-medium text-gray-800">${user.firstName || ''} ${user.lastName || ''}</div>
-                            <div class="text-xs text-gray-400">${user.role || 'User'}</div>
+                            <div class="text-xs text-gray-400">${displayRole}</div>
                         </div>
                     </div>
                 </td>
                 <td class="py-3 px-2 text-gray-600 text-sm">${user.email || ''}</td>
-                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${user.role || 'User'}</span></td>
+                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${displayRole}</span></td>
                 <td class="py-3 px-2 text-gray-600 text-sm">${user.department || 'N/A'}</td>
                 <td class="py-3 px-2">${statusBadge}</td>
                 <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
