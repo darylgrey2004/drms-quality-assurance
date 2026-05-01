@@ -59,26 +59,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const docViewerTitle = document.getElementById('docViewerTitle');
         const docViewerMeta = document.getElementById('docViewerMeta');
         if (docViewerTitle) docViewerTitle.textContent = doc.title || 'Untitled Document';
-        if (docViewerMeta) docViewerMeta.textContent = 
-            `${doc.category || 'N/A'} · ${doc.department || 'N/A'} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+        if (docViewerMeta) {
+            const deptDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
+            docViewerMeta.textContent = 
+                `${doc.category || 'N/A'} · ${deptDisplay} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+        }
 
         // Load document content
         const content = document.getElementById('docViewerContent');
         
         if (doc.file_url) {
-            const fileUrl = doc.file_url;
+            const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://127.0.0.1:3000${doc.file_url}`;
             const isPDF = fileUrl.toLowerCase().endsWith('.pdf');
             
             if (isPDF && content) {
                 content.innerHTML = `
-                    <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${doc.title}"></iframe>
-                    <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${doc.title}</p>
+                    <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${escapeHtml(doc.title)}"></iframe>
+                    <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${escapeHtml(doc.title)}</p>
                 `;
             } else if (content) {
                 content.innerHTML = `
                     <div class="text-center py-12">
                         <div class="text-4xl mb-4">📄</div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${doc.title}</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${escapeHtml(doc.title)}</h3>
                         <p class="text-gray-600 mb-4">File Type: ${doc.file_url.split('.').pop().toUpperCase()}</p>
                         <p class="text-gray-500 text-sm mb-6">This document can be viewed or downloaded using the button below.</p>
                         <a href="${fileUrl}" download class="inline-block px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
@@ -101,9 +104,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const downloadBtn = document.getElementById('downloadDoc');
         if (downloadBtn) {
             if (doc.file_url) {
+                const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://127.0.0.1:3000${doc.file_url}`;
                 downloadBtn.onclick = function() {
                     const link = document.createElement('a');
-                    link.href = doc.file_url;
+                    link.href = fileUrl;
                     link.download = doc.title || 'document';
                     document.body.appendChild(link);
                     link.click();
@@ -162,7 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            console.log('Fetching documents...');
+            console.log('Fetching documents for evaluator...');
+            // Evaluators automatically get only approved documents from backend
             const response = await fetch('http://127.0.0.1:3000/api/documents', {
                 method: 'GET',
                 headers: {
@@ -177,14 +182,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const documents = await response.json();
             console.log('Documents fetched:', documents.length);
-            
-            // Filter to show only approved documents for evaluator
-            const approvedDocs = documents.filter(doc => doc.status === 'approved');
-            console.log('Approved documents:', approvedDocs.length);
+            console.log('All documents are approved (evaluator role):', documents.every(d => d.workflow_status === 'approved'));
 
             if (!tbody) return;
 
-            if (approvedDocs.length === 0) {
+            if (documents.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No approved documents available for review</td></tr>';
                 isLoading = false;
                 return;
@@ -192,20 +194,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Store documents data
             documentsData = {};
-            approvedDocs.forEach(doc => {
+            documents.forEach(doc => {
                 documentsData[doc.id] = doc;
             });
 
             // Clear and populate table
             tbody.innerHTML = '';
             
-            approvedDocs.forEach(doc => {
+            documents.forEach(doc => {
+                console.log('Document:', doc);
                 const row = document.createElement('tr');
                 const categoryClass = getCategoryClass(doc.category);
-                const statusClass = getStatusClass(doc.status);
-                const statusText = getStatusText(doc.status);
+                const statusClass = getStatusClass(doc.workflow_status);
+                const statusText = getStatusText(doc.workflow_status);
                 const categoryDisplay = doc.category || 'N/A';
-                const departmentDisplay = doc.department || 'N/A';
+                const departmentDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
                 const authorDisplay = doc.author_name || doc.author || 'Unknown';
                 const dateDisplay = doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-CA') : 'N/A';
                 const versionDisplay = doc.version || 'v1.0';

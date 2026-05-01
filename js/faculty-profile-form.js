@@ -14,6 +14,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const registrationData = JSON.parse(registrationDataString);
     
+    // Auto-fill department if it exists in registration data
+    if (registrationData.department) {
+        const departmentInput = document.getElementById('department');
+        if (departmentInput) {
+            // Map department codes to full names
+            const departmentMap = {
+                'BEED': 'Bachelor of Elementary Education (BEED)',
+                'BSED': 'Bachelor of Secondary Education (BSED)',
+                'BSNED': 'Bachelor of Special Needs Education (BSNED) (SPED)',
+                'BCAED': 'Bachelor of Culture and Arts Education (BCAED)',
+                'BPED': 'Bachelor of Physical Education (BPED)'
+            };
+            
+            const fullDepartmentName = departmentMap[registrationData.department] || registrationData.department;
+            departmentInput.value = fullDepartmentName;
+            
+            console.log('Auto-filled department:', fullDepartmentName);
+        }
+    }
+    
+    // Employee ID - only allow numbers
+    const employeeIdInput = document.getElementById('employeeId');
+    if (employeeIdInput) {
+        employeeIdInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    
     // Form submission
     const form = document.getElementById('facultyProfileForm');
     const cancelBtn = document.getElementById('cancelBtn');

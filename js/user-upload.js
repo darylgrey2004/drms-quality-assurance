@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load categories and departments
     loadCategories();
     autoFillUserData();
+    setupVersionAutoIncrement();
 
     function loadCategories() {
         fetch(`${API_BASE}/api/documents/categories`, {
@@ -105,6 +106,107 @@ document.addEventListener('DOMContentLoaded', async function() {
         const normalizedRole = (role || '').toLowerCase();
         if (validateOption && normalizedRole === 'area-chair') {
             validateOption.style.display = 'flex';
+        }
+    }
+
+    function setupVersionAutoIncrement() {
+        const titleInput = document.getElementById('docTitle');
+        const versionInput = document.getElementById('version');
+
+        async function checkAndUpdateVersion() {
+            const title = titleInput?.value.trim();
+            const category = categorySelect?.value;
+            const department = departmentInput?.getAttribute('data-department-code') || departmentInput?.value;
+
+            if (!title || !category || !department || !token) {
+                if (versionInput) versionInput.value = 'v1.0';
+                return;
+            }
+
+            try {
+                // Check if document with same title, category, and department exists
+                const response = await fetch(`${API_BASE}/api/documents?scope=mine`, {
+                    headers: { 'x-auth-token': token }
+                });
+                
+                if (!response.ok) {
+                    if (versionInput) versionInput.value = 'v1.0';
+                    return;
+                }
+
+                const documents = await response.json();
+                
+                // Filter documents with same title, category, and department
+                const matchingDocs = documents.filter(doc => 
+                    doc.title.toLowerCase() === title.toLowerCase() && 
+                    String(doc.category_id) === String(category) &&
+                    (doc.department_code === department || doc.area === department)
+                );
+
+                if (matchingDocs.length === 0) {
+                    if (versionInput) versionInput.value = 'v1.0';
+                    return;
+                }
+
+                // Find highest version number
+                let maxVersion = 1;
+                matchingDocs.forEach(doc => {
+                    const versionMatch = (doc.version || 'v1.0').match(/v?(\d+)(\.\d+)?/);
+                    if (versionMatch) {
+                        const versionNum = parseInt(versionMatch[1]);
+                        if (versionNum >= maxVersion) {
+                            maxVersion = versionNum + 1;
+                        }
+                    }
+                });
+
+                const newVersion = `v${maxVersion}.0`;
+                if (versionInput) {
+                    versionInput.value = newVersion;
+                    versionInput.classList.add('bg-amber-50', 'border-amber-300');
+                    versionInput.classList.remove('bg-gray-100');
+                }
+
+                // Get category display name
+                const categoryOption = categorySelect?.querySelector(`option[value="${category}"]`);
+                const categoryName = categoryOption?.textContent || 'this category';
+
+                // Show alert to user
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'bg-amber-50 border-l-4 border-amber-400 p-3 mb-4 rounded';
+                alertDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="text-amber-600 mr-2">⚠️</span>
+                        <div class="text-sm">
+                            <p class="font-medium text-amber-800">Document Version Auto-Incremented</p>
+                            <p class="text-amber-700 mt-1">A document with the title "${title}" already exists in <strong>${categoryName}</strong> category for <strong>${department}</strong> department. Version automatically set to <strong>${newVersion}</strong>.</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert alert before the form
+                const form = document.getElementById('uploadForm');
+                const existingAlert = form?.previousElementSibling;
+                if (existingAlert && existingAlert.classList.contains('bg-amber-50')) {
+                    existingAlert.remove();
+                }
+                form?.parentNode.insertBefore(alertDiv, form);
+
+                // Auto-remove alert after 8 seconds
+                setTimeout(() => alertDiv.remove(), 8000);
+
+            } catch (error) {
+                console.error('Version check error:', error);
+                if (versionInput) versionInput.value = 'v1.0';
+            }
+        }
+
+        // Check version when title or category changes
+        if (titleInput) {
+            titleInput.addEventListener('blur', checkAndUpdateVersion);
+        }
+        if (categorySelect) {
+            categorySelect.addEventListener('change', checkAndUpdateVersion);
         }
     }
 
@@ -203,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const author = document.getElementById('author')?.value;
             const department = document.getElementById('department')?.value;
             const version = document.getElementById('version')?.value || 'v1.0';
-            const expiryDate = document.getElementById('expiryDate')?.value || '';
             const description = document.getElementById('description')?.value || '';
             const keywords = document.getElementById('keywords')?.value || '';
             const workflow = document.querySelector('input[name="workflow"]:checked')?.value || 'submit';
@@ -223,10 +324,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
 
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
-            submitBtn.disabled = true;
+            const submitButton = document.getElementById('submitBtn');
+            const originalText = submitButton?.innerHTML || 'Upload Document';
+            if (submitButton) {
+                submitButton.innerHTML = '<span class="mr-2">⏳</span> Uploading...';
+                submitButton.disabled = true;
+            }
             if (uploadLoadingOverlay) uploadLoadingOverlay.classList.remove('hidden');
             updateProgressUI(10, 'Preparing upload...');
 
@@ -242,7 +345,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             formData.append('author', author);
             formData.append('department', departmentCode);
             formData.append('version', version);
-            formData.append('expiryDate', expiryDate);
             formData.append('description', description);
             formData.append('keywords', keywords);
             formData.append('workflow', workflow === 'draft' ? 'draft' : workflow === 'validate' ? 'approve' : 'submit');
@@ -285,8 +387,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 showErrorModal('Upload failed: ' + error.message);
                 updateProgressUI(0, 'Upload failed');
             } finally {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+                if (submitButton) {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
                 if (uploadLoadingOverlay) uploadLoadingOverlay.classList.add('hidden');
             }
         });

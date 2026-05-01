@@ -62,9 +62,21 @@
                     <option value="" disabled selected>Select your role</option>
                     <option value="faculty">Faculty Member</option>
                     <option value="department-head">Dept. Head</option>
-                    <option value="dean">Dean</option>
-                    <option value="evaluator">External Evaluator</option>
                 </select>
+            </div>
+
+            <!-- Department Selection (shown for both Faculty and Dept. Head) -->
+            <div id="departmentField" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Department <span class="text-red-500">*</span></label>
+                <select id="department" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition bg-white">
+                    <option value="" disabled selected>Select department</option>
+                    <option value="BEED">BEED - Bachelor of Elementary Education</option>
+                    <option value="BSED">BSED - Bachelor of Secondary Education</option>
+                    <option value="BSNED">BSNED - Bachelor of Special Needs Education</option>
+                    <option value="BCAED">BCAED - Bachelor of Culture and Arts Education</option>
+                    <option value="BPED">BPED - Bachelor of Physical Education</option>
+                </select>
+                <p id="departmentAvailability" class="text-xs mt-1"></p>
             </div>
 
             <!-- Password -->
@@ -77,6 +89,40 @@
                     <svg id="eyeIconPass" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     <svg id="eyeOffIconPass" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .95-3.112 3.544-5.47 6.69-6.336M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6M3 3l6 6"/></svg>
                 </span>
+                <!-- Password Strength Meter -->
+                <div class="mt-2">
+                    <div class="flex gap-1 mb-1">
+                        <div id="strength-bar-1" class="h-1 flex-1 bg-gray-200 rounded transition-colors"></div>
+                        <div id="strength-bar-2" class="h-1 flex-1 bg-gray-200 rounded transition-colors"></div>
+                        <div id="strength-bar-3" class="h-1 flex-1 bg-gray-200 rounded transition-colors"></div>
+                        <div id="strength-bar-4" class="h-1 flex-1 bg-gray-200 rounded transition-colors"></div>
+                    </div>
+                    <p id="strength-text" class="text-xs text-gray-500">Password strength: <span id="strength-label">Not set</span></p>
+                </div>
+                <!-- Password Requirements -->
+                <div class="mt-2 space-y-1">
+                    <p class="text-xs text-gray-600 font-medium">Password must contain:</p>
+                    <div class="flex items-center gap-2 text-xs" id="req-length">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-500">At least 8 characters</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" id="req-uppercase">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-500">One uppercase letter (A-Z)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" id="req-lowercase">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-500">One lowercase letter (a-z)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" id="req-number">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-500">One number (0-9)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs" id="req-special">
+                        <span class="text-gray-400">○</span>
+                        <span class="text-gray-500">One special character (!@#$%^&*)</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Confirm Password -->
@@ -108,6 +154,23 @@
             Already have an account? 
             <a href="landing.html" class="text-teal-700 hover:text-teal-800 font-medium">Sign in</a>
         </p>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
+        <div class="absolute inset-0 bg-slate-900/50"></div>
+        <div class="relative bg-white w-[92vw] max-w-md rounded-2xl shadow-2xl p-6 mx-4">
+            <div class="flex items-start gap-3">
+                <div id="alertIcon" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0"></div>
+                <div class="flex-1">
+                    <h3 id="alertTitle" class="text-lg font-semibold text-gray-800"></h3>
+                    <p id="alertMessage" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" id="closeAlertBtn" class="px-4 py-2 rounded-lg bg-teal-700 text-white hover:bg-teal-800">OK</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/registration.js"></script>

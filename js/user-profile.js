@@ -249,4 +249,131 @@ document.addEventListener('DOMContentLoaded', async function () {
             saveProfileBtn.textContent = 'Save Changes';
         }
     }
+    
+    // Change Password Modal
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const closePasswordModal = document.getElementById('closePasswordModal');
+    const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+    const submitPasswordBtn = document.getElementById('submitPasswordBtn');
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    const passwordSuccess = document.getElementById('passwordSuccess');
+    
+    function openPasswordModal() {
+        changePasswordModal.classList.remove('hidden');
+        changePasswordModal.classList.add('flex');
+        currentPasswordInput.value = '';
+        newPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        passwordError.classList.add('hidden');
+        passwordSuccess.classList.add('hidden');
+    }
+    
+    function closePasswordModalFn() {
+        changePasswordModal.classList.add('hidden');
+        changePasswordModal.classList.remove('flex');
+    }
+    
+    if (changePasswordBtn) changePasswordBtn.addEventListener('click', openPasswordModal);
+    if (closePasswordModal) closePasswordModal.addEventListener('click', closePasswordModalFn);
+    if (cancelPasswordBtn) cancelPasswordBtn.addEventListener('click', closePasswordModalFn);
+    
+    // Password toggle function
+    window.togglePassword = function(fieldId) {
+        const input = document.getElementById(fieldId);
+        const eye = document.getElementById(fieldId + '-eye');
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+        } else {
+            input.type = 'password';
+            eye.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+        }
+    };
+    
+    if (submitPasswordBtn) {
+        submitPasswordBtn.addEventListener('click', async () => {
+            const currentPassword = currentPasswordInput.value.trim();
+            const newPassword = newPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+            
+            passwordError.classList.add('hidden');
+            passwordSuccess.classList.add('hidden');
+            
+            // Validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                passwordError.textContent = 'Please fill in all fields';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                passwordError.textContent = 'New password must be at least 6 characters long';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                passwordError.textContent = 'New passwords do not match';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+            
+            if (currentPassword === newPassword) {
+                passwordError.textContent = 'New password must be different from current password';
+                passwordError.classList.remove('hidden');
+                return;
+            }
+            
+            // Disable button
+            submitPasswordBtn.disabled = true;
+            submitPasswordBtn.textContent = 'Changing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                
+                if (!response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        throw new Error(data.msg || 'Failed to change password');
+                    } else {
+                        throw new Error('Server error. Please ensure you are logged in and try again.');
+                    }
+                }
+                
+                const data = await response.json();
+                
+                passwordSuccess.textContent = data.msg || 'Password changed successfully!';
+                passwordSuccess.classList.remove('hidden');
+                
+                // Clear inputs
+                currentPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                
+                // Close modal after 2 seconds
+                setTimeout(() => {
+                    closePasswordModalFn();
+                }, 2000);
+                
+            } catch (error) {
+                passwordError.textContent = error.message;
+                passwordError.classList.remove('hidden');
+            } finally {
+                submitPasswordBtn.disabled = false;
+                submitPasswordBtn.textContent = 'Change Password';
+            }
+        });
+    }
 });

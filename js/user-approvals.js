@@ -132,21 +132,35 @@ document.addEventListener('DOMContentLoaded', async function() {
         submitRejection.addEventListener('click', async () => {
             const reason = rejectionComment?.value?.trim();
             if (!reason) { showToast('Please provide a rejection reason.', true); return; }
-            if (!pendingRejectDocId) return;
+            if (!pendingRejectDocId) {
+                showErrorModal('No document selected for rejection.');
+                return;
+            }
+            
+            console.log('Submitting rejection for document ID:', pendingRejectDocId);
+            console.log('Rejection reason:', reason);
+            
             try {
                 const res = await fetch(`${API_BASE}/api/approvals/${pendingRejectDocId}/reject`, {
                     method: 'POST',
                     headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reason })
                 });
+                
+                console.log('Rejection response status:', res.status);
+                
                 const data = await res.json();
+                console.log('Rejection response data:', data);
+                
                 if (!res.ok) throw new Error(data.msg || 'Failed to reject');
+                
                 closeRejectionModal();
                 showToast('Document rejected successfully.');
                 updateDocumentStatus(pendingRejectDocId, 'rejected');
                 loadStats();
             } catch (err) {
-                showErrorModal(err.message);
+                console.error('Rejection error:', err);
+                showErrorModal(err.message || 'Failed to reject document');
             }
         });
     }
@@ -495,8 +509,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.querySelectorAll('.btn-reject-action').forEach(btn => {
             btn.addEventListener('click', () => {
                 const docId = parseInt(btn.getAttribute('data-id'));
-                const doc = allDocuments.find(d => d.id === docId);
-                if (doc) openRejectionModal(doc);
+                console.log('Reject button clicked for document ID:', docId);
+                const doc = allDocuments.find(d => d.id === docId || d.id === String(docId));
+                console.log('Found document:', doc);
+                if (doc) {
+                    openRejectionModal(doc);
+                } else {
+                    console.error('Document not found in allDocuments array');
+                    showErrorModal('Document not found. Please refresh the page and try again.');
+                }
             });
         });
 

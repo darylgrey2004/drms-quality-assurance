@@ -37,6 +37,30 @@ async function createSession(userId, req) {
   }
 }
 
+// @route   GET api/auth/check-dept-head/:department
+// @desc    Check if department head exists for a department
+// @access  Public
+router.get('/check-dept-head/:department', async (req, res) => {
+  const { department } = req.params;
+
+  try {
+    // Check in faculty_profiles table for department heads
+    // Department field stores full name like "Bachelor of Elementary Education (BEED)"
+    const [profiles] = await db.query(
+      `SELECT fp.id FROM faculty_profiles fp
+       INNER JOIN users u ON fp.user_id = u.id
+       WHERE u.role = 'department-head' AND fp.department LIKE ?
+       LIMIT 1`,
+      [`%${department}%`]
+    );
+
+    res.json({ exists: profiles.length > 0 });
+  } catch (err) {
+    console.error('Check dept head error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   POST api/auth/register
 // @desc    Register a new user
 // @access  Public
@@ -48,10 +72,35 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
-  // Validate role against ENUM values
-  const validRoles = ['admin', 'dean', 'area-chair', 'department-head', 'faculty', 'evaluator'];
+  // Validate role against ENUM values (only faculty and department-head allowed for registration)
+  const validRoles = ['faculty', 'department-head'];
   if (!validRoles.includes(role)) {
-    return res.status(400).json({ msg: 'Invalid role selected' });
+    return res.status(400).json({ msg: 'Invalid role selected. Only Faculty and Department Head can register.' });
+  }
+
+  // Check if department head already exists for the department
+  if (role === 'department-head') {
+    const { department } = req.body;
+    if (!department) {
+      return res.status(400).json({ msg: 'Department is required for Department Head role' });
+    }
+
+    try {
+      const [existingDeptHead] = await db.query(
+        `SELECT fp.id FROM faculty_profiles fp
+         INNER JOIN users u ON fp.user_id = u.id
+         WHERE u.role = 'department-head' AND fp.department LIKE ?
+         LIMIT 1`,
+        [`%${department}%`]
+      );
+
+      if (existingDeptHead.length > 0) {
+        return res.status(400).json({ msg: `A Department Head for ${department} already exists` });
+      }
+    } catch (checkErr) {
+      console.error('Dept head check error:', checkErr.message);
+      return res.status(500).json({ msg: 'Error checking department head availability' });
+    }
   }
 
   try {
@@ -461,6 +510,64 @@ router.post('/reset-password', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/auth/change-password
+// @desc    Change password for logged-in user
+// @access  Private
+const { auth } = require('../middleware/auth');
+
+router.post('/change-password', auth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ msg: 'Please provide current password and new password' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ msg: 'New password must be at least 6 characters long' });
+  }
+
+  try {
+    // Get user from database
+    const [users] = await db.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    const user = users[0];
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
+
+    // Log the password change in audit logs
+    try {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
+      await db.query(
+        `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent)
+         VALUES (?, 'PASSWORD_CHANGED', 'user', ?, ?, ?)`,
+        [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown']
+      );
+    } catch (auditErr) {
+      console.log('Audit log skipped:', auditErr.message);
+    }
+
+    res.json({ msg: 'Password changed successfully' });
+
+  } catch (err) {
+    console.error('Change password error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 

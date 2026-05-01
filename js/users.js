@@ -1,5 +1,122 @@
 // js/users.js
 
+// Modal Alert System
+function showAlert(message, title = 'Alert', type = 'warning') {
+    const modal = document.getElementById('alertModal');
+    const icon = document.getElementById('alertIcon');
+    const titleEl = document.getElementById('alertTitle');
+    const messageEl = document.getElementById('alertMessage');
+    
+    if (!modal || !icon || !titleEl || !messageEl) return;
+    
+    // Set icon and colors based on type
+    if (type === 'error') {
+        icon.className = 'w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4';
+        icon.innerHTML = '<span class="text-red-600 text-xl font-bold">✗</span>';
+    } else if (type === 'success') {
+        icon.className = 'w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4';
+        icon.innerHTML = '<span class="text-green-600 text-xl font-bold">✓</span>';
+    } else {
+        icon.className = 'w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4';
+        icon.innerHTML = '<span class="text-amber-600 text-xl font-bold">⚠</span>';
+    }
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    modal.classList.remove('hidden');
+}
+
+function closeAlert() {
+    const modal = document.getElementById('alertModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Password Strength Checker
+function checkPasswordStrength(password) {
+    const bars = [
+        document.getElementById('strength-bar-1'),
+        document.getElementById('strength-bar-2'),
+        document.getElementById('strength-bar-3'),
+        document.getElementById('strength-bar-4')
+    ];
+    const label = document.getElementById('strength-label');
+    const reqLength = document.getElementById('req-length');
+    const reqUppercase = document.getElementById('req-uppercase');
+    const reqLowercase = document.getElementById('req-lowercase');
+    const reqNumber = document.getElementById('req-number');
+    const reqSpecial = document.getElementById('req-special');
+    
+    if (!password) {
+        bars.forEach(bar => bar.className = 'h-1 flex-1 bg-gray-200 rounded transition-colors');
+        if (label) label.innerHTML = 'Password strength: <span class="font-medium">None</span>';
+        if (reqLength) reqLength.className = 'text-gray-400';
+        if (reqUppercase) reqUppercase.className = 'text-gray-400';
+        if (reqLowercase) reqLowercase.className = 'text-gray-400';
+        if (reqNumber) reqNumber.className = 'text-gray-400';
+        if (reqSpecial) reqSpecial.className = 'text-gray-400';
+        return { strength: 0, valid: false };
+    }
+    
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*]/.test(password);
+    
+    // Update requirement indicators
+    if (reqLength) {
+        reqLength.className = hasLength ? 'text-green-600' : 'text-gray-400';
+        reqLength.innerHTML = hasLength ? '✓ At least 8 characters' : '✗ At least 8 characters';
+    }
+    if (reqUppercase) {
+        reqUppercase.className = hasUppercase ? 'text-green-600' : 'text-gray-400';
+        reqUppercase.innerHTML = hasUppercase ? '✓ One uppercase letter' : '✗ One uppercase letter';
+    }
+    if (reqLowercase) {
+        reqLowercase.className = hasLowercase ? 'text-green-600' : 'text-gray-400';
+        reqLowercase.innerHTML = hasLowercase ? '✓ One lowercase letter' : '✗ One lowercase letter';
+    }
+    if (reqNumber) {
+        reqNumber.className = hasNumber ? 'text-green-600' : 'text-gray-400';
+        reqNumber.innerHTML = hasNumber ? '✓ One number' : '✗ One number';
+    }
+    if (reqSpecial) {
+        reqSpecial.className = hasSpecial ? 'text-green-600' : 'text-gray-400';
+        reqSpecial.innerHTML = hasSpecial ? '✓ One special character (!@#$%^&*)' : '✗ One special character (!@#$%^&*)';
+    }
+    
+    // Calculate strength
+    let strength = 0;
+    if (hasLength) strength++;
+    if (hasUppercase) strength++;
+    if (hasLowercase) strength++;
+    if (hasNumber) strength++;
+    if (hasSpecial) strength++;
+    
+    // Update bars and label
+    bars.forEach(bar => bar.className = 'h-1 flex-1 bg-gray-200 rounded transition-colors');
+    
+    if (strength === 1) {
+        bars[0].className = 'h-1 flex-1 bg-red-500 rounded transition-colors';
+        if (label) label.innerHTML = 'Password strength: <span class="font-medium text-red-600">Weak</span>';
+    } else if (strength === 2 || strength === 3) {
+        bars[0].className = 'h-1 flex-1 bg-amber-500 rounded transition-colors';
+        bars[1].className = 'h-1 flex-1 bg-amber-500 rounded transition-colors';
+        if (label) label.innerHTML = 'Password strength: <span class="font-medium text-amber-600">Fair</span>';
+    } else if (strength === 4) {
+        bars[0].className = 'h-1 flex-1 bg-blue-500 rounded transition-colors';
+        bars[1].className = 'h-1 flex-1 bg-blue-500 rounded transition-colors';
+        bars[2].className = 'h-1 flex-1 bg-blue-500 rounded transition-colors';
+        if (label) label.innerHTML = 'Password strength: <span class="font-medium text-blue-600">Good</span>';
+    } else if (strength === 5) {
+        bars.forEach(bar => bar.className = 'h-1 flex-1 bg-green-500 rounded transition-colors');
+        if (label) label.innerHTML = 'Password strength: <span class="font-medium text-green-600">Strong</span>';
+    }
+    
+    const valid = hasLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+    return { strength, valid };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const usersTableBody = document.getElementById('usersTableBody');
     const searchInput = document.getElementById('searchUsers');
@@ -19,6 +136,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const createEvaluatorExpiresAt = document.getElementById('createEvaluatorExpiresAt');
     const departmentWrap = document.getElementById('departmentWrap');
     const createDepartment = document.getElementById('createDepartment');
+
+    // Alert modal handlers
+    const alertOkBtn = document.getElementById('alertOkBtn');
+    if (alertOkBtn) alertOkBtn.addEventListener('click', closeAlert);
+    
+    // Password strength checker
+    const createPassword = document.getElementById('createPassword');
+    if (createPassword) {
+        createPassword.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+    }
+    
+    // Toggle password requirements dropdown
+    const toggleRequirementsBtn = document.getElementById('toggleRequirements');
+    const passwordRequirements = document.getElementById('passwordRequirements');
+    const requirementsArrow = document.getElementById('requirementsArrow');
+    
+    if (toggleRequirementsBtn && passwordRequirements && requirementsArrow) {
+        toggleRequirementsBtn.addEventListener('click', function() {
+            const isHidden = passwordRequirements.classList.contains('hidden');
+            passwordRequirements.classList.toggle('hidden');
+            
+            // Rotate arrow
+            if (isHidden) {
+                requirementsArrow.style.transform = 'rotate(180deg)';
+            } else {
+                requirementsArrow.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
 
     let allUsers = [];
     let isRedirecting = false;
@@ -75,6 +223,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (createUserForm) createUserForm.reset();
         if (evaluatorExpiryWrap) evaluatorExpiryWrap.classList.add('hidden');
         if (createEvaluatorExpiresAt) createEvaluatorExpiresAt.required = false;
+        
+        // Reset password strength meter
+        checkPasswordStrength('');
+        
+        // Hide requirements dropdown
+        const passwordRequirements = document.getElementById('passwordRequirements');
+        const requirementsArrow = document.getElementById('requirementsArrow');
+        if (passwordRequirements) passwordRequirements.classList.add('hidden');
+        if (requirementsArrow) requirementsArrow.style.transform = 'rotate(0deg)';
     }
 
     function syncEvaluatorExpiryField() {
@@ -127,11 +284,19 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Form submission data:', { firstName, lastName, email, role, department, departmentVisible: !departmentSelect?.closest('#departmentWrap').classList.contains('hidden') });
 
             if (!firstName || !lastName || !email || !role || !password || !confirmPassword) {
-                alert('Please fill in all required fields.');
+                showAlert('Please fill in all required fields.', 'Missing Information', 'warning');
                 return;
             }
+            
+            // Validate password strength
+            const passwordCheck = checkPasswordStrength(password);
+            if (!passwordCheck.valid) {
+                showAlert('Password must meet all requirements: at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).', 'Weak Password', 'error');
+                return;
+            }
+            
             if (password !== confirmPassword) {
-                alert('Passwords do not match.');
+                showAlert('Passwords do not match. Please re-enter your password.', 'Password Mismatch', 'error');
                 return;
             }
 
@@ -140,12 +305,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
             
             if (requiresDepartment && !department) {
-                alert('Please select a department for Faculty or Dept. Head role.');
+                showAlert('Please select a department for Faculty or Dept. Head role.', 'Department Required', 'warning');
                 return;
             }
             
+            // Check if department head already exists for selected department
+            if (normalizedRole === 'department-head' && department) {
+                try {
+                    const checkResponse = await fetch(`http://localhost:3000/api/auth/check-dept-head/${department}`, {
+                        headers: { 'x-auth-token': token }
+                    });
+                    
+                    if (checkResponse.ok) {
+                        const checkData = await checkResponse.json();
+                        if (checkData.exists) {
+                            showAlert(
+                                `A Department Head for ${department} already exists. Only one Department Head is allowed per department. Please select a different department or role.`,
+                                'Department Head Already Exists',
+                                'error'
+                            );
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking department head:', error);
+                    showAlert('Unable to verify department head availability. Please try again.', 'Verification Error', 'error');
+                    return;
+                }
+            }
+            
             if (isEvaluator && !evaluatorExpiresAt) {
-                alert('Please set an expiration date/time for External Evaluator.');
+                showAlert('Please set an expiration date/time for External Evaluator accounts.', 'Expiration Date Required', 'warning');
                 return;
             }
 
@@ -176,12 +366,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.msg || 'Failed to create user account.');
 
-                alert(result.msg || 'User account created successfully.');
+                showAlert(result.msg || 'User account created successfully.', 'Success', 'success');
                 closeCreateUserModal();
                 fetchAndRenderUsers();
             } catch (error) {
                 console.error('Error creating user:', error);
-                alert(`Failed to create user: ${error.message}`);
+                showAlert(`Failed to create user: ${error.message}`, 'Error', 'error');
             }
         });
     }

@@ -398,6 +398,94 @@ router.get('/approvals', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/documents/stats
+// @desc    Get dashboard statistics for evaluator
+// @access  Private (Evaluator)
+router.get('/stats/dashboard', auth, async (req, res) => {
+  try {
+    const normalizedRole = normalizeRole(req.user.role);
+    const isEvaluator = normalizedRole === 'evaluator';
+    
+    // Evaluators can only see approved documents stats
+    const statusFilter = isEvaluator ? "WHERE d.workflow_status = 'approved'" : '';
+    
+    // Get total documents count
+    const [totalResult] = await db.query(
+      `SELECT COUNT(*) as total FROM documents d ${statusFilter}`
+    );
+    const totalDocuments = totalResult[0]?.total || 0;
+    
+    // Get counts by category
+    const [categoryStats] = await db.query(
+      `SELECT 
+        c.name,
+        c.display_name,
+        COUNT(d.id) as count,
+        ROUND((COUNT(d.id) * 100.0 / ?), 1) as percentage
+       FROM categories c
+       LEFT JOIN documents d ON c.id = d.category_id ${statusFilter ? 'AND d.workflow_status = \'approved\'' : ''}
+       WHERE c.is_active = 1
+       GROUP BY c.id, c.name, c.display_name
+       ORDER BY c.sort_order ASC`,
+      [totalDocuments || 1]
+    );
+    
+    // Get counts by status
+    const [statusStats] = await db.query(
+      `SELECT 
+        workflow_status as status,
+        COUNT(*) as count
+       FROM documents d
+       ${statusFilter}
+       GROUP BY workflow_status`
+    );
+    
+    // Get counts by department
+    const [departmentStats] = await db.query(
+      `SELECT 
+        dept.code,
+        dept.name,
+        COUNT(d.id) as count
+       FROM departments dept
+       LEFT JOIN documents d ON dept.id = d.department_id ${statusFilter ? 'AND d.workflow_status = \'approved\'' : ''}
+       WHERE dept.is_active = 1
+       GROUP BY dept.id, dept.code, dept.name
+       ORDER BY dept.code ASC`
+    );
+    
+    // Get recent documents (limit 10 for dashboard)
+    const [recentDocs] = await db.query(
+      `SELECT 
+        d.id,
+        d.title,
+        d.category,
+        d.department_code as department,
+        d.workflow_status as status,
+        d.version,
+        d.author_name,
+        d.created_at,
+        c.display_name as category_display_name,
+        (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
+       FROM documents d
+       LEFT JOIN categories c ON d.category_id = c.id
+       ${statusFilter}
+       ORDER BY d.created_at DESC
+       LIMIT 10`
+    );
+    
+    res.json({
+      total: totalDocuments,
+      categories: categoryStats,
+      statuses: statusStats,
+      departments: departmentStats,
+      recentDocuments: recentDocs
+    });
+  } catch (err) {
+    console.error('Dashboard stats error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   GET /api/documents/:id
 // @desc    Get single document with all files
 // @access  Private

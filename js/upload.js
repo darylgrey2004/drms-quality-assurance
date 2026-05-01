@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropZoneFiles = document.getElementById('dropZoneFiles');
     const uploadFileList = document.getElementById('uploadFileList');
     const addMoreBtn = document.getElementById('addMoreBtn');
-
+    const uploadForm = document.getElementById('uploadForm');
     const cancelBtn = document.getElementById('cancelBtn');
     const uploadSuccessModal = document.getElementById('uploadSuccessModal');
     const uploadSuccessBackdrop = document.getElementById('uploadSuccessBackdrop');
@@ -34,8 +34,129 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedFiles = [];
     const API_BASE = 'http://localhost:3000';
 
-    // Load categories dynamically
+    // Load categories and departments dynamically
     loadCategories();
+    loadDepartments();
+    loadRecentUploads();
+    populateAuthorField();
+    setupVersionAutoIncrement();
+
+    function populateAuthorField() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const authorInput = document.getElementById('author');
+        if (authorInput && user.firstName && user.lastName) {
+            const fullName = `${user.firstName} ${user.lastName}`.trim();
+            authorInput.value = fullName;
+            authorInput.setAttribute('readonly', 'readonly');
+            authorInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        }
+    }
+
+    function setupVersionAutoIncrement() {
+        const titleInput = document.getElementById('docTitle');
+        const categorySelect = document.getElementById('category');
+        const departmentSelect = document.getElementById('department');
+        const versionInput = document.getElementById('version');
+
+        async function checkAndUpdateVersion() {
+            const title = titleInput?.value.trim();
+            const category = categorySelect?.value;
+            const department = departmentSelect?.value;
+
+            if (!title || !category || !department || !token) {
+                if (versionInput) versionInput.value = 'v1.0';
+                return;
+            }
+
+            try {
+                // Check if document with same title, category, and department exists
+                const response = await fetch(`${API_BASE}/api/documents?scope=mine`, {
+                    headers: { 'x-auth-token': token }
+                });
+                
+                if (!response.ok) {
+                    if (versionInput) versionInput.value = 'v1.0';
+                    return;
+                }
+
+                const documents = await response.json();
+                
+                // Filter documents with same title, category, and department
+                const matchingDocs = documents.filter(doc => 
+                    doc.title.toLowerCase() === title.toLowerCase() && 
+                    String(doc.category_id) === String(category) &&
+                    (doc.department_code === department || doc.area === department)
+                );
+
+                if (matchingDocs.length === 0) {
+                    if (versionInput) versionInput.value = 'v1.0';
+                    return;
+                }
+
+                // Find highest version number
+                let maxVersion = 1;
+                matchingDocs.forEach(doc => {
+                    const versionMatch = (doc.version || 'v1.0').match(/v?(\d+)(\.\d+)?/);
+                    if (versionMatch) {
+                        const versionNum = parseInt(versionMatch[1]);
+                        if (versionNum >= maxVersion) {
+                            maxVersion = versionNum + 1;
+                        }
+                    }
+                });
+
+                const newVersion = `v${maxVersion}.0`;
+                if (versionInput) {
+                    versionInput.value = newVersion;
+                    versionInput.classList.add('bg-amber-50', 'border-amber-300');
+                    versionInput.classList.remove('bg-gray-100');
+                }
+
+                // Get category display name
+                const categoryOption = categorySelect?.querySelector(`option[value="${category}"]`);
+                const categoryName = categoryOption?.textContent || 'this category';
+
+                // Show alert to user
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'bg-amber-50 border-l-4 border-amber-400 p-3 mb-4 rounded';
+                alertDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="text-amber-600 mr-2">⚠️</span>
+                        <div class="text-sm">
+                            <p class="font-medium text-amber-800">Document Version Auto-Incremented</p>
+                            <p class="text-amber-700 mt-1">A document with the title "${title}" already exists in <strong>${categoryName}</strong> category for <strong>${department}</strong> department. Version automatically set to <strong>${newVersion}</strong>.</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert alert before the form
+                const form = document.getElementById('uploadForm');
+                const existingAlert = form?.previousElementSibling;
+                if (existingAlert && existingAlert.classList.contains('bg-amber-50')) {
+                    existingAlert.remove();
+                }
+                form?.parentNode.insertBefore(alertDiv, form);
+
+                // Auto-remove alert after 8 seconds
+                setTimeout(() => alertDiv.remove(), 8000);
+
+            } catch (error) {
+                console.error('Version check error:', error);
+                if (versionInput) versionInput.value = 'v1.0';
+            }
+        }
+
+        // Check version when title, category, or department changes
+        if (titleInput) {
+            titleInput.addEventListener('blur', checkAndUpdateVersion);
+        }
+        if (categorySelect) {
+            categorySelect.addEventListener('change', checkAndUpdateVersion);
+        }
+        if (departmentSelect) {
+            departmentSelect.addEventListener('change', checkAndUpdateVersion);
+        }
+    }
 
     function loadCategories() {
         fetch(`${API_BASE}/api/documents/categories`, {
@@ -48,13 +169,83 @@ document.addEventListener('DOMContentLoaded', function() {
                 categorySelect.innerHTML = '<option value="">Select category</option>';
                 categories.forEach(cat => {
                     const option = document.createElement('option');
-                    option.value = cat.id;  // Use numeric ID
+                    option.value = cat.id;
                     option.textContent = cat.display_name || cat.name;
                     categorySelect.appendChild(option);
                 });
             }
         })
         .catch(err => console.error('Load categories error:', err));
+    }
+
+    function loadDepartments() {
+        fetch(`${API_BASE}/api/documents/departments`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(departments => {
+            const departmentSelect = document.getElementById('department');
+            if (departmentSelect && departments.length > 0) {
+                departmentSelect.innerHTML = '<option value="">Select department</option>';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.code;
+                    option.textContent = `${dept.code} (${dept.name})`;
+                    departmentSelect.appendChild(option);
+                });
+            }
+        })
+        .catch(err => console.error('Load departments error:', err));
+    }
+
+    function loadRecentUploads() {
+        fetch(`${API_BASE}/api/documents?scope=mine`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(documents => {
+            renderRecentUploads(documents.slice(0, 5));
+        })
+        .catch(err => console.error('Load recent uploads error:', err));
+    }
+
+    function renderRecentUploads(documents) {
+        const desktopContainer = document.querySelector('.hidden.md\\:block .divide-y');
+        const mobileContainer = document.querySelector('.block.md\\:hidden');
+        
+        if (!documents || documents.length === 0) {
+            if (desktopContainer) desktopContainer.innerHTML = '<div class="py-4 text-center text-gray-500 text-sm">No recent uploads</div>';
+            if (mobileContainer) mobileContainer.innerHTML = '<div class="py-4 text-center text-gray-500 text-sm">No recent uploads</div>';
+            return;
+        }
+
+        // Desktop view
+        if (desktopContainer) {
+            desktopContainer.innerHTML = documents.map(doc => {
+                const uploadDate = new Date(doc.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                    <div class="grid grid-cols-12 py-2 text-sm items-center">
+                        <div class="col-span-5 text-gray-700">${doc.title || 'Untitled'}</div>
+                        <div class="col-span-2 text-gray-600">${doc.category_display_name || doc.category || '-'}</div>
+                        <div class="col-span-2 text-gray-600">${doc.department_code || doc.area || '-'}</div>
+                        <div class="col-span-3 text-gray-400 text-xs">${uploadDate}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Mobile view
+        if (mobileContainer) {
+            mobileContainer.innerHTML = documents.map(doc => {
+                const uploadDate = new Date(doc.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                    <div class="border-b pb-2">
+                        <div class="font-medium text-gray-800 text-sm">${doc.title || 'Untitled'}</div>
+                        <div class="text-xs text-gray-500">${doc.category_display_name || doc.category || '-'} · ${doc.department_code || doc.area || '-'} · ${uploadDate}</div>
+                    </div>
+                `;
+            }).join('');
+        }
     }
 
     function showUploadSuccessModal() {
@@ -264,7 +455,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('author', author);
                 formData.append('description', document.getElementById('description')?.value || '');
                 formData.append('keywords', document.getElementById('keywords')?.value || '');
-                formData.append('expiryDate', document.getElementById('expiryDate')?.value || '');
                 formData.append('workflow', document.querySelector('input[name="workflow"]:checked')?.value || 'submit');
                 formData.append('files', file);
 
@@ -327,7 +517,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 department,
                 author,
                 version: document.getElementById('version')?.value,
-                expiryDate: document.getElementById('expiryDate')?.value,
                 workflow: document.querySelector('input[name="workflow"]:checked')?.value,
                 files: files.map((f) => f.name)
             });

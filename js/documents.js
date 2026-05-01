@@ -353,11 +353,19 @@ function updateUserInfo(user) {
 
 async function loadDocuments() {
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = (user.role || '').toLowerCase();
+    
+    console.log('Loading documents for role:', role);
     
     try {
         showLoading();
         
-        const response = await fetch(`${API_BASE}/api/documents?scope=all`, {
+        // Admin and Dean should see all documents
+        const scopeParam = (role === 'admin' || role === 'dean') ? '?scope=all' : '';
+        console.log('Fetching documents with scope:', scopeParam || 'default (own documents)');
+        
+        const response = await fetch(`${API_BASE}/api/documents${scopeParam}`, {
             headers: {
                 'x-auth-token': token
             }
@@ -368,6 +376,9 @@ async function loadDocuments() {
         }
 
         allDocuments = await response.json();
+        console.log('Documents loaded:', allDocuments.length);
+        console.log('Departments represented:', [...new Set(allDocuments.map(d => d.department_code))]);
+        
         filteredDocuments = [...allDocuments];
         
         renderDocuments();

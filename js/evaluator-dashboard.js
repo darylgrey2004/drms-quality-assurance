@@ -67,8 +67,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const docViewerMeta = document.getElementById('docViewerMeta');
         
         if (docViewerTitle) docViewerTitle.textContent = doc.title || 'Untitled Document';
-        if (docViewerMeta) docViewerMeta.textContent = 
-            `${doc.category || 'N/A'} · ${doc.department || 'N/A'} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+        if (docViewerMeta) {
+            const deptDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
+            docViewerMeta.textContent = 
+                `${doc.category || 'N/A'} · ${deptDisplay} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
+        }
 
         // Load document content
         const content = document.getElementById('docViewerContent');
@@ -76,14 +79,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (content) {
             if (doc.file_url) {
                 // Determine file type
-                const fileUrl = doc.file_url;
+                const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://127.0.0.1:3000${doc.file_url}`;
                 const isPDF = fileUrl.toLowerCase().endsWith('.pdf');
                 
                 if (isPDF) {
                     // For PDF, use iframe
                     content.innerHTML = `
-                        <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${doc.title}"></iframe>
-                        <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${doc.title}</p>
+                        <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${escapeHtml(doc.title)}"></iframe>
+                        <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${escapeHtml(doc.title)}</p>
                     `;
                 } else {
                     // For other files, show download prompt
@@ -152,6 +155,89 @@ document.addEventListener('DOMContentLoaded', function() {
         return category || 'N/A';
     }
 
+    // Fetch dashboard statistics from API
+    async function loadDashboardStats() {
+        try {
+            console.log('Fetching dashboard statistics...');
+            const response = await fetch('http://127.0.0.1:3000/api/documents/stats/dashboard', {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const stats = await response.json();
+            console.log('Dashboard stats fetched:', stats);
+
+            // Update total documents
+            const totalElement = document.querySelector('.stat-card .text-2xl, .stat-card .text-3xl');
+            if (totalElement && totalElement.closest('.stat-card')?.querySelector('.text-gray-500')?.textContent === 'Total Documents') {
+                totalElement.textContent = stats.total || 0;
+            }
+
+            // Update category stats
+            stats.categories?.forEach(cat => {
+                const categoryCard = Array.from(document.querySelectorAll('.stat-card')).find(card => {
+                    const label = card.querySelector('.text-gray-500')?.textContent;
+                    return label === cat.display_name;
+                });
+                if (categoryCard) {
+                    const countElement = categoryCard.querySelector('.text-2xl, .text-3xl');
+                    const percentElement = categoryCard.querySelector('.text-xs.text-gray-500');
+                    if (countElement) countElement.textContent = cat.count || 0;
+                    if (percentElement) percentElement.textContent = `${cat.percentage || 0}% of total`;
+                }
+            });
+
+            // Update status stats
+            const approvedStat = stats.statuses?.find(s => s.status === 'approved');
+            const pendingStat = stats.statuses?.find(s => s.status === 'pending');
+            
+            const approvedCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
+                card.querySelector('.text-gray-500')?.textContent === 'Approved'
+            );
+            if (approvedCard && approvedStat) {
+                const countElement = approvedCard.querySelector('.text-2xl, .text-3xl');
+                const percentElement = approvedCard.querySelector('.text-xs');
+                if (countElement) countElement.textContent = approvedStat.count || 0;
+                if (percentElement && stats.total > 0) {
+                    const percentage = ((approvedStat.count / stats.total) * 100).toFixed(1);
+                    percentElement.textContent = `${percentage}% approved`;
+                }
+            }
+
+            const pendingCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
+                card.querySelector('.text-gray-500')?.textContent === 'Pending'
+            );
+            if (pendingCard && pendingStat) {
+                const countElement = pendingCard.querySelector('.text-2xl, .text-3xl');
+                if (countElement) countElement.textContent = pendingStat.count || 0;
+            }
+
+            // Update departments count
+            const deptCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
+                card.querySelector('.text-gray-500')?.textContent === 'Departments'
+            );
+            if (deptCard) {
+                const countElement = deptCard.querySelector('.text-2xl, .text-3xl');
+                const detailElement = deptCard.querySelector('.text-xs');
+                if (countElement) countElement.textContent = stats.departments?.length || 0;
+                if (detailElement && stats.departments) {
+                    const deptCodes = stats.departments.map(d => d.code).join(', ');
+                    detailElement.textContent = deptCodes;
+                }
+            }
+
+        } catch (error) {
+            console.error('Error loading dashboard stats:', error);
+        }
+    }
+
     // Fetch recent approved documents from API
     async function loadRecentApprovedDocuments() {
         const tableTbody = document.querySelector('#recentDocumentsTable tbody');
@@ -199,10 +285,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Populate table with documents
                 recentDocs.forEach(doc => {
+                    console.log('Document data:', doc);
                     const row = document.createElement('tr');
                     const categoryClass = getCategoryClass(doc.category);
                     const categoryDisplay = getCategoryDisplay(doc.category);
-                    const departmentDisplay = doc.department || 'N/A';
+                    const departmentDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
                     
                     row.innerHTML = `
                         <td class="py-3">
@@ -252,7 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Load documents on page load
+    // Load dashboard stats and documents on page load
+    loadDashboardStats();
     loadRecentApprovedDocuments();
 
     // Activity feed items - informational only

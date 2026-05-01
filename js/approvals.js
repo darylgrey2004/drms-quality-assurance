@@ -439,7 +439,14 @@ document.addEventListener('DOMContentLoaded', function() {
         submitRejection.addEventListener('click', async () => {
             const reason = rejectionComment?.value?.trim();
             if (!reason) { showToast('Please provide a rejection reason.', true); return; }
-            if (!pendingRejectDocId) return;
+            if (!pendingRejectDocId) {
+                showErrorModal('No document selected for rejection.');
+                return;
+            }
+            
+            console.log('Submitting rejection for document ID:', pendingRejectDocId);
+            console.log('Rejection reason:', reason);
+            
             await performReject(pendingRejectDocId, reason);
             closeRejectionModal();
         });
@@ -519,18 +526,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function performReject(docId, reason, silent = false) {
         try {
+            console.log('performReject called with docId:', docId, 'reason:', reason);
+            
             const response = await fetch(`${API_BASE}/api/approvals/${docId}/reject`, {
                 method: 'POST',
                 headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reason })
             });
+            
+            console.log('Rejection response status:', response.status);
+            
             const data = await response.json();
+            console.log('Rejection response data:', data);
+            
             if (!response.ok) throw new Error(data.msg || 'Failed to reject');
             if (!silent) showToast('Document rejected successfully.');
             updateDocumentStatus(docId, 'rejected');
+            loadStats();
             return true;
         } catch (err) {
-            if (!silent) showErrorModal(err.message);
+            console.error('Rejection error:', err);
+            if (!silent) showErrorModal(err.message || 'Failed to reject document');
             return false;
         }
     }
@@ -953,8 +969,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.btn-reject').forEach(btn => {
             btn.addEventListener('click', () => {
                 const docId = parseInt(btn.getAttribute('data-id'));
-                const doc = allDocuments.find(d => d.id === docId);
-                if (doc) openRejectionModal(doc);
+                console.log('Reject button clicked for document ID:', docId);
+                const doc = allDocuments.find(d => d.id === docId || d.id === String(docId));
+                console.log('Found document:', doc);
+                if (doc) {
+                    openRejectionModal(doc);
+                } else {
+                    console.error('Document not found in allDocuments array');
+                    showErrorModal('Document not found. Please refresh the page and try again.');
+                }
             });
         });
         
