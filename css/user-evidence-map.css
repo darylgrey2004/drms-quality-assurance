@@ -28,7 +28,7 @@ body {
 }
 
 .stat-card {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     border: 1px solid #eef2f6;
     background-color: white;
     border-radius: 0.75rem;
@@ -42,20 +42,82 @@ body {
 }
 
 /* Category badge colors */
-.bg-blue-100 { background-color: #dbeafe; }
-.text-blue-800 { color: #1e40af; }
+.badge-instruction {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-research {
+    background-color: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-extension {
+    background-color: #fef3c7;
+    color: #b45309;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-employment {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Status badges */
+.badge-status-complete {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-status-partial {
+    background-color: #fef9e7;
+    color: #b78103;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+/* Department badge */
+.badge-department {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Progress bar colors */
 .bg-blue-600 { background-color: #2563eb; }
-
-.bg-green-100 { background-color: #dcfce7; }
-.text-green-800 { color: #166534; }
 .bg-green-600 { background-color: #16a34a; }
-
-.bg-amber-100 { background-color: #fef3c7; }
-.text-amber-800 { color: #92400e; }
 .bg-amber-600 { background-color: #d97706; }
-
-.bg-purple-100 { background-color: #f3e8ff; }
-.text-purple-800 { color: #6b21a5; }
 .bg-purple-600 { background-color: #9333ea; }
 
 /* Tab styling */
@@ -64,15 +126,15 @@ body {
     border-bottom-color: #0f766e;
 }
 
-/* Progress bar colors */
-.bg-teal-600 { background-color: #0d9488; }
-.bg-amber-600 { background-color: #d97706; }
-.bg-indigo-600 { background-color: #4f46e5; }
-
-/* Status indicators */
+/* Status colors */
 .text-green-600 { color: #15803d; }
 .text-amber-600 { color: #b45309; }
+.text-blue-700 { color: #1d4ed8; }
+.text-green-700 { color: #15803d; }
+.text-amber-700 { color: #b45309; }
+.text-purple-700 { color: #7e22ce; }
 
+/* Input focus */
 input:focus, select:focus {
     outline: none;
     border-color: #14b8a6;
@@ -83,6 +145,23 @@ input:focus, select:focus {
 .mobile-header-spacer {
     height: 60px;
     width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0f766e;
 }
 
 /* ============================================ */
@@ -166,4 +245,20 @@ input:focus, select:focus {
     button, a { min-height: 44px; }
     body { font-size: 14px; }
     input, select { font-size: 16px !important; }
+}
+
+/* Print styles */
+@media print {
+    .sidebar, nav, .menu-toggle, button {
+        display: none !important;
+    }
+    main {
+        margin: 0;
+        padding: 0;
+    }
+    .stat-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
 }

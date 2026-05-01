@@ -42,25 +42,22 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">📄</span> My Documents
+                    <span class="mr-3 text-teal-300 w-5">My Documents</span>
                 </a>
                 <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload Document
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
                 </a>
                 <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> My Approvals
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
@@ -90,13 +87,13 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
                                 <input type="text" id="searchDocuments" placeholder="Search your documents..." 
-                                       class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                       class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
+                            <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 <option value="all">All Status</option>
                                 <option value="approved">Approved</option>
                                 <option value="pending">Pending</option>
@@ -104,13 +101,13 @@
                                 <option value="draft">Draft</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
+                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 <option value="all">All Categories</option>
                             </select>
-                            <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700">
+                            <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 <option value="all">All Departments</option>
                             </select>
-                            <button id="filterBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg">Filter</button>
+                            <button id="filterBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Filter</button>
                         </div>
                     </div>
                 </div>
@@ -121,13 +118,13 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-gray-200 text-gray-500 text-xs">
-                                    <th class="text-left py-3">Document</th>
-                                    <th class="text-left py-3">Category</th>
-                                    <th class="text-left py-3">Department</th>
-                                    <th class="text-left py-3">Status</th>
-                                    <th class="text-left py-3">Version</th>
-                                    <th class="text-left py-3">Uploaded</th>
-                                    <th class="text-left py-3">Actions</th>
+                                    <th class="text-left py-3 px-2">Document</th>
+                                    <th class="text-left py-3 px-2">Category</th>
+                                    <th class="text-left py-3 px-2">Department</th>
+                                    <th class="text-left py-3 px-2">Status</th>
+                                    <th class="text-left py-3 px-2">Version</th>
+                                    <th class="text-left py-3 px-2">Uploaded</th>
+                                    <th class="text-left py-3 px-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100" id="documentsTable">
@@ -202,7 +199,55 @@
         </div>
     </div>
 
+    <!-- DOCUMENT DETAILS MODAL -->
+    <div id="docDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docDetailsTitle" class="text-lg font-semibold text-gray-800">Document Details</h3>
+                <button id="docDetailsCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-4" id="docDetailsContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button id="docDetailsCloseBtn2" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'faculty' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Faculty Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'Faculty Access';
+            }
+        }
+        updateSidebarUser();
+        
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -217,7 +262,41 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
         
-
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
+        
+        // Details modal close handlers
+        function closeDetailsModal() {
+            const modal = document.getElementById('docDetailsModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+        
+        const docDetailsCloseBtn = document.getElementById('docDetailsCloseBtn');
+        const docDetailsCloseBtn2 = document.getElementById('docDetailsCloseBtn2');
+        const docDetailsModal = document.getElementById('docDetailsModal');
+        
+        if (docDetailsCloseBtn) docDetailsCloseBtn.addEventListener('click', closeDetailsModal);
+        if (docDetailsCloseBtn2) docDetailsCloseBtn2.addEventListener('click', closeDetailsModal);
+        if (docDetailsModal) {
+            docDetailsModal.addEventListener('click', (e) => {
+                if (e.target === docDetailsModal) closeDetailsModal();
+            });
+        }
     </script>
 </body>
 <script src="js/user-session.js"></script>

@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>DRMS-QA · Evidence Map (View Only)</title>
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- External CSS -->
     <link rel="stylesheet" href="css/user-evidence-map.css">
 </head>
 <body class="min-h-screen">
@@ -29,36 +32,32 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">JD</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Juan Dela Cruz</div>
-                        <div id="sidebarRole" class="text-xs text-teal-300">Faculty · Science Education</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> My Documents
+                    <span class="mr-3 text-teal-300/70 w-5">My Documents</span>
                 </a>
                 <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload Document
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
                 </a>
                 <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300 w-5">Evidence Map</span>
                 </a>
                 <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> My Approvals
-                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
@@ -88,7 +87,7 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="font-semibold text-gray-800">Instruction</h3>
-                            <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">245 docs</span>
+                            <span class="badge-instruction text-xs px-2.5 py-0.5 rounded-full">245 docs</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Documents mapped:</span>
@@ -103,7 +102,7 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="font-semibold text-gray-800">Research</h3>
-                            <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">312 docs</span>
+                            <span class="badge-research text-xs px-2.5 py-0.5 rounded-full">312 docs</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Documents mapped:</span>
@@ -118,7 +117,7 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="font-semibold text-gray-800">Extension</h3>
-                            <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full">156 docs</span>
+                            <span class="badge-extension text-xs px-2.5 py-0.5 rounded-full">156 docs</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Documents mapped:</span>
@@ -133,7 +132,7 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="font-semibold text-gray-800">Employment</h3>
-                            <span class="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full">134 docs</span>
+                            <span class="badge-employment text-xs px-2.5 py-0.5 rounded-full">134 docs</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Documents mapped:</span>
@@ -150,18 +149,21 @@
                 <div class="bg-white rounded-xl p-4 stat-card mb-6">
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
-                            <input type="text" id="searchMap" placeholder="Search by category, department, or document..." 
-                                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
+                                <input type="text" id="searchMap" placeholder="Search by category, department, or document..." 
+                                       class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm">
+                            </div>
                         </div>
                         <div class="flex gap-2">
-                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white">
+                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 <option value="all">All Categories</option>
                                 <option value="instruction">Instruction</option>
                                 <option value="research">Research</option>
                                 <option value="extension">Extension</option>
                                 <option value="employment">Employment</option>
                             </select>
-                            <button id="refreshMap" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Refresh</button>
+                            <button id="refreshMap" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Refresh</button>
                         </div>
                     </div>
                 </div>
@@ -180,154 +182,38 @@
                 <div id="instructionTab" class="tab-content block">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Instruction Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BEED</span>
-                                        <h4 class="font-medium mt-2">Bachelor of Elementary Education</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">42/45 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSED</span>
-                                        <h4 class="font-medium mt-2">Bachelor of Secondary Education</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">58/65 docs</span>
-                                        <div class="text-xs text-green-600">Complete</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSNED</span>
-                                        <h4 class="font-medium mt-2">Bachelor of Special Needs Education</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">28/40 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BCAED</span>
-                                        <h4 class="font-medium mt-2">Bachelor of Culture and Arts Education</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">25/35 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BPED</span>
-                                        <h4 class="font-medium mt-2">Bachelor of Physical Education</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">22/30 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="instructionDepartments">
+                            <!-- Dynamic content will be loaded from JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Research Tab (hidden) -->
+                <!-- Research Tab -->
                 <div id="researchTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Research Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BEED</span>
-                                        <h4 class="font-medium mt-2">Elementary Education Research</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">35/40 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BSED</span>
-                                        <h4 class="font-medium mt-2">Secondary Education Research</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">48/55 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="researchDepartments">
+                            <!-- Dynamic content will be loaded from JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Extension Tab (hidden) -->
+                <!-- Extension Tab -->
                 <div id="extensionTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Extension Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">BPED</span>
-                                        <h4 class="font-medium mt-2">Physical Education Extension</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">18/25 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">BEED</span>
-                                        <h4 class="font-medium mt-2">Elementary Extension Programs</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">15/20 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="extensionDepartments">
+                            <!-- Dynamic content will be loaded from JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Employment Tab (hidden) -->
+                <!-- Employment Tab -->
                 <div id="employmentTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Employment Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div>
-                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">All Depts</span>
-                                        <h4 class="font-medium mt-2">Employment Related Documents</h4>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-sm font-medium">134/180 docs</span>
-                                        <div class="text-xs text-amber-600">Partial</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="employmentDepartments">
+                            <!-- Dynamic content will be loaded from JS -->
                         </div>
                     </div>
                 </div>
@@ -335,7 +221,47 @@
         </main>
     </div>
 
+    <!-- Loading indicator -->
+    <div id="loadingMap" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-xl p-6 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-700 mb-4"></div>
+            <p class="text-gray-700">Loading evidence map...</p>
+        </div>
+    </div>
+
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'faculty' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Faculty Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'Faculty Access';
+            }
+        }
+        updateSidebarUser();
+
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -349,6 +275,110 @@
             document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
+
+        // Departments data
+        const departments = [
+            { code: 'BEED', name: 'Bachelor of Elementary Education' },
+            { code: 'BSED', name: 'Bachelor of Secondary Education' },
+            { code: 'BSNED', name: 'Bachelor of Special Needs Education' },
+            { code: 'BCAED', name: 'Bachelor of Culture and Arts Education' },
+            { code: 'BPED', name: 'Bachelor of Physical Education' }
+        ];
+
+        // Sample data for display (replace with real API data)
+        const categoryData = {
+            instruction: {
+                BEED: { current: 42, expected: 45, status: 'complete' },
+                BSED: { current: 58, expected: 65, status: 'complete' },
+                BSNED: { current: 28, expected: 40, status: 'partial' },
+                BCAED: { current: 25, expected: 35, status: 'partial' },
+                BPED: { current: 22, expected: 30, status: 'partial' }
+            },
+            research: {
+                BEED: { current: 35, expected: 40, status: 'partial' },
+                BSED: { current: 48, expected: 55, status: 'partial' },
+                BSNED: { current: 25, expected: 35, status: 'partial' },
+                BCAED: { current: 22, expected: 30, status: 'partial' },
+                BPED: { current: 18, expected: 25, status: 'partial' }
+            },
+            extension: {
+                BEED: { current: 18, expected: 25, status: 'partial' },
+                BSED: { current: 20, expected: 25, status: 'partial' },
+                BSNED: { current: 15, expected: 25, status: 'partial' },
+                BCAED: { current: 12, expected: 25, status: 'partial' },
+                BPED: { current: 18, expected: 25, status: 'partial' }
+            },
+            employment: {
+                BEED: { current: 28, expected: 30, status: 'partial' },
+                BSED: { current: 25, expected: 30, status: 'partial' },
+                BSNED: { current: 22, expected: 30, status: 'partial' },
+                BCAED: { current: 20, expected: 30, status: 'partial' },
+                BPED: { current: 18, expected: 30, status: 'partial' }
+            }
+        };
+
+        function getProgressWidth(current, expected) {
+            if (expected === 0) return 0;
+            return Math.min((current / expected) * 100, 100);
+        }
+
+        function getStatusColor(status) {
+            return status === 'complete' ? 'text-green-600' : 'text-amber-600';
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'complete') {
+                return '<span class="badge-status-complete px-2 py-1 rounded-full text-xs">Complete</span>';
+            } else {
+                return '<span class="badge-status-partial px-2 py-1 rounded-full text-xs">Partial</span>';
+            }
+        }
+
+        function renderCategoryTab(categoryId) {
+            const container = document.getElementById(`${categoryId}Departments`);
+            if (!container) return;
+            
+            const data = categoryData[categoryId];
+            if (!data) return;
+            
+            container.innerHTML = departments.map(dept => {
+                const deptData = data[dept.code] || { current: 0, expected: 25, status: 'partial' };
+                const percentage = getProgressWidth(deptData.current, deptData.expected);
+                const progressColor = deptData.status === 'complete' ? 'bg-green-600' : 'bg-amber-600';
+                const statusText = deptData.status === 'complete' ? 'Complete' : 'Partial';
+                const statusColor = getStatusColor(deptData.status);
+                
+                return `
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${dept.code}</span>
+                                <h4 class="font-medium text-gray-800 mt-2">${dept.name}</h4>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-medium">${deptData.current}/${deptData.expected} docs</span>
+                                <div class="text-xs ${statusColor}">${statusText}</div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="${progressColor} h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render all tabs
+        function renderAllTabs() {
+            renderCategoryTab('instruction');
+            renderCategoryTab('research');
+            renderCategoryTab('extension');
+            renderCategoryTab('employment');
+        }
+
+        renderAllTabs();
 
         // Tab switching
         document.querySelectorAll('#mapTabs a').forEach(link => {
@@ -392,7 +422,7 @@
                     const items = activeTab.querySelectorAll('.border.rounded-lg');
                     items.forEach(item => {
                         const text = item.textContent.toLowerCase();
-                        item.style.display = text.includes(term) ? 'block' : 'none';
+                        item.style.display = text.includes(term) ? '' : 'none';
                     });
                 }
             });
@@ -402,9 +432,24 @@
         document.getElementById('refreshMap')?.addEventListener('click', () => {
             if (searchInput) searchInput.value = '';
             if (categoryFilter) categoryFilter.value = 'all';
-            document.querySelectorAll('.border.rounded-lg').forEach(item => item.style.display = 'block');
+            document.querySelectorAll('.border.rounded-lg').forEach(item => item.style.display = '');
             alert('Evidence map refreshed');
         });
+
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
 <script src="js/user-session.js"></script>

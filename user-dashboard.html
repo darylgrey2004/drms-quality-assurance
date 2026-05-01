@@ -44,29 +44,25 @@
                 </div>
             </div>
 
-            <!-- navigation menu -->
+            <!-- navigation menu - My Approvals removed -->
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300 w-5">Dashboard</span>
                 </a>
                 <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> My Documents
+                    <span class="mr-3 text-teal-300/70 w-5">My Documents</span>
                 </a>
                 <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload Document
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
                 </a>
                 <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> My Approvals
-                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
@@ -95,39 +91,45 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="bg-white rounded-full px-4 py-2 text-sm shadow-sm text-gray-600 border whitespace-nowrap">
-                            📅 28 Apr 2026
+                            <span id="currentDate">28 Apr 2026</span>
                         </div>
                         <div class="relative">
-                            <button class="bg-white p-2 rounded-full shadow-sm border hover:bg-gray-50">
-                                🔔
+                            <button class="bg-white p-2 rounded-full shadow-sm border hover:bg-gray-50 transition-colors" id="notificationBtn">
+                                <span class="text-gray-600">Notifications</span>
                                 <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- role indicator -->
-                <div class="bg-teal-50 border border-teal-200 rounded-lg p-3 mb-6 text-sm text-teal-800 flex items-center">
-                    <span class="mr-2">ℹ️</span>
-                    You are logged in as <span class="font-semibold mx-1">Faculty</span> with upload and view permissions.
-                </div>
-
                 <!-- stats cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">My Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div><span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📄</span></div>
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">My Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div>
+                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">Docs</span>
+                        </div>
                         <div class="text-xs text-teal-600 mt-2">+3 this month</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">18</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span></div>
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">18</div></div>
+                            <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">Approved</span>
+                        </div>
                         <div class="text-xs text-green-600 mt-2">75% approval rate</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">4</div></div><span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span></div>
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">4</div></div>
+                            <span class="bg-amber-100 text-amber-700 p-2 rounded-lg text-lg">Pending</span>
+                        </div>
                         <div class="text-xs text-amber-600 mt-2">Awaiting validation</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Needs Revision</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">2</div></div><span class="bg-red-100 text-red-700 p-2 rounded-lg">✏️</span></div>
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">Needs Revision</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">2</div></div>
+                            <span class="bg-red-100 text-red-700 p-2 rounded-lg text-lg">Revision</span>
+                        </div>
                         <div class="text-xs text-red-600 mt-2">Action required</div>
                     </div>
                 </div>
@@ -143,11 +145,45 @@
                     <div class="hidden md:block overflow-x-auto">
                         <div class="min-w-[800px]">
                             <table class="w-full text-sm">
-                                <thead><tr class="border-b border-gray-200 text-gray-500 text-xs"><th class="text-left py-3">Document</th><th class="text-left py-3">Category</th><th class="text-left py-3">Department</th><th class="text-left py-3">Status</th><th class="text-left py-3">Version</th><th class="text-left py-3">Uploaded</th><th class="text-left py-3">Actions</th></tr></thead>
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                        <th class="text-left py-3">Document</th>
+                                        <th class="text-left py-3">Category</th>
+                                        <th class="text-left py-3">Department</th>
+                                        <th class="text-left py-3">Status</th>
+                                        <th class="text-left py-3">Version</th>
+                                        <th class="text-left py-3">Uploaded</th>
+                                        <th class="text-left py-3">Actions</th>
+                                    </tr>
+                                </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    <tr><td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td><td class="py-3 text-gray-600">BSED</td><td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td><td class="py-3 text-gray-600">v2.1</td><td class="py-3 text-gray-400">Apr 20, 2026</td><td class="py-3"><button class="action-btn view-btn">View</button><button class="action-btn download-btn ml-2">Download</button></td></tr>
-                                    <tr><td class="py-3"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td><td class="py-3 text-gray-600">BSED</td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td><td class="py-3 text-gray-600">v1.0</td><td class="py-3 text-gray-400">Apr 22, 2026</td><td class="py-3"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn ml-2">Edit</button></td></tr>
-                                    <tr><td class="py-3"><div class="font-medium text-gray-800">Extension Program Report</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td><td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td><td class="py-3 text-gray-600">BEED</td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td><td class="py-3 text-gray-600">v0.5</td><td class="py-3 text-gray-400">Apr 18, 2026</td><td class="py-3"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn ml-2">Edit</button></td></tr>
+                                    <tr>
+                                        <td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
+                                        <td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td>
+                                        <td class="py-3 text-gray-600">BSED</td>
+                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                                        <td class="py-3 text-gray-600">v2.1</td>
+                                        <td class="py-3 text-gray-400">Apr 20, 2026</td>
+                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn download-btn">Download</button></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
+                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
+                                        <td class="py-3 text-gray-600">BSED</td>
+                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
+                                        <td class="py-3 text-gray-600">v1.0</td>
+                                        <td class="py-3 text-gray-400">Apr 22, 2026</td>
+                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn">Edit</button></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3"><div class="font-medium text-gray-800">Extension Program Report</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
+                                        <td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td>
+                                        <td class="py-3 text-gray-600">BEED</td>
+                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
+                                        <td class="py-3 text-gray-600">v0.5</td>
+                                        <td class="py-3 text-gray-400">Apr 18, 2026</td>
+                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn">Edit</button></div></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -155,9 +191,27 @@
 
                     <!-- Mobile Card View -->
                     <div class="block md:hidden space-y-4">
-                        <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 20, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div><div class="text-sm text-gray-600 mb-3">BSED · v2.1</div><div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm download-btn">Download</button></div></div>
-                        <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 22, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div><div class="text-sm text-gray-600 mb-3">BSED · v1.0</div><div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div></div>
-                        <div class="border rounded-lg p-4 bg-white"><div class="font-medium text-gray-800">Extension Program Report</div><div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 18, 2026</div><div class="flex flex-wrap gap-2 mb-2"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div><div class="text-sm text-gray-600 mb-3">BEED · v0.5</div><div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div></div>
+                        <div class="border rounded-lg p-4 bg-white">
+                            <div class="font-medium text-gray-800">Research Publication 2025</div>
+                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 20, 2026</div>
+                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
+                            <div class="text-sm text-gray-600 mb-3">BSED · v2.1</div>
+                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm download-btn">Download</button></div>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-white">
+                            <div class="font-medium text-gray-800">Syllabus - Science Education</div>
+                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 22, 2026</div>
+                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div>
+                            <div class="text-sm text-gray-600 mb-3">BSED · v1.0</div>
+                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-white">
+                            <div class="font-medium text-gray-800">Extension Program Report</div>
+                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 18, 2026</div>
+                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div>
+                            <div class="text-sm text-gray-600 mb-3">BEED · v0.5</div>
+                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div>
+                        </div>
                     </div>
                 </div>
 
@@ -166,20 +220,43 @@
                     <!-- notifications & reminders -->
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <h2 class="font-semibold text-gray-800 text-lg mb-3">Notifications</h2>
-                        <div class="space-y-3"><div class="flex items-start gap-3 pb-2 border-b border-gray-100"><span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs">✓</span><div class="flex-1"><p class="text-sm">Your document <span class="font-medium">Research Publication 2025</span> was approved</p><p class="text-xs text-gray-400">2 hours ago</p></div></div>
-                        <div class="flex items-start gap-3 pb-2 border-b border-gray-100"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs">↗️</span><div class="flex-1"><p class="text-sm"><span class="font-medium">QA Coordinator</span> requested revisions on Syllabus</p><p class="text-xs text-gray-400">Yesterday, 4:30 PM</p></div></div>
-                        <div class="flex items-start gap-3"><span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs">⏳</span><div class="flex-1"><p class="text-sm">Reminder: Extension report pending for 3 days</p><p class="text-xs text-gray-400">Apr 25, 2026</p></div></div></div>
-                        <button class="mt-3 text-sm text-teal-700 hover:text-teal-800">View all →</button>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">✓</span>
+                                <div class="flex-1"><p class="text-sm">Your document <span class="font-medium">Research Publication 2025</span> was approved</p><p class="text-xs text-gray-400">2 hours ago</p></div>
+                            </div>
+                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">R</span>
+                                <div class="flex-1"><p class="text-sm"><span class="font-medium">Department Head</span> requested revisions on Syllabus</p><p class="text-xs text-gray-400">Yesterday, 4:30 PM</p></div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">!</span>
+                                <div class="flex-1"><p class="text-sm">Reminder: Extension report pending for 3 days</p><p class="text-xs text-gray-400">Apr 25, 2026</p></div>
+                            </div>
+                        </div>
+                        <button class="mt-3 text-sm text-teal-700 hover:text-teal-800 view-all-notifications">View all →</button>
                     </div>
 
                     <!-- quick actions -->
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <h2 class="font-semibold text-gray-800 text-lg mb-3">Quick Actions</h2>
                         <div class="space-y-2">
-                            <a href="user-upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition"><span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📤</span><div><div class="font-medium text-sm">Upload New Document</div><div class="text-xs text-gray-400">Submit QA records for review</div></div></a>
-                            <a href="user-documents.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition"><span class="bg-blue-100 text-blue-800 p-2 rounded-lg mr-3">📋</span><div><div class="font-medium text-sm">View My Documents</div><div class="text-xs text-gray-400">Track submission status</div></div></a>
-                            <a href="user-search.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition"><span class="bg-purple-100 text-purple-800 p-2 rounded-lg mr-3">🔍</span><div><div class="font-medium text-sm">Search Records</div><div class="text-xs text-gray-400">Find documents by keyword</div></div></a>
-                            <a href="user-evidence-map.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition"><span class="bg-amber-100 text-amber-800 p-2 rounded-lg mr-3">🗺️</span><div><div class="font-medium text-sm">View Evidence Map</div><div class="text-xs text-gray-400">See category coverage</div></div></a>
+                            <a href="user-upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3 font-medium">Upload</span>
+                                <div><div class="font-medium text-sm">Upload New Document</div><div class="text-xs text-gray-400">Submit QA records for review</div></div>
+                            </a>
+                            <a href="user-documents.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-blue-100 text-blue-800 p-2 rounded-lg mr-3 font-medium">View</span>
+                                <div><div class="font-medium text-sm">View My Documents</div><div class="text-xs text-gray-400">Track submission status</div></div>
+                            </a>
+                            <a href="user-search.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-purple-100 text-purple-800 p-2 rounded-lg mr-3 font-medium">Search</span>
+                                <div><div class="font-medium text-sm">Search Records</div><div class="text-xs text-gray-400">Find documents by keyword</div></div>
+                            </a>
+                            <a href="user-evidence-map.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-amber-100 text-amber-800 p-2 rounded-lg mr-3 font-medium">Map</span>
+                                <div><div class="font-medium text-sm">View Evidence Map</div><div class="text-xs text-gray-400">See category coverage</div></div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -188,16 +265,95 @@
                 <div class="mt-6 bg-white rounded-xl p-5 stat-card">
                     <h2 class="font-semibold text-gray-800 text-lg mb-3">Upcoming Deadlines</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="border border-gray-100 rounded-lg p-3"><div class="text-xs text-gray-400 mb-1">Instruction - BSED</div><div class="font-medium text-gray-800">Lesson Plan Submission</div><div class="flex justify-between items-center mt-2"><span class="text-xs text-amber-600">Due in 3 days</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div></div>
-                        <div class="border border-gray-100 rounded-lg p-3"><div class="text-xs text-gray-400 mb-1">Research - BEED</div><div class="font-medium text-gray-800">Research Paper Submission</div><div class="flex justify-between items-center mt-2"><span class="text-xs text-red-600">Overdue by 2 days</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div></div>
-                        <div class="border border-gray-100 rounded-lg p-3"><div class="text-xs text-gray-400 mb-1">Extension - BPED</div><div class="font-medium text-gray-800">Community Report</div><div class="flex justify-between items-center mt-2"><span class="text-xs text-green-600">Due in 2 weeks</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div></div>
+                        <div class="border border-gray-100 rounded-lg p-3">
+                            <div class="text-xs text-gray-400 mb-1">Instruction - BSED</div>
+                            <div class="font-medium text-gray-800">Lesson Plan Submission</div>
+                            <div class="flex justify-between items-center mt-2"><span class="text-xs text-amber-600">Due in 3 days</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div>
+                        </div>
+                        <div class="border border-gray-100 rounded-lg p-3">
+                            <div class="text-xs text-gray-400 mb-1">Research - BEED</div>
+                            <div class="font-medium text-gray-800">Research Paper Submission</div>
+                            <div class="flex justify-between items-center mt-2"><span class="text-xs text-red-600">Overdue by 2 days</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div>
+                        </div>
+                        <div class="border border-gray-100 rounded-lg p-3">
+                            <div class="text-xs text-gray-400 mb-1">Extension - BPED</div>
+                            <div class="font-medium text-gray-800">Community Report</div>
+                            <div class="flex justify-between items-center mt-2"><span class="text-xs text-green-600">Due in 2 weeks</span><button class="text-xs text-teal-700 hover:text-teal-800">Upload →</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- NOTIFICATIONS MODAL -->
+    <div id="notificationsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
+                <button id="closeNotificationsModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="notificationsList">
+                <div class="flex items-start gap-3 pb-3 border-b border-gray-100">
+                    <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">✓</span>
+                    <div class="flex-1">
+                        <p class="text-sm"><span class="font-medium">Document Approved</span></p>
+                        <p class="text-xs text-gray-600">Your document "Research Publication 2025" has been approved by Dr. Santos</p>
+                        <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 pb-3 border-b border-gray-100">
+                    <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">R</span>
+                    <div class="flex-1">
+                        <p class="text-sm"><span class="font-medium">Revision Requested</span></p>
+                        <p class="text-xs text-gray-600">Department Head requested revisions on "Syllabus - Science Education"</p>
+                        <p class="text-xs text-gray-400 mt-1">Yesterday, 4:30 PM</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 pb-3 border-b border-gray-100">
+                    <span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">!</span>
+                    <div class="flex-1">
+                        <p class="text-sm"><span class="font-medium">Pending Document</span></p>
+                        <p class="text-xs text-gray-600">Your document "Extension Program Report" has been pending for 3 days</p>
+                        <p class="text-xs text-gray-400 mt-1">Apr 25, 2026</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 pb-3 border-b border-gray-100">
+                    <span class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">✓</span>
+                    <div class="flex-1">
+                        <p class="text-sm"><span class="font-medium">Document Validated</span></p>
+                        <p class="text-xs text-gray-600">Your document "Faculty Employment Contract" has been validated</p>
+                        <p class="text-xs text-gray-400 mt-1">Apr 24, 2026</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 text-xs font-bold">📄</span>
+                    <div class="flex-1">
+                        <p class="text-sm"><span class="font-medium">New Deadline</span></p>
+                        <p class="text-xs text-gray-600">Research Paper Submission deadline is approaching (Due in 3 days)</p>
+                        <p class="text-xs text-gray-400 mt-1">Apr 23, 2026</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button id="markAllReadBtn" class="px-4 py-2 text-teal-700 hover:text-teal-800 text-sm font-medium">Mark all as read</button>
+                <button id="closeNotificationsModalBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Set current date
+        function setCurrentDate() {
+            const dateElem = document.getElementById('currentDate');
+            if (dateElem) {
+                const now = new Date();
+                const options = { month: 'short', day: 'numeric', year: 'numeric' };
+                dateElem.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        setCurrentDate();
+        
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -212,10 +368,81 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
         
+        // Notifications Modal
+        const notificationsModal = document.getElementById('notificationsModal');
+        const notificationBtn = document.getElementById('notificationBtn');
+        const closeNotificationsModal = document.getElementById('closeNotificationsModal');
+        const closeNotificationsModalBtn = document.getElementById('closeNotificationsModalBtn');
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+        
+        // Open modal
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', () => {
+                if (notificationsModal) {
+                    notificationsModal.classList.remove('hidden');
+                    notificationsModal.classList.add('flex');
+                }
+            });
+        }
+        
+        // Close modal functions
+        function closeModal() {
+            if (notificationsModal) {
+                notificationsModal.classList.add('hidden');
+                notificationsModal.classList.remove('flex');
+            }
+        }
+        
+        if (closeNotificationsModal) closeNotificationsModal.addEventListener('click', closeModal);
+        if (closeNotificationsModalBtn) closeNotificationsModalBtn.addEventListener('click', closeModal);
+        
+        // Close on outside click
+        if (notificationsModal) {
+            notificationsModal.addEventListener('click', (e) => {
+                if (e.target === notificationsModal) closeModal();
+            });
+        }
+        
+        // Mark all as read
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', () => {
+                const badge = document.querySelector('#notificationBtn .absolute');
+                if (badge) badge.style.display = 'none';
+                alert('All notifications marked as read');
+                closeModal();
+            });
+        }
+        
+        // View all notifications link
+        document.querySelectorAll('.view-all-notifications').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (notificationsModal) {
+                    notificationsModal.classList.remove('hidden');
+                    notificationsModal.classList.add('flex');
+                }
+            });
+        });
+        
         // View and Download button handlers
         document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => alert('Document viewer would open here')));
         document.querySelectorAll('.download-btn').forEach(btn => btn.addEventListener('click', () => alert('Document download would start here')));
         document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => alert('Edit document would open here')));
+        
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
 <script src="js/user-session.js"></script>

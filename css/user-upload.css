@@ -16,7 +16,7 @@ body {
 /* Sidebar styling */
 .bg-user-sidebar {
     background-color: #123a4d;
-}
+} 
 
 .hover-nav:hover {
     background-color: #1f5a6e;
@@ -122,7 +122,12 @@ input[type="radio"] {
 }
 
 .upload-file-icon {
-    font-size: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
 }
 
 .upload-file-name {
@@ -146,6 +151,10 @@ input[type="radio"] {
     cursor: pointer;
     font-size: 1rem;
     padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+.upload-remove-btn:hover {
+    background-color: #fee2e2;
 }
 
 .upload-progress-wrap {
@@ -175,6 +184,23 @@ input[type="radio"] {
 .mobile-header-spacer {
     height: 60px;
     width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0f766e;
 }
 
 /* ============================================ */
@@ -261,6 +287,22 @@ input[type="radio"] {
     button, a, .upload-remove-btn { min-height: 40px; min-width: 40px; }
     body { font-size: 14px; }
     input, select, textarea { font-size: 16px !important; }
+}
+
+/* Print styles */
+@media print {
+    .sidebar, nav, .menu-toggle, button {
+        display: none !important;
+    }
+    main {
+        margin: 0;
+        padding: 0;
+    }
+    .stat-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
 }
 
 /* Upload loading overlay */

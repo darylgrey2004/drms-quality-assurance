@@ -28,7 +28,7 @@ body {
 }
 
 .stat-card {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     border: 1px solid #eef2f6;
     background-color: white;
     border-radius: 0.75rem;
@@ -67,6 +67,37 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Status badges */
+.status-badge-verified {
+    background-color: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-badge-faculty {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-badge-active {
+    background-color: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Background colors */
 .bg-teal-100 {
     background-color: #f0fdfa;
 }
@@ -79,11 +110,66 @@ input:focus, select:focus, textarea:focus {
 .text-green-700 {
     color: #15803d;
 }
+.bg-red-100 {
+    background-color: #fee2e2;
+}
+.text-red-700 {
+    color: #dc2626;
+}
+.bg-blue-100 {
+    background-color: #dbeafe;
+}
+.text-blue-700 {
+    color: #1d4ed8;
+}
+
+/* Button styling */
+.bg-teal-700 {
+    background-color: #0f766e;
+}
+.bg-teal-700:hover {
+    background-color: #115e59;
+}
+.bg-green-600 {
+    background-color: #16a34a;
+}
+.bg-green-600:hover {
+    background-color: #15803d;
+}
+.bg-gray-500 {
+    background-color: #6b7280;
+}
+.bg-gray-500:hover {
+    background-color: #4b5563;
+}
+.bg-red-600 {
+    background-color: #dc2626;
+}
+.bg-red-600:hover {
+    background-color: #b91c1c;
+}
 
 /* Mobile header spacer */
 .mobile-header-spacer {
     height: 60px;
     width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0f766e;
 }
 
 /* ============================================ */
@@ -171,4 +257,20 @@ input:focus, select:focus, textarea:focus {
     button, a { min-height: 44px; }
     body { font-size: 14px; }
     input, select, textarea { font-size: 16px !important; }
+}
+
+/* Print styles */
+@media print {
+    .sidebar, nav, .menu-toggle, button {
+        display: none !important;
+    }
+    main {
+        margin: 0;
+        padding: 0;
+    }
+    .stat-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
 }

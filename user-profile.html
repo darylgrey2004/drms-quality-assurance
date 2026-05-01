@@ -20,14 +20,14 @@
     <div class="sidebar-overlay"></div>
 
     <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR (no logout button) -->
+        <!-- SIDEBAR -->
         <aside id="mainSidebar" class="w-72 bg-user-sidebar text-gray-200 flex flex-col shrink-0 overflow-y-auto">
             <div class="px-5 pt-7 pb-4 border-b border-teal-900/40">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Faculty Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Faculty Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
@@ -42,35 +42,31 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> My Documents
+                    <span class="mr-3 text-teal-300/70 w-5">My Documents</span>
                 </a>
                 <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload Document
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
                 </a>
                 <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
-                </a>
-                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> My Approvals
-                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">👤</span> Profile
+                    <span class="mr-3 text-teal-300 w-5">Profile</span>
                 </a>
             </nav>
 
-            <!-- Sidebar footer - no logout button, just copyright -->
+            <!-- Sidebar footer -->
             <div class="border-t border-teal-900/40 p-4">
                 <div class="text-xs text-teal-200/50">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                        <span>Faculty Access</span>
+                        <span id="sidebarAccess">Faculty Access</span>
                     </div>
                     <div class="mt-1">© CTE · v.DRMS-QA</div>
                 </div>
@@ -88,10 +84,10 @@
                         <p class="text-sm text-gray-500 mt-1">Manage your account information and preferences</p>
                     </div>
                     <div class="flex gap-3">
-                        <button id="editProfileBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                        <button id="editProfileBtn" class="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium text-sm transition-colors">
                             Edit Profile
                         </button>
-                        <button id="saveProfileBtn" class="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-medium text-sm hidden transition-colors">
+                        <button id="saveProfileBtn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm hidden transition-colors">
                             Save Changes
                         </button>
                         <button id="cancelEditBtn" class="px-5 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium text-sm hidden transition-colors">
@@ -125,20 +121,11 @@
                             </div>
                         </div>
 
-                        <!-- Logout Section (moved here from sidebar) -->
+                        <!-- Logout Section -->
                         <div class="bg-white rounded-xl p-5 stat-card mt-6 border border-red-100">
-                            <h3 class="font-medium text-gray-800 text-base mb-3">Account Security</h3>
+                            <h3 class="font-medium text-gray-800 text-base mb-3">Session Management</h3>
                             <div class="space-y-3">
-                                <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <div>
-                                        <span class="text-sm text-gray-600">Change your password</span>
-                                        <p class="text-xs text-gray-400">Update your account password</p>
-                                    </div>
-                                    <button id="changePasswordBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
-                                        Change Password
-                                    </button>
-                                </div>
-                                <div class="flex items-center justify-between pt-2">
+                                <div class="flex items-center justify-between">
                                     <div>
                                         <span class="text-sm text-gray-600">End your current session</span>
                                         <p class="text-xs text-gray-400">You will be redirected to the login page</p>
@@ -223,67 +210,82 @@
             </div>
         </main>
     </div>    
-    
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Change Password</h3>
-                <button id="closePasswordModal" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                    <div class="relative">
-                        <input type="password" id="currentPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Enter current password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('currentPassword')">
-                            <svg id="currentPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                    <div class="relative">
-                        <input type="password" id="newPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Enter new password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('newPassword')">
-                            <svg id="newPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Must be at least 6 characters long</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                    <div class="relative">
-                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Confirm new password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('confirmPassword')">
-                            <svg id="confirmPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div id="passwordError" class="hidden text-sm text-red-600 bg-red-50 p-3 rounded-lg"></div>
-                <div id="passwordSuccess" class="hidden text-sm text-green-600 bg-green-50 p-3 rounded-lg"></div>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button id="cancelPasswordBtn" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button id="submitPasswordBtn" class="flex-1 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Change Password</button>
-            </div>
-        </div>
-    </div>
-    
+
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'faculty' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Faculty Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'Faculty Access';
+            }
+        }
+        updateSidebarUser();
+        
+        // Update profile display
+        function updateProfileDisplay() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const profileInitials = document.getElementById('profileInitials');
+            const profileName = document.getElementById('profileName');
+            const profileRoleDept = document.getElementById('profileRoleDept');
+            const profileEmail = document.getElementById('profileEmail');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (profileInitials) profileInitials.textContent = initials;
+                if (profileName) profileName.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && profileRoleDept) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                profileRoleDept.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.email && profileEmail) {
+                profileEmail.textContent = user.email;
+            }
+            
+            // Set member since (example - would come from backend)
+            document.getElementById('memberSince').textContent = 'Jan 15, 2025';
+            document.getElementById('profileStatus').textContent = 'Active';
+            document.getElementById('emailVerified').innerHTML = '<span class="text-green-600">✓ Verified</span>';
+            document.getElementById('accountType').innerHTML = '<span class="bg-teal-100 text-teal-700 px-2 py-1 rounded-full text-xs">Faculty</span>';
+            document.getElementById('accountStatus').innerHTML = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Active</span>';
+            
+            // Pre-fill form fields with user data
+            document.getElementById('firstName').value = user.firstName || '';
+            document.getElementById('lastName').value = user.lastName || '';
+            document.getElementById('email').value = user.email || '';
+        }
+        updateProfileDisplay();
+
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -296,6 +298,151 @@
             overlay.addEventListener('click', closeSidebar);
             document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Edit Profile functionality
+        const editBtn = document.getElementById('editProfileBtn');
+        const saveBtn = document.getElementById('saveProfileBtn');
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        const formInputs = document.querySelectorAll('#lastName, #firstName, #middleInitial, #dob, #age, #gender, #civilStatus, #nationality, #phone, #address, #employeeId, #position, #department, #employmentStatus, #dateOfHire, #yearsInService, #previousPositions, #highestDegree, #specialization, #institution, #gradYear, #license, #continuingEd, #subjectsTaught, #yearLevel, #loadUnits, #advising, #committeeRoles, #researchInterests, #publications');
+        const selects = document.querySelectorAll('#gender, #civilStatus, #highestDegree');
+        
+        function enableEditing() {
+            formInputs.forEach(input => {
+                input.classList.remove('bg-gray-50');
+                input.classList.add('bg-white');
+                input.removeAttribute('readonly');
+            });
+            selects.forEach(select => {
+                select.classList.remove('bg-gray-50');
+                select.classList.add('bg-white');
+                select.disabled = false;
+            });
+            editBtn.classList.add('hidden');
+            saveBtn.classList.remove('hidden');
+            cancelBtn.classList.remove('hidden');
+        }
+        
+        function disableEditing() {
+            formInputs.forEach(input => {
+                input.classList.add('bg-gray-50');
+                input.classList.remove('bg-white');
+                input.setAttribute('readonly', 'readonly');
+            });
+            selects.forEach(select => {
+                select.classList.add('bg-gray-50');
+                select.classList.remove('bg-white');
+                select.disabled = true;
+            });
+            editBtn.classList.remove('hidden');
+            saveBtn.classList.add('hidden');
+            cancelBtn.classList.add('hidden');
+        }
+        
+        function saveChanges() {
+            // Collect form data
+            const profileData = {
+                lastName: document.getElementById('lastName').value,
+                firstName: document.getElementById('firstName').value,
+                middleInitial: document.getElementById('middleInitial').value,
+                dob: document.getElementById('dob').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                civilStatus: document.getElementById('civilStatus').value,
+                nationality: document.getElementById('nationality').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                employeeId: document.getElementById('employeeId').value,
+                position: document.getElementById('position').value,
+                department: document.getElementById('department').value,
+                employmentStatus: document.getElementById('employmentStatus').value,
+                dateOfHire: document.getElementById('dateOfHire').value,
+                yearsInService: document.getElementById('yearsInService').value,
+                previousPositions: document.getElementById('previousPositions').value,
+                highestDegree: document.getElementById('highestDegree').value,
+                specialization: document.getElementById('specialization').value,
+                institution: document.getElementById('institution').value,
+                gradYear: document.getElementById('gradYear').value,
+                license: document.getElementById('license').value,
+                continuingEd: document.getElementById('continuingEd').value,
+                subjectsTaught: document.getElementById('subjectsTaught').value,
+                yearLevel: document.getElementById('yearLevel').value,
+                loadUnits: document.getElementById('loadUnits').value,
+                advising: document.getElementById('advising').value,
+                committeeRoles: document.getElementById('committeeRoles').value,
+                researchInterests: document.getElementById('researchInterests').value,
+                publications: document.getElementById('publications').value
+            };
+            
+            // Save to localStorage (in real app, this would be an API call)
+            localStorage.setItem('userProfile', JSON.stringify(profileData));
+            alert('Profile changes saved successfully!');
+            disableEditing();
+        }
+        
+        function cancelEdit() {
+            // Reload original data
+            disableEditing();
+            alert('Changes discarded');
+        }
+        
+        if (editBtn) editBtn.addEventListener('click', enableEditing);
+        if (saveBtn) saveBtn.addEventListener('click', saveChanges);
+        if (cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
+        
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'landing.html';
+                }
+            });
+        }
+        
+        // Calculate age from DOB
+        const dobInput = document.getElementById('dob');
+        const ageInput = document.getElementById('age');
+        if (dobInput && ageInput) {
+            dobInput.addEventListener('change', function() {
+                if (this.value) {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const m = today.getMonth() - birthDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    ageInput.value = age;
+                }
+            });
+        }
+        
+        // Load saved profile data if exists
+        const savedProfile = localStorage.getItem('userProfile');
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            Object.keys(profile).forEach(key => {
+                const field = document.getElementById(key);
+                if (field) field.value = profile[key];
+            });
+        }
+        
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
         }
     </script>
 </body>

@@ -3,9 +3,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
 
 /* base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Inter', system-ui, sans-serif;
-    background-color: #0b1f33;
+    background: linear-gradient(135deg, #0a2a3a 0%, #0d3b4f 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
 }
 
 /* custom utility classes */
@@ -14,7 +25,7 @@ body {
 }
 
 .bg-navy-medium {
-    background-color: #0f2a41;
+    background: linear-gradient(135deg, #0a2a3a 0%, #0d3b4f 100%);
 }
 
 .text-teal-accent {
@@ -25,33 +36,84 @@ body {
     border-color: #2aa79b;
 }
 
-/* minimalist card without heavy shadows */
+/* minimalist card */
 .minimal-card {
-    box-shadow: 0 4px 14px 0 rgba(0, 20, 30, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* subtle teal glow for focus — minimal but effective */
-input:focus {
-    outline: 2px solid #0d9488;
-    outline-offset: 2px;
+.minimal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.25);
 }
 
-/* additional custom refinements */
-.text-navy-900 {
-    color: #0b1f33;
-}
-
-/* smooth transitions */
-.transition-colors {
+/* Category badges - Professional styling */
+.instruction-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    backdrop-filter: blur(4px);
     transition: all 0.2s ease;
 }
 
-/* button hover effects */
-.bg-teal-700:hover {
-    background-color: #0f766e;
+.research-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
 }
 
-/* Register button specific styles */
+.extension-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.employment-badge {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+/* Badge hover effects */
+.instruction-badge:hover, .research-badge:hover, 
+.extension-badge:hover, .employment-badge:hover {
+    transform: translateY(-1px);
+    backdrop-filter: blur(8px);
+}
+
+/* form elements styling */
+input {
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* button styling */
+.bg-teal-600 {
+    background-color: #0d9488;
+    transition: all 0.2s ease;
+}
+
+.bg-teal-600:hover {
+    background-color: #0f766e;
+    transform: translateY(-1px);
+}
+
+.bg-teal-600:active {
+    transform: translateY(0);
+}
+
+/* Register button */
 #registerBtn {
     transition: all 0.2s ease;
 }
@@ -61,9 +123,42 @@ input:focus {
     transform: translateY(-1px);
 }
 
-/* Divider animation */
-.flex-1.border-t {
-    transition: width 0.3s ease;
+/* Toast message styling */
+.toast-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    z-index: 1000;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-success {
+    background-color: #10b981;
+}
+
+.toast-error {
+    background-color: #ef4444;
+}
+
+.toast-info {
+    background-color: #3b82f6;
 }
 
 /* Role selection note animation */
@@ -82,9 +177,103 @@ input:focus {
     }
 }
 
+/* Button loading state */
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Stats counters */
+.stats-counter {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .minimal-card {
         padding: 1.5rem;
+    }
+    
+    body {
+        padding: 0.75rem;
+    }
+    
+    .instruction-badge, .research-badge, 
+    .extension-badge, .employment-badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.75rem;
+    }
+    
+    .stats-counter {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .max-w-6xl {
+        max-width: 100%;
+    }
+    
+    .text-3xl {
+        font-size: 1.8rem;
+    }
+    
+    .px-8 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .p-8 {
+        padding: 1.5rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (max-width: 768px) {
+    button, 
+    a,
+    input {
+        min-height: 44px;
+    }
+    
+    body {
+        font-size: 14px;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0f766e;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .minimal-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    button, .toast-message {
+        display: none;
     }
 }
