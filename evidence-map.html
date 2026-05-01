@@ -34,44 +34,44 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AD</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Admin User</div>
-                        <div class="text-xs text-teal-300">Administrator</div>
+                        <div class="text-sm font-medium text-white" id="userName">Admin User</div>
+                        <div class="text-xs text-teal-300" id="userRole">Administrator</div>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> Documents
+                    <span class="mr-3 text-teal-300/70 w-5">Documents</span>
                 </a>
                 <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                    <span class="mr-3 text-teal-300/70 w-5">Upload</span>
                 </a>
                 <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300 w-5">Evidence Map</span>
                 </a>
                 <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                    <span class="mr-3 text-teal-300/70 w-5">Approvals</span>
                 </a>
                 <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
                 </a>
                 <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👥</span> Users
+                    <span class="mr-3 text-teal-300/70 w-5">Users</span>
                 </a>
                 <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                    <span class="mr-3 text-teal-300/70 w-5">Audit Trail</span>
                 </a>
                 <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                    <span class="mr-3 text-teal-300/70 w-5">Settings</span>
                 </a>
             </nav>
 
@@ -94,67 +94,9 @@
                     <p class="text-sm text-gray-500 mt-1">Map documents to categories: Instruction, Research, Extension, Employment</p>
                 </div>
 
-                <!-- category overview cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800 text-base">Instruction</h3>
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">245 docs</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">245/320</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2">
-                            <div class="bg-blue-600 h-1.5 rounded-full" style="width:77%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-blue-700">77% complete · 75 missing</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800 text-base">Research</h3>
-                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">312 docs</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">312/400</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2">
-                            <div class="bg-green-600 h-1.5 rounded-full" style="width:78%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-green-700">78% complete · 88 missing</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800 text-base">Extension</h3>
-                            <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">156 docs</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">156/210</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2">
-                            <div class="bg-amber-600 h-1.5 rounded-full" style="width:74%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-amber-700">74% complete · 54 missing</div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-800 text-base">Employment</h3>
-                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">134 docs</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Documents mapped:</span>
-                            <span class="font-medium">134/180</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2">
-                            <div class="bg-purple-600 h-1.5 rounded-full" style="width:74%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-purple-700">74% complete · 46 missing</div>
-                    </div>
+                <!-- category overview cards - dynamic -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6" id="categoryOverview">
+                    <!-- Dynamic content from JS -->
                 </div>
 
                 <!-- filter controls -->
@@ -162,9 +104,9 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-                                <input type="text" id="searchMap" placeholder="Search by category, department, or document..." 
-                                       class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
+                                <input type="text" id="searchMap" placeholder="Search by department or document..." 
+                                       class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -177,9 +119,8 @@
                             </select>
                             <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
                                 <option value="all">All Status</option>
-                                <option value="complete">Complete</option>
-                                <option value="partial">Partial</option>
-                                <option value="missing">Missing</option>
+                                <option value="complete">Complete (100%)</option>
+                                <option value="partial">Partial (&lt;100%)</option>
                             </select>
                             <button id="refreshMap" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Refresh</button>
                         </div>
@@ -196,98 +137,23 @@
                     </ul>
                 </div>
 
+                <!-- Loading indicator -->
+                <div id="loadingMap" class="hidden text-center py-12">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-700 mx-auto mb-3"></div>
+                    <p class="text-gray-500">Loading evidence map data...</p>
+                </div>
+
                 <!-- Instruction Tab -->
                 <div id="instructionTab" class="tab-content block">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Instruction - Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4 clause-item" data-status="complete">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BEED</span>
-                                            <h4 class="font-medium text-gray-800">Bachelor of Elementary Education</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Instructional materials, syllabi, teaching guides for elementary education</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">42</span>
-                                            <span class="text-xs text-gray-400">/45 docs</span>
-                                        </div>
-                                        <span class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">Complete</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Instruction - Department Mapping</h3>
+                            <div class="text-sm text-gray-500">
+                                Total Documents: <span id="instructionTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
-                            
-                            <div class="border rounded-lg p-4 clause-item" data-status="complete">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BSED</span>
-                                            <h4 class="font-medium text-gray-800">Bachelor of Secondary Education</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Subject-specific instructional materials, curriculum guides</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">58</span><span class="text-xs text-gray-400">/65 docs</span></div>
-                                        <span class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">Complete</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="border rounded-lg p-4 clause-item" data-status="partial">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BSNED</span>
-                                            <h4 class="font-medium text-gray-800">Bachelor of Special Needs Education</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Inclusive education materials, special education resources</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">28</span><span class="text-xs text-gray-400">/40 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="border rounded-lg p-4 clause-item" data-status="partial">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BCAED</span>
-                                            <h4 class="font-medium text-gray-800">Bachelor of Culture and Arts Education</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Arts and culture instructional materials</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">25</span><span class="text-xs text-gray-400">/35 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="border rounded-lg p-4 clause-item" data-status="partial">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BPED</span>
-                                            <h4 class="font-medium text-gray-800">Bachelor of Physical Education</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Physical education curriculum, sports instructional materials</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">22</span><span class="text-xs text-gray-400">/30 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                        <div id="instructionDepartments" class="space-y-4">
+                            <!-- Dynamic content from JS -->
                         </div>
                     </div>
                 </div>
@@ -295,40 +161,14 @@
                 <!-- Research Tab -->
                 <div id="researchTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Research - Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4 clause-item" data-status="complete">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BEED</span>
-                                            <h4 class="font-medium text-gray-800">Elementary Education Research</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Research outputs, publications, studies in elementary education</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">35</span><span class="text-xs text-gray-400">/40 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Research - Department Mapping</h3>
+                            <div class="text-sm text-gray-500">
+                                Total Documents: <span id="researchTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
-                            <div class="border rounded-lg p-4 clause-item" data-status="complete">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BSED</span>
-                                            <h4 class="font-medium text-gray-800">Secondary Education Research</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Research publications, action research in secondary education</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">48</span><span class="text-xs text-gray-400">/55 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                        <div id="researchDepartments" class="space-y-4">
+                            <!-- Dynamic content from JS -->
                         </div>
                     </div>
                 </div>
@@ -336,24 +176,14 @@
                 <!-- Extension Tab -->
                 <div id="extensionTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Extension - Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4 clause-item" data-status="partial">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BEED</span>
-                                            <h4 class="font-medium text-gray-800">Community Extension Programs</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Extension projects, community outreach documentation</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">18</span><span class="text-xs text-gray-400">/25 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Extension - Department Mapping</h3>
+                            <div class="text-sm text-gray-500">
+                                Total Documents: <span id="extensionTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
+                        </div>
+                        <div id="extensionDepartments" class="space-y-4">
+                            <!-- Dynamic content from JS -->
                         </div>
                     </div>
                 </div>
@@ -361,24 +191,14 @@
                 <!-- Employment Tab -->
                 <div id="employmentTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
-                        <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Employment - Department Mapping</h3>
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4 clause-item" data-status="partial">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">All Depts</span>
-                                            <h4 class="font-medium text-gray-800">Employment Related Documents</h4>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Contracts, employment records, personnel files</p>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-4">
-                                        <div class="text-right"><span class="text-sm font-medium">42</span><span class="text-xs text-gray-400">/60 docs</span></div>
-                                        <span class="bg-yellow-100 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">Partial</span>
-                                        <button class="view-clause-btn text-teal-700 hover:text-teal-800 border border-teal-200 hover:border-teal-400 px-3 py-1 rounded text-xs transition">View</button>
-                                    </div>
-                                </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Employment - Department Mapping</h3>
+                            <div class="text-sm text-gray-500">
+                                Total Documents: <span id="employmentTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
+                        </div>
+                        <div id="employmentDepartments" class="space-y-4">
+                            <!-- Dynamic content from JS -->
                         </div>
                     </div>
                 </div>
@@ -388,32 +208,34 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base mb-3">Quick Actions</h3>
                         <div class="space-y-2">
-                            <a href="upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition">
-                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📤</span>
-                                <div><div class="font-medium text-sm">Upload Document</div><div class="text-xs text-gray-400">Add new QA records</div></div>
+                            <a href="upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3 font-medium">Upload</span>
+                                <div>
+                                    <div class="font-medium text-sm">Upload Document</div>
+                                    <div class="text-xs text-gray-400">Add new QA records</div>
+                                </div>
                             </a>
-                            <a href="#" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition" id="bulkMapBtn">
-                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">🗺️</span>
-                                <div><div class="font-medium text-sm">Bulk Map Evidence</div><div class="text-xs text-gray-400">Map multiple documents to categories</div></div>
+                            <a href="documents.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3 font-medium">View</span>
+                                <div>
+                                    <div class="font-medium text-sm">View All Documents</div>
+                                    <div class="text-xs text-gray-400">Browse all QA records</div>
+                                </div>
                             </a>
-                            <a href="reports.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition">
-                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📊</span>
-                                <div><div class="font-medium text-sm">Generate Gap Report</div><div class="text-xs text-gray-400">Identify missing evidence</div></div>
+                            <a href="reports.html" class="flex items-center p-2 hover:bg-teal-50 rounded-md transition group">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3 font-medium">Report</span>
+                                <div>
+                                    <div class="font-medium text-sm">Generate Gap Report</div>
+                                    <div class="text-xs text-gray-400">Identify missing evidence</div>
+                                </div>
                             </a>
                         </div>
                     </div>
                     
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <h3 class="font-semibold text-gray-800 text-base mb-3">Mapping Summary</h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between"><span class="text-sm">Total Categories:</span><span class="font-medium">4</span></div>
-                            <div class="flex justify-between"><span class="text-sm">Total Departments:</span><span class="font-medium">5</span></div>
-                            <div class="flex justify-between"><span class="text-sm">Fully Mapped:</span><span class="font-medium text-green-700">3 (38%)</span></div>
-                            <div class="flex justify-between"><span class="text-sm">Partially Mapped:</span><span class="font-medium text-yellow-700">5 (62%)</span></div>
-                            <div class="pt-2 mt-2 border-t">
-                                <div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-teal-600 h-2 rounded-full" style="width:76%"></div></div>
-                                <p class="text-xs text-gray-500 mt-2">Overall mapping completion: <span class="font-medium">76%</span></p>
-                            </div>
+                        <div class="space-y-3" id="mappingSummary">
+                            <!-- Dynamic content from JS -->
                         </div>
                     </div>
                 </div>
@@ -421,91 +243,22 @@
         </main>
     </div>
 
-    <script>
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.className = 'sidebar-overlay';
-                document.body.appendChild(overlay);
-            }
-            
-            function closeSidebar() {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-                document.body.classList.remove('sidebar-open');
-            }
-            
-            function openSidebar() {
-                sidebar.classList.add('open');
-                overlay.classList.add('active');
-                document.body.classList.add('sidebar-open');
-            }
-            
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (sidebar.classList.contains('open')) closeSidebar();
-                else openSidebar();
-            });
-            
-            overlay.addEventListener('click', closeSidebar);
-            
-            document.querySelectorAll('nav a').forEach(link => {
-                link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
-            });
-            
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        // Tab switching
-        document.querySelectorAll('#mapTabs a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const tabId = this.dataset.tab;
-                document.querySelectorAll('#mapTabs a').forEach(l => {
-                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
-                    l.classList.add('border-transparent', 'text-gray-500');
-                });
-                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(tabId + 'Tab').classList.remove('hidden');
-                
-                // Update filter to match tab
-                const categoryFilter = document.getElementById('categoryFilter');
-                if (categoryFilter) categoryFilter.value = tabId;
-            });
-        });
-        
-        // Filter by category dropdown
-        const categoryFilter = document.getElementById('categoryFilter');
-        if (categoryFilter) {
-            categoryFilter.addEventListener('change', function() {
-                const value = this.value;
-                document.querySelectorAll('#mapTabs a').forEach(link => {
-                    if (link.dataset.tab === value) {
-                        link.click();
-                    }
-                });
-            });
-        }
-        
-        // View clause buttons
-        document.querySelectorAll('.view-clause-btn, .view-doc').forEach(btn => {
-            btn.addEventListener('click', () => alert('Document details would appear here'));
-        });
-        
-        // Refresh button
-        document.getElementById('refreshMap')?.addEventListener('click', () => alert('Refreshed evidence map'));
-        
-        // Bulk map button
-        document.getElementById('bulkMapBtn')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('Bulk mapping interface would open here');
-        });
-    </script>
+    <!-- DOCUMENT DETAILS MODAL -->
+    <div id="docDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docDetailsTitle" class="text-lg font-semibold text-gray-800">Document Details</h3>
+                <button id="docDetailsCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-4" id="docDetailsContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button id="docDetailsCloseBtn2" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/evidence-map.js"></script>
 </body>
 </html>

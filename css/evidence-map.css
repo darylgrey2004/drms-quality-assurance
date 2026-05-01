@@ -45,7 +45,7 @@ body {
 
 /* stat card styles */
 .stat-card {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     border: 1px solid #eef2f6;
     background-color: white;
     border-radius: 0.75rem;
@@ -53,16 +53,69 @@ body {
 
 .stat-card:hover {
     box-shadow: 0 8px 20px -8px rgba(18, 79, 86, 0.15);
+    transform: translateY(-2px);
 }
 
-/* badge styles */
-.badge-approved {
+/* Category badges */
+.badge-instruction {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-research {
+    background-color: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-extension {
+    background-color: #fef3c7;
+    color: #b45309;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.badge-employment {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Status badges */
+.badge-status-complete {
     background-color: #e3f7ec;
     color: #0f7b4b;
     display: inline-block;
-    padding: 0.2rem 0.5rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 9999px;
     font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-status-partial {
+    background-color: #fef9e7;
+    color: #b78103;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
 }
 
 /* dashboard background */
@@ -110,17 +163,10 @@ input:focus, select:focus {
     background-color: #f9fafb;
 }
 
-/* status badge colors */
-.bg-green-100 { background-color: #e3f7ec; }
-.bg-yellow-100 { background-color: #fef9e7; }
-.bg-red-100 { background-color: #fee9e7; }
-.text-green-700 { color: #0f7b4b; }
-.text-yellow-700 { color: #b78103; }
-.text-red-700 { color: #b33f2f; }
-
 /* view clause button */
 .view-clause-btn {
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 .view-clause-btn:hover {
     background-color: #f0fdfa;
@@ -131,6 +177,71 @@ input:focus, select:focus {
     height: 60px;
     width: 100%;
 }
+
+/* Progress bar */
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Department badge */
+.dept-badge {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* ============================================ */
+/* DOCUMENT DETAILS MODAL */
+/* ============================================ */
+#docDetailsModal {
+    backdrop-filter: blur(2px);
+}
+
+#docDetailsContent {
+    scrollbar-width: thin;
+}
+
+#docDetailsContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+#docDetailsContent::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+#docDetailsContent::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+
+.detail-row {
+    display: flex;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-label {
+    width: 35%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.detail-value {
+    width: 65%;
+    font-size: 0.8rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* ============================================ */
+/* RESPONSIVE DESIGN */
+/* ============================================ */
 
 /* Sidebar - Mobile Responsive */
 @media (max-width: 768px) {
@@ -185,10 +296,12 @@ input:focus, select:focus {
 
 /* Cards responsive */
 @media (max-width: 640px) {
-    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3 {
-        grid-template-columns: 1fr !important;
+    .grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem;
     }
     .stat-card { padding: 1rem; }
+    h1 { font-size: 1.5rem; }
 }
 
 /* Filter bar responsive */
@@ -212,27 +325,27 @@ input:focus, select:focus {
 @media (max-width: 640px) {
     .clause-item { padding: 0.75rem !important; }
     .view-clause-btn { padding: 0.25rem 0.6rem; font-size: 0.65rem; }
-    .bg-teal-100, .bg-amber-100, .bg-indigo-100 { font-size: 0.6rem; }
 }
 
 /* Touch-friendly */
 @media (max-width: 768px) {
     button, a, .view-clause-btn { min-height: 44px; min-width: 44px; }
     body { font-size: 14px; }
+    input, select { font-size: 16px !important; }
 }
-/* New Category Badges for Evidence Map */
-.bg-blue-100 { background-color: #dbeafe; }
-.text-blue-800 { color: #1e40af; }
-.bg-blue-600 { background-color: #2563eb; }
 
-.bg-green-100 { background-color: #dcfce7; }
-.text-green-800 { color: #166534; }
-.bg-green-600 { background-color: #16a34a; }
-
-.bg-amber-100 { background-color: #fef3c7; }
-.text-amber-800 { color: #92400e; }
-.bg-amber-600 { background-color: #d97706; }
-
-.bg-purple-100 { background-color: #f3e8ff; }
-.text-purple-800 { color: #6b21a5; }
-.bg-purple-600 { background-color: #9333ea; }
+/* Print styles */
+@media print {
+    .sidebar, nav, .menu-toggle, button {
+        display: none !important;
+    }
+    main {
+        margin: 0;
+        padding: 0;
+    }
+    .stat-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}

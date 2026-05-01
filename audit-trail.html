@@ -34,25 +34,45 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AD</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Admin User</div>
-                        <div class="text-xs text-teal-300">Administrator</div>
+                        <div class="text-sm font-medium text-white" id="userName">Admin User</div>
+                        <div class="text-xs text-teal-300" id="userRole">Administrator</div>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
-                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📊</span> Dashboard</a>
-                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📄</span> Documents</a>
-                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⬆️</span> Upload</a>
-                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map</a>
-                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🔍</span> Search</a>
-                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">✅</span> Approvals</a>
-                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📈</span> Reports</a>
-                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">👥</span> Users</a>
-                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav"><span class="mr-3 text-teal-300">📋</span> Audit Trail</a>
-                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⚙️</span> Settings</a>
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
+                </a>
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Documents</span>
+                </a>
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Upload</span>
+                </a>
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
+                </a>
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
+                </a>
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Approvals</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
+                </a>
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Users</span>
+                </a>
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300 w-5">Audit Trail</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Settings</span>
+                </a>
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
@@ -76,21 +96,70 @@
 
                 <!-- audit stats cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Total Events</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">1,284</div></div><span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📋</span></div><div class="text-xs text-green-600 mt-2">+124 this week</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Document Actions</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div><span class="bg-blue-100 text-blue-700 p-2 rounded-lg">📄</span></div><div class="text-xs text-blue-600 mt-2">66% of total</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">User Actions</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">312</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">👥</span></div><div class="text-xs text-green-600 mt-2">24% of total</div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">System Events</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">125</div></div><span class="bg-purple-100 text-purple-700 p-2 rounded-lg">⚙️</span></div><div class="text-xs text-purple-600 mt-2">10% of total</div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">Total Events</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">1,284</div></div>
+                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">Events</span>
+                        </div>
+                        <div class="text-xs text-green-600 mt-2">+124 this week</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">Document Actions</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div>
+                            <span class="bg-blue-100 text-blue-700 p-2 rounded-lg text-lg">Docs</span>
+                        </div>
+                        <div class="text-xs text-blue-600 mt-2">66% of total</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">User Actions</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">312</div></div>
+                            <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">Users</span>
+                        </div>
+                        <div class="text-xs text-green-600 mt-2">24% of total</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-gray-500 text-sm">System Events</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">125</div></div>
+                            <span class="bg-purple-100 text-purple-700 p-2 rounded-lg text-lg">System</span>
+                        </div>
+                        <div class="text-xs text-purple-600 mt-2">10% of total</div>
+                    </div>
                 </div>
 
                 <!-- audit filters -->
                 <div class="bg-white rounded-xl p-4 stat-card mb-6">
                     <div class="flex flex-col lg:flex-row gap-4">
-                        <div class="flex-1"><div class="relative"><span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span><input type="text" id="searchAudit" placeholder="Search by user, action, document..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"></div></div>
+                        <div class="flex-1">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
+                                <input type="text" id="searchAudit" placeholder="Search by user, action, document..." class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                            </div>
+                        </div>
                         <div class="flex flex-wrap gap-2">
-                            <select id="actionTypeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm"><option value="all">All Actions</option><option value="upload">Upload</option><option value="validate">Validate</option><option value="approve">Approve</option><option value="reject">Reject</option><option value="lock">Lock</option><option value="edit">Edit</option><option value="delete">Delete</option></select>
-                            <select id="userFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm"><option value="all">All Users</option><option value="santos">Dr. Santos</option><option value="garcia">Prof. Garcia</option><option value="cruz">Dean Cruz</option><option value="reyes">Dr. Reyes</option><option value="mendoza">Prof. Mendoza</option></select>
-                            <select id="dateRangeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm"><option value="today">Today</option><option value="week">This Week</option><option value="month" selected>This Month</option></select>
-                            <button id="exportAuditBtn" class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm">Export CSV</button>
+                            <select id="actionTypeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Actions</option>
+                                <option value="upload">Upload</option>
+                                <option value="validate">Validate</option>
+                                <option value="approve">Approve</option>
+                                <option value="reject">Reject</option>
+                                <option value="lock">Lock</option>
+                                <option value="edit">Edit</option>
+                                <option value="delete">Delete</option>
+                            </select>
+                            <select id="userFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Users</option>
+                                <option value="santos">Dr. Santos</option>
+                                <option value="garcia">Prof. Garcia</option>
+                                <option value="cruz">Dean Cruz</option>
+                                <option value="reyes">Dr. Reyes</option>
+                                <option value="mendoza">Prof. Mendoza</option>
+                            </select>
+                            <select id="dateRangeFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                            </select>
+                            <button id="exportAuditBtn" class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm transition-colors">Export CSV</button>
                         </div>
                     </div>
                 </div>
@@ -104,31 +173,125 @@
                     <div class="text-sm text-gray-500"><span id="eventCount">Showing 24 events</span></div>
                 </div>
 
-                <!-- list view - Updated with new categories -->
+                <!-- list view -->
                 <div id="listView" class="block">
                     <div class="bg-white rounded-xl p-5 stat-card overflow-x-auto">
                         <div class="min-w-[800px]">
                             <table class="w-full text-sm">
-                                <thead><tr class="border-b border-gray-200 text-gray-500 text-xs"><th class="text-left py-3 px-2">Timestamp</th><th class="text-left py-3 px-2">User</th><th class="text-left py-3 px-2">Action</th><th class="text-left py-3 px-2">Document</th><th class="text-left py-3 px-2">Category</th><th class="text-left py-3 px-2">Department</th><th class="text-left py-3 px-2">Version</th><th class="text-left py-3 px-2">IP</th><th class="text-left py-3 px-2"></th></tr></thead>
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-gray-500 text-xs">
+                                        <th class="text-left py-3 px-2">Timestamp</th>
+                                        <th class="text-left py-3 px-2">User</th>
+                                        <th class="text-left py-3 px-2">Action</th>
+                                        <th class="text-left py-3 px-2">Document</th>
+                                        <th class="text-left py-3 px-2">Category</th>
+                                        <th class="text-left py-3 px-2">Department</th>
+                                        <th class="text-left py-3 px-2">Version</th>
+                                        <th class="text-left py-3 px-2">IP</th>
+                                        <th class="text-left py-3 px-2"></th>
+                                    </tr>
+                                </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    <tr class="audit-row hover:bg-gray-50"><td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-28 09:30:45</td><td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">AS</span><span>Dr. Santos</span></div></td><td class="py-3 px-2"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Approve</span></td><td class="py-3 px-2 font-medium text-gray-800 text-sm">Syllabus - Elementary Education</td><td class="py-3 px-2 text-gray-600 text-xs">Instruction</td><td class="py-3 px-2 text-gray-600 text-xs">BEED</td><td class="py-3 px-2 text-gray-600 text-xs">v3.2</td><td class="py-3 px-2 text-gray-400 text-xs">192.168.1.45</td><td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">Details</button></td></tr>
-                                    <tr class="audit-row hover:bg-gray-50"><td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-28 08:15:22</td><td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">PG</span><span>Prof. Garcia</span></div></td><td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Upload</span></td><td class="py-3 px-2 font-medium text-gray-800 text-sm">Research Publication 2025</td><td class="py-3 px-2 text-gray-600 text-xs">Research</td><td class="py-3 px-2 text-gray-600 text-xs">BSED</td><td class="py-3 px-2 text-gray-600 text-xs">v0.3</td><td class="py-3 px-2 text-gray-400 text-xs">192.168.1.102</td><td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">Details</button></td></tr>
-                                    <tr class="audit-row hover:bg-gray-50"><td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-27 16:45:10</td><td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">DC</span><span>Dean Cruz</span></div></td><td class="py-3 px-2"><span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">Comment</span></td><td class="py-3 px-2 font-medium text-gray-800 text-sm">Community Extension Program</td><td class="py-3 px-2 text-gray-600 text-xs">Extension</td><td class="py-3 px-2 text-gray-600 text-xs">BPED</td><td class="py-3 px-2 text-gray-600 text-xs">v1.1</td><td class="py-3 px-2 text-gray-400 text-xs">192.168.1.78</td><td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">Details</button></td></tr>
-                                    <tr class="audit-row hover:bg-gray-50"><td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-27 14:20:05</td><td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">DR</span><span>Dr. Reyes</span></div></td><td class="py-3 px-2"><span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Validate</span></td><td class="py-3 px-2 font-medium text-gray-800 text-sm">Inclusive Education Module</td><td class="py-3 px-2 text-gray-600 text-xs">Instruction</td><td class="py-3 px-2 text-gray-600 text-xs">BSNED</td><td class="py-3 px-2 text-gray-600 text-xs">v1.0</td><td class="py-3 px-2 text-gray-400 text-xs">192.168.1.34</td><td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">Details</button></td></tr>
-                                    <tr class="audit-row hover:bg-gray-50"><td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-26 11:05:33</td><td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-700 text-xs font-bold">QO</span><span>QA Office</span></div></td><td class="py-3 px-2"><span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Flag</span></td><td class="py-3 px-2 font-medium text-gray-800 text-sm">Faculty Employment Contract</td><td class="py-3 px-2 text-gray-600 text-xs">Employment</td><td class="py-3 px-2 text-gray-600 text-xs">BEED</td><td class="py-3 px-2 text-gray-600 text-xs">v2.1</td><td class="py-3 px-2 text-gray-400 text-xs">192.168.1.200</td><td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">Details</button></td></tr>
+                                    <tr class="audit-row hover:bg-gray-50">
+                                        <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-28 09:30:45</td>
+                                        <td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">AS</span><span>Dr. Santos</span></div></td>
+                                        <td class="py-3 px-2"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Approve</span></td>
+                                        <td class="py-3 px-2 font-medium text-gray-800 text-sm">Syllabus - Elementary Education</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">Instruction</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">BEED</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">v3.2</td>
+                                        <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.45</td>
+                                        <td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button></td>
+                                    </tr>
+                                    <tr class="audit-row hover:bg-gray-50">
+                                        <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-28 08:15:22</td>
+                                        <td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">PG</span><span>Prof. Garcia</span></div></td>
+                                        <td class="py-3 px-2"><span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Upload</span></td>
+                                        <td class="py-3 px-2 font-medium text-gray-800 text-sm">Research Publication 2025</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">Research</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">BSED</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">v0.3</td>
+                                        <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.102</td>
+                                        <td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button></td>
+                                    </tr>
+                                    <tr class="audit-row hover:bg-gray-50">
+                                        <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-27 16:45:10</td>
+                                        <td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">DC</span><span>Dean Cruz</span></div></td>
+                                        <td class="py-3 px-2"><span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">Comment</span></td>
+                                        <td class="py-3 px-2 font-medium text-gray-800 text-sm">Community Extension Program</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">Extension</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">BPED</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">v1.1</td>
+                                        <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.78</td>
+                                        <td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button></td>
+                                    </tr>
+                                    <tr class="audit-row hover:bg-gray-50">
+                                        <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-27 14:20:05</td>
+                                        <td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">DR</span><span>Dr. Reyes</span></div></td>
+                                        <td class="py-3 px-2"><span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Validate</span></td>
+                                        <td class="py-3 px-2 font-medium text-gray-800 text-sm">Inclusive Education Module</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">Instruction</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">BSNED</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">v1.0</td>
+                                        <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.34</td>
+                                        <td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button></td>
+                                    </tr>
+                                    <tr class="audit-row hover:bg-gray-50">
+                                        <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">2026-04-26 11:05:33</td>
+                                        <td class="py-3 px-2"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-700 text-xs font-bold">QO</span><span>QA Office</span></div></td>
+                                        <td class="py-3 px-2"><span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Flag</span></td>
+                                        <td class="py-3 px-2 font-medium text-gray-800 text-sm">Faculty Employment Contract</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">Employment</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">BEED</td>
+                                        <td class="py-3 px-2 text-gray-600 text-xs">v2.1</td>
+                                        <td class="py-3 px-2 text-gray-400 text-xs">192.168.1.200</td>
+                                        <td class="py-3 px-2"><button class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- timeline view - Updated with new categories -->
+                <!-- timeline view -->
                 <div id="timelineView" class="hidden">
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="space-y-6">
-                            <div><h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>Today, April 28, 2026</h3><div class="space-y-3 pl-4"><div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-teal-200 pl-4 pb-2"><span class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">09:30</span><div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved Syllabus - Elementary Education</p><p class="text-xs text-gray-400">Instruction · BEED · IP: 192.168.1.45</p></div></div><div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-blue-200 pl-4"><span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">08:15</span><div><p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded Research Publication 2025</p><p class="text-xs text-gray-400">Research · BSED · IP: 192.168.1.102</p></div></div></div></div>
-                            <div><h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>Yesterday, April 27, 2026</h3><div class="space-y-3 pl-4"><div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-amber-200 pl-4 pb-2"><span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">16:45</span><div><p class="text-sm"><span class="font-medium">Dean Cruz</span> commented on Extension Program</p><p class="text-xs text-gray-400">Extension · BPED · IP: 192.168.1.78</p></div></div><div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-purple-200 pl-4"><span class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">14:20</span><div><p class="text-sm"><span class="font-medium">Dr. Reyes</span> validated Inclusive Education Module</p><p class="text-xs text-gray-400">Instruction · BSNED · IP: 192.168.1.34</p></div></div></div></div>
-                            <div><h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>April 26, 2026</h3><div class="space-y-3 pl-4"><div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-green-200 pl-4"><span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">11:05</span><div><p class="text-sm"><span class="font-medium">QA Office</span> flagged Employment Contract</p><p class="text-xs text-gray-400">Employment · BEED · IP: 192.168.1.200</p></div></div></div></div>
+                            <div>
+                                <h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>Today, April 28, 2026</h3>
+                                <div class="space-y-3 pl-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-teal-200 pl-4 pb-2">
+                                        <span class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">09:30</span>
+                                        <div><p class="text-sm"><span class="font-medium">Dr. Santos</span> approved Syllabus - Elementary Education</p><p class="text-xs text-gray-400">Instruction · BEED · IP: 192.168.1.45</p></div>
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-blue-200 pl-4">
+                                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">08:15</span>
+                                        <div><p class="text-sm"><span class="font-medium">Prof. Garcia</span> uploaded Research Publication 2025</p><p class="text-xs text-gray-400">Research · BSED · IP: 192.168.1.102</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>Yesterday, April 27, 2026</h3>
+                                <div class="space-y-3 pl-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-amber-200 pl-4 pb-2">
+                                        <span class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 text-xs font-bold">16:45</span>
+                                        <div><p class="text-sm"><span class="font-medium">Dean Cruz</span> commented on Extension Program</p><p class="text-xs text-gray-400">Extension · BPED · IP: 192.168.1.78</p></div>
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-purple-200 pl-4">
+                                        <span class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">14:20</span>
+                                        <div><p class="text-sm"><span class="font-medium">Dr. Reyes</span> validated Inclusive Education Module</p><p class="text-xs text-gray-400">Instruction · BSNED · IP: 192.168.1.34</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-700 mb-3 flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>April 26, 2026</h3>
+                                <div class="space-y-3 pl-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-green-200 pl-4">
+                                        <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">11:05</span>
+                                        <div><p class="text-sm"><span class="font-medium">QA Office</span> flagged Employment Contract</p><p class="text-xs text-gray-400">Employment · BEED · IP: 192.168.1.200</p></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,19 +299,61 @@
                 <!-- pagination -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
                     <div class="text-sm text-gray-500">Showing 1 to 5 of 1,284 events</div>
-                    <div class="flex flex-wrap gap-2 justify-center"><button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">Previous</button><button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg text-sm">1</button><button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">2</button><button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">3</button><button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">Next</button></div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm transition-colors">Previous</button>
+                        <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg text-sm">1</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">2</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">3</button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm">Next</button>
+                    </div>
                 </div>
 
                 <!-- version history summary -->
                 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-3">Version History Summary</h3><div class="space-y-3"><div class="flex justify-between"><span class="text-sm">Total versions tracked:</span><span class="font-medium">2,456</span></div><div class="flex justify-between"><span class="text-sm">Documents with multiple versions:</span><span class="font-medium">342</span></div><div class="flex justify-between"><span class="text-sm">Average versions per document:</span><span class="font-medium">2.9</span></div></div></div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-3">Audit Trail Integrity</h3><div class="space-y-3"><div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-sm">All logs are tamper-proof and timestamped</span></div><div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-sm">Daily backups maintained for 90 days</span></div><div class="mt-3 pt-3 border-t"><p class="text-xs text-gray-400">Last audit log verification: Apr 28, 2026</p></div></div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h3 class="font-semibold text-gray-800 text-base mb-3">Version History Summary</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between"><span class="text-sm">Total versions tracked:</span><span class="font-medium">2,456</span></div>
+                            <div class="flex justify-between"><span class="text-sm">Documents with multiple versions:</span><span class="font-medium">342</span></div>
+                            <div class="flex justify-between"><span class="text-sm">Average versions per document:</span><span class="font-medium">2.9</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h3 class="font-semibold text-gray-800 text-base mb-3">Audit Trail Integrity</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-sm">All logs are tamper-proof and timestamped</span></div>
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span><span class="text-sm">Daily backups maintained for 90 days</span></div>
+                            <div class="mt-3 pt-3 border-t"><p class="text-xs text-gray-400">Last audit log verification: Apr 28, 2026</p></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
+        // Update sidebar user info
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const userInitialsSpan = document.getElementById('userInitials');
+        const userNameSpan = document.getElementById('userName');
+        const userRoleSpan = document.getElementById('userRole');
+        
+        if (userData.firstName && userData.lastName) {
+            if (userInitialsSpan) userInitialsSpan.textContent = (userData.firstName[0] + userData.lastName[0]).toUpperCase();
+            if (userNameSpan) userNameSpan.textContent = `${userData.firstName} ${userData.lastName}`;
+        }
+        if (userData.role && userRoleSpan) {
+            const roleMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'faculty': 'Faculty Member',
+                'area-chair': 'Dept. Head',
+                'department-head': 'Dept. Head',
+                'evaluator': 'External Evaluator'
+            };
+            userRoleSpan.textContent = roleMap[userData.role] || userData.role;
+        }
+        
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -177,7 +382,9 @@
         });
         
         // View details buttons
-        document.querySelectorAll('.view-details-btn').forEach(btn => { btn.addEventListener('click', () => alert('Event details would appear here')); });
+        document.querySelectorAll('.view-details-btn').forEach(btn => { 
+            btn.addEventListener('click', () => alert('Event details would appear here')); 
+        });
         
         // Export button
         document.getElementById('exportAuditBtn')?.addEventListener('click', () => alert('Exporting audit log as CSV...'));
@@ -186,6 +393,21 @@
         ['searchAudit', 'actionTypeFilter', 'userFilter', 'dateRangeFilter'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', () => alert('Filter applied'));
         });
+        
+        // Heartbeat
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
 </html>

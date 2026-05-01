@@ -1,4 +1,4 @@
-// js/approvals.js - Admin Approvals Page
+// js/approvals.js - Admin Approvals Page with Validation and Approval Modals
 
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
@@ -27,11 +27,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const paginationInfo = document.getElementById('paginationInfo');
     const paginationButtons = document.getElementById('paginationButtons');
     
+    // Bulk action elements
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const bulkActionSelect = document.getElementById('bulkAction');
+    const applyBulkBtn = document.getElementById('applyBulk');
+    
     // Preview modal elements
     const docPreviewModal = document.getElementById('docPreviewModal');
     const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
     const docPreviewFrame = document.getElementById('docPreviewFrame');
     const docPreviewTitle = document.getElementById('docPreviewTitle');
+    
+    // Validate modal elements
+    const validateModal = document.getElementById('validateModal');
+    const validateModalCloseBtn = document.getElementById('validateModalCloseBtn');
+    const validateModalCancelBtn = document.getElementById('validateModalCancelBtn');
+    const validateModalConfirmBtn = document.getElementById('validateModalConfirmBtn');
+    const validateDocTitle = document.getElementById('validateDocTitle');
+    const validateComment = document.getElementById('validateComment');
+    
+    // Approve modal elements
+    const approveModal = document.getElementById('approveModal');
+    const approveModalCloseBtn = document.getElementById('approveModalCloseBtn');
+    const approveModalCancelBtn = document.getElementById('approveModalCancelBtn');
+    const approveModalConfirmBtn = document.getElementById('approveModalConfirmBtn');
+    const approveDocTitle = document.getElementById('approveDocTitle');
+    const approveComment = document.getElementById('approveComment');
     
     // Rejection modal elements
     const rejectionModal = document.getElementById('rejectionModal');
@@ -39,10 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelRejection = document.getElementById('cancelRejection');
     const submitRejection = document.getElementById('submitRejection');
     const rejectionComment = document.getElementById('rejectionComment');
-    const modalDocTitle = document.getElementById('modalDocTitle');
-    const modalDocDate = document.getElementById('modalDocDate');
-    const modalDocCategory = document.getElementById('modalDocCategory');
-    const modalDocAuthor = document.getElementById('modalDocAuthor');
+    
+    // Bulk rejection modal
+    const bulkRejectionModal = document.getElementById('bulkRejectionModal');
+    const closeBulkRejectionBtn = document.getElementById('closeBulkRejectionModal');
+    const cancelBulkRejection = document.getElementById('cancelBulkRejection');
+    const submitBulkRejection = document.getElementById('submitBulkRejection');
+    const bulkRejectionComment = document.getElementById('bulkRejectionComment');
+    const bulkRejectCount = document.getElementById('bulkRejectCount');
     
     // Lock modal elements
     const lockModal = document.getElementById('lockModal');
@@ -60,26 +86,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const actionErrorMessage = document.getElementById('actionErrorMessage');
     const closeActionErrorBtn = document.getElementById('closeActionErrorBtn');
     
-    let currentLockDocId = null;
-    let pendingRejectDocId = null;
-    let toastTimer;
-
     let allDocuments = [];
     let filteredDocuments = [];
     let currentPage = 1;
     const itemsPerPage = 10;
     let currentTab = 'all';
+    let currentLockDocId = null;
+    let pendingRejectDocId = null;
+    let pendingValidateDocId = null;
+    let pendingApproveDocId = null;
+    let bulkRejectIds = [];
+    let toastTimer;
+
+    // Update user info
+    updateUserInfo();
 
     // Load stats and documents
     loadStats();
     loadDocuments();
 
+    function updateUserInfo() {
+        const userInitials = document.getElementById('userInitials');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+        
+        if (user.firstName && user.lastName) {
+            const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+            if (userInitials) userInitials.textContent = initials;
+            if (userName) userName.textContent = `${user.firstName} ${user.lastName}`;
+        }
+        if (user.role && userRole) {
+            const roleMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'faculty': 'Faculty Member',
+                'area-chair': 'Dept. Head',
+                'department-head': 'Dept. Head',
+                'evaluator': 'External Evaluator'
+            };
+            userRole.textContent = roleMap[user.role] || user.role;
+        }
+    }
+
     // Helper functions
     function showToast(msg, isError = false) {
-        if (!actionToast) return;
+        if (!actionToast) { alert(msg); return; }
         actionToastIcon.textContent = isError ? '✕' : '✓';
         actionToastMsg.textContent = msg;
-        actionToast.querySelector('div').className = `flex items-center gap-3 ${isError ? 'bg-red-700' : 'bg-gray-900'} text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm`;
+        const toastDiv = actionToast.querySelector('div');
+        if (toastDiv) {
+            toastDiv.className = `flex items-center gap-3 ${isError ? 'bg-red-700' : 'bg-gray-900'} text-white px-4 py-3 rounded-xl shadow-xl text-sm max-w-sm`;
+        }
         actionToast.classList.remove('hidden');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => actionToast.classList.add('hidden'), 3500);
@@ -98,41 +155,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Load statistics
-    function loadStats() {
-        fetch(`${API_BASE}/api/approvals/stats`, {
-            headers: { 'x-auth-token': token }
-        })
-        .then(r => r.json())
-        .then(stats => {
+    async function loadStats() {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/stats`, {
+                headers: { 'x-auth-token': token }
+            });
+            const stats = await response.json();
             document.getElementById('statPendingReview').textContent = (stats.pending || 0) + (stats.validated || 0);
             document.getElementById('statAwaitingValidation').textContent = stats.pending || 0;
             document.getElementById('statPendingApproval').textContent = stats.validated || 0;
-            document.getElementById('statApprovedMonth').textContent = stats.approved_month || 0;
-        })
-        .catch(() => {});
+            document.getElementById('statApproved').textContent = stats.approved || 0;
+            document.getElementById('statRejected').textContent = stats.rejected || 0;
+        } catch (err) {
+            console.error('Error loading stats:', err);
+        }
     }
 
     // Load documents
-    function loadDocuments() {
+    async function loadDocuments() {
         console.log('Loading documents from API...');
-        fetch(`${API_BASE}/api/approvals/pending`, {
-            headers: { 'x-auth-token': token }
-        })
-        .then(r => {
-            console.log('API Response status:', r.status);
-            return r.json();
-        })
-        .then(docs => {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/pending`, {
+                headers: { 'x-auth-token': token }
+            });
+            const docs = await response.json();
             console.log('Documents received:', docs);
             allDocuments = docs;
             applyFilters();
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('Error loading documents:', err);
-        });
+            showErrorModal('Failed to load documents');
+        }
     }
 
-    // Get workflow stage for filtering
     function getWorkflowStage(status) {
         const statusMap = {
             'draft': 'draft',
@@ -145,7 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return statusMap[status] || 'unknown';
     }
 
-    // Apply filters
     function applyFilters() {
         const searchTerm = searchInput.value.toLowerCase();
         const stage = workflowStage.value;
@@ -153,29 +207,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         filteredDocuments = allDocuments.filter(doc => {
             const matchesSearch = !searchTerm || 
-                doc.title.toLowerCase().includes(searchTerm) ||
+                (doc.title || '').toLowerCase().includes(searchTerm) ||
                 (doc.author_name || '').toLowerCase().includes(searchTerm) ||
-                (doc.department_name || '').toLowerCase().includes(searchTerm) ||
                 (doc.department_code || '').toLowerCase().includes(searchTerm);
 
-            const docStage = getWorkflowStage(doc.workflow_status);
             const matchesStage = stage === 'all' || 
-                (stage === 'upload' && doc.workflow_status === 'draft') ||
-                (stage === 'validate' && doc.workflow_status === 'pending') ||
-                (stage === 'approve' && doc.workflow_status === 'validated') ||
-                (stage === 'lock' && doc.workflow_status === 'approved');
+                (stage === 'validate' && (doc.workflow_status === 'pending' || doc.workflow_status === 'draft')) ||
+                (stage === 'approve' && doc.workflow_status === 'validated');
 
-            const matchesStatus = status === 'all' ||
-                (status === 'pending' && doc.workflow_status === 'pending') ||
-                (status === 'review' && doc.workflow_status === 'validated') ||
-                (status === 'approved' && doc.workflow_status === 'approved') ||
-                (status === 'locked' && doc.workflow_status === 'locked') ||
-                (status === 'rejected' && doc.workflow_status === 'rejected');
+            const matchesStatus = status === 'all' || doc.workflow_status === status;
 
             const matchesTab = currentTab === 'all' ||
                 (currentTab === 'pending' && (doc.workflow_status === 'pending' || doc.workflow_status === 'validated')) ||
                 (currentTab === 'validating' && doc.workflow_status === 'pending') ||
                 (currentTab === 'approving' && doc.workflow_status === 'validated') ||
+                (currentTab === 'rejected' && doc.workflow_status === 'rejected') ||
                 (currentTab === 'recent' && (doc.workflow_status === 'approved' || doc.workflow_status === 'locked'));
 
             return matchesSearch && matchesStage && matchesStatus && matchesTab;
@@ -184,9 +230,9 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPage = 1;
         renderDocuments();
         renderPagination();
+        updateSelectedCount();
     }
 
-    // Get status badge class
     function getStatusBadge(status) {
         const badges = {
             'draft': 'bg-gray-100 text-gray-700',
@@ -199,12 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return badges[status] || 'bg-gray-100 text-gray-700';
     }
 
-    // Get status text
     function getStatusText(status) {
         const texts = {
             'draft': 'Draft',
-            'pending': 'Validation',
-            'validated': 'Approval',
+            'pending': 'Pending Validation',
+            'validated': 'Pending Approval',
             'approved': 'Approved',
             'locked': 'Locked',
             'rejected': 'Rejected'
@@ -212,7 +257,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return texts[status] || status;
     }
 
-    // Open preview modal
     function openPreviewModal(url, title) {
         if (!docPreviewModal || !docPreviewFrame) {
             window.open(url, '_blank');
@@ -224,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
         docPreviewModal.classList.add('flex');
     }
 
-    // Close preview modal
     function closePreviewModal() {
         if (!docPreviewModal || !docPreviewFrame) return;
         docPreviewModal.classList.add('hidden');
@@ -232,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
         docPreviewFrame.src = 'about:blank';
     }
 
-    // Preview modal event listeners
     if (docPreviewCloseBtn) docPreviewCloseBtn.addEventListener('click', closePreviewModal);
     if (docPreviewModal) {
         docPreviewModal.addEventListener('click', (e) => {
@@ -240,14 +282,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Validate modal functions
+    function openValidateModal(docId, title) {
+        pendingValidateDocId = docId;
+        validateDocTitle.textContent = title;
+        validateComment.value = '';
+        if (validateModal) {
+            validateModal.classList.remove('hidden');
+            validateModal.classList.add('flex');
+        }
+    }
+    
+    function closeValidateModal() {
+        pendingValidateDocId = null;
+        if (validateModal) {
+            validateModal.classList.add('hidden');
+            validateModal.classList.remove('flex');
+        }
+    }
+    
+    // Approve modal functions
+    function openApproveModal(docId, title) {
+        pendingApproveDocId = docId;
+        approveDocTitle.textContent = title;
+        approveComment.value = '';
+        if (approveModal) {
+            approveModal.classList.remove('hidden');
+            approveModal.classList.add('flex');
+        }
+    }
+    
+    function closeApproveModal() {
+        pendingApproveDocId = null;
+        if (approveModal) {
+            approveModal.classList.add('hidden');
+            approveModal.classList.remove('flex');
+        }
+    }
+    
     // Rejection modal functions
     function openRejectionModal(doc) {
         pendingRejectDocId = doc.id;
-        if (modalDocTitle) modalDocTitle.textContent = doc.title;
-        if (modalDocDate) modalDocDate.textContent = new Date(doc.created_at).toLocaleDateString();
-        if (modalDocCategory) modalDocCategory.textContent = `${doc.category_name || doc.category || 'N/A'} / ${doc.department_code || 'N/A'}`;
-        if (modalDocAuthor) modalDocAuthor.textContent = doc.author_name || 'Unknown';
-        if (rejectionComment) rejectionComment.value = '';
+        document.getElementById('modalDocTitle').textContent = doc.title;
+        document.getElementById('modalDocDate').textContent = new Date(doc.created_at).toLocaleDateString();
+        document.getElementById('modalDocCategory').textContent = `${doc.category_name || doc.category || 'N/A'} / ${doc.department_code || 'N/A'}`;
+        document.getElementById('modalDocAuthor').textContent = doc.author_name || 'Unknown';
+        document.getElementById('modalReviewer').textContent = `${user.firstName || 'Admin'} ${user.lastName || 'User'}`;
+        rejectionComment.value = '';
         if (rejectionModal) {
             rejectionModal.classList.remove('hidden');
             setTimeout(() => rejectionModal.classList.add('active'), 10);
@@ -262,33 +343,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (closeRejectionBtn) closeRejectionBtn.addEventListener('click', closeRejectionModal);
-    if (cancelRejection) cancelRejection.addEventListener('click', closeRejectionModal);
-    if (rejectionModal) rejectionModal.addEventListener('click', e => { if (e.target === rejectionModal) closeRejectionModal(); });
-
-    if (submitRejection) {
-        submitRejection.addEventListener('click', async () => {
-            const reason = rejectionComment?.value?.trim();
-            if (!reason) { showToast('Please provide a rejection reason.', true); return; }
-            if (!pendingRejectDocId) return;
-            try {
-                const res = await fetch(`${API_BASE}/api/approvals/${pendingRejectDocId}/reject`, {
-                    method: 'POST',
-                    headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reason })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.msg || 'Failed to reject');
-                closeRejectionModal();
-                showToast('Document rejected successfully.');
-                updateDocumentStatus(pendingRejectDocId, 'rejected');
-                loadStats();
-            } catch (err) {
-                showErrorModal(err.message);
-            }
-        });
+    // Bulk rejection modal functions
+    function openBulkRejectionModal(ids) {
+        bulkRejectIds = ids;
+        bulkRejectCount.textContent = ids.length;
+        bulkRejectionComment.value = '';
+        if (bulkRejectionModal) {
+            bulkRejectionModal.classList.remove('hidden');
+            setTimeout(() => bulkRejectionModal.classList.add('active'), 10);
+        }
     }
-    
+
+    function closeBulkRejectionModal() {
+        bulkRejectIds = [];
+        if (bulkRejectionModal) {
+            bulkRejectionModal.classList.remove('active');
+            setTimeout(() => bulkRejectionModal.classList.add('hidden'), 300);
+        }
+    }
+
     // Lock modal functions
     function openLockModal(docId, title) {
         currentLockDocId = docId;
@@ -308,9 +381,98 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Lock modal event listeners
+    // Modal event listeners
+    if (validateModalCloseBtn) validateModalCloseBtn.addEventListener('click', closeValidateModal);
+    if (validateModalCancelBtn) validateModalCancelBtn.addEventListener('click', closeValidateModal);
+    if (validateModal) {
+        validateModal.addEventListener('click', (e) => {
+            if (e.target === validateModal) closeValidateModal();
+        });
+    }
+    
+    if (approveModalCloseBtn) approveModalCloseBtn.addEventListener('click', closeApproveModal);
+    if (approveModalCancelBtn) approveModalCancelBtn.addEventListener('click', closeApproveModal);
+    if (approveModal) {
+        approveModal.addEventListener('click', (e) => {
+            if (e.target === approveModal) closeApproveModal();
+        });
+    }
+    
+    if (closeRejectionBtn) closeRejectionBtn.addEventListener('click', closeRejectionModal);
+    if (cancelRejection) cancelRejection.addEventListener('click', closeRejectionModal);
+    if (rejectionModal) rejectionModal.addEventListener('click', e => { if (e.target === rejectionModal) closeRejectionModal(); });
+    
+    if (closeBulkRejectionBtn) closeBulkRejectionBtn.addEventListener('click', closeBulkRejectionModal);
+    if (cancelBulkRejection) cancelBulkRejection.addEventListener('click', closeBulkRejectionModal);
+    if (bulkRejectionModal) bulkRejectionModal.addEventListener('click', e => { if (e.target === bulkRejectionModal) closeBulkRejectionModal(); });
+    
     if (lockModalCloseBtn) lockModalCloseBtn.addEventListener('click', closeLockModal);
     if (lockModalCancelBtn) lockModalCancelBtn.addEventListener('click', closeLockModal);
+    if (lockModal) {
+        lockModal.addEventListener('click', (e) => {
+            if (e.target === lockModal) closeLockModal();
+        });
+    }
+    
+    // Action handlers with modals
+    if (validateModalConfirmBtn) {
+        validateModalConfirmBtn.addEventListener('click', async () => {
+            if (pendingValidateDocId) {
+                const comments = validateComment ? validateComment.value : '';
+                await performValidate(pendingValidateDocId, comments);
+                closeValidateModal();
+            }
+        });
+    }
+    
+    if (approveModalConfirmBtn) {
+        approveModalConfirmBtn.addEventListener('click', async () => {
+            if (pendingApproveDocId) {
+                const comments = approveComment ? approveComment.value : '';
+                await performApprove(pendingApproveDocId, comments);
+                closeApproveModal();
+            }
+        });
+    }
+    
+    if (submitRejection) {
+        submitRejection.addEventListener('click', async () => {
+            const reason = rejectionComment?.value?.trim();
+            if (!reason) { showToast('Please provide a rejection reason.', true); return; }
+            if (!pendingRejectDocId) return;
+            await performReject(pendingRejectDocId, reason);
+            closeRejectionModal();
+        });
+    }
+    
+    if (submitBulkRejection) {
+        submitBulkRejection.addEventListener('click', async () => {
+            const reason = bulkRejectionComment?.value?.trim();
+            if (!reason) { showToast('Please provide a rejection reason for all selected documents.', true); return; }
+            if (bulkRejectIds.length === 0) return;
+            
+            showToast(`Rejecting ${bulkRejectIds.length} documents...`, false);
+            let successCount = 0;
+            let failCount = 0;
+            
+            for (const docId of bulkRejectIds) {
+                const success = await performReject(docId, reason, true);
+                if (success) successCount++;
+                else failCount++;
+            }
+            
+            closeBulkRejectionModal();
+            if (failCount === 0) {
+                showToast(`Successfully rejected ${successCount} documents.`);
+            } else {
+                showToast(`Rejected ${successCount} documents, ${failCount} failed.`, true);
+            }
+            clearAllSelections();
+            loadDocuments();
+            loadStats();
+        });
+    }
+    
     if (lockModalConfirmBtn) {
         lockModalConfirmBtn.addEventListener('click', () => {
             if (currentLockDocId) {
@@ -320,256 +482,123 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    if (lockModal) {
-        lockModal.addEventListener('click', (e) => {
-            if (e.target === lockModal) closeLockModal();
-        });
-    }
-
-    // Get action buttons based on workflow status
-    function getActionButtons(doc) {
-        const status = doc.workflow_status;
-        const isAdmin = role === 'admin';
-        const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
-        
-        let buttons = `<button class="btn-view text-xs text-teal-600 hover:underline font-medium px-1" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
-
-        // Show buttons based on current workflow status
-        if (status === 'draft' || status === 'pending') {
-            // Pending documents: Show Validate and Reject
-            buttons += ` <button class="btn-validate text-xs text-green-600 hover:underline font-medium px-1" data-id="${doc.id}">Validate</button>`;
-            buttons += ` <button class="btn-reject text-xs text-red-600 hover:underline font-medium px-1" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
-        } else if (status === 'validated') {
-            // Validated documents: Show Approve and Reject
-            buttons += ` <button class="btn-approve text-xs text-blue-600 hover:underline font-medium px-1" data-id="${doc.id}">Approve</button>`;
-            buttons += ` <button class="btn-reject text-xs text-red-600 hover:underline font-medium px-1" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
-        } else if (status === 'approved') {
-            // Approved documents: Show Lock
-            buttons += ` <button class="btn-lock text-xs text-purple-600 hover:underline font-medium px-1" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
-        } else if (status === 'locked' && isAdmin) {
-            // Locked documents: Show Unlock (admin only)
-            buttons += ` <button class="btn-unlock text-xs text-orange-600 hover:underline font-medium px-1" data-id="${doc.id}">Unlock</button>`;
-        } else if (status === 'rejected') {
-            // Rejected documents: Show Comments and Delete
-            buttons += ` <button class="btn-comments text-xs text-blue-600 hover:underline font-medium px-1" data-id="${doc.id}">Comments</button>`;
-            buttons += ` <button class="btn-delete text-xs text-red-600 hover:underline font-medium px-1" data-id="${doc.id}">Delete</button>`;
-        }
-
-        return buttons;
-    }
-
-    // Get mobile action buttons
-    function getMobileActionButtons(doc) {
-        const status = doc.workflow_status;
-        const isAdmin = role === 'admin';
-        const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
-        
-        let buttons = `<button class="btn-view text-xs px-2 py-1 bg-teal-600 text-white rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
-
-        // Show buttons based on current workflow status
-        if (status === 'draft' || status === 'pending') {
-            buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-green-600 text-white rounded" data-id="${doc.id}">Validate</button>`;
-            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
-        } else if (status === 'validated') {
-            buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}">Approve</button>`;
-            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
-        } else if (status === 'approved') {
-            buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
-        } else if (status === 'locked' && isAdmin) {
-            buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-600 text-white rounded" data-id="${doc.id}">Unlock</button>`;
-        } else if (status === 'rejected') {
-            buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}">Comments</button>`;
-            buttons += ` <button class="btn-delete text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}">Delete</button>`;
-        }
-
-        return buttons;
-    }
-
-    // Render documents
-    function renderDocuments() {
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const pageDocuments = filteredDocuments.slice(start, end);
-
-        console.log('Rendering documents:', pageDocuments.length, 'of', filteredDocuments.length);
-
-        if (pageDocuments.length === 0) {
-            approvalsList.innerHTML = '<div class="col-span-12 py-8 text-center text-gray-500">No documents found</div>';
-            mobileApprovalsList.innerHTML = '<div class="p-4 text-center text-gray-500">No documents found</div>';
-            return;
-        }
-
-        // Desktop view
-        approvalsList.innerHTML = pageDocuments.map(doc => {
-            const statusBadge = getStatusBadge(doc.workflow_status);
-            const statusText = getStatusText(doc.workflow_status);
-            const deptCode = doc.department_code || 'N/A';
-
-            return `
-                <div class="grid grid-cols-12 py-3 text-sm items-center approval-item" data-id="${doc.id}" data-stage="${getWorkflowStage(doc.workflow_status)}" data-status="${doc.workflow_status}">
-                    <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                    <div class="col-span-3">
-                        <div class="font-medium text-gray-800">${doc.title}</div>
-                        <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
-                    </div>
-                    <div class="col-span-2"><span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span></div>
-                    <div class="col-span-1"><span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${deptCode}</span></div>
-                    <div class="col-span-2"><span class="${statusBadge} text-xs px-2 py-1 rounded-full font-medium">${statusText}</span></div>
-                    <div class="col-span-1 text-gray-600">${doc.version || 'v1.0'}</div>
-                    <div class="col-span-2">
-                        <div class="flex flex-wrap gap-2">
-                            ${getActionButtons(doc)}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Mobile view
-        mobileApprovalsList.innerHTML = pageDocuments.map(doc => {
-            const statusBadge = getStatusBadge(doc.workflow_status);
-            const statusText = getStatusText(doc.workflow_status);
-            const deptCode = doc.department_code || 'N/A';
-
-            return `
-                <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
-                    <div class="flex items-start gap-2 mb-2">
-                        <input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600">
-                        <div class="flex-1">
-                            <div class="font-medium text-gray-800">${doc.title}</div>
-                            <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-2">
-                        <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span>
-                        <span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${deptCode}</span>
-                        <span class="${statusBadge} text-xs px-2 py-1 rounded-full font-medium">${statusText}</span>
-                    </div>
-                    <div class="text-sm text-gray-600 mb-3">${doc.version || 'v1.0'}</div>
-                    <div class="flex flex-wrap gap-2">
-                        ${getMobileActionButtons(doc)}
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        attachActionHandlers();
-    }
-
-    // Render pagination
-    function renderPagination() {
-        const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredDocuments.length);
-
-        paginationInfo.textContent = `Showing ${start} to ${end} of ${filteredDocuments.length}`;
-
-        let buttons = '<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm" data-page="prev">Previous</button>';
-        for (let i = 1; i <= totalPages; i++) {
-            const active = i === currentPage ? 'bg-teal-600 text-white' : 'bg-white border text-gray-600';
-            buttons += `<button class="px-3 py-1 ${active} rounded-lg text-sm" data-page="${i}">${i}</button>`;
-        }
-        buttons += '<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm" data-page="next">Next</button>';
-
-        paginationButtons.innerHTML = buttons;
-
-        paginationButtons.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const page = btn.getAttribute('data-page');
-                if (page === 'prev' && currentPage > 1) currentPage--;
-                else if (page === 'next' && currentPage < totalPages) currentPage++;
-                else if (!isNaN(page)) currentPage = parseInt(page);
-                renderDocuments();
-                renderPagination();
+    
+    async function performValidate(docId, comments) {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
+                method: 'POST',
+                headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comments })
             });
-        });
-    }
-
-    // Update document status in UI
-    function updateDocumentStatus(docId, newStatus) {
-        const doc = allDocuments.find(d => d.id === docId);
-        if (doc) {
-            doc.workflow_status = newStatus;
-            applyFilters();
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Validation failed');
+            showToast(data.msg || 'Document validated successfully.');
+            updateDocumentStatus(parseInt(docId), 'validated');
+            loadStats();
+        } catch (err) {
+            showErrorModal('Failed to validate document: ' + err.message);
         }
     }
-
-    // Attach action handlers
-    function attachActionHandlers() {
-        document.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const url = btn.getAttribute('data-url');
-                const title = btn.getAttribute('data-title');
-                openPreviewModal(url, title);
+    
+    async function performApprove(docId, comments) {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/${docId}/approve`, {
+                method: 'POST',
+                headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comments })
             });
-        });
-
-        document.querySelectorAll('.btn-validate').forEach(btn => {
-            btn.addEventListener('click', () => handleValidate(btn.getAttribute('data-id')));
-        });
-
-        document.querySelectorAll('.btn-approve').forEach(btn => {
-            btn.addEventListener('click', () => handleApprove(btn.getAttribute('data-id')));
-        });
-
-        document.querySelectorAll('.btn-lock').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const docId = btn.getAttribute('data-id');
-                const title = btn.getAttribute('data-title');
-                openLockModal(docId, title);
-            });
-        });
-
-        document.querySelectorAll('.btn-unlock').forEach(btn => {
-            btn.addEventListener('click', () => handleUnlock(btn.getAttribute('data-id')));
-        });
-
-        document.querySelectorAll('.btn-reject').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const docId = parseInt(btn.getAttribute('data-id'));
-                const doc = allDocuments.find(d => d.id === docId);
-                if (doc) openRejectionModal(doc);
-            });
-        });
-
-        document.querySelectorAll('.btn-comments').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const docId = btn.getAttribute('data-id');
-                try {
-                    const res = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
-                        headers: { 'x-auth-token': token }
-                    });
-                    const data = await res.json();
-                    const doc = allDocuments.find(d => d.id == docId);
-                    openCommentsModal(doc, data.comments || []);
-                } catch (err) {
-                    showErrorModal('Failed to load comments');
-                }
-            });
-        });
-
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const docId = btn.getAttribute('data-id');
-                if (!confirm('Delete this document? This action cannot be undone.')) return;
-                try {
-                    const res = await fetch(`${API_BASE}/api/documents/${docId}`, {
-                        method: 'DELETE',
-                        headers: { 'x-auth-token': token }
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.msg || 'Failed to delete');
-                    showToast('Document deleted successfully.');
-                    loadDocuments();
-                    loadStats();
-                } catch (err) {
-                    showErrorModal(err.message);
-                }
-            });
-        });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Approval failed');
+            showToast(data.msg || 'Document approved successfully.');
+            updateDocumentStatus(parseInt(docId), 'approved');
+            loadStats();
+        } catch (err) {
+            showErrorModal('Failed to approve document: ' + err.message);
+        }
     }
-
+    
+    async function performReject(docId, reason, silent = false) {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/${docId}/reject`, {
+                method: 'POST',
+                headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Failed to reject');
+            if (!silent) showToast('Document rejected successfully.');
+            updateDocumentStatus(docId, 'rejected');
+            return true;
+        } catch (err) {
+            if (!silent) showErrorModal(err.message);
+            return false;
+        }
+    }
+    
+    async function confirmLockDocument(docId, comments) {
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/${docId}/lock`, {
+                method: 'POST',
+                headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comments })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Lock failed');
+            showToast(data.msg || 'Document locked successfully.');
+            updateDocumentStatus(parseInt(docId), 'locked');
+            loadStats();
+        } catch (err) {
+            showErrorModal('Failed to lock document: ' + err.message);
+        }
+    }
+    
+    async function handleUnlock(docId) {
+        if (!confirm('Unlock this document? It will return to approved status.')) return;
+        try {
+            const response = await fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
+                method: 'POST',
+                headers: { 'x-auth-token': token }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Unlock failed');
+            showToast(data.msg || 'Document unlocked successfully.');
+            updateDocumentStatus(parseInt(docId), 'approved');
+            loadStats();
+        } catch (err) {
+            showErrorModal('Failed to unlock document: ' + err.message);
+        }
+    }
+    
+    async function handleDelete(docId) {
+        if (!confirm('Delete this document? This action cannot be undone.')) return;
+        try {
+            const response = await fetch(`${API_BASE}/api/documents/${docId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.msg || 'Failed to delete');
+            showToast('Document deleted successfully.');
+            loadDocuments();
+            loadStats();
+        } catch (err) {
+            showErrorModal(err.message);
+        }
+    }
+    
+    async function handleComments(docId) {
+        try {
+            const response = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
+                headers: { 'x-auth-token': token }
+            });
+            const data = await response.json();
+            const doc = allDocuments.find(d => d.id == docId);
+            openCommentsModal(doc, data.comments || []);
+        } catch (err) {
+            showErrorModal('Failed to load comments');
+        }
+    }
+    
     function openCommentsModal(doc, comments) {
         const commentsModal = document.getElementById('commentsModal');
         const commentsDocTitle = document.getElementById('commentsDocTitle');
@@ -592,10 +621,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     return `
                         <div class="comment-item">
                             <div class="comment-header">
-                                <span class="comment-reviewer">${reviewer}</span>
+                                <span class="comment-reviewer">${escapeHtml(reviewer)}</span>
                                 <span class="comment-date">${date}</span>
                             </div>
-                            <div class="comment-text">${text}</div>
+                            <div class="comment-text">${escapeHtml(text)}</div>
                         </div>
                     `;
                 }).join('');
@@ -605,14 +634,14 @@ document.addEventListener('DOMContentLoaded', function() {
         commentsModal.classList.remove('hidden');
         setTimeout(() => commentsModal.classList.add('active'), 10);
     }
-
+    
     function closeCommentsModal() {
         const commentsModal = document.getElementById('commentsModal');
         if (!commentsModal) return;
         commentsModal.classList.remove('active');
         setTimeout(() => commentsModal.classList.add('hidden'), 300);
     }
-
+    
     const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
     const closeCommentsBtn = document.getElementById('closeCommentsBtn');
     if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
@@ -624,121 +653,328 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.target === commentsModal) closeCommentsModal();
         });
     }
+    
+    function updateDocumentStatus(docId, newStatus) {
+        const doc = allDocuments.find(d => d.id === docId);
+        if (doc) {
+            doc.workflow_status = newStatus;
+            applyFilters();
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    
+    function getActionButtons(doc) {
+        const status = doc.workflow_status;
+        const isAdmin = role === 'admin';
+        const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
+        
+        let buttons = `<button class="btn-view text-xs px-2 py-1 bg-gray-100 border border-gray-300 rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
-    // Handle validate
-    function handleValidate(docId) {
-        if (!confirm('Validate this document? It will move to the approval stage.')) return;
+        if (status === 'pending' || status === 'draft') {
+            buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
+        } else if (status === 'validated') {
+            buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-100 border border-green-300 rounded text-green-700" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
+            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
+        } else if (status === 'approved') {
+            buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-100 border border-purple-300 rounded text-purple-700" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+        } else if (status === 'locked' && isAdmin) {
+            buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-100 border border-orange-300 rounded text-orange-700" data-id="${doc.id}">Unlock</button>`;
+        } else if (status === 'rejected') {
+            buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}">Comments</button>`;
+            buttons += ` <button class="btn-delete text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}">Delete</button>`;
+        }
 
-        console.log('Validating document:', docId);
+        return buttons;
+    }
+    
+    function getMobileActionButtons(doc) {
+        const status = doc.workflow_status;
+        const isAdmin = role === 'admin';
+        const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
+        
+        let buttons = `<button class="btn-view text-xs px-2 py-1 bg-teal-600 text-white rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
-        fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
-            method: 'POST',
-            headers: { 
-                'x-auth-token': token,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(r => {
-            console.log('Validate response status:', r.status);
-            if (!r.ok) throw new Error('Validation failed');
-            return r.json();
-        })
-        .then(data => {
-            console.log('Validate response:', data);
-            showToast(data.msg || 'Document validated successfully.');
-            if (data.document && data.document.workflow_status) {
-                updateDocumentStatus(parseInt(docId), data.document.workflow_status);
-            } else {
-                updateDocumentStatus(parseInt(docId), 'validated');
-            }
-            loadStats();
-        })
-        .catch(err => {
-            console.error('Validate error:', err);
-            showErrorModal('Failed to validate document: ' + err.message);
+        if (status === 'pending' || status === 'draft') {
+            buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
+        } else if (status === 'validated') {
+            buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
+            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
+        } else if (status === 'approved') {
+            buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+        } else if (status === 'locked' && isAdmin) {
+            buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-600 text-white rounded" data-id="${doc.id}">Unlock</button>`;
+        } else if (status === 'rejected') {
+            buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}">Comments</button>`;
+            buttons += ` <button class="btn-delete text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}">Delete</button>`;
+        }
+
+        return buttons;
+    }
+    
+    function renderDocuments() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageDocuments = filteredDocuments.slice(start, end);
+
+        if (pageDocuments.length === 0) {
+            approvalsList.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-500">No documents found</td></tr>';
+            mobileApprovalsList.innerHTML = '<div class="p-4 text-center text-gray-500">No documents found</div>';
+            return;
+        }
+
+        // Desktop view
+        approvalsList.innerHTML = pageDocuments.map(doc => `
+            <tr class="approval-item hover:bg-gray-50 transition" data-id="${doc.id}" data-stage="${getWorkflowStage(doc.workflow_status)}" data-status="${doc.workflow_status}">
+                <td class="py-3 px-4"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600" data-id="${doc.id}"></td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div>
+                    <div class="text-xs text-gray-400">by ${escapeHtml(doc.author_name || 'Unknown')} · ${new Date(doc.created_at).toLocaleDateString()}</div>
+                </td>
+                <td class="py-3 px-4"><span class="badge-${doc.category || 'other'} px-2 py-1 rounded-full text-xs">${escapeHtml((doc.category_name || doc.category || 'N/A').toUpperCase())}</span></td>
+                <td class="py-3 px-4"><span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${escapeHtml(doc.department_code || 'N/A')}</span></td>
+                <td class="py-3 px-4"><span class="${getStatusBadge(doc.workflow_status)} px-2 py-1 rounded-full text-xs font-medium">${getStatusText(doc.workflow_status)}</span></td>
+                <td class="py-3 px-4 text-gray-600">${escapeHtml(doc.version || 'v1.0')}</td>
+                <td class="py-3 px-4"><div class="flex flex-wrap gap-2">${getActionButtons(doc)}</div></td>
+            </tr>
+        `).join('');
+
+        // Mobile view
+        mobileApprovalsList.innerHTML = pageDocuments.map(doc => `
+            <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
+                <div class="flex items-start gap-2 mb-2">
+                    <input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600" data-id="${doc.id}">
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div>
+                        <div class="text-xs text-gray-400">by ${escapeHtml(doc.author_name || 'Unknown')} · ${new Date(doc.created_at).toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <span class="badge-${doc.category || 'other'} px-2 py-1 rounded-full text-xs">${escapeHtml((doc.category_name || doc.category || 'N/A').toUpperCase())}</span>
+                    <span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${escapeHtml(doc.department_code || 'N/A')}</span>
+                    <span class="${getStatusBadge(doc.workflow_status)} px-2 py-1 rounded-full text-xs font-medium">${getStatusText(doc.workflow_status)}</span>
+                </div>
+                <div class="text-sm text-gray-600 mb-3">${escapeHtml(doc.version || 'v1.0')}</div>
+                <div class="flex flex-wrap gap-2">${getMobileActionButtons(doc)}</div>
+            </div>
+        `).join('');
+
+        attachActionHandlers();
+    }
+    
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredDocuments.length);
+
+        paginationInfo.textContent = `Showing ${start} to ${end} of ${filteredDocuments.length}`;
+
+        let buttons = '';
+        buttons += `<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" data-page="prev" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+        
+        const maxButtons = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+        if (endPage - startPage + 1 < maxButtons) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const active = i === currentPage ? 'bg-teal-600 text-white' : 'bg-white border text-gray-600 hover:bg-gray-50';
+            buttons += `<button class="px-3 py-1 ${active} rounded-lg text-sm" data-page="${i}">${i}</button>`;
+        }
+        
+        buttons += `<button class="px-3 py-1 bg-white border rounded-lg text-gray-600 text-sm hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" data-page="next" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+
+        paginationButtons.innerHTML = buttons;
+
+        paginationButtons.querySelectorAll('button:not([disabled])').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = btn.getAttribute('data-page');
+                if (page === 'prev' && currentPage > 1) currentPage--;
+                else if (page === 'next' && currentPage < totalPages) currentPage++;
+                else if (!isNaN(page)) currentPage = parseInt(page);
+                renderDocuments();
+                renderPagination();
+                updateSelectedCount();
+            });
         });
     }
-
-    // Handle approve
-    function handleApprove(docId) {
-        if (!confirm('Approve this document? It will be ready to lock.')) return;
-
-        console.log('Approving document:', docId);
-
-        fetch(`${API_BASE}/api/approvals/${docId}/approve`, {
-            method: 'POST',
-            headers: { 
-                'x-auth-token': token,
-                'Content-Type': 'application/json'
+    
+    function getSelectedDocumentIds() {
+        const checkboxes = document.querySelectorAll('.doc-checkbox:checked');
+        return Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+    }
+    
+    function updateSelectedCount() {
+        const selectedIds = getSelectedDocumentIds();
+        if (selectedCountSpan) selectedCountSpan.textContent = `${selectedIds.length} selected`;
+        
+        if (selectAllCheckbox) {
+            const allCheckboxes = document.querySelectorAll('.doc-checkbox');
+            if (allCheckboxes.length > 0) {
+                const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = !allChecked && selectedIds.length > 0;
             }
-        })
-        .then(r => {
-            console.log('Approve response status:', r.status);
-            if (!r.ok) throw new Error('Approval failed');
-            return r.json();
-        })
-        .then(data => {
-            console.log('Approve response:', data);
-            showToast(data.msg || 'Document approved successfully.');
-            if (data.document && data.document.workflow_status) {
-                updateDocumentStatus(parseInt(docId), data.document.workflow_status);
-            } else {
-                updateDocumentStatus(parseInt(docId), 'approved');
+        }
+    }
+    
+    function clearAllSelections() {
+        const checkboxes = document.querySelectorAll('.doc-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelectedCount();
+    }
+    
+    async function performBulkAction() {
+        const action = bulkActionSelect.value;
+        if (!action) {
+            showToast('Please select an action to perform', true);
+            return;
+        }
+        
+        const selectedIds = getSelectedDocumentIds();
+        if (selectedIds.length === 0) {
+            showToast('Please select at least one document', true);
+            return;
+        }
+        
+        if (action === 'reject') {
+            openBulkRejectionModal(selectedIds);
+            return;
+        }
+        
+        if (action === 'validate') {
+            showToast('Please use the individual Validate buttons for each document.', true);
+            return;
+        }
+        
+        if (action === 'approve') {
+            showToast('Please use the individual Approve buttons for each document.', true);
+            return;
+        }
+        
+        const actionNames = {
+            'lock': 'lock',
+            'unlock': 'unlock'
+        };
+        
+        if (!confirm(`Are you sure you want to ${actionNames[action]} ${selectedIds.length} document(s)?`)) return;
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const docId of selectedIds) {
+            try {
+                let response;
+                if (action === 'unlock') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' }
+                    });
+                } else {
+                    continue;
+                }
+                
+                const data = await response.json();
+                if (response.ok) {
+                    successCount++;
+                    updateDocumentStatus(docId, action === 'unlock' ? 'approved' : doc.workflow_status);
+                } else {
+                    failCount++;
+                }
+            } catch (err) {
+                failCount++;
             }
-            loadStats();
-        })
-        .catch(err => {
-            console.error('Approve error:', err);
-            showErrorModal('Failed to approve document: ' + err.message);
+        }
+        
+        if (failCount === 0) {
+            showToast(`Successfully ${actionNames[action]}ed ${successCount} document(s).`);
+        } else {
+            showToast(`${actionNames[action]}ed ${successCount} documents, ${failCount} failed.`, true);
+        }
+        
+        clearAllSelections();
+        loadStats();
+        loadDocuments();
+    }
+    
+    function attachActionHandlers() {
+        // View buttons
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = btn.getAttribute('data-url');
+                const title = btn.getAttribute('data-title');
+                openPreviewModal(url, title);
+            });
+        });
+        
+        // Validate buttons - open modal
+        document.querySelectorAll('.btn-validate').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const docId = btn.getAttribute('data-id');
+                const title = btn.getAttribute('data-title');
+                openValidateModal(docId, title);
+            });
+        });
+        
+        // Approve buttons - open modal
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const docId = btn.getAttribute('data-id');
+                const title = btn.getAttribute('data-title');
+                openApproveModal(docId, title);
+            });
+        });
+        
+        // Lock buttons
+        document.querySelectorAll('.btn-lock').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const docId = btn.getAttribute('data-id');
+                const title = btn.getAttribute('data-title');
+                openLockModal(docId, title);
+            });
+        });
+        
+        // Unlock buttons
+        document.querySelectorAll('.btn-unlock').forEach(btn => {
+            btn.addEventListener('click', () => handleUnlock(btn.getAttribute('data-id')));
+        });
+        
+        // Reject buttons
+        document.querySelectorAll('.btn-reject').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const docId = parseInt(btn.getAttribute('data-id'));
+                const doc = allDocuments.find(d => d.id === docId);
+                if (doc) openRejectionModal(doc);
+            });
+        });
+        
+        // Comments buttons
+        document.querySelectorAll('.btn-comments').forEach(btn => {
+            btn.addEventListener('click', () => handleComments(btn.getAttribute('data-id')));
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', () => handleDelete(btn.getAttribute('data-id')));
+        });
+        
+        // Checkbox event listeners for bulk actions
+        document.querySelectorAll('.doc-checkbox').forEach(cb => {
+            cb.removeEventListener('change', updateSelectedCount);
+            cb.addEventListener('change', updateSelectedCount);
         });
     }
-
-    // Handle lock (called from modal)
-    function confirmLockDocument(docId, comments) {
-        fetch(`${API_BASE}/api/approvals/${docId}/lock`, {
-            method: 'POST',
-            headers: { 
-                'x-auth-token': token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ comments })
-        })
-        .then(r => {
-            if (!r.ok) throw new Error('Lock failed');
-            return r.json();
-        })
-        .then(data => {
-            showToast(data.msg || 'Document locked successfully.');
-            updateDocumentStatus(parseInt(docId), 'locked');
-            loadStats();
-        })
-        .catch(err => {
-            showErrorModal('Failed to lock document: ' + err.message);
-        });
-    }
-
-    // Handle unlock
-    function handleUnlock(docId) {
-        if (!confirm('Unlock this document? It will return to approved status.')) return;
-
-        fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
-            method: 'POST',
-            headers: { 'x-auth-token': token }
-        })
-        .then(r => {
-            if (!r.ok) throw new Error('Unlock failed');
-            return r.json();
-        })
-        .then(data => {
-            showToast(data.msg || 'Document unlocked successfully.');
-            updateDocumentStatus(parseInt(docId), 'approved');
-            loadStats();
-        })
-        .catch(err => {
-            showErrorModal('Failed to unlock document: ' + err.message);
-        });
-    }
-
+    
     // Event listeners
     if (searchInput) searchInput.addEventListener('input', applyFilters);
     if (workflowStage) workflowStage.addEventListener('change', applyFilters);
@@ -747,22 +983,76 @@ document.addEventListener('DOMContentLoaded', function() {
         loadStats();
         loadDocuments();
     });
-
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.doc-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSelectedCount();
+        });
+    }
+    if (applyBulkBtn) applyBulkBtn.addEventListener('click', performBulkAction);
+    
     // Tab switching
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             currentTab = this.getAttribute('data-tab');
-
+            
             tabLinks.forEach(l => {
                 l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
                 l.classList.add('border-transparent', 'text-gray-500');
             });
-
+            
             this.classList.remove('border-transparent', 'text-gray-500');
             this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-
+            
             applyFilters();
         });
     });
+    
+    // Mobile sidebar
+    setupMobileSidebar();
 });
+
+function setupMobileSidebar() {
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.getElementById('mainSidebar');
+    
+    if (!menuToggle || !sidebar) return;
+    
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+    }
+    
+    function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        document.body.classList.add('sidebar-open');
+    }
+    
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    
+    overlay.addEventListener('click', closeSidebar);
+    
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeSidebar();
+        });
+    });
+    
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) closeSidebar();
+    });
+}

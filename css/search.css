@@ -36,7 +36,7 @@ body {
 
 /* stat card styles */
 .stat-card {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     border: 1px solid #eef2f6;
     background-color: white;
     border-radius: 0.75rem;
@@ -51,17 +51,72 @@ body {
 }
 
 /* badge styles */
-.badge-pending, .badge-approved, .badge-draft, .badge-expired {
+.badge-approved, .badge-pending, .badge-draft, .badge-rejected, .badge-locked,
+.badge-validated, .badge-pending-validation, .badge-pending-approval {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+.badge-approved { background-color: #e3f7ec; color: #0f7b4b; }
+.badge-pending, .badge-pending-validation, .badge-pending-approval { background-color: #fef9e7; color: #b78103; }
+.badge-validated { background-color: #dbeafe; color: #1e40af; }
+.badge-draft { background-color: #edf2f7; color: #385d7a; }
+.badge-rejected { background-color: #fee2e2; color: #dc2626; }
+.badge-locked { background-color: #f3f4f6; color: #6b7280; }
+
+/* Category badges */
+.badge-instruction {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-research {
+    background-color: #dcfce7;
+    color: #15803d;
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-extension {
+    background-color: #fef3c7;
+    color: #b45309;
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-employment {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+/* Department tags */
+.badge-department {
+    background-color: #f1f5f9;
+    color: #475569;
     display: inline-block;
     padding: 0.2rem 0.5rem;
     border-radius: 9999px;
     font-size: 0.65rem;
     font-weight: 500;
 }
-.badge-pending { background-color: #fef9e7; color: #b78103; }
-.badge-approved { background-color: #e3f7ec; color: #0f7b4b; }
-.badge-draft { background-color: #edf2f7; color: #385d7a; }
-.badge-expired { background-color: #fee9e7; color: #b33f2f; }
 
 /* utility classes */
 .text-teal-300 { color: #5eead4; }
@@ -74,10 +129,15 @@ body {
 .bg-teal-700:hover { background-color: #115e59; }
 
 /* search result styling */
-.search-result { transition: all 0.2s ease; }
-.search-result:hover { background-color: #f9fafb; }
+.search-result {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.search-result:hover {
+    background-color: #f9fafb;
+}
 
-/* line clamp - standard property */
+/* line clamp */
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -97,12 +157,45 @@ body {
     color: white;
 }
 
-/* pagination buttons */
-.pagination-prev, .pagination-next { transition: all 0.2s ease; }
-.pagination-prev:disabled, .pagination-next:disabled { opacity: 0.5; cursor: not-allowed; }
+/* action buttons */
+.btn-view, .btn-details {
+    padding: 0.3rem 0.85rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-view {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+}
+.btn-view:hover {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+}
+.btn-details {
+    background-color: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+}
+.btn-details:hover {
+    background-color: #bae6fd;
+    border-color: #7dd3fc;
+}
+.btn-view:active, .btn-details:active {
+    transform: scale(0.97);
+}
 
 /* recent search tags */
 .bg-gray-100 { background-color: #f3f4f6; }
+.remove-search {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 12px;
+}
 
 /* mobile header spacer */
 .mobile-header-spacer { height: 60px; width: 100%; }
@@ -116,6 +209,20 @@ input:focus, select:focus {
 
 /* transitions */
 .transition, .transition-colors { transition: all 0.2s ease; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
 
 /* ============================================ */
 /* RESPONSIVE DESIGN */
@@ -175,7 +282,6 @@ input:focus, select:focus {
 @media (max-width: 640px) {
     .stat-card { padding: 0.75rem; }
     h1 { font-size: 1.5rem; }
-    .badge-pending, .badge-approved, .badge-draft, .badge-expired { font-size: 0.6rem; }
 }
 
 /* Filter bar responsive */
@@ -194,7 +300,7 @@ input:focus, select:focus {
 @media (max-width: 640px) {
     .search-result { padding: 0.75rem; }
     .flex.flex-col.md\:flex-row { flex-direction: column; }
-    .view-doc-btn { width: 100%; text-align: center; }
+    .btn-view, .btn-details { width: 100%; text-align: center; }
 }
 
 /* Recent searches responsive */
@@ -204,32 +310,33 @@ input:focus, select:focus {
 
 /* Touch-friendly */
 @media (max-width: 768px) {
-    button, a, .view-doc-btn { min-height: 44px; min-width: 44px; }
+    button, a, .btn-view, .btn-details { min-height: 44px; min-width: 44px; }
     body { font-size: 14px; }
     input, select { font-size: 16px !important; }
 }
 
-/* Grid view */
-#gridView .search-result { height: 100%; display: flex; flex-direction: column; }
-/* New Category Badges for Search */
-.bg-blue-100 { background-color: #dbeafe; }
-.text-blue-800 { color: #1e40af; }
+/* Grid view items */
+#gridView .search-result {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
-.bg-green-100 { background-color: #dcfce7; }
-.text-green-800 { color: #166534; }
-
-.bg-amber-100 { background-color: #fef3c7; }
-.text-amber-800 { color: #92400e; }
-
-.bg-purple-100 { background-color: #f3e8ff; }
-.text-purple-800 { color: #6b21a5; }
-
-/* Department tags */
-.badge-department {
-    background-color: #f1f5f9;
-    color: #475569;
-    display: inline-block;
-    padding: 0.2rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.65rem;
+/* Document Details Modal */
+#docDetailsModal {
+    backdrop-filter: blur(2px);
+}
+#docDetailsContent {
+    scrollbar-width: thin;
+}
+#docDetailsContent::-webkit-scrollbar {
+    width: 6px;
+}
+#docDetailsContent::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+#docDetailsContent::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
 }

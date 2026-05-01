@@ -45,7 +45,7 @@ body {
 
 /* stat card styles */
 .stat-card {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     border: 1px solid #eef2f6;
     background-color: white;
     border-radius: 0.75rem;
@@ -231,8 +231,11 @@ input[type="radio"] {
 /* Form grid responsive */
 @media (max-width: 768px) {
     .grid-cols-1.md\:grid-cols-2 {
-        grid-template-columns: 1fr !important;
         gap: 1rem;
+    }
+    
+    .grid-cols-1.md\:grid-cols-2 > div {
+        margin-bottom: 0;
     }
 }
 
@@ -255,13 +258,6 @@ input[type="radio"] {
 @media (max-width: 640px) {
     h1.text-2xl.md\:text-3xl {
         font-size: 1.5rem;
-    }
-}
-
-/* Recent uploads - mobile view */
-@media (max-width: 768px) {
-    .bg-white.rounded-xl.p-4.stat-card {
-        padding: 0.75rem;
     }
 }
 
@@ -332,10 +328,12 @@ input[type="radio"] {
     cursor: pointer;
     font-size: 1rem;
     padding: 0.25rem 0.5rem;
+    border-radius: 4px;
 }
 
 .upload-item-remove:hover {
     color: #dc2626;
+    background-color: #fee2e2;
 }
 
 .upload-progress-track {
@@ -390,7 +388,7 @@ input[type="radio"] {
         margin: 0;
         padding: 0;
     }
-    
+     
     .stat-card {
         break-inside: avoid;
         page-break-inside: avoid;

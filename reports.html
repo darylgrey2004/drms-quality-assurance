@@ -34,25 +34,45 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">AD</span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AD</span>
                     <div>
-                        <div class="text-sm font-medium text-white">Admin User</div>
-                        <div class="text-xs text-teal-300">Administrator</div>
+                        <div class="text-sm font-medium text-white" id="userName">Admin User</div>
+                        <div class="text-xs text-teal-300" id="userRole">Administrator</div>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
-                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📊</span> Dashboard</a>
-                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📄</span> Documents</a>
-                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⬆️</span> Upload</a>
-                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map</a>
-                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">🔍</span> Search</a>
-                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">✅</span> Approvals</a>
-                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav"><span class="mr-3 text-teal-300">📈</span> Reports</a>
-                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">👥</span> Users</a>
-                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">📋</span> Audit Trail</a>
-                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav"><span class="mr-3 text-teal-300/70">⚙️</span> Settings</a>
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
+                </a>
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Documents</span>
+                </a>
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Upload</span>
+                </a>
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
+                </a>
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
+                </a>
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Approvals</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300 w-5">Reports</span>
+                </a>
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Users</span>
+                </a>
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Audit Trail</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Settings</span>
+                </a>
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
@@ -88,10 +108,28 @@
                 <!-- report controls -->
                 <div class="bg-white rounded-xl p-4 stat-card mb-6">
                     <div class="flex flex-col lg:flex-row gap-4">
-                        <div class="flex-1"><div class="relative"><span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span><select id="reportPeriod" class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"><option value="this-month">This Month</option><option value="last-month">Last Month</option><option value="this-quarter">This Quarter</option><option value="last-quarter">Last Quarter</option><option value="this-year">This Year</option><option value="custom">Custom Range</option></select></div></div>
-                        <div class="flex flex-wrap gap-2"><select id="reportFormat" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"><option value="pdf">PDF</option><option value="excel">Excel</option><option value="csv">CSV</option></select>
-                        <button id="generateReport" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Generate Report</button>
-                        <button id="exportReport" class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-sm">Export</button></div>
+                        <div class="flex-1">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Period</span>
+                                <select id="reportPeriod" class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                                    <option value="this-month">This Month</option>
+                                    <option value="last-month">Last Month</option>
+                                    <option value="this-quarter">This Quarter</option>
+                                    <option value="last-quarter">Last Quarter</option>
+                                    <option value="this-year">This Year</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="reportFormat" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                            <button id="generateReport" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Generate Report</button>
+                            <button id="exportReport" class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-sm">Export</button>
+                        </div>
                     </div>
                 </div>
 
@@ -99,13 +137,37 @@
                 <div id="overviewTab" class="tab-content block">
                     <!-- summary cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                        <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Total Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div><span class="bg-teal-100 text-teal-700 p-2 rounded-lg">📄</span></div><div class="text-xs text-green-600 mt-2">↑ 12% from last month</div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">692</div></div><span class="bg-green-100 text-green-700 p-2 rounded-lg">✅</span></div><div class="text-xs text-green-600 mt-2">81.7% approval rate</div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">38</div></div><span class="bg-amber-100 text-amber-700 p-2 rounded-lg">⏳</span></div><div class="text-xs text-amber-600 mt-2">5 urgent · 2 overdue</div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><div class="flex justify-between items-start"><div><span class="text-gray-500 text-sm">Active Users</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div><span class="bg-blue-100 text-blue-700 p-2 rounded-lg">👥</span></div><div class="text-xs text-blue-600 mt-2">6 roles · 18 faculty</div></div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Total Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div>
+                                <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">Total</span>
+                            </div>
+                            <div class="text-xs text-green-600 mt-2">↑ 12% from last month</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">692</div></div>
+                                <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">Approved</span>
+                            </div>
+                            <div class="text-xs text-green-600 mt-2">81.7% approval rate</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">38</div></div>
+                                <span class="bg-amber-100 text-amber-700 p-2 rounded-lg text-lg">Pending</span>
+                            </div>
+                            <div class="text-xs text-amber-600 mt-2">5 urgent · 2 overdue</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-gray-500 text-sm">Active Users</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div>
+                                <span class="bg-blue-100 text-blue-700 p-2 rounded-lg text-lg">Users</span>
+                            </div>
+                            <div class="text-xs text-blue-600 mt-2">6 roles · 18 faculty</div>
+                        </div>
                     </div>
 
-                    <!-- charts row - Updated with new categories -->
+                    <!-- charts row -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base mb-4">Documents by Category</h3>
@@ -129,22 +191,46 @@
                     </div>
 
                     <!-- recent reports -->
-                    <div class="hidden md:block bg-white rounded-xl p-5 stat-card">
-                        <div class="flex justify-between items-center mb-4"><h3 class="font-semibold text-gray-800 text-base">Recently Generated Reports</h3><a href="#" class="text-sm text-teal-700">View All</a></div>
-                        <div class="overflow-x-auto"><div class="min-w-[600px]"><div class="divide-y">
-                            <div class="grid grid-cols-12 py-3 text-sm items-center"><div class="col-span-5"><div class="font-medium">Completeness Report - Q1 2026</div><div class="text-xs text-gray-400">Apr 26, 2026</div></div><div class="col-span-2">PDF</div><div class="col-span-2">2.4 MB</div><div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div></div>
-                            <div class="grid grid-cols-12 py-3 text-sm items-center"><div class="col-span-5"><div class="font-medium">Instruction Category Status</div><div class="text-xs text-gray-400">Apr 25, 2026</div></div><div class="col-span-2">Excel</div><div class="col-span-2">1.8 MB</div><div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div></div>
-                            <div class="grid grid-cols-12 py-3 text-sm items-center"><div class="col-span-5"><div class="font-medium">Research Gap Analysis</div><div class="text-xs text-gray-400">Apr 24, 2026</div></div><div class="col-span-2">PDF</div><div class="col-span-2">3.1 MB</div><div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div></div>
-                        </div></div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800 text-base">Recently Generated Reports</h3>
+                            <a href="#" class="text-sm text-teal-700 hover:text-teal-800">View All</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <div class="min-w-[600px]">
+                                <div class="divide-y">
+                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
+                                        <div class="col-span-5"><div class="font-medium">Completeness Report - Q1 2026</div><div class="text-xs text-gray-400">Apr 26, 2026</div></div>
+                                        <div class="col-span-2">PDF</div>
+                                        <div class="col-span-2">2.4 MB</div>
+                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
+                                    </div>
+                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
+                                        <div class="col-span-5"><div class="font-medium">Instruction Category Status</div><div class="text-xs text-gray-400">Apr 25, 2026</div></div>
+                                        <div class="col-span-2">Excel</div>
+                                        <div class="col-span-2">1.8 MB</div>
+                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
+                                    </div>
+                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
+                                        <div class="col-span-5"><div class="font-medium">Research Gap Analysis</div><div class="text-xs text-gray-400">Apr 24, 2026</div></div>
+                                        <div class="col-span-2">PDF</div>
+                                        <div class="col-span-2">3.1 MB</div>
+                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="block md:hidden space-y-3">
+                    
+                    <!-- Mobile recent reports -->
+                    <div class="block md:hidden space-y-3 mt-4">
                         <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Completeness Report - Q1 2026</div><div class="text-xs text-gray-400 mb-2">Apr 26, 2026 · PDF · 2.4 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
                         <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Instruction Category Status</div><div class="text-xs text-gray-400 mb-2">Apr 25, 2026 · Excel · 1.8 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
                         <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Research Gap Analysis</div><div class="text-xs text-gray-400 mb-2">Apr 24, 2026 · PDF · 3.1 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
                     </div>
                 </div>
 
-                <!-- Completeness Tab - Updated with new categories -->
+                <!-- Completeness Tab -->
                 <div id="completenessTab" class="tab-content hidden">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                         <div class="lg:col-span-2 bg-white rounded-xl p-5 stat-card">
@@ -158,33 +244,93 @@
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base mb-4">Quick Actions</h3>
-                            <div class="space-y-3"><a href="upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded transition"><span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3">📤</span><div><div class="font-medium text-sm">Upload Missing Documents</div><div class="text-xs text-gray-400">Add new QA records</div></div></a>
-                            <a href="evidence-map.html" class="flex items-center p-2 hover:bg-teal-50 rounded transition"><span class="bg-amber-100 text-amber-800 p-2 rounded-lg mr-3">🗺️</span><div><div class="font-medium text-sm">Review Evidence Map</div><div class="text-xs text-gray-400">Identify gaps by category</div></div></a>
-                            <a href="#" class="flex items-center p-2 hover:bg-teal-50 rounded transition" id="generateGapReport"><span class="bg-indigo-100 text-indigo-800 p-2 rounded-lg mr-3">📊</span><div><div class="font-medium text-sm">Generate Gap Report</div><div class="text-xs text-gray-400">Detailed missing items</div></div></a></div>
+                            <div class="space-y-3">
+                                <a href="upload.html" class="flex items-center p-2 hover:bg-teal-50 rounded transition group">
+                                    <span class="bg-teal-100 text-teal-800 p-2 rounded-lg mr-3 font-medium">Upload</span>
+                                    <div><div class="font-medium text-sm">Upload Missing Documents</div><div class="text-xs text-gray-400">Add new QA records</div></div>
+                                </a>
+                                <a href="evidence-map.html" class="flex items-center p-2 hover:bg-teal-50 rounded transition group">
+                                    <span class="bg-amber-100 text-amber-800 p-2 rounded-lg mr-3 font-medium">Map</span>
+                                    <div><div class="font-medium text-sm">Review Evidence Map</div><div class="text-xs text-gray-400">Identify gaps by category</div></div>
+                                </a>
+                                <a href="#" class="flex items-center p-2 hover:bg-teal-50 rounded transition group" id="generateGapReport">
+                                    <span class="bg-indigo-100 text-indigo-800 p-2 rounded-lg mr-3 font-medium">Report</span>
+                                    <div><div class="font-medium text-sm">Generate Gap Report</div><div class="text-xs text-gray-400">Detailed missing items</div></div>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card overflow-x-auto">
                         <h3 class="font-semibold text-gray-800 text-base mb-4">Detailed Department Breakdown</h3>
-                        <div class="min-w-[600px]"><table class="w-full text-sm"><thead><tr class="border-b text-gray-500 text-xs"><th class="text-left py-2">Department</th><th class="text-left py-2">Category</th><th class="text-left py-2">Required</th><th class="text-left py-2">Uploaded</th><th class="text-left py-2">Verified</th><th class="text-left py-2">Completeness</th><th class="text-left py-2">Status</th></tr></thead><tbody class="divide-y">
-                            <tr><td class="py-3">BEED</td><td>Instruction</td><td>45</td><td>42</td><td>40</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:89%"></div></div></td><td><span class="badge-approved px-2 py-1 rounded-full text-xs">Complete</span></td></tr>
-                            <tr><td class="py-3">BSED</td><td>Instruction</td><td>65</td><td>58</td><td>55</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:85%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                            <tr><td class="py-3">BSNED</td><td>Instruction</td><td>40</td><td>28</td><td>25</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:63%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                            <tr><td class="py-3">BSED</td><td>Research</td><td>55</td><td>48</td><td>45</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:82%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                            <tr><td class="py-3">BEED</td><td>Research</td><td>40</td><td>35</td><td>33</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:83%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                            <tr><td class="py-3">BPED</td><td>Extension</td><td>25</td><td>18</td><td>16</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:64%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                        </tbody></table></div>
+                        <div class="min-w-[600px]">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b text-gray-500 text-xs">
+                                        <th class="text-left py-2">Department</th>
+                                        <th class="text-left py-2">Category</th>
+                                        <th class="text-left py-2">Required</th>
+                                        <th class="text-left py-2">Uploaded</th>
+                                        <th class="text-left py-2">Verified</th>
+                                        <th class="text-left py-2">Completeness</th>
+                                        <th class="text-left py-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <tr><td class="py-3">BEED</td><td>Instruction</td><td>45</td><td>42</td><td>40</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:89%"></div></div></td><td><span class="badge-approved px-2 py-1 rounded-full text-xs">Complete</span></td></tr>
+                                    <tr><td class="py-3">BSED</td><td>Instruction</td><td>65</td><td>58</td><td>55</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:85%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                    <tr><td class="py-3">BSNED</td><td>Instruction</td><td>40</td><td>28</td><td>25</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:63%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                    <tr><td class="py-3">BSED</td><td>Research</td><td>55</td><td>48</td><td>45</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:82%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                    <tr><td class="py-3">BEED</td><td>Research</td><td>40</td><td>35</td><td>33</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:83%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                    <tr><td class="py-3">BPED</td><td>Extension</td><td>25</td><td>18</td><td>16</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:64%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Compliance Tab - Updated with new categories -->
+                <!-- Compliance Tab -->
                 <div id="complianceTab" class="tab-content hidden">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-4">Instruction Compliance</h3><div class="space-y-3"><div class="flex justify-between"><span>Curriculum Development</span><span class="text-green-700">Compliant</span></div><div class="flex justify-between"><span>Teaching Materials</span><span class="text-green-700">Compliant</span></div><div class="flex justify-between"><span>Assessment Tools</span><span class="text-amber-700">Partial</span></div><div class="flex justify-between"><span>Learning Modules</span><span class="text-green-700">Compliant</span></div></div><div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Instruction Compliance:</span><span class="font-bold text-blue-700">77%</span></div></div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-4">Research Compliance</h3><div class="space-y-3"><div class="flex justify-between"><span>Publications</span><span class="text-green-700">Compliant</span></div><div class="flex justify-between"><span>Research Proposals</span><span class="text-amber-700">Partial</span></div><div class="flex justify-between"><span>Ethics Clearance</span><span class="text-red-700">Non-compliant</span></div><div class="flex justify-between"><span>Research Outputs</span><span class="text-green-700">Compliant</span></div></div><div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Research Compliance:</span><span class="font-bold text-green-700">78%</span></div></div></div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base mb-4">Instruction Compliance</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between"><span>Curriculum Development</span><span class="text-green-700">Compliant</span></div>
+                                <div class="flex justify-between"><span>Teaching Materials</span><span class="text-green-700">Compliant</span></div>
+                                <div class="flex justify-between"><span>Assessment Tools</span><span class="text-amber-700">Partial</span></div>
+                                <div class="flex justify-between"><span>Learning Modules</span><span class="text-green-700">Compliant</span></div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Instruction Compliance:</span><span class="font-bold text-blue-700">77%</span></div></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base mb-4">Research Compliance</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between"><span>Publications</span><span class="text-green-700">Compliant</span></div>
+                                <div class="flex justify-between"><span>Research Proposals</span><span class="text-amber-700">Partial</span></div>
+                                <div class="flex justify-between"><span>Ethics Clearance</span><span class="text-red-700">Non-compliant</span></div>
+                                <div class="flex justify-between"><span>Research Outputs</span><span class="text-green-700">Compliant</span></div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Research Compliance:</span><span class="font-bold text-green-700">78%</span></div></div>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-4">Extension Compliance</h3><div class="space-y-3"><div class="flex justify-between"><span>Community Programs</span><span class="text-amber-700">Partial</span></div><div class="flex justify-between"><span>Outreach Documentation</span><span class="text-yellow-700">Partial</span></div><div class="flex justify-between"><span>Impact Assessment</span><span class="text-red-700">Non-compliant</span></div></div><div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Extension Compliance:</span><span class="font-bold text-amber-700">74%</span></div></div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-gray-800 text-base mb-4">Employment Compliance</h3><div class="space-y-3"><div class="flex justify-between"><span>Employment Contracts</span><span class="text-green-700">Compliant</span></div><div class="flex justify-between"><span>Personnel Records</span><span class="text-amber-700">Partial</span></div><div class="flex justify-between"><span>Benefits Documentation</span><span class="text-yellow-700">Partial</span></div></div><div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Employment Compliance:</span><span class="font-bold text-purple-700">74%</span></div></div></div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base mb-4">Extension Compliance</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between"><span>Community Programs</span><span class="text-amber-700">Partial</span></div>
+                                <div class="flex justify-between"><span>Outreach Documentation</span><span class="text-amber-700">Partial</span></div>
+                                <div class="flex justify-between"><span>Impact Assessment</span><span class="text-red-700">Non-compliant</span></div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Extension Compliance:</span><span class="font-bold text-amber-700">74%</span></div></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 stat-card">
+                            <h3 class="font-semibold text-gray-800 text-base mb-4">Employment Compliance</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between"><span>Employment Contracts</span><span class="text-green-700">Compliant</span></div>
+                                <div class="flex justify-between"><span>Personnel Records</span><span class="text-amber-700">Partial</span></div>
+                                <div class="flex justify-between"><span>Benefits Documentation</span><span class="text-amber-700">Partial</span></div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Employment Compliance:</span><span class="font-bold text-purple-700">74%</span></div></div>
+                        </div>
                     </div>
                 </div>
 
@@ -195,18 +341,56 @@
                         <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold mb-2">Approval Rate</h3><div class="text-3xl font-bold">87%</div><div class="text-xs text-green-600">↑ 5% from last month</div></div>
                         <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold mb-2">Rejection Rate</h3><div class="text-3xl font-bold">13%</div><div class="text-xs text-amber-600">Within acceptable range</div></div>
                     </div>
-                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-base mb-4">Workflow Bottlenecks</h3><div class="space-y-4"><div><div class="flex justify-between text-sm mb-1"><span>Validation Stage</span><span class="text-amber-700">12 items · 3.5 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:65%"></div></div></div><div><div class="flex justify-between text-sm mb-1"><span>Approval Stage</span><span class="text-green-700">8 items · 2.1 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:40%"></div></div></div><div><div class="flex justify-between text-sm mb-1"><span>Lock Stage</span><span class="text-green-700">0 items · instant</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:0%"></div></div></div></div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h3 class="font-semibold text-base mb-4">Workflow Bottlenecks</h3>
+                        <div class="space-y-4">
+                            <div><div class="flex justify-between text-sm mb-1"><span>Validation Stage</span><span class="text-amber-700">12 items · 3.5 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:65%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span>Approval Stage</span><span class="text-green-700">8 items · 2.1 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:40%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span>Lock Stage</span><span class="text-green-700">0 items · instant</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:0%"></div></div></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Audit Tab -->
                 <div id="auditTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold text-base mb-4">Recent Audit Activity</h3><div class="space-y-3"><div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs">📄</span><div><p class="text-sm"><span class="font-medium">Document Uploaded</span> · Syllabus - Elementary Education</p><p class="text-xs text-gray-400">by Dr. Santos · 2026-04-26</p></div></div><div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs">✓</span><div><p class="text-sm"><span class="font-medium">Document Approved</span> · Research Publication 2025</p><p class="text-xs text-gray-400">by Dean Cruz · 2026-04-26</p></div></div><div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 text-xs">✕</span><div><p class="text-sm"><span class="font-medium">Document Rejected</span> · Learning Module v0.5</p><p class="text-xs text-gray-400">by QA Office · 2026-04-25</p></div></div><div class="flex items-start gap-3"><span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs">🔒</span><div><p class="text-sm"><span class="font-medium">Document Locked</span> · Employment Contract</p><p class="text-xs text-gray-400">System · 2026-04-25</p></div></div></div><div class="mt-4 pt-2"><a href="audit-trail.html" class="text-teal-700 text-sm">View Full Audit Trail →</a></div></div>
+                    <div class="bg-white rounded-xl p-5 stat-card">
+                        <h3 class="font-semibold text-base mb-4">Recent Audit Activity</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">U</span><div><p class="text-sm"><span class="font-medium">Document Uploaded</span> · Syllabus - Elementary Education</p><p class="text-xs text-gray-400">by Dr. Santos · 2026-04-26</p></div></div>
+                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">A</span><div><p class="text-sm"><span class="font-medium">Document Approved</span> · Research Publication 2025</p><p class="text-xs text-gray-400">by Dean Cruz · 2026-04-26</p></div></div>
+                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 text-xs font-bold">R</span><div><p class="text-sm"><span class="font-medium">Document Rejected</span> · Learning Module v0.5</p><p class="text-xs text-gray-400">by QA Office · 2026-04-25</p></div></div>
+                            <div class="flex items-start gap-3"><span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">L</span><div><p class="text-sm"><span class="font-medium">Document Locked</span> · Employment Contract</p><p class="text-xs text-gray-400">System · 2026-04-25</p></div></div>
+                        </div>
+                        <div class="mt-4 pt-2"><a href="audit-trail.html" class="text-teal-700 text-sm">View Full Audit Trail →</a></div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
+        // Update sidebar user info
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userInitials = document.getElementById('userInitials');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+        
+        if (user.firstName && user.lastName) {
+            if (userInitials) userInitials.textContent = (user.firstName[0] + user.lastName[0]).toUpperCase();
+            if (userName) userName.textContent = `${user.firstName} ${user.lastName}`;
+        }
+        if (user.role && userRole) {
+            const roleMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'faculty': 'Faculty Member',
+                'area-chair': 'Dept. Head',
+                'department-head': 'Dept. Head',
+                'evaluator': 'External Evaluator'
+            };
+            userRole.textContent = roleMap[user.role] || user.role;
+        }
+        
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -240,7 +424,25 @@
         document.getElementById('generateReport')?.addEventListener('click', () => alert('Generating report...'));
         document.getElementById('exportReport')?.addEventListener('click', () => alert('Exporting report...'));
         document.getElementById('generateGapReport')?.addEventListener('click', (e) => { e.preventDefault(); alert('Generating gap report...'); });
-        document.querySelectorAll('.text-teal-600, .text-gray-500').forEach(btn => { if (btn.textContent === 'Download' || btn.textContent === 'View') btn.addEventListener('click', () => alert('Report action triggered')); });
+        document.querySelectorAll('.text-teal-600, .text-gray-500').forEach(btn => { 
+            if (btn.textContent === 'Download' || btn.textContent === 'View') 
+                btn.addEventListener('click', () => alert('Report action triggered')); 
+        });
+        
+        // Heartbeat
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
 </html>

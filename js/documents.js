@@ -6,6 +6,10 @@ let filteredDocuments = [];
 let currentPage = 1;
 const itemsPerPage = 10;
 
+// Variables for delete confirmation
+let pendingDeleteId = null;
+let pendingDeleteTitle = null;
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Documents page loaded - fetching from backend');
@@ -19,11 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Initialize heartbeat
-    if (sessionManager) {
-        sessionManager.initializeHeartbeat(2 * 60 * 1000);
-    }
-
     // Update user info in sidebar
     updateUserInfo(user);
 
@@ -35,12 +34,123 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup preview modal
     setupPreviewModal();
+    
+    // Setup details modal
+    setupDetailsModal();
+    
+    // Setup delete confirmation modal
+    setupDeleteModal();
+    
+    // Setup comments modal
+    setupCommentsModalEventListeners();
 });
+
+function setupDeleteModal() {
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+    }
+    
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', confirmDelete);
+    }
+    
+    if (deleteModal) {
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
+}
+
+function openDeleteModal(docId, docTitle) {
+    pendingDeleteId = docId;
+    pendingDeleteTitle = docTitle;
+    
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const deleteDocTitle = document.getElementById('deleteDocTitle');
+    
+    if (deleteDocTitle) deleteDocTitle.textContent = docTitle;
+    
+    if (deleteModal) {
+        deleteModal.classList.remove('hidden');
+        deleteModal.style.display = 'flex';
+    }
+}
+
+function closeDeleteModal() {
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    if (deleteModal) {
+        deleteModal.classList.add('hidden');
+        deleteModal.style.display = 'none';
+    }
+    pendingDeleteId = null;
+    pendingDeleteTitle = null;
+}
+
+async function confirmDelete() {
+    if (!pendingDeleteId) return;
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/documents/${pendingDeleteId}`, {
+            method: 'DELETE',
+            headers: {
+                'x-auth-token': token
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.msg || 'Failed to delete document');
+        }
+
+        showToastMessage('Document deleted successfully', 'success');
+        closeDeleteModal();
+        loadDocuments();
+    } catch (error) {
+        console.error('Delete error:', error);
+        showToastMessage(error.message || 'Failed to delete document', 'error');
+        closeDeleteModal();
+    }
+}
+
+function showToastMessage(message, type = 'success') {
+    let toast = document.querySelector('.custom-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 10000;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+    }
+    
+    toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+    toast.textContent = message;
+    toast.style.transform = 'translateX(0)';
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateX(400px)';
+    }, 3000);
+}
 
 function setupPreviewModal() {
     const docPreviewModal = document.getElementById('docPreviewModal');
     const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
-    const docPreviewFrame = document.getElementById('docPreviewFrame');
     
     if (docPreviewCloseBtn) {
         docPreviewCloseBtn.addEventListener('click', closePreviewModal);
@@ -80,10 +190,147 @@ function closePreviewModal() {
     if (docPreviewFrame) docPreviewFrame.src = 'about:blank';
 }
 
+// Setup Details Modal for viewing description and keywords
+function setupDetailsModal() {
+    const docDetailsModal = document.getElementById('docDetailsModal');
+    const docDetailsCloseBtn = document.getElementById('docDetailsCloseBtn');
+    const docDetailsCloseBtn2 = document.getElementById('docDetailsCloseBtn2');
+    
+    if (docDetailsCloseBtn) {
+        docDetailsCloseBtn.addEventListener('click', closeDetailsModal);
+    }
+    if (docDetailsCloseBtn2) {
+        docDetailsCloseBtn2.addEventListener('click', closeDetailsModal);
+    }
+    if (docDetailsModal) {
+        docDetailsModal.addEventListener('click', (e) => {
+            if (e.target === docDetailsModal) closeDetailsModal();
+        });
+    }
+}
+
+function openDetailsModal(doc) {
+    const modal = document.getElementById('docDetailsModal');
+    const titleElem = document.getElementById('docDetailsTitle');
+    const contentElem = document.getElementById('docDetailsContent');
+    
+    if (!modal || !contentElem) return;
+    
+    if (titleElem) titleElem.textContent = `Document Details: ${doc.title || 'Untitled'}`;
+    
+    // Format keywords as badges
+    let keywordsHtml = '';
+    if (doc.keywords) {
+        const keywords = doc.keywords.split(',').map(k => k.trim());
+        keywordsHtml = `
+            <div class="flex flex-wrap gap-2 mt-2">
+                ${keywords.map(k => `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${escapeHtml(k)}</span>`).join('')}
+            </div>
+        `;
+    } else {
+        keywordsHtml = '<p class="text-gray-400 text-sm italic">No keywords provided</p>';
+    }
+    
+    contentElem.innerHTML = `
+        <div class="border-b pb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Document Information</h4>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <span class="text-gray-500">Title:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.title || 'Untitled')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Version:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.version || 'v1.0')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Category:</span>
+                    <p class="font-medium text-gray-800 mt-1">${getCategoryDisplayName(doc.category)}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Department:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.department_code || doc.area || 'N/A')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Status:</span>
+                    <p class="font-medium mt-1">${getStatusText(doc.workflow_status)}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Uploaded by:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.author_name || doc.uploader_firstName || 'Unknown')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Uploaded on:</span>
+                    <p class="font-medium text-gray-800 mt-1">${formatDateTime(doc.created_at)}</p>
+                </div>
+                ${doc.expiry_date ? `
+                <div>
+                    <span class="text-gray-500">Expiry Date:</span>
+                    <p class="font-medium text-gray-800 mt-1">${formatDate(doc.expiry_date)}</p>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+        
+        <div class="border-b pb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Description / Notes</h4>
+            <div class="bg-gray-50 rounded-lg p-4">
+                ${doc.description ? `<p class="text-gray-700 text-sm leading-relaxed">${escapeHtml(doc.description)}</p>` : '<p class="text-gray-400 text-sm italic">No description provided</p>'}
+            </div>
+        </div>
+        
+        <div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Keywords</h4>
+            ${keywordsHtml}
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDetailsModal() {
+    const modal = document.getElementById('docDetailsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function getCategoryDisplayName(category) {
+    const categoryMap = {
+        'instruction': 'Instruction',
+        'research': 'Research',
+        'extension': 'Extension',
+        'employment': 'Employment'
+    };
+    return categoryMap[category] || category || 'Other';
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'approved': 'Approved',
+        'pending': 'Pending Review',
+        'pending_validation': 'Pending Validation',
+        'validated': 'Validated',
+        'pending_approval': 'Pending Approval',
+        'draft': 'Draft',
+        'rejected': 'Rejected',
+        'locked': 'Locked'
+    };
+    return statusMap[status] || status || 'Unknown';
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+
 function updateUserInfo(user) {
-    const userInitials = document.querySelector('.w-10.h-10.bg-teal-600');
-    const userName = document.querySelector('.text-sm.font-medium.text-white');
-    const userRole = document.querySelector('.text-xs.text-teal-300');
+    const userInitials = document.getElementById('userInitials');
+    const userName = document.getElementById('userName');
+    const userRole = document.getElementById('userRole');
 
     if (user.firstName && user.lastName) {
         const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
@@ -144,7 +391,7 @@ function showLoading() {
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-700"></div>
                 <span>Loading documents...</span>
             </div>
-        </td></tr>
+        </td>
     `;
     
     if (tbody) tbody.innerHTML = loadingHTML;
@@ -162,7 +409,7 @@ function showError(message) {
     const errorHTML = `
         <tr><td colspan="6" class="py-8 text-center text-red-600">
             <div>⚠️ ${message}</div>
-        </td></tr>
+        </td>
     `;
     
     if (tbody) tbody.innerHTML = errorHTML;
@@ -176,27 +423,24 @@ function renderDocuments() {
     if (filteredDocuments.length === 0) {
         const emptyHTML = `
             <tr><td colspan="6" class="py-8 text-center text-gray-500">
-                <div>📄 No documents found</div>
+                <div>No documents found</div>
                 <div class="text-sm mt-2">Try adjusting your filters or upload a new document</div>
-            </td></tr>
+            </td>
         `;
         if (tbody) tbody.innerHTML = emptyHTML;
-        if (mobileContainer) mobileContainer.innerHTML = '<div class="text-center py-8 text-gray-500">📄 No documents found</div>';
+        if (mobileContainer) mobileContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No documents found</div>';
         return;
     }
 
-    // Pagination
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedDocs = filteredDocuments.slice(startIndex, endIndex);
 
-    // Render desktop table
     if (tbody) {
         tbody.innerHTML = paginatedDocs.map(doc => createTableRow(doc)).join('');
         attachRowEventListeners();
     }
 
-    // Render mobile cards
     if (mobileContainer) {
         mobileContainer.innerHTML = paginatedDocs.map(doc => createMobileCard(doc)).join('');
         attachRowEventListeners();
@@ -214,10 +458,14 @@ function createTableRow(doc) {
         ? `${doc.uploader_firstName} ${doc.uploader_lastName}` 
         : doc.author_name || 'Unknown';
 
+    // Show if document has description or keywords (for visual indicator)
+    const hasMetadata = (doc.description && doc.description.trim()) || (doc.keywords && doc.keywords.trim());
+    const metadataIcon = hasMetadata ? '<span class="ml-1 text-teal-500 text-xs" title="Has description or keywords">ℹ️</span>' : '';
+
     return `
         <tr class="doc-row hover:bg-gray-50 transition" data-id="${doc.id}">
             <td class="py-3 px-4">
-                <div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div>
+                <div class="font-medium text-gray-800">${escapeHtml(doc.title)}${metadataIcon}</div>
                 <div class="text-xs text-gray-400">by ${escapeHtml(uploader)} · ${date}</div>
             </td>
             <td class="py-3 px-4">${categoryBadge}</td>
@@ -226,12 +474,11 @@ function createTableRow(doc) {
             <td class="py-3 px-4 text-gray-600 text-sm">${escapeHtml(doc.version || 'v1.0')}</td>
             <td class="py-3 px-4">
                 <div class="flex flex-wrap gap-2">
-                    <button class="btn-view" data-id="${doc.id}">View</button>
-                    ${doc.workflow_status === 'rejected' ? `<button class="btn-comments" data-id="${doc.id}">Comments</button>` : ''}
-                    ${doc.workflow_status === 'rejected' ? `<button class="btn-delete" data-id="${doc.id}">Delete</button>` : ''}
-                    <button class="btn-download" data-id="${doc.id}">Download</button>
-                    <button class="btn-edit" data-id="${doc.id}">Edit</button>
-                    ${doc.workflow_status !== 'rejected' ? `<button class="btn-delete" data-id="${doc.id}">Delete</button>` : ''}
+                    <button class="btn-view" data-id="${doc.id}" title="View Document">View</button>
+                    <button class="btn-details" data-id="${doc.id}" title="View Details (Description & Keywords)">Details</button>
+                    ${doc.workflow_status === 'rejected' ? `<button class="btn-comments" data-id="${doc.id}" title="View Comments">Comments</button>` : ''}
+                    <button class="btn-download" data-id="${doc.id}" title="Download">Download</button>
+                    <button class="btn-delete" data-id="${doc.id}" title="Delete">Delete</button>
                 </div>
             </td>
         </tr>
@@ -247,9 +494,12 @@ function createMobileCard(doc) {
         ? `${doc.uploader_firstName} ${doc.uploader_lastName}` 
         : doc.author_name || 'Unknown';
 
+    const hasMetadata = (doc.description && doc.description.trim()) || (doc.keywords && doc.keywords.trim());
+    const metadataIcon = hasMetadata ? '<span class="ml-1 text-teal-500 text-xs" title="Has description or keywords">ℹ️</span>' : '';
+
     return `
         <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
-            <div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div>
+            <div class="font-medium text-gray-800">${escapeHtml(doc.title)}${metadataIcon}</div>
             <div class="text-xs text-gray-400 mb-2">by ${escapeHtml(uploader)} · ${date}</div>
             <div class="flex flex-wrap gap-2 mb-2">
                 ${categoryBadge}
@@ -259,11 +509,10 @@ function createMobileCard(doc) {
             <div class="text-sm text-gray-600 mb-3">Version: ${escapeHtml(doc.version || 'v1.0')}</div>
             <div class="flex flex-wrap gap-2">
                 <button class="btn-view-sm" data-id="${doc.id}">View</button>
+                <button class="btn-details-sm" data-id="${doc.id}">Details</button>
                 ${doc.workflow_status === 'rejected' ? `<button class="btn-comments-sm" data-id="${doc.id}">Comments</button>` : ''}
-                ${doc.workflow_status === 'rejected' ? `<button class="btn-delete-sm" data-id="${doc.id}">Delete</button>` : ''}
                 <button class="btn-download-sm" data-id="${doc.id}">Download</button>
-                <button class="btn-edit-sm" data-id="${doc.id}">Edit</button>
-                ${doc.workflow_status !== 'rejected' ? `<button class="btn-delete-sm" data-id="${doc.id}">Delete</button>` : ''}
+                <button class="btn-delete-sm" data-id="${doc.id}">Delete</button>
             </div>
         </div>
     `;
@@ -273,7 +522,9 @@ function getStatusBadge(status) {
     const statusMap = {
         'approved': { text: 'Approved', class: 'badge-approved' },
         'pending': { text: 'Pending Review', class: 'badge-pending' },
+        'pending_validation': { text: 'Pending Validation', class: 'badge-pending' },
         'validated': { text: 'Validated', class: 'badge-validated' },
+        'pending_approval': { text: 'Pending Approval', class: 'badge-pending' },
         'draft': { text: 'Draft', class: 'badge-draft' },
         'rejected': { text: 'Rejected', class: 'badge-rejected' },
         'locked': { text: 'Locked', class: 'badge-locked' }
@@ -297,7 +548,7 @@ function getCategoryBadge(category) {
 
 function getDepartmentBadge(deptCode) {
     if (!deptCode) return '<span class="badge-department px-2 py-1 rounded-full text-xs">N/A</span>';
-    return `<span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(deptCode)}</span>`;
+    return `<span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(deptCode.toUpperCase())}</span>`;
 }
 
 function formatDate(dateString) {
@@ -319,6 +570,11 @@ function attachRowEventListeners() {
         btn.addEventListener('click', handleView);
     });
 
+    // Details buttons (new)
+    document.querySelectorAll('.btn-details, .btn-details-sm').forEach(btn => {
+        btn.addEventListener('click', handleDetails);
+    });
+
     // Comments buttons
     document.querySelectorAll('.btn-comments, .btn-comments-sm').forEach(btn => {
         btn.addEventListener('click', handleComments);
@@ -329,14 +585,9 @@ function attachRowEventListeners() {
         btn.addEventListener('click', handleDownload);
     });
 
-    // Edit buttons
-    document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => {
-        btn.addEventListener('click', handleEdit);
-    });
-
     // Delete buttons
     document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
+        btn.addEventListener('click', handleDeleteClick);
     });
 }
 
@@ -350,8 +601,17 @@ async function handleView(e) {
         const fileUrl = `${API_BASE}${doc.file_url}`;
         openPreviewModal(fileUrl, doc.title);
     } else {
-        alert('No file available for this document');
+        showToastMessage('No file available for this document', 'error');
     }
+}
+
+function handleDetails(e) {
+    const docId = e.target.dataset.id;
+    const doc = allDocuments.find(d => d.id == docId);
+    
+    if (!doc) return;
+    
+    openDetailsModal(doc);
 }
 
 async function handleComments(e) {
@@ -373,7 +633,7 @@ async function handleComments(e) {
         openCommentsModal(doc, data.comments || []);
     } catch (error) {
         console.error('Error fetching comments:', error);
-        alert('Failed to load comments');
+        showToastMessage('Failed to load comments', 'error');
     }
 }
 
@@ -399,10 +659,10 @@ function openCommentsModal(doc, comments) {
                 return `
                     <div class="comment-item">
                         <div class="comment-header">
-                            <span class="comment-reviewer">${reviewer}</span>
+                            <span class="comment-reviewer">${escapeHtml(reviewer)}</span>
                             <span class="comment-date">${date}</span>
                         </div>
-                        <div class="comment-text">${text}</div>
+                        <div class="comment-text">${escapeHtml(text)}</div>
                     </div>
                 `;
             }).join('');
@@ -420,17 +680,18 @@ function closeCommentsModal() {
     setTimeout(() => commentsModal.classList.add('hidden'), 300);
 }
 
-// Setup comments modal event listeners
-const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
-const closeCommentsBtn = document.getElementById('closeCommentsBtn');
-if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
-if (closeCommentsBtn) closeCommentsBtn.addEventListener('click', closeCommentsModal);
+function setupCommentsModalEventListeners() {
+    const closeCommentsModalBtn = document.getElementById('closeCommentsModal');
+    const closeCommentsBtn = document.getElementById('closeCommentsBtn');
+    if (closeCommentsModalBtn) closeCommentsModalBtn.addEventListener('click', closeCommentsModal);
+    if (closeCommentsBtn) closeCommentsBtn.addEventListener('click', closeCommentsModal);
 
-const commentsModal = document.getElementById('commentsModal');
-if (commentsModal) {
-    commentsModal.addEventListener('click', e => {
-        if (e.target === commentsModal) closeCommentsModal();
-    });
+    const commentsModal = document.getElementById('commentsModal');
+    if (commentsModal) {
+        commentsModal.addEventListener('click', e => {
+            if (e.target === commentsModal) closeCommentsModal();
+        });
+    }
 }
 
 async function handleDownload(e) {
@@ -438,7 +699,7 @@ async function handleDownload(e) {
     const doc = allDocuments.find(d => d.id == docId);
     
     if (!doc || !doc.file_url) {
-        alert('No file available for download');
+        showToastMessage('No file available for download', 'error');
         return;
     }
 
@@ -449,59 +710,25 @@ async function handleDownload(e) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    showToastMessage('Download started', 'success');
 }
 
-function handleEdit(e) {
+function handleDeleteClick(e) {
     const docId = e.target.dataset.id;
     const doc = allDocuments.find(d => d.id == docId);
     
     if (!doc) return;
-
-    // For now, just show alert. In full implementation, open edit modal
-    alert(`Edit functionality coming soon for: ${doc.title}`);
-}
-
-async function handleDelete(e) {
-    const docId = e.target.dataset.id;
-    const doc = allDocuments.find(d => d.id == docId);
     
-    if (!doc) return;
-
-    if (!confirm(`Are you sure you want to delete "${doc.title}"?`)) {
-        return;
-    }
-
-    const token = localStorage.getItem('token');
-
-    try {
-        const response = await fetch(`${API_BASE}/api/documents/${docId}`, {
-            method: 'DELETE',
-            headers: {
-                'x-auth-token': token
-            }
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.msg || 'Failed to delete document');
-        }
-
-        alert('Document deleted successfully');
-        loadDocuments(); // Reload the list
-    } catch (error) {
-        console.error('Delete error:', error);
-        alert(error.message || 'Failed to delete document');
-    }
+    openDeleteModal(docId, doc.title);
 }
 
 function setupEventListeners() {
-    // Search input
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', applyFilters);
     }
 
-    // Filter dropdowns
     const categoryFilter = document.getElementById('categoryFilter');
     const departmentFilter = document.getElementById('departmentFilter');
     const statusFilter = document.getElementById('statusFilter');
@@ -510,7 +737,6 @@ function setupEventListeners() {
     if (departmentFilter) departmentFilter.addEventListener('change', applyFilters);
     if (statusFilter) statusFilter.addEventListener('change', applyFilters);
 
-    // Upload button
     const uploadBtn = document.getElementById('uploadBtn');
     if (uploadBtn) {
         uploadBtn.addEventListener('click', () => {
@@ -518,7 +744,6 @@ function setupEventListeners() {
         });
     }
 
-    // Pagination buttons
     const prevBtn = document.getElementById('prevPageBtn');
     const nextBtn = document.getElementById('nextPageBtn');
 
@@ -541,7 +766,6 @@ function setupEventListeners() {
         });
     }
 
-    // Mobile sidebar toggle
     setupMobileSidebar();
 }
 
@@ -552,26 +776,20 @@ function applyFilters() {
     const status = document.getElementById('statusFilter')?.value || 'all';
 
     filteredDocuments = allDocuments.filter(doc => {
-        // Search filter
         const matchesSearch = !searchTerm || 
             doc.title?.toLowerCase().includes(searchTerm) ||
             doc.author_name?.toLowerCase().includes(searchTerm) ||
-            doc.description?.toLowerCase().includes(searchTerm);
+            doc.description?.toLowerCase().includes(searchTerm) ||
+            doc.keywords?.toLowerCase().includes(searchTerm);
 
-        // Category filter
         const matchesCategory = category === 'all' || doc.category === category;
-
-        // Department filter
-        const matchesDepartment = department === 'all' || 
-            doc.department_code?.toLowerCase() === department.toLowerCase();
-
-        // Status filter
+        const matchesDepartment = department === 'all' || doc.department_code?.toLowerCase() === department.toLowerCase();
         const matchesStatus = status === 'all' || doc.workflow_status === status;
 
         return matchesSearch && matchesCategory && matchesDepartment && matchesStatus;
     });
 
-    currentPage = 1; // Reset to first page
+    currentPage = 1;
     renderDocuments();
     updateCounts();
 }
