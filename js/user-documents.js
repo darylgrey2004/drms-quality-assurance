@@ -332,21 +332,30 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     async function showRejectionComments(docId) {
         try {
+            console.log('Fetching comments for document:', docId);
+            console.log('API URL:', `${API_BASE}/api/documents/${docId}/comments`);
+            
             const response = await fetch(`${API_BASE}/api/documents/${docId}/comments`, {
                 headers: { 'x-auth-token': token }
             });
             
+            console.log('Comments response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch comments');
+                const errorData = await response.json().catch(() => ({ msg: 'Unknown error' }));
+                throw new Error(errorData.msg || `HTTP ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('Comments data:', data);
+            
             const doc = allDocuments.find(d => d.id == docId);
+            console.log('Document found:', doc);
             
             openCommentsModal(doc, data.comments || []);
         } catch (error) {
             console.error('Error fetching comments:', error);
-            showToast('Failed to load comments', true);
+            showToast('Failed to load comments: ' + error.message, true);
         }
     }
 
@@ -408,18 +417,32 @@ document.addEventListener('DOMContentLoaded', async function() {
     function deleteDocument(docId) {
         if (!confirm('Delete this document? This action cannot be undone.')) return;
 
+        console.log('Deleting document:', docId);
+        console.log('API URL:', `${API_BASE}/api/documents/${docId}`);
+        console.log('Token:', token ? 'Present' : 'Missing');
+        console.log('User role:', role);
+
         fetch(`${API_BASE}/api/documents/${docId}`, {
             method: 'DELETE',
             headers: { 'x-auth-token': token }
         })
-        .then(r => r.json())
+        .then(r => {
+            console.log('Delete response status:', r.status);
+            if (!r.ok) {
+                return r.json().then(errData => {
+                    throw new Error(errData.msg || `HTTP ${r.status}`);
+                });
+            }
+            return r.json();
+        })
         .then(data => {
+            console.log('Delete success:', data);
             showToast(data.msg || 'Document deleted successfully');
             loadDocuments();
         })
         .catch(err => {
             console.error('Delete error:', err);
-            showToast('Failed to delete document', true);
+            showToast('Failed to delete document: ' + err.message, true);
         });
     }
 

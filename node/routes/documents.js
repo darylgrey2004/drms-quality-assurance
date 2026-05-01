@@ -58,7 +58,7 @@ const upload = multer({
 
 // @route   POST /api/documents/upload
 // @desc    Upload document with files
-// @access  Private (Admin, Dean, Faculty, Area-Chair)
+// @access  Private (Admin, Dean, Faculty, Dept. Head)
 router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
   try {
     if (!canUpload(req.user.role)) {
@@ -191,7 +191,7 @@ router.get('/', auth, async (req, res) => {
     const { scope, status, category, department } = req.query || {};
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
-    const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
     const viewAll = canViewAll(req.user.role);
 
     const where = [];
@@ -201,16 +201,16 @@ router.get('/', auth, async (req, res) => {
     if (isEvaluator) {
       where.push('d.workflow_status = ?');
       params.push('approved');
-    } else if (isAreaChair) {
-      // Area-chair can see their own documents + documents from their department faculty
-      // First get the area-chair's department
-      const [areaChairProfile] = await db.query(
+    } else if (isDeptHead) {
+      // Dept. Head can see their own documents + documents from their department faculty
+      // First get the Dept. Head's department
+      const [deptHeadProfile] = await db.query(
         'SELECT department FROM faculty_profiles WHERE user_id = ?',
         [req.user.id]
       );
       
-      if (areaChairProfile.length > 0 && areaChairProfile[0].department) {
-        const deptName = areaChairProfile[0].department;
+      if (deptHeadProfile.length > 0 && deptHeadProfile[0].department) {
+        const deptName = deptHeadProfile[0].department;
         // Get department_id from departments table - try multiple matching strategies
         const [deptInfo] = await db.query(
           `SELECT id FROM departments 
@@ -222,7 +222,7 @@ router.get('/', auth, async (req, res) => {
         );
         
         if (deptInfo.length > 0) {
-          // Show documents uploaded by area-chair OR documents from their department
+          // Show documents uploaded by Dept. Head OR documents from their department
           where.push('(d.uploader_id = ? OR d.department_id = ?)');
           params.push(req.user.id, deptInfo[0].id);
         } else {
@@ -518,17 +518,69 @@ router.get('/:id/comments', auth, async (req, res) => {
   try {
     const docId = Number(req.params.id);
     
-    // Get document to check ownership
-    const [docs] = await db.query('SELECT uploader_id FROM documents WHERE id = ?', [docId]);
+    console.log('=== COMMENTS REQUEST ===');
+    console.log('Document ID:', docId);
+    console.log('User ID:', req.user.id);
+    console.log('User Role (raw):', req.user.role);
+    
+    // Get document to check ownership and department
+    const [docs] = await db.query('SELECT uploader_id, department_id FROM documents WHERE id = ?', [docId]);
     if (docs.length === 0) {
       return res.status(404).json({ msg: 'Document not found' });
     }
     
+    console.log('Document:', { uploader_id: docs[0].uploader_id, department_id: docs[0].department_id });
+    
     const normalizedRole = normalizeRole(req.user.role);
+    console.log('Normalized Role:', normalizedRole);
+    
     const viewAll = canViewAll(req.user.role);
+    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    
+    console.log('Authorization checks:', { viewAll, isDeptHead, isOwner: docs[0].uploader_id === req.user.id });
     
     // Check if user can view this document's comments
-    if (!viewAll && docs[0].uploader_id !== req.user.id) {
+    let authorized = viewAll || docs[0].uploader_id === req.user.id;
+    
+    // Area-chair/Dept. Head can view comments for documents in their department
+    if (!authorized && isDeptHead) {
+      console.log('Checking Dept. Head department...');
+      const [profile] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
+        [req.user.id]
+      );
+      console.log('Faculty profile:', profile);
+      
+      if (profile.length && profile[0].department) {
+        const deptValue = profile[0].department.trim();
+        console.log('Dept. Head department value:', deptValue);
+        
+        // Try multiple matching strategies
+        const [dept] = await db.query(
+          `SELECT id FROM departments 
+           WHERE name = ? OR code = ? 
+           OR name LIKE ? OR code LIKE ?
+           OR ? LIKE CONCAT('%', code, '%')
+           OR ? LIKE CONCAT('%', name, '%')
+           LIMIT 1`,
+          [deptValue, deptValue.toUpperCase(), `%${deptValue}%`, `%${deptValue.toUpperCase()}%`, deptValue, deptValue]
+        );
+        console.log('Department lookup result:', dept);
+        
+        if (dept.length && dept[0].id === docs[0].department_id) {
+          console.log('Authorized: Dept. Head of same department');
+          authorized = true;
+        } else {
+          console.log('NOT Authorized: Department mismatch', { deptHeadDeptId: dept[0]?.id, documentDeptId: docs[0].department_id });
+        }
+      } else {
+        console.log('NOT Authorized: No faculty profile found');
+      }
+    }
+    
+    console.log('Final authorization:', authorized);
+    
+    if (!authorized) {
       return res.status(403).json({ msg: 'Not authorized to view comments' });
     }
     
@@ -557,10 +609,15 @@ router.get('/:id/comments', auth, async (req, res) => {
 
 // @route   DELETE /api/documents/:id
 // @desc    Delete document and its files
-// @access  Private (Admin, or owner if draft)
+// @access  Private (Admin, Dept. Head for rejected docs in their dept, or owner if draft/rejected)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const docId = Number(req.params.id);
+    
+    console.log('=== DELETE REQUEST ===');
+    console.log('Document ID:', docId);
+    console.log('User ID:', req.user.id);
+    console.log('User Role (raw):', req.user.role);
     
     const [docs] = await db.query('SELECT * FROM documents WHERE id = ?', [docId]);
     if (docs.length === 0) {
@@ -568,12 +625,70 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     const document = docs[0];
-    const isAdmin = normalizeRole(req.user.role) === 'admin';
+    console.log('Document:', { id: document.id, uploader_id: document.uploader_id, department_id: document.department_id, workflow_status: document.workflow_status });
+    
+    const normalizedRole = normalizeRole(req.user.role);
+    console.log('Normalized Role:', normalizedRole);
+    
+    const isAdmin = normalizedRole === 'admin';
+    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
     const isOwner = document.uploader_id === req.user.id;
     const isDraft = document.workflow_status === 'draft';
+    const isRejected = document.workflow_status === 'rejected';
 
-    // Only admin can delete any document, or owner can delete their own draft
-    if (!isAdmin && !(isOwner && isDraft)) {
+    console.log('Authorization checks:', { isAdmin, isDeptHead, isOwner, isDraft, isRejected });
+
+    let authorized = false;
+
+    // Admin can delete any document
+    if (isAdmin) {
+      console.log('Authorized: Admin');
+      authorized = true;
+    }
+    // Owner can delete their own draft or rejected documents
+    else if (isOwner && (isDraft || isRejected)) {
+      console.log('Authorized: Owner of draft/rejected');
+      authorized = true;
+    }
+    // Dept. Head can delete rejected documents from their department
+    else if (isDeptHead && isRejected) {
+      console.log('Checking Dept. Head department...');
+      const [profile] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
+        [req.user.id]
+      );
+      console.log('Faculty profile:', profile);
+      
+      if (profile.length && profile[0].department) {
+        const deptValue = profile[0].department.trim();
+        console.log('Dept. Head department value:', deptValue);
+        
+        // Try multiple matching strategies
+        const [dept] = await db.query(
+          `SELECT id FROM departments 
+           WHERE name = ? OR code = ? 
+           OR name LIKE ? OR code LIKE ?
+           OR ? LIKE CONCAT('%', code, '%')
+           OR ? LIKE CONCAT('%', name, '%')
+           LIMIT 1`,
+          [deptValue, deptValue.toUpperCase(), `%${deptValue}%`, `%${deptValue.toUpperCase()}%`, deptValue, deptValue]
+        );
+        console.log('Department lookup result:', dept);
+        
+        if (dept.length && dept[0].id === document.department_id) {
+          console.log('Authorized: Dept. Head of same department');
+          authorized = true;
+        } else {
+          console.log('NOT Authorized: Department mismatch', { deptHeadDeptId: dept[0]?.id, documentDeptId: document.department_id });
+        }
+      } else {
+        console.log('NOT Authorized: No faculty profile found');
+      }
+    }
+
+    console.log('Final authorization:', authorized);
+
+    if (!authorized) {
       return res.status(403).json({ msg: 'Not authorized to delete this document' });
     }
 

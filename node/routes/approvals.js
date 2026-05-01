@@ -12,6 +12,11 @@ function canApprove(role) {
   return r === 'admin' || r === 'dean' || r === 'area-chair' || r === 'department-head';
 }
 
+function canFinalApprove(role) {
+  const r = normalizeRole(role);
+  return r === 'admin' || r === 'dean';
+}
+
 // Resolves the department_id for an area-chair. Returns null if not found.
 async function getAreaChairDeptId(userId) {
   try {
@@ -62,13 +67,13 @@ router.get('/pending', auth, async (req, res) => {
     let whereSql = "WHERE d.workflow_status IN ('draft', 'pending', 'validated', 'approved', 'locked', 'rejected')";
     const params = [];
 
-    // Area-chair sees documents from their department OR their own uploads
+    // Area-chair/Dept. Head sees documents from their department OR their own uploads
     if (isAreaChair) {
       const deptId = await getAreaChairDeptId(req.user.id);
       if (deptId) {
-        // dept docs + own uploads (covers null department_id on own docs)
-        whereSql += " AND (d.department_id = ? OR d.uploader_id = ?)";
-        params.push(deptId, req.user.id);
+        // Show all documents from their department (not just own uploads)
+        whereSql += " AND d.department_id = ?";
+        params.push(deptId);
       } else {
         // no dept profile — show only own uploads
         whereSql += " AND d.uploader_id = ?";
@@ -180,12 +185,12 @@ router.get('/stats', auth, async (req, res) => {
 
 // @route   POST /api/approvals/:documentId/approve
 // @desc    Approve a document
-// @access  Private (Admin, Dean)
+// @access  Private (Admin, Dean only)
 router.post('/:documentId/approve', auth, async (req, res) => {
   try {
     const role = normalizeRole(req.user.role);
-    if (role !== 'admin' && role !== 'dean') {
-      return res.status(403).json({ msg: 'Not authorized to approve documents' });
+    if (!canFinalApprove(role)) {
+      return res.status(403).json({ msg: 'Not authorized to approve documents. Only Admin and Dean can approve.' });
     }
 
     const documentId = parseInt(req.params.documentId);
