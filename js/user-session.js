@@ -147,22 +147,38 @@ document.addEventListener('DOMContentLoaded', function () {
         const portalLabels = {
             'faculty member': 'Faculty Portal',
             'faculty': 'Faculty Portal',
-            'area chair/program head': 'Area Chair Portal',
-            'area-chair': 'Area Chair Portal'
+            'area chair/program head': 'Dept. Head Portal',
+            'area-chair': 'Dept. Head Portal',
+            'department-head': 'Dept. Head Portal'
         };
         const accessLabels = {
             'faculty member': 'Faculty Access',
             'faculty': 'Faculty Access',
-            'area chair/program head': 'Area Chair Access',
-            'area-chair': 'Area Chair Access'
+            'area chair/program head': 'Dept. Head Access',
+            'area-chair': 'Dept. Head Access',
+            'department-head': 'Dept. Head Access'
         };
+        
+        // Map role values to display names
+        const roleDisplayMap = {
+            'admin': 'Administrator',
+            'dean': 'Dean',
+            'faculty': 'Faculty',
+            'faculty member': 'Faculty',
+            'area-chair': 'Dept. Head',
+            'area chair/program head': 'Dept. Head',
+            'department-head': 'Dept. Head',
+            'evaluator': 'External Evaluator'
+        };
+        
+        const displayRole = roleDisplayMap[role] || roleValue;
 
-        if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${roleValue} Portal`;
-        if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${roleValue} Access`;
+        if (el('sidebarPortal')) el('sidebarPortal').textContent = portalLabels[role] || `${displayRole} Portal`;
+        if (el('sidebarAccess')) el('sidebarAccess').textContent = accessLabels[role] || `${displayRole} Access`;
 
         if (el('sidebarRole')) {
             const department = data.department ? ` · ${data.department}` : '';
-            el('sidebarRole').textContent = `${roleValue}${department}`;
+            el('sidebarRole').textContent = `${displayRole}${department}`;
         }
         if (el('welcomeUserText')) el('welcomeUserText').textContent = `Welcome back, ${first}`;
     }

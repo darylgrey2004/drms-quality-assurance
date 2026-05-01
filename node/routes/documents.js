@@ -12,7 +12,7 @@ function normalizeRole(role) {
 
 function canUpload(role) {
   const r = normalizeRole(role);
-  return r === 'admin' || r === 'faculty' || r === 'area-chair' || r === 'dean';
+  return r === 'admin' || r === 'faculty' || r === 'area-chair' || r === 'department-head' || r === 'dean';
 }
 
 function canViewAll(role) {
@@ -191,7 +191,7 @@ router.get('/', auth, async (req, res) => {
     const { scope, status, category, department } = req.query || {};
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
-    const isAreaChair = normalizedRole === 'area-chair';
+    const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
     const viewAll = canViewAll(req.user.role);
 
     const where = [];

@@ -50,9 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitBtn.textContent;
             const normalizedRole = role?.toLowerCase().trim();
 
-            // For faculty and area-chair roles, skip backend registration API
+            // For faculty and department-head roles, skip backend registration API
             // They will complete registration through the employment form
-            if (normalizedRole === 'faculty' || normalizedRole === 'area-chair') {
+            if (normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head') {
                 // Store registration data in localStorage for faculty profile form
                 const registrationData = {
                     firstName,
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 localStorage.setItem('registrationData', JSON.stringify(registrationData));
                 
-                console.log('Faculty/Area-Chair registration - redirecting to employment form');
+                console.log('Faculty/Dept. Head registration - redirecting to employment form');
                 alert('Please complete your employment information to finish registration.');
                 window.location.href = 'faculty-profile-form.html';
                 return;

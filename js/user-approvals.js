@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const normalizedRole = (role || '').toLowerCase();
 
     // Only area-chair, dean, and admin can access
-    if (normalizedRole !== 'area-chair' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
+    if (normalizedRole !== 'area-chair' && normalizedRole !== 'department-head' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
         window.location.href = 'user-dashboard.html';
         return;
     }

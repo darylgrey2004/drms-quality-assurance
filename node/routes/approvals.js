@@ -9,7 +9,7 @@ function normalizeRole(role) {
 
 function canApprove(role) {
   const r = normalizeRole(role);
-  return r === 'admin' || r === 'dean' || r === 'area-chair';
+  return r === 'admin' || r === 'dean' || r === 'area-chair' || r === 'department-head';
 }
 
 // Resolves the department_id for an area-chair. Returns null if not found.
@@ -55,7 +55,7 @@ router.get('/pending', auth, async (req, res) => {
     }
 
     const normalizedRole = normalizeRole(req.user.role);
-    const isAreaChair = normalizedRole === 'area-chair';
+    const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
     const isAdmin = normalizedRole === 'admin';
     const isDean = normalizedRole === 'dean';
 
@@ -132,7 +132,7 @@ router.get('/stats', auth, async (req, res) => {
     let whereClause = '';
     const params = [];
 
-    if (normalizedRole === 'area-chair') {
+    if (normalizedRole === 'area-chair' || normalizedRole === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       if (deptId) {
         whereClause = 'WHERE (department_id = ? OR uploader_id = ?)';
@@ -269,8 +269,8 @@ router.post('/:documentId/reject', auth, async (req, res) => {
 
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
 
-    // Area-chair can only reject their department's documents or own uploads
-    if (normalizeRole(req.user.role) === 'area-chair') {
+    // Area-chair/Dept. Head can only reject their department's documents or own uploads
+    if (normalizeRole(req.user.role) === 'area-chair' || normalizeRole(req.user.role) === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       const isOwnUpload = docs[0].uploader_id == req.user.id;
       const isInDept = deptId && docs[0].department_id == deptId;
@@ -332,7 +332,7 @@ router.post('/:documentId/validate', auth, async (req, res) => {
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
     const doc = docs[0];
 
-    if (role === 'area-chair') {
+    if (role === 'area-chair' || role === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       const isOwnUpload = String(doc.uploader_id) === String(req.user.id);
       const isInDept = deptId && String(doc.department_id) === String(deptId);
@@ -380,7 +380,7 @@ router.post('/:documentId/validate', auth, async (req, res) => {
 router.post('/:documentId/lock', auth, async (req, res) => {
   try {
     const role = normalizeRole(req.user.role);
-    if (role !== 'admin' && role !== 'dean' && role !== 'area-chair') {
+    if (role !== 'admin' && role !== 'dean' && role !== 'area-chair' && role !== 'department-head') {
       return res.status(403).json({ msg: 'Not authorized to lock documents' });
     }
 
@@ -394,8 +394,8 @@ router.post('/:documentId/lock', auth, async (req, res) => {
 
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
 
-    // Area-chair can only lock their department's documents or own uploads
-    if (role === 'area-chair') {
+    // Area-chair/Dept. Head can only lock their department's documents or own uploads
+    if (role === 'area-chair' || role === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       const isOwnUpload = docs[0].uploader_id == req.user.id;
       const isInDept = deptId && docs[0].department_id == deptId;

@@ -82,7 +82,7 @@ router.post('/users', adminAuth, async (req, res) => {
 
   const normalizedRole = String(role).toLowerCase().trim();
   const isEvaluatorRole = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
-  const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair';
+  const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
   let parsedEvaluatorExpiration = null;
 
   if (isEvaluatorRole && !evaluatorExpiresAt) {
@@ -90,7 +90,7 @@ router.post('/users', adminAuth, async (req, res) => {
   }
 
   if (requiresDepartment && !department) {
-    return res.status(400).json({ msg: 'Department is required for Faculty and Area Chair roles.' });
+    return res.status(400).json({ msg: 'Department is required for Faculty and Department Head roles.' });
   }
 
   if (isEvaluatorRole) {

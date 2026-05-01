@@ -96,7 +96,8 @@ function updateUserInfo(user) {
             'admin': 'Administrator',
             'dean': 'Dean',
             'faculty': 'Faculty Member',
-            'area-chair': 'Area Chair',
+            'area-chair': 'Dept. Head',
+            'department-head': 'Dept. Head',
             'evaluator': 'External Evaluator'
         };
         userRole.textContent = roleMap[user.role] || user.role;

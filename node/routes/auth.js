@@ -49,7 +49,7 @@ router.post('/register', async (req, res) => {
   }
 
   // Validate role against ENUM values
-  const validRoles = ['admin', 'dean', 'area-chair', 'faculty', 'evaluator'];
+  const validRoles = ['admin', 'dean', 'area-chair', 'department-head', 'faculty', 'evaluator'];
   if (!validRoles.includes(role)) {
     return res.status(400).json({ msg: 'Invalid role selected' });
   }

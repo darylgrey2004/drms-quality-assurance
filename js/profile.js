@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // RBAC: Only admin-type users can access this page
-    if (role === 'faculty member' || role === 'area chair/program head') {
+    if (role === 'faculty member' || role === 'faculty' || role === 'area chair/program head' || role === 'area-chair' || role === 'department-head') {
         window.location.href = 'user-dashboard.html';
         return;
     }
@@ -24,7 +24,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const el = (id) => document.getElementById(id);
     if (el('sidebarInitials')) el('sidebarInitials').textContent = initials;
     if (el('sidebarName')) el('sidebarName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    if (el('sidebarRole')) el('sidebarRole').textContent = user.role || '';
+    
+    // Map role to display name
+    const roleDisplayMap = {
+        'admin': 'Administrator',
+        'dean': 'Dean',
+        'faculty': 'Faculty',
+        'faculty member': 'Faculty',
+        'area-chair': 'Dept. Head',
+        'area chair/program head': 'Dept. Head',
+        'department-head': 'Dept. Head',
+        'evaluator': 'External Evaluator'
+    };
+    const displayRole = roleDisplayMap[role] || user.role || '';
+    if (el('sidebarRole')) el('sidebarRole').textContent = displayRole;
 
     // Fetch profile for dept to update sidebarRole
     fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
@@ -32,7 +45,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     }).then(r => r.json()).then(data => {
         if (el('sidebarRole')) {
             const dept = data.department ? ` · ${data.department}` : '';
-            el('sidebarRole').textContent = `${data.role || user.role || ''}${dept}`;
+            const dataRole = (data.role || '').toLowerCase().trim();
+            const roleDisplayMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'faculty': 'Faculty',
+                'faculty member': 'Faculty',
+                'area-chair': 'Dept. Head',
+                'area chair/program head': 'Dept. Head',
+                'department-head': 'Dept. Head',
+                'evaluator': 'External Evaluator'
+            };
+            const mappedRole = roleDisplayMap[dataRole] || data.role || user.role || '';
+            el('sidebarRole').textContent = `${mappedRole}${dept}`;
         }
     }).catch(() => {});
 
@@ -211,7 +236,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     function populateProfile(data) {
         const initials = (data.firstName?.charAt(0) || '') + (data.lastName?.charAt(0) || '');
         const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-        const displayRole = data.role || '';
+        const dataRole = (data.role || '').toLowerCase().trim();
+        const roleDisplayMap = {
+            'admin': 'Administrator',
+            'dean': 'Dean',
+            'faculty': 'Faculty',
+            'faculty member': 'Faculty',
+            'area-chair': 'Dept. Head',
+            'area chair/program head': 'Dept. Head',
+            'department-head': 'Dept. Head',
+            'evaluator': 'External Evaluator'
+        };
+        const displayRole = roleDisplayMap[dataRole] || data.role || '';
         const roleDept = `${displayRole}${data.department ? ' · ' + data.department : ''}`;
 
         // Sidebar
