@@ -310,7 +310,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function getActionButtons(doc, mobile = false) {
         const s = doc.workflow_status;
-        const isAreaChair = normalizedRole === 'area-chair';
+        const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+        const isDeanOrAdmin = normalizedRole === 'dean' || normalizedRole === 'admin';
         const isAdmin     = normalizedRole === 'admin';
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
 
@@ -325,13 +326,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             btns += ` <button class="${cls.validate} btn-validate-action" data-id="${doc.id}">Validate</button>`;
             btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
         } else if (s === 'validated') {
-            if (isAreaChair) {
-                // Area-chair cannot approve — show informational badge
-                btns += ` <span class="${cls.awaiting}" title="Awaiting Dean/Admin approval">Awaiting Approval</span>`;
-            } else {
-                // Dean / Admin can approve
+            if (isDeanOrAdmin) {
+                // Only Dean / Admin can approve
                 btns += ` <button class="${cls.approve} btn-approve-action" data-id="${doc.id}">Approve</button>`;
                 btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
+            } else if (isAreaChair) {
+                // Area-chair/Dept. Head cannot approve — show informational badge
+                btns += ` <span class="${cls.awaiting}" title="Awaiting Dean/Admin approval">Awaiting Approval</span>`;
             }
         } else if (s === 'approved') {
             // Area-chair, dean, admin can lock
