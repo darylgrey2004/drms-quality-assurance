@@ -25,12 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveGeneral = document.getElementById('saveGeneral');
     const saveWorkflow = document.getElementById('saveWorkflow');
     const saveStandards = document.getElementById('saveStandards');
-    const saveNotifications = document.getElementById('saveNotifications');
-    const saveBackup = document.getElementById('saveBackup');
-    const saveApi = document.getElementById('saveApi');
     
     // Other buttons
-    const backupNowBtn = document.getElementById('backupNowBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     
     // Tab switching functionality
@@ -278,13 +274,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Change Password functionality
+    // ============================================
+    // CHANGE PASSWORD WITH TOGGLE BUTTON
+    // ============================================
+    
+    const showChangePasswordBtn = document.getElementById('showChangePasswordBtn');
+    const changePasswordForm = document.getElementById('changePasswordForm');
     const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const cancelChangePasswordBtn = document.getElementById('cancelChangePasswordBtn');
     const currentPasswordInput = document.getElementById('currentPassword');
     const newPasswordInput = document.getElementById('newPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const passwordMessage = document.getElementById('passwordMessage');
     
+    // Show change password form when button is clicked
+    if (showChangePasswordBtn) {
+        showChangePasswordBtn.addEventListener('click', function() {
+            changePasswordForm.classList.remove('hidden');
+            // Clear any previous inputs and messages
+            if (currentPasswordInput) currentPasswordInput.value = '';
+            if (newPasswordInput) newPasswordInput.value = '';
+            if (confirmPasswordInput) confirmPasswordInput.value = '';
+            if (passwordMessage) {
+                passwordMessage.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Cancel change password
+    if (cancelChangePasswordBtn) {
+        cancelChangePasswordBtn.addEventListener('click', function() {
+            changePasswordForm.classList.add('hidden');
+            if (passwordMessage) {
+                passwordMessage.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Change password functionality
     if (changePasswordBtn) {
         changePasswordBtn.addEventListener('click', async () => {
             const currentPassword = currentPasswordInput?.value.trim();
@@ -335,9 +362,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (newPasswordInput) newPasswordInput.value = '';
                 if (confirmPasswordInput) confirmPasswordInput.value = '';
                 
+                // Hide form after successful change
                 setTimeout(() => {
+                    changePasswordForm.classList.add('hidden');
                     if (passwordMessage) passwordMessage.classList.add('hidden');
-                }, 3000);
+                }, 2000);
                 
             } catch (error) {
                 showPasswordMessage(error.message, 'error');
@@ -557,12 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const settings = {
                 systemName: document.getElementById('systemName')?.value || 'DRMS-QA',
                 institutionName: document.getElementById('institutionName')?.value || 'College of Teacher Education',
-                systemEmail: document.getElementById('systemEmail')?.value || 'qa@cte.edu',
-                timezone: document.getElementById('timezone')?.value || 'Asia/Manila',
-                dateFormat: document.getElementById('dateFormat')?.value || 'Y-m-d',
-                language: document.getElementById('language')?.value || 'en',
-                maintenanceMode: document.getElementById('maintenanceMode')?.checked || false,
-                debugMode: document.getElementById('debugMode')?.checked || false
+                systemEmail: document.getElementById('systemEmail')?.value || 'qa@cte.edu'
             };
             localStorage.setItem('generalSettings', JSON.stringify(settings));
             showToastMessage('General settings saved successfully!', 'success');
@@ -575,10 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 workflowType: document.querySelector('input[name="workflowType"]:checked')?.value || 'standard',
                 autoApproveAdmin: document.getElementById('autoApproveAdmin')?.checked || false,
                 autoApproveDean: document.getElementById('autoApproveDean')?.checked || false,
-                autoApproveDeptHead: document.getElementById('autoApproveDeptHead')?.checked || false,
-                slaValidation: document.getElementById('slaValidation')?.value || 48,
-                slaApproval: document.getElementById('slaApproval')?.value || 72,
-                maxVersions: document.getElementById('maxVersions')?.value || 10
+                autoApproveDeptHead: document.getElementById('autoApproveDeptHead')?.checked || false
             };
             localStorage.setItem('workflowSettings', JSON.stringify(settings));
             showToastMessage('Workflow settings saved successfully!', 'success');
@@ -591,79 +612,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    if (saveNotifications) {
-        saveNotifications.addEventListener('click', () => {
-            const settings = {
-                notificationEmail: document.getElementById('notificationEmail')?.value || 'admin@cte.edu'
-            };
-            localStorage.setItem('notificationSettings', JSON.stringify(settings));
-            showToastMessage('Notification settings saved successfully!', 'success');
-        });
-    }
-    
-    if (saveBackup) {
-        saveBackup.addEventListener('click', () => {
-            const settings = {
-                backupSchedule: document.getElementById('backupSchedule')?.value || 'weekly',
-                backupRetention: document.getElementById('backupRetention')?.value || '90'
-            };
-            localStorage.setItem('backupSettings', JSON.stringify(settings));
-            showToastMessage('Backup settings saved successfully!', 'success');
-        });
-    }
-    
-    if (saveApi) {
-        saveApi.addEventListener('click', () => {
-            const settings = {
-                apiEnabled: document.getElementById('apiEnabled')?.checked || true
-            };
-            localStorage.setItem('apiSettings', JSON.stringify(settings));
-            showToastMessage('API settings saved successfully!', 'success');
-        });
-    }
-    
-    // Backup Now button
-    if (backupNowBtn) {
-        backupNowBtn.addEventListener('click', function() {
-            const originalText = this.innerHTML;
-            this.innerHTML = 'Creating backup...';
-            this.disabled = true;
-            
-            setTimeout(() => {
-                showToastMessage('Backup created successfully!', 'success');
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }, 2000);
-        });
-    }
-    
-    // Regenerate API key button
-    const regenerateApiKey = document.getElementById('regenerateApiKey');
-    if (regenerateApiKey) {
-        regenerateApiKey.addEventListener('click', () => {
-            if (confirm('Regenerate API key? This will invalidate existing keys.')) {
-                const newKey = 'key_' + Math.random().toString(36).substring(2, 20);
-                showToastMessage(`New API key generated: ${newKey}`, 'success');
-            }
-        });
-    }
-    
-    // Add webhook button
-    const addWebhookBtn = document.getElementById('addWebhookBtn');
-    if (addWebhookBtn) {
-        addWebhookBtn.addEventListener('click', () => {
-            const url = document.getElementById('webhookUrl')?.value;
-            if (url) {
-                showToastMessage(`Webhook added: ${url}`, 'success');
-                document.getElementById('webhookUrl').value = '';
-            } else {
-                showToastMessage('Please enter a webhook URL', 'error');
-            }
-        });
-    }
-    
     // Cancel buttons
-    const cancelButtons = document.querySelectorAll('.border.border-gray-300.rounded-lg.text-gray-700');
+    const cancelButtons = document.querySelectorAll('.cancel-btn');
     cancelButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             if (confirm('Discard unsaved changes?')) {
@@ -671,6 +621,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Load saved general settings on page load
+    function loadSavedGeneralSettings() {
+        const saved = localStorage.getItem('generalSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            if (document.getElementById('systemName')) document.getElementById('systemName').value = settings.systemName || '';
+            if (document.getElementById('institutionName')) document.getElementById('institutionName').value = settings.institutionName || '';
+            if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = settings.systemEmail || '';
+        } else {
+            // Set default values
+            if (document.getElementById('systemName')) document.getElementById('systemName').value = 'DRMS-QA';
+            if (document.getElementById('institutionName')) document.getElementById('institutionName').value = 'College of Teacher Education';
+            if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = 'qa@cte.edu';
+        }
+    }
+    
+    // Load saved workflow settings on page load
+    function loadSavedWorkflowSettings() {
+        const saved = localStorage.getItem('workflowSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            if (settings.workflowType) {
+                const radio = document.querySelector(`input[name="workflowType"][value="${settings.workflowType}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (document.getElementById('autoApproveAdmin')) document.getElementById('autoApproveAdmin').checked = settings.autoApproveAdmin || false;
+            if (document.getElementById('autoApproveDean')) document.getElementById('autoApproveDean').checked = settings.autoApproveDean || false;
+            if (document.getElementById('autoApproveDeptHead')) document.getElementById('autoApproveDeptHead').checked = settings.autoApproveDeptHead || false;
+        }
+    }
+    
+    loadSavedGeneralSettings();
+    loadSavedWorkflowSettings();
     
     // Active navigation state
     const currentPath = window.location.pathname.split('/').pop() || 'settings.html';
@@ -687,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
             link.style.background = '#1a4450';
         }
     });
-});
+    
     // ============================================
     // MOBILE SIDEBAR TOGGLE
     // ============================================
@@ -762,3 +746,4 @@ document.addEventListener('DOMContentLoaded', function() {
         checkMobile();
         window.addEventListener('resize', checkMobile);
     }
+});
