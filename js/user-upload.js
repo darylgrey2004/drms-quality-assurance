@@ -80,31 +80,49 @@ document.addEventListener('DOMContentLoaded', async function() {
             authorInput.value = fullName || user.username || 'User';
         }
         
-        // Fetch and auto-fill department from database
+        // Fetch and auto-fill department from user profile
         if (departmentInput) {
-            fetch(`${API_BASE}/api/documents/user/department`, {
+            departmentInput.value = 'Loading department...';
+            
+            fetch(`${API_BASE}/api/user/profile/${user.id}`, {
                 headers: { 'x-auth-token': token }
             })
-            .then(r => r.json())
-            .then(data => {
-                if (data.department_name || data.department_code) {
-                    departmentInput.value = data.department_name || data.department_code;
-                    departmentInput.setAttribute('data-department-id',   data.department_id   || '');
-                    departmentInput.setAttribute('data-department-code', data.department_code || '');
-                    departmentInput.setAttribute('data-department-name', data.department_name || '');
+            .then(r => {
+                if (!r.ok) throw new Error('Failed to fetch profile');
+                return r.json();
+            })
+            .then(profile => {
+                if (profile.department) {
+                    // Map department codes to full names
+                    const deptMap = {
+                        'beed': 'BEED (Bachelor of Elementary Education)',
+                        'bsed': 'BSED (Bachelor of Secondary Education)',
+                        'bsned': 'BSNED (Bachelor of Special Needs Education)',
+                        'bcaed': 'BCAED (Bachelor of Culture and Arts Education)',
+                        'bped': 'BPED (Bachelor of Physical Education)'
+                    };
+                    
+                    const deptLower = profile.department.toLowerCase();
+                    const displayName = deptMap[deptLower] || profile.department;
+                    
+                    departmentInput.value = displayName;
+                    departmentInput.setAttribute('data-department-code', deptLower);
+                    departmentInput.setAttribute('data-department-name', profile.department);
                 } else {
                     departmentInput.value = 'No department assigned';
+                    console.warn('User has no department assigned in profile');
                 }
             })
             .catch(err => {
                 console.error('Load department error:', err);
                 departmentInput.value = 'Error loading department';
+                showErrorModal('Failed to load your department information. Please contact administrator.');
             });
         }
         
-        // Show "Validate Immediately" option for area-chair only
+        // Show "Validate Immediately" option for area-chair/department-head only
         const normalizedRole = (role || '').toLowerCase();
-        if (validateOption && normalizedRole === 'area-chair') {
+        if (validateOption && (normalizedRole === 'area-chair' || normalizedRole === 'department-head')) {
             validateOption.style.display = 'flex';
         }
     }

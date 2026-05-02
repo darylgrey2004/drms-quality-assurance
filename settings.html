@@ -298,7 +298,7 @@
                                     <div class="md:col-span-2"><button id="logoutBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Log Out</button></div>
                                 </div>
                             </div>
-                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600" id="loggedInUser">Admin User</span> (Administrator)</p></div>
+                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600" id="loggedInUser">Loading...</span> (<span id="loggedInRole">Loading...</span>)</p></div>
                         </div>
                     </div>
                 </div>
@@ -395,6 +395,24 @@
                 'evaluator': 'External Evaluator'
             };
             userRoleSpan.textContent = roleMap[userData.role] || userData.role;
+        }
+        
+        // Update logged in user info in Account tab
+        const loggedInUserElem = document.getElementById('loggedInUser');
+        const loggedInRoleElem = document.getElementById('loggedInRole');
+        if (loggedInUserElem && userData.firstName && userData.lastName) {
+            loggedInUserElem.textContent = `${userData.firstName} ${userData.lastName}`;
+        }
+        if (loggedInRoleElem && userData.role) {
+            const roleMap = {
+                'admin': 'Administrator',
+                'dean': 'Dean',
+                'faculty': 'Faculty Member',
+                'area-chair': 'Dept. Head',
+                'department-head': 'Dept. Head',
+                'evaluator': 'External Evaluator'
+            };
+            loggedInRoleElem.textContent = roleMap[userData.role] || userData.role;
         }
         
         // Mobile Sidebar Toggle
@@ -708,5 +726,6 @@
             setInterval(sendHeartbeat, 2 * 60 * 1000);
         }
     </script>
+    <script src="js/sidebar-updater.js"></script>
 </body>
 </html>
