@@ -106,29 +106,29 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div><span class="text-gray-500 text-sm">My Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div>
-                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">Docs</span>
+                            <div><span class="text-gray-500 text-sm">My Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="totalDocs">0</div></div>
+                            <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">📄</span>
                         </div>
-                        <div class="text-xs text-teal-600 mt-2">+3 this month</div>
+                        <div class="text-xs text-teal-600 mt-2">Total uploaded</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">18</div></div>
-                            <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">Approved</span>
+                            <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="approvedDocs">0</div></div>
+                            <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">✓</span>
                         </div>
-                        <div class="text-xs text-green-600 mt-2">75% approval rate</div>
+                        <div class="text-xs text-green-600 mt-2">0% approval rate</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">4</div></div>
-                            <span class="bg-amber-100 text-amber-700 p-2 rounded-lg text-lg">Pending</span>
+                            <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="pendingDocs">0</div></div>
+                            <span class="bg-amber-100 text-amber-700 p-2 rounded-lg text-lg">⏳</span>
                         </div>
                         <div class="text-xs text-amber-600 mt-2">Awaiting validation</div>
                     </div>
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
-                            <div><span class="text-gray-500 text-sm">Needs Revision</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">2</div></div>
-                            <span class="bg-red-100 text-red-700 p-2 rounded-lg text-lg">Revision</span>
+                            <div><span class="text-gray-500 text-sm">Needs Revision</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="rejectedDocs">0</div></div>
+                            <span class="bg-red-100 text-red-700 p-2 rounded-lg text-lg">✗</span>
                         </div>
                         <div class="text-xs text-red-600 mt-2">Action required</div>
                     </div>
@@ -157,33 +157,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
-                                        <td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td>
-                                        <td class="py-3 text-gray-600">BSED</td>
-                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                        <td class="py-3 text-gray-600">v2.1</td>
-                                        <td class="py-3 text-gray-400">Apr 20, 2026</td>
-                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn download-btn">Download</button></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Syllabus - Science Education</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
-                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
-                                        <td class="py-3 text-gray-600">BSED</td>
-                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
-                                        <td class="py-3 text-gray-600">v1.0</td>
-                                        <td class="py-3 text-gray-400">Apr 22, 2026</td>
-                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn">Edit</button></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Extension Program Report</div><div class="text-xs text-gray-400">By Dr. Juan Dela Cruz</div></td>
-                                        <td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td>
-                                        <td class="py-3 text-gray-600">BEED</td>
-                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
-                                        <td class="py-3 text-gray-600">v0.5</td>
-                                        <td class="py-3 text-gray-400">Apr 18, 2026</td>
-                                        <td class="py-3"><div class="flex gap-2"><button class="action-btn view-btn">View</button><button class="action-btn edit-btn">Edit</button></div></td>
-                                    </tr>
+                                    <!-- Dynamic content will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -191,27 +165,7 @@
 
                     <!-- Mobile Card View -->
                     <div class="block md:hidden space-y-4">
-                        <div class="border rounded-lg p-4 bg-white">
-                            <div class="font-medium text-gray-800">Research Publication 2025</div>
-                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 20, 2026</div>
-                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></div>
-                            <div class="text-sm text-gray-600 mb-3">BSED · v2.1</div>
-                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm download-btn">Download</button></div>
-                        </div>
-                        <div class="border rounded-lg p-4 bg-white">
-                            <div class="font-medium text-gray-800">Syllabus - Science Education</div>
-                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 22, 2026</div>
-                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div>
-                            <div class="text-sm text-gray-600 mb-3">BSED · v1.0</div>
-                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div>
-                        </div>
-                        <div class="border rounded-lg p-4 bg-white">
-                            <div class="font-medium text-gray-800">Extension Program Report</div>
-                            <div class="text-xs text-gray-400 mb-2">By Dr. Juan Dela Cruz · Apr 18, 2026</div>
-                            <div class="flex flex-wrap gap-2 mb-2"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></div>
-                            <div class="text-sm text-gray-600 mb-3">BEED · v0.5</div>
-                            <div class="flex gap-2"><button class="action-btn-sm view-btn">View</button><button class="action-btn-sm edit-btn">Edit</button></div>
-                        </div>
+                        <!-- Dynamic content will be loaded here -->
                     </div>
                 </div>
 

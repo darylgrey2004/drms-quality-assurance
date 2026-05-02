@@ -155,7 +155,7 @@ async function loadDashboardData() {
             fetch(`${API_BASE}/api/documents?scope=all`, {
                 headers: { 'x-auth-token': token }
             }),
-            fetch(`${API_BASE}/api/category-requirements`, {
+            fetch(`${API_BASE}/api/documents/category-requirements`, {
                 headers: { 'x-auth-token': token }
             })
         ]);
