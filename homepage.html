@@ -266,6 +266,7 @@
     </div>
 
     <script src="js/sidebar-updater.js"></script>
+    <script src="js/homepage.js"></script>
     <script>
         // API Base URL
         const API_BASE = 'http://localhost:3000';
@@ -335,304 +336,7 @@
         // Store previous document count to detect new uploads
         let previousDocumentCount = 0;
         
-        // Load recent documents - GET REAL DOCUMENTS FROM DATABASE
-        async function loadRecentDocuments() {
-            console.log('Loading REAL documents from database...');
-            
-            const tableBody = document.getElementById('recentDocsTable');
-            const mobileContainer = document.getElementById('recentDocsMobile');
-            
-            // Show loading
-            if (tableBody) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500"><div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div> Loading real documents...</td></tr>';
-            }
-            if (mobileContainer) {
-                mobileContainer.innerHTML = '<div class="text-center text-gray-500 py-4"><div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div> Loading real documents...</div>';
-            }
-            
-            let documents = [];
-            
-            try {
-                // Get REAL documents from your database
-                const token = localStorage.getItem('token');
-                console.log('Token found:', token ? 'YES' : 'NO');
-                console.log('API_BASE:', API_BASE);
-                
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (token) {
-                    headers['x-auth-token'] = token;
-                }
-                
-                console.log('Request headers:', headers);
-                console.log('Fetching from:', `${API_BASE}/api/documents?scope=all`);
-                
-                const response = await fetch(`${API_BASE}/api/documents?scope=all`, {
-                    method: 'GET',
-                    headers: headers
-                });
-                
-                console.log('Response status:', response.status);
-                
-                if (response.ok) {
-                    documents = await response.json();
-                    console.log('SUCCESS: Got real documents from database:', documents.length);
-                    console.log('Documents:', documents);
-                    
-                    // Check for new documents
-                    if (previousDocumentCount > 0 && documents.length > previousDocumentCount) {
-                        const newDocsCount = documents.length - previousDocumentCount;
-                        showNewDocumentNotification(newDocsCount);
-                    }
-                    previousDocumentCount = documents.length;
-                    
-                    // Check if 'fck' document is in the results
-                    const fckDoc = documents.find(doc => doc.title && doc.title.toLowerCase().includes('fck'));
-                    if (fckDoc) {
-                        console.log('FOUND fck document:', fckDoc);
-                    } else {
-                        console.log('fck document NOT found in results');
-                    }
-                    
-                    if (!Array.isArray(documents) || documents.length === 0) {
-                        console.log('No documents found in database, using fallback');
-                        throw new Error('No documents');
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.log('API Error response:', errorText);
-                    throw new Error(`API Error: ${response.status} - ${errorText}`);
-                }
-            } catch (err) {
-                console.log('API failed, showing database sample:', err.message);
-                // Use actual data from your database as fallback
-                documents = [
-                    { 
-                        id: 33, 
-                        title: 'fck', 
-                        author_name: 'Admin User',
-                        created_at: '2026-05-02 23:15:30', 
-                        category_display_name: 'Research', 
-                        department_code: 'BEED', 
-                        workflow_status: 'pending', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 32, 
-                        title: 'Faculty File Created by Admin', 
-                        author_name: 'Jelmar Kemba',
-                        created_at: '2026-04-30 21:09:44', 
-                        category_display_name: 'Instruction', 
-                        department_code: 'BEED', 
-                        workflow_status: 'approved', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 30, 
-                        title: 'Faculty File', 
-                        author_name: 'Guilmars Quimbas',
-                        created_at: '2026-04-30 21:02:02', 
-                        category_display_name: 'Instruction', 
-                        department_code: 'BEED', 
-                        workflow_status: 'pending', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 29, 
-                        title: 'Capstone Vitae', 
-                        author_name: 'Admin',
-                        created_at: '2026-04-30 20:31:30', 
-                        category_display_name: 'Research', 
-                        department_code: 'BEED', 
-                        workflow_status: 'approved', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 28, 
-                        title: 'Last Testing', 
-                        author_name: 'Guilmar Quimba',
-                        created_at: '2026-04-30 20:30:00', 
-                        category_display_name: 'Instruction', 
-                        department_code: 'BEED', 
-                        workflow_status: 'rejected', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 22, 
-                        title: 'C', 
-                        author_name: 'Guilmara Quimbar',
-                        created_at: '2026-04-29 21:05:41', 
-                        category_display_name: 'Instruction', 
-                        department_code: 'BEED', 
-                        workflow_status: 'locked', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 21, 
-                        title: 'Source Code', 
-                        author_name: 'Guilmar Quimba',
-                        created_at: '2026-04-29 20:46:17', 
-                        category_display_name: 'Employment', 
-                        department_code: 'BEED', 
-                        workflow_status: 'approved', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 20, 
-                        title: 'Testing 2', 
-                        author_name: 'Guilmar Quimba',
-                        created_at: '2026-04-29 20:33:29', 
-                        category_display_name: 'Extension', 
-                        department_code: 'BEED', 
-                        workflow_status: 'approved', 
-                        version: 'v1.0' 
-                    },
-                    { 
-                        id: 19, 
-                        title: 'Capstone Manuscript', 
-                        author_name: 'Admin',
-                        created_at: '2026-04-29 19:19:25', 
-                        category_display_name: 'Research', 
-                        department_code: 'BPED', 
-                        workflow_status: 'locked', 
-                        version: 'v1.0' 
-                    }
-                ];
-            }
-            
-            // DESKTOP TABLE
-            if (tableBody) {
-                tableBody.innerHTML = '';
-                documents.forEach(doc => {
-                    const statusClass = getStatusBadgeClass(doc.workflow_status);
-                    const categoryClass = getCategoryBadgeClass(doc.category_display_name);
-                    const uploadedDate = formatDate(doc.created_at);
-                    const documentTitle = doc.title;
-                    const authorName = doc.author_name || 'Unknown';
-                    const departmentName = doc.department_code;
-                    const version = doc.version;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="py-3">
-                            <div class="font-medium text-gray-800">${documentTitle}</div>
-                            <div class="text-xs text-gray-400">by ${authorName} · ${uploadedDate}</div>
-                        </td>
-                        <td class="py-3"><span class="${categoryClass} px-2 py-1 rounded-full text-xs">${getCategoryDisplay(doc.category_display_name)}</span></td>
-                        <td class="py-3 text-xs text-gray-600">${departmentName}</td>
-                        <td class="py-3"><span class="${statusClass} px-2 py-1 rounded-full text-xs">${doc.workflow_status}</span></td>
-                        <td class="py-3 text-xs text-gray-500">${version}</td>
-                        <td class="py-3">
-                            <div class="flex gap-1">
-                                <button onclick="viewDocument(${doc.id}, '${documentTitle.replace(/'/g, "\\'")}')" class="view-btn px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors" data-title="${documentTitle}">View</button>
-                                <button onclick="downloadDocument(${doc.id}, '${documentTitle.replace(/'/g, "\\'")}')" class="download-btn px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors">Download</button>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-            
-            // MOBILE CARDS
-            if (mobileContainer) {
-                mobileContainer.innerHTML = '';
-                documents.forEach(doc => {
-                    const statusClass = getStatusBadgeClass(doc.workflow_status);
-                    const categoryClass = getCategoryBadgeClass(doc.category_display_name);
-                    const uploadedDate = formatDate(doc.created_at);
-                    const documentTitle = doc.title;
-                    const authorName = doc.author_name || 'Unknown';
-                    const departmentName = doc.department_code;
-                    const version = doc.version;
-                    
-                    const card = document.createElement('div');
-                    card.className = 'border rounded-lg p-4 bg-white';
-                    card.innerHTML = `
-                        <div class="font-medium text-gray-800">${documentTitle}</div>
-                        <div class="text-xs text-gray-400 mb-2">by ${authorName} · ${uploadedDate}</div>
-                        <div class="flex flex-wrap gap-2 mb-2">
-                            <span class="${categoryClass} px-2 py-1 rounded-full text-xs">${getCategoryDisplay(doc.category_display_name)}</span>
-                            <span class="${statusClass} px-2 py-1 rounded-full text-xs">${formatStatus(doc.workflow_status)}</span>
-                        </div>
-                        <div class="text-sm text-gray-600 mb-2">${departmentName} · ${version}</div>
-                        <div class="flex gap-2">
-                            <button class="view-btn-sm" onclick="viewDocument(${doc.id}, '${documentTitle}')">View</button>
-                            <button class="download-btn-sm" onclick="downloadDocument(${doc.id}, '${documentTitle}')">Download</button>
-                        </div>
-                    `;
-                    mobileContainer.appendChild(card);
-                });
-            }
-        }
-
         // Helper functions
-        function getStatusBadgeClass(status) {
-            const statusMap = {
-                'approved': 'badge-approved',
-                'locked': 'badge-approved', 
-                'validated': 'badge-approved',
-                'pending_review': 'badge-pending',
-                'pending': 'badge-pending',
-                'rejected': 'badge-rejected',
-                'draft': 'badge-draft'
-            };
-            return statusMap[status?.toLowerCase()] || 'badge-pending';
-        }
-
-        function getCategoryBadgeClass(category) {
-            const categoryMap = {
-                'instruction': 'badge-instruction',
-                'research': 'badge-research',
-                'extension': 'badge-extension',
-                'employment': 'badge-employment'
-            };
-            return categoryMap[category?.toLowerCase()] || 'badge-instruction';
-        }
-
-        function getCategoryDisplay(category) {
-            const displayMap = {
-                'instruction': 'Instruction',
-                'research': 'Research', 
-                'extension': 'Extension',
-                'employment': 'Employment'
-            };
-            return displayMap[category?.toLowerCase()] || category || 'Instruction';
-        }
-
-        function formatStatus(status) {
-            const statusMap = {
-                'approved': 'Approved',
-                'locked': 'Approved',
-                'validated': 'Approved',
-                'pending_review': 'Pending Review',
-                'pending': 'Pending Review',
-                'rejected': 'Rejected',
-                'draft': 'Draft'
-            };
-            return statusMap[status?.toLowerCase()] || status || 'Pending';
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'Unknown';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            } catch {
-                return 'Unknown';
-            }
-        }
-
-        function viewDocument(docId, title) {
-            console.log('View document:', docId, title);
-            window.location.href = `view-document.html?id=${docId}`;
-        }
-
-        function downloadDocument(docId, title) {
-            console.log('Download document:', docId, title);
-            window.location.href = `${API_BASE}/api/documents/${docId}/download`;
-        }
         
         // Show notification for new documents
         function showNewDocumentNotification(count) {
@@ -664,7 +368,7 @@
                 // Immediately refresh all dashboard data
                 loadRecentDocuments();
                 loadRecentActivities();
-                loadDashboardStats();
+                // Dashboard stats handled by homepage.js loadDashboardData()
                 
                 // Show success notification
                 showNewDocumentNotification(1);
@@ -677,7 +381,7 @@
                     // Immediately refresh all dashboard data
                     loadRecentDocuments();
                     loadRecentActivities();
-                    loadDashboardStats();
+                    // Dashboard stats handled by homepage.js loadDashboardData()
                     
                     // Show success notification
                     showNewDocumentNotification(1);
@@ -747,7 +451,7 @@
                 // Refresh dashboard to show new document
                 loadRecentDocuments();
                 loadRecentActivities();
-                loadDashboardStats();
+                // Dashboard stats handled by homepage.js loadDashboardData()
             }
         }
         
@@ -954,7 +658,7 @@
                         // Refresh dashboard data
                         loadRecentDocuments();
                         loadRecentActivities();
-                        loadDashboardStats();
+                        // Dashboard stats handled by homepage.js loadDashboardData()
                         
                     } else {
                         const error = await response.json();
@@ -991,7 +695,7 @@
                         showNewDocumentNotification(newDocsCount);
                         loadRecentDocuments();
                         loadRecentActivities();
-                        loadDashboardStats();
+                        // Dashboard stats handled by homepage.js loadDashboardData()
                     }
                     lastDocumentCount = documents.length;
                 }
@@ -1004,247 +708,17 @@
         setInterval(pollForNewDocuments, 5000);
         
                 
-        // Load recent activities from backend database
-        async function loadRecentActivities() {
-            console.log('loadRecentActivities() called');
-            const container = document.getElementById('recentActivities');
-            if (!container) {
-                console.log('recentActivities container not found');
-                return;
-            }
-            
-            // Show loading
-            container.innerHTML = '<div class="text-center text-gray-500 py-2"><div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600"></div> Loading activities...</div>';
-            
-            try {
-                console.log('Fetching activities from API...');
-                // Get REAL activities from audit_logs table
-                const token = localStorage.getItem('token');
-                console.log('Token:', token ? 'exists' : 'missing');
-                const response = await fetch(`${API_BASE}/api/documents/activity`, {
-                    method: 'GET',
-                    headers: {
-                        'x-auth-token': token || '',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('Activities API response status:', response.status);
-                
-                if (response.ok) {
-                    const activities = await response.json();
-                    console.log('SUCCESS: Got real activities from database:', activities.length);
-                    
-                    if (Array.isArray(activities) && activities.length > 0) {
-                        displayActivities(activities);
-                    } else {
-                        throw new Error('No activities found');
-                    }
-                } else {
-                    throw new Error(`API Error: ${response.status}`);
-                }
-            } catch (err) {
-                console.error('Error loading recent activities:', err);
-                console.log('Activities API failed, showing empty state');
-                
-                // Show empty state instead of hardcoded data
-                container.innerHTML = '<div class="text-center text-gray-500 py-2">No recent activities found</div>';
-            }
-        }
-        
-        function displayActivities(activities) {
-            const container = document.getElementById('recentActivities');
-            if (!container) return;
-            
-            const recentActivities = activities.slice(0, 5); // Show only 5 most recent
-            
-            container.innerHTML = recentActivities.map(act => {
-                const actionText = formatActivityAction(act.action);
-                const timeAgo = formatTimeAgo(act.created_at);
-                const initial = act.user_name ? act.user_name.charAt(0).toUpperCase() : 'U';
-                
-                return `
-                    <div class="flex items-start gap-3 border-b border-gray-100 pb-2">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-teal-600">${initial}</span>
-                        <div>
-                            <p class="text-sm"><span class="font-medium">${act.user_name || 'Unknown'}</span> ${actionText} ${act.document_title ? `<span class="font-medium">${act.document_title}</span>` : ''}</p>
-                            <p class="text-xs text-gray-400">${timeAgo}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function formatActivityAction(action) {
-            const actionMap = {
-                'DOCUMENT_UPLOAD': 'uploaded',
-                'DOCUMENT_APPROVED': 'approved',
-                'DOCUMENT_REJECTED': 'rejected',
-                'DOCUMENT_VALIDATED': 'validated',
-                'DOCUMENT_LOCKED': 'locked',
-                'DOCUMENT_DELETE': 'deleted'
-            };
-            return actionMap[action] || action.toLowerCase().replace('_', ' ');
-        }
-        
-        function formatTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffDays > 0) {
-                return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-            } else if (diffHours > 0) {
-                return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-            } else {
-                return 'Just now';
-            }
-        }
-        
-        // Load real dashboard statistics from backend database
-        async function loadDashboardStats() {
-            console.log('Loading dashboard stats from real database...');
-            try {
-                const token = localStorage.getItem('token');
-                console.log('Stats API - Token found:', token ? 'YES' : 'NO');
-                
-                if (!token) {
-                    throw new Error('No authentication token found');
-                }
-                
-                const response = await fetch(`${API_BASE}/api/documents/stats/dashboard`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    }
-                });
-                
-                if (response.ok) {
-                    const stats = await response.json();
-                    console.log('SUCCESS: Got real stats from database:', stats);
-                    updateDashboardStats(stats);
-                } else {
-                    const errorData = await response.json();
-                    console.error('Stats API error:', errorData);
-                    throw new Error(`API Error: ${response.status} - ${errorData.msg || 'Unknown error'}`);
-                }
-            } catch (err) {
-                console.error('Stats API failed:', err.message);
-                console.log('Using minimal fallback - showing 0 to indicate API issue');
-                
-                // Show minimal fallback to indicate API issue
-                const stats = {
-                    total_documents: 0,
-                    approved_count: 0,
-                    pending_count: 0,
-                    rejected_count: 0,
-                    expiring_count: 0,
-                    monthly_change: 0,
-                    urgent_count: 0,
-                    instruction: { total: 0, completed: 0, percentage: 0 },
-                    research: { total: 0, completed: 0, percentage: 0 },
-                    extension: { total: 0, completed: 0, percentage: 0 },
-                    employment: { total: 0, completed: 0, percentage: 0 }
-                };
-                console.log('Using minimal fallback stats:', stats);
-                updateDashboardStats(stats);
-            }
-        }
-        
-        function updateDashboardStats(stats) {
-            console.log('Updating dashboard stats with:', stats);
-            
-            // Update KPI cards
-            const totalDocsEl = document.getElementById('totalDocs');
-            const approvedDocsEl = document.getElementById('approvedDocs');
-            const pendingDocsEl = document.getElementById('pendingDocs');
-            const expiringDocsEl = document.getElementById('expiringDocs');
-            
-            if (totalDocsEl) totalDocsEl.textContent = stats.total_documents || 0;
-            if (approvedDocsEl) approvedDocsEl.textContent = stats.approved_count || 0;
-            if (pendingDocsEl) pendingDocsEl.textContent = stats.pending_count || 0;
-            if (expiringDocsEl) expiringDocsEl.textContent = stats.expiring_count || 0;
-            
-            // Update approval rate
-            const approvalRateEl = document.getElementById('approvalRate');
-            if (approvalRateEl && stats.total_documents && stats.approved_count) {
-                const rate = ((stats.approved_count / stats.total_documents) * 100).toFixed(1);
-                approvalRateEl.textContent = `${rate}% approval rate`;
-            }
-            
-            // Update monthly change
-            const monthlyChangeEl = document.getElementById('monthlyChange');
-            if (monthlyChangeEl) {
-                monthlyChangeEl.textContent = `+${stats.monthly_change || 0} this month`;
-            }
-            
-            // Update urgent count
-            const urgentCountEl = document.getElementById('urgentCount');
-            if (urgentCountEl) {
-                urgentCountEl.textContent = `${stats.urgent_count || 0} urgent`;
-            }
-            
-            // Update total documents in main stats
-            const totalElement = document.querySelector('.text-3xl.font-bold.text-gray-800');
-            if (totalElement) {
-                totalElement.textContent = stats.total_documents || 0;
-            }
-            
-            // Update category stats with real backend data
-            if (stats.instruction) {
-                document.getElementById('instructionCount').textContent = stats.instruction.completed;
-                document.getElementById('instructionProgress').style.width = `${stats.instruction.percentage}%`;
-                document.getElementById('instructionDocs').textContent = `${stats.instruction.total} documents`;
-                document.getElementById('instructionComplete').textContent = `${stats.instruction.percentage}% complete`;
-            }
-            
-            if (stats.research) {
-                document.getElementById('researchCount').textContent = stats.research.completed;
-                document.getElementById('researchProgress').style.width = `${stats.research.percentage}%`;
-                document.getElementById('researchDocs').textContent = `${stats.research.total} documents`;
-                document.getElementById('researchComplete').textContent = `${stats.research.percentage}% complete`;
-            }
-            
-            if (stats.extension) {
-                document.getElementById('extensionCount').textContent = stats.extension.completed;
-                document.getElementById('extensionProgress').style.width = `${stats.extension.percentage}%`;
-                document.getElementById('extensionDocs').textContent = `${stats.extension.total} documents`;
-                document.getElementById('extensionComplete').textContent = `${stats.extension.percentage}% complete`;
-            }
-            
-            if (stats.employment) {
-                document.getElementById('employmentCount').textContent = stats.employment.completed;
-                document.getElementById('employmentProgress').style.width = `${stats.employment.percentage}%`;
-                document.getElementById('employmentDocs').textContent = `${stats.employment.total} documents`;
-                document.getElementById('employmentComplete').textContent = `${stats.employment.percentage}% complete`;
-            }
-        }
-        
-        // Initialize upload event listener
-        listenForUploadEvents();
-
         // Auto-refresh recent documents every 30 seconds
         setInterval(() => {
             loadRecentDocuments();
             loadRecentActivities();
-            loadDashboardStats();
         }, 30000);
         
-        // Faster refresh during active upload periods (every 10 seconds)
-        let fastRefreshInterval = setInterval(() => {
-            loadRecentDocuments();
-            loadRecentActivities();
-        }, 10000);
-
         // Listen for visibility changes to refresh when page becomes active
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
                 loadRecentDocuments();
                 loadRecentActivities();
-                loadDashboardStats();
             }
         });
 
@@ -1252,13 +726,7 @@
         window.addEventListener('focus', function() {
             loadRecentDocuments();
             loadRecentActivities();
-            loadDashboardStats();
         });
-
-        // Load real data when page loads
-        loadDashboardStats();
-        loadRecentDocuments();
-        loadRecentActivities();
         
         // View and Download button handlers
         document.querySelectorAll('.view-btn, .view-btn-sm').forEach(btn => {

@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update user info in sidebar
     updateUserInfo(user);
 
+    // Check for URL parameters from evidence-map
+    checkAndApplyEvidenceMapFilters();
+
     // Load documents from backend
     loadDocuments();
 
@@ -361,6 +364,58 @@ function updateUserInfo(user) {
     }
 }
 
+function checkAndApplyEvidenceMapFilters() {
+    // Check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    const departmentParam = urlParams.get('department');
+    
+    // Check localStorage for filters
+    const storedFilters = localStorage.getItem('evidenceMapFilters');
+    
+    if (categoryParam || departmentParam || storedFilters) {
+        let category = categoryParam;
+        let department = departmentParam;
+        
+        // If stored filters exist, use them
+        if (storedFilters) {
+            try {
+                const filters = JSON.parse(storedFilters);
+                category = category || filters.category;
+                department = department || filters.department;
+                
+                // Show message if available
+                if (filters.message) {
+                    showToastMessage(filters.message, 'success');
+                }
+                
+                // Clear stored filters after using them
+                localStorage.removeItem('evidenceMapFilters');
+            } catch (e) {
+                console.error('Error parsing stored filters:', e);
+            }
+        }
+        
+        // Apply filters to dropdowns
+        if (category) {
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter) {
+                categoryFilter.value = category;
+            }
+        }
+        
+        if (department) {
+            const departmentFilter = document.getElementById('departmentFilter');
+            if (departmentFilter) {
+                departmentFilter.value = department.toLowerCase();
+            }
+        }
+        
+        // Note: Filters will be applied after documents are loaded
+        // The applyFilters() function will be called in loadDocuments()
+    }
+}
+
 async function loadDocuments() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -391,8 +446,8 @@ async function loadDocuments() {
         
         filteredDocuments = [...allDocuments];
         
-        renderDocuments();
-        updateCounts();
+        // Apply filters if they were set from evidence-map
+        applyFilters();
         
     } catch (error) {
         console.error('Error loading documents:', error);

@@ -1049,6 +1049,36 @@ router.get('/stats/dashboard', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/category-requirements
+// @desc    Get all category requirements for all departments
+// @access  Private
+router.get('/category-requirements', auth, async (req, res) => {
+  try {
+    const [requirements] = await db.query(
+      `SELECT 
+        cr.id,
+        cr.category_id,
+        cr.department_id,
+        cr.expected_documents,
+        cr.is_required,
+        c.name as category_name,
+        c.display_name as category_display_name,
+        d.code as department_code,
+        d.name as department_name
+       FROM category_requirements cr
+       LEFT JOIN categories c ON cr.category_id = c.id
+       LEFT JOIN departments d ON cr.department_id = d.id
+       WHERE cr.is_required = 1
+       ORDER BY c.sort_order ASC, d.code ASC`
+    );
+    
+    res.json(requirements);
+  } catch (err) {
+    console.error('Category requirements error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   GET /api/documents/:id
 // @desc    Get single document with all files
 // @access  Private

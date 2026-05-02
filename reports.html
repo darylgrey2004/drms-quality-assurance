@@ -341,6 +341,7 @@
         </main>
     </div>
 
+    <script src="js/reports.js"></script>
     <script>
         // Update sidebar user info
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -357,8 +358,7 @@
                 'admin': 'Administrator',
                 'dean': 'Dean',
                 'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
-                'department-head': 'Dept. Head',
+                'department-head': 'Department Head',
                 'evaluator': 'External Evaluator'
             };
             userRole.textContent = roleMap[user.role] || user.role;

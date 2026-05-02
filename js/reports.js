@@ -20,9 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(sendHeartbeat, 2 * 60 * 1000);
     }
     
-    // Load real analytics data on page load
-    loadAnalyticsData();
-    loadReportSummary();
+    // Use a small delay to ensure DOM is fully ready
+    setTimeout(() => {
+        console.log('Loading analytics data...');
+        loadAnalyticsData();
+        loadReportSummary();
+    }, 100);
     
     // Initialize reports page functionality
     initializeReportsPage();
@@ -31,41 +34,120 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load real analytics data from backend
 async function loadAnalyticsData() {
     console.log('Loading analytics data from backend...');
+    
     try {
         const token = localStorage.getItem('token');
         console.log('Reports - Token found:', token ? 'YES' : 'NO');
         
         if (!token) {
             console.error('No authentication token found');
+            useFallbackAnalytics();
             return;
         }
         
-        console.log('Making API call to:', `${API_BASE}/api/documents/analytics/overview`);
+        // Fetch documents and requirements
+        const [docsResponse, reqResponse, analyticsResponse] = await Promise.all([
+            fetch(`${API_BASE}/api/documents?scope=all`, {
+                headers: { 'x-auth-token': token }
+            }),
+            fetch(`${API_BASE}/api/category-requirements`, {
+                headers: { 'x-auth-token': token }
+            }),
+            fetch(`${API_BASE}/api/documents/analytics/overview`, {
+                headers: { 'x-auth-token': token }
+            })
+        ]);
         
-        const response = await fetch(`${API_BASE}/api/documents/analytics/overview`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-auth-token': token
-            }
+        console.log('API responses:', {
+            docs: docsResponse.status,
+            requirements: reqResponse.status,
+            analytics: analyticsResponse.status
         });
         
-        console.log('Analytics API response status:', response.status);
-        
-        if (response.ok) {
-            const analytics = await response.json();
-            console.log('SUCCESS: Analytics data loaded successfully:', analytics);
-            console.log('Category breakdown:', analytics.category_breakdown);
-            updateAnalyticsDisplay(analytics);
+        if (docsResponse.ok && reqResponse.ok) {
+            const documents = await docsResponse.json();
+            const requirements = await reqResponse.json();
+            const analytics = analyticsResponse.ok ? await analyticsResponse.json() : null;
+            
+            console.log('SUCCESS: Data loaded:', {
+                documents: documents.length,
+                requirements: requirements.length
+            });
+            
+            // Calculate requirements-based analytics
+            const enhancedAnalytics = calculateRequirementsAnalytics(documents, requirements, analytics);
+            updateAnalyticsDisplay(enhancedAnalytics);
         } else {
-            const error = await response.json();
-            console.error('Analytics API error:', error);
-            useFallbackAnalytics();
+            throw new Error('Failed to fetch data');
         }
     } catch (error) {
         console.error('Failed to load analytics:', error);
         useFallbackAnalytics();
     }
+}
+
+// Calculate analytics based on requirements
+function calculateRequirementsAnalytics(documents, requirements, analytics) {
+    // Calculate total requirements per category
+    const categoryRequirements = {
+        instruction: 0,
+        research: 0,
+        extension: 0,
+        employment: 0
+    };
+    
+    requirements.forEach(req => {
+        const categoryName = (req.category_name || '').toLowerCase();
+        if (categoryRequirements[categoryName] !== undefined) {
+            categoryRequirements[categoryName] += req.expected_documents || 0;
+        }
+    });
+    
+    console.log('Total requirements per category:', categoryRequirements);
+    
+    // Count documents by category and status
+    const categoryBreakdown = [
+        { category: 'Instruction', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.instruction },
+        { category: 'Research', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.research },
+        { category: 'Extension', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.extension },
+        { category: 'Employment', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.employment }
+    ];
+    
+    documents.forEach(doc => {
+        const category = (doc.category || doc.category_name || '').toLowerCase();
+        const categoryIndex = {
+            'instruction': 0,
+            'research': 1,
+            'extension': 2,
+            'employment': 3
+        }[category];
+        
+        if (categoryIndex !== undefined) {
+            categoryBreakdown[categoryIndex].total++;
+            
+            if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                categoryBreakdown[categoryIndex].approved++;
+            } else if (doc.workflow_status === 'pending' || doc.workflow_status === 'validated') {
+                categoryBreakdown[categoryIndex].pending++;
+            } else if (doc.workflow_status === 'rejected') {
+                categoryBreakdown[categoryIndex].rejected++;
+            }
+        }
+    });
+    
+    // Calculate approval rates based on requirements
+    categoryBreakdown.forEach(cat => {
+        cat.approval_rate = cat.required > 0 ? ((cat.approved / cat.required) * 100).toFixed(2) : 0;
+    });
+    
+    return {
+        status_distribution: analytics?.status_distribution || [],
+        category_breakdown: categoryBreakdown,
+        department_breakdown: analytics?.department_breakdown || [],
+        monthly_trends: analytics?.monthly_trends || [],
+        top_uploaders: analytics?.top_uploaders || [],
+        requirements: categoryRequirements
+    };
 }
 
 // Load real report summary from backend
@@ -104,7 +186,8 @@ async function loadReportSummary() {
 
 // Update analytics display with real data
 function updateAnalyticsDisplay(analytics) {
-    console.log('Updating analytics display with:', analytics);
+    console.log('=== UPDATING ANALYTICS DISPLAY ===');
+    console.log('Analytics data received:', analytics);
     
     // Update summary cards
     const totalDocs = analytics.category_breakdown.reduce((sum, cat) => sum + cat.total, 0);
@@ -112,60 +195,80 @@ function updateAnalyticsDisplay(analytics) {
     const pendingDocs = analytics.category_breakdown.reduce((sum, cat) => sum + cat.pending, 0);
     const rejectedDocs = analytics.category_breakdown.reduce((sum, cat) => sum + cat.rejected, 0);
     
-    console.log('Calculated totals - Total:', totalDocs, 'Approved:', approvedDocs, 'Pending:', pendingDocs, 'Rejected:', rejectedDocs);
+    console.log('Calculated totals:');
+    console.log('- Total:', totalDocs);
+    console.log('- Approved:', approvedDocs);
+    console.log('- Pending:', pendingDocs);
+    console.log('- Rejected:', rejectedDocs);
     
     // Update elements with error checking
     const totalDocsEl = document.getElementById('totalDocs');
     const approvedDocsEl = document.getElementById('approvedDocs');
     const pendingDocsEl = document.getElementById('pendingDocs');
+    const totalChangeEl = document.getElementById('totalChange');
     const approvalRateEl = document.getElementById('approvalRate');
     const pendingInfoEl = document.getElementById('pendingInfo');
     const activeUsersEl = document.getElementById('activeUsers');
     const userInfoEl = document.getElementById('userInfo');
     
-    console.log('Elements found:', {
-        totalDocs: !!totalDocsEl,
-        approvedDocs: !!approvedDocsEl,
-        pendingDocs: !!pendingDocsEl,
-        approvalRate: !!approvalRateEl,
-        pendingInfo: !!pendingInfoEl,
-        activeUsers: !!activeUsersEl,
-        userInfo: !!userInfoEl
-    });
+    console.log('DOM Elements check:');
+    console.log('- totalDocs:', totalDocsEl ? 'FOUND' : 'NOT FOUND');
+    console.log('- approvedDocs:', approvedDocsEl ? 'FOUND' : 'NOT FOUND');
+    console.log('- pendingDocs:', pendingDocsEl ? 'FOUND' : 'NOT FOUND');
+    console.log('- activeUsers:', activeUsersEl ? 'FOUND' : 'NOT FOUND');
     
     if (totalDocsEl) {
         totalDocsEl.textContent = totalDocs;
-        console.log('Updated totalDocs to:', totalDocs);
+        console.log('✓ Updated totalDocs to:', totalDocs);
+    } else {
+        console.error('✗ totalDocs element not found!');
     }
+    
     if (approvedDocsEl) {
         approvedDocsEl.textContent = approvedDocs;
-        console.log('Updated approvedDocs to:', approvedDocs);
+        console.log('✓ Updated approvedDocs to:', approvedDocs);
+    } else {
+        console.error('✗ approvedDocs element not found!');
     }
+    
     if (pendingDocsEl) {
         pendingDocsEl.textContent = pendingDocs;
-        console.log('Updated pendingDocs to:', pendingDocs);
+        console.log('✓ Updated pendingDocs to:', pendingDocs);
+    } else {
+        console.error('✗ pendingDocs element not found!');
+    }
+    
+    if (totalChangeEl) {
+        totalChangeEl.textContent = `+${totalDocs} total documents`;
+        console.log('✓ Updated totalChange');
     }
     
     const approvalRate = totalDocs > 0 ? ((approvedDocs / totalDocs) * 100).toFixed(1) : 0;
     if (approvalRateEl) {
         approvalRateEl.textContent = `${approvalRate}% approval rate`;
-        console.log('Updated approvalRate to:', `${approvalRate}% approval rate`);
+        console.log('✓ Updated approvalRate to:', `${approvalRate}% approval rate`);
     }
+    
     if (pendingInfoEl) {
         pendingInfoEl.textContent = `${rejectedDocs} rejected`;
-        console.log('Updated pendingInfo to:', `${rejectedDocs} rejected`);
+        console.log('✓ Updated pendingInfo to:', `${rejectedDocs} rejected`);
     }
     
     // Update active users from top uploaders
     const activeUsers = analytics.top_uploaders ? analytics.top_uploaders.length : 0;
     if (activeUsersEl) {
         activeUsersEl.textContent = activeUsers;
-        console.log('Updated activeUsers to:', activeUsers);
+        console.log('✓ Updated activeUsers to:', activeUsers);
+    } else {
+        console.error('✗ activeUsers element not found!');
     }
+    
     if (userInfoEl) {
         userInfoEl.textContent = `${activeUsers} active uploaders`;
-        console.log('Updated userInfo to:', `${activeUsers} active uploaders`);
+        console.log('✓ Updated userInfo to:', `${activeUsers} active uploaders`);
     }
+    
+    console.log('=== ANALYTICS DISPLAY UPDATE COMPLETE ===');
     
     // Update status distribution
     updateStatusChart(analytics.status_distribution);
@@ -211,26 +314,33 @@ function useFallbackAnalytics() {
             { workflow_status: 'rejected', count: 1, percentage: 10.0 }
         ],
         category_breakdown: [
-            { category: 'Instruction', total: 4, approved: 2, pending: 2, rejected: 0, approval_rate: 50.0 },
-            { category: 'Research', total: 3, approved: 1, pending: 2, rejected: 0, approval_rate: 33.33 },
-            { category: 'Extension', total: 2, approved: 1, pending: 1, rejected: 0, approval_rate: 50.0 },
-            { category: 'Employment', total: 1, approved: 0, pending: 1, rejected: 0, approval_rate: 0.0 }
+            { category: 'Instruction', total: 4, approved: 2, pending: 2, rejected: 0, approval_rate: 0.93, required: 215 },
+            { category: 'Research', total: 3, approved: 1, pending: 2, rejected: 0, approval_rate: 0.54, required: 185 },
+            { category: 'Extension', total: 2, approved: 1, pending: 1, rejected: 0, approval_rate: 0.80, required: 125 },
+            { category: 'Employment', total: 1, approved: 0, pending: 1, rejected: 0, approval_rate: 0.00, required: 150 }
         ],
         department_breakdown: [
             { department_code: 'BEED', total: 4, approved: 2, pending: 2, rejected: 0 },
-            { department_code: 'bped', total: 2, approved: 1, pending: 1, rejected: 0 },
+            { department_code: 'BPED', total: 2, approved: 1, pending: 1, rejected: 0 },
             { department_code: 'BSED', total: 2, approved: 1, pending: 1, rejected: 0 },
-            { department_code: 'BSIT', total: 1, approved: 0, pending: 1, rejected: 0 }
+            { department_code: 'BSNED', total: 1, approved: 0, pending: 1, rejected: 0 },
+            { department_code: 'BCAED', total: 1, approved: 0, pending: 1, rejected: 0 }
         ],
         monthly_trends: [
-            { month: '2025-04', documents_uploaded: 8, approved: 3, pending: 4, rejected: 1 },
-            { month: '2025-05', documents_uploaded: 2, approved: 1, pending: 1, rejected: 0 }
+            { month: '2026-04', documents_uploaded: 8, approved: 3, pending: 4, rejected: 1 },
+            { month: '2026-05', documents_uploaded: 2, approved: 1, pending: 1, rejected: 0 }
         ],
         top_uploaders: [
             { firstName: 'Admin', lastName: 'User', documents_uploaded: 6 },
             { firstName: 'Guilmar', lastName: 'Quimba', documents_uploaded: 2 },
             { firstName: 'Guilmara', lastName: 'Quimbar', documents_uploaded: 1 }
-        ]
+        ],
+        requirements: {
+            instruction: 215,
+            research: 185,
+            extension: 125,
+            employment: 150
+        }
     };
     updateAnalyticsDisplay(fallbackAnalytics);
 }
@@ -322,19 +432,24 @@ function updateCategoryChart(data) {
     };
     
     const total = data.reduce((sum, cat) => sum + cat.total, 0);
-    if (totalContainer) totalContainer.textContent = total;
+    const totalRequired = data.reduce((sum, cat) => sum + (cat.required || 0), 0);
+    const totalApproved = data.reduce((sum, cat) => sum + cat.approved, 0);
+    
+    if (totalContainer) totalContainer.textContent = `${totalApproved}/${totalRequired} required`;
     
     container.innerHTML = data.map(item => {
-        const percentage = total > 0 ? ((item.total / total) * 100).toFixed(0) : 0;
+        const percentage = (item.required || 0) > 0 ? ((item.approved / item.required) * 100).toFixed(0) : 0;
+        const missing = Math.max(0, (item.required || 0) - item.approved);
         return `
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-600">${item.category}</span>
-                    <span class="font-medium">${item.total} (${percentage}%)</span>
+                    <span class="font-medium">${item.approved}/${item.required || 0} (${percentage}%)</span>
                 </div>
                 <div class="w-full bg-gray-200 h-2 rounded-full">
                     <div class="${categoryColors[item.category] || 'bg-gray-600'} h-2 rounded-full" style="width:${percentage}%"></div>
                 </div>
+                <div class="text-xs text-gray-500 mt-1">${missing} missing</div>
             </div>
         `;
     }).join('');
@@ -695,4 +810,4 @@ function initializeReportsPage() {
     
     // Initialize with Overview tab active
     // Already set in HTML
-}); 
+}

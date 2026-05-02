@@ -24,8 +24,7 @@ function updateSidebarUserInfo() {
             'admin': 'Administrator',
             'dean': 'Dean',
             'faculty': 'Faculty Member',
-            'area-chair': 'Dept. Head',
-            'department-head': 'Dept. Head',
+            'department-head': 'Department Head',
             'evaluator': 'External Evaluator'
         };
         userRoleElem.textContent = roleMap[userData.role] || userData.role;
@@ -38,8 +37,7 @@ function updateSidebarUserInfo() {
             'admin': 'Admin · Full Access',
             'dean': 'Dean · Full Access',
             'faculty': 'Faculty · Limited Access',
-            'area-chair': 'Dept. Head · Department Access',
-            'department-head': 'Dept. Head · Department Access',
+            'department-head': 'Department Head · Department Access',
             'evaluator': 'Evaluator · Read-Only Access'
         };
         footerAccessElem.textContent = accessMap[userData.role] || 'User Access';
