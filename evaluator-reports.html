@@ -7,7 +7,7 @@
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <!-- External CSS -->
     <link rel="stylesheet" href="css/evaluator-reports.css">
 </head>
@@ -27,15 +27,15 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">External Evaluator Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Evaluator Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -46,29 +46,29 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="evaluator-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="evaluator-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> View Documents
+                    <span class="mr-3 text-teal-300/70 w-5">View Documents</span>
                 </a>
                 <a href="evaluator-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="evaluator-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="evaluator-reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">📈</span> Reports
+                    <span class="mr-3 text-teal-300 w-5">Reports</span>
                 </a>
                 <a href="evaluator-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
                 <div class="flex items-center gap-2 text-xs">
                     <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                    <span class="text-teal-200/50">View-Only Access · Read Only</span>
+                    <span id="sidebarAccess" class="text-teal-200/50">View-Only Access · Read Only</span>
                 </div>
                 <div class="mt-2 text-xs text-teal-200/30">
                     © CTE · v.DRMS‑QA · Evaluator
@@ -87,7 +87,7 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-3">
                                 <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Accreditation Reports</h1>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                                <span class="view-only-badge px-3 py-1 rounded-full text-xs font-medium">View-Only</span>
                             </div>
                             <p class="text-sm text-gray-500 mt-1">Review QA readiness and compliance reports for Instruction, Research, Extension, Employment</p>
                         </div>
@@ -105,7 +105,7 @@
 
                     <!-- Compliance Summary Tab -->
                     <div id="complianceTab" class="tab-content block">
-                        <!-- Summary Cards - Updated with new categories -->
+                        <!-- Summary Cards -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                             <div class="bg-white rounded-xl p-5 stat-card">
                                 <h3 class="font-semibold text-gray-800 mb-2">Instruction</h3>
@@ -115,7 +115,7 @@
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-500">245/320 documents</span>
-                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                    <span class="text-amber-600">In Progress</span>
                                 </div>
                             </div>
                             
@@ -127,7 +127,7 @@
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-500">312/400 documents</span>
-                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                    <span class="text-amber-600">In Progress</span>
                                 </div>
                             </div>
                             
@@ -139,7 +139,7 @@
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-500">156/210 documents</span>
-                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                    <span class="text-amber-600">In Progress</span>
                                 </div>
                             </div>
                             
@@ -151,34 +151,34 @@
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-500">134/180 documents</span>
-                                    <span class="text-amber-600">⚠️ In Progress</span>
+                                    <span class="text-amber-600">In Progress</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Detailed Report Cards - Updated with new categories -->
+                        <!-- Detailed Report Cards -->
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <!-- Instruction Detailed -->
                             <div class="bg-white rounded-xl p-5 stat-card">
                                 <h3 class="font-semibold text-gray-800 text-lg mb-4">Instruction Department Status</h3>
                                 <div class="space-y-3">
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BEED</span>
                                         <span class="text-sm font-medium text-green-600">Complete (42/45)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BSED</span>
                                         <span class="text-sm font-medium text-green-600">Complete (58/65)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BSNED</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (28/40)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BCAED</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (25/35)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2">
                                         <span class="text-sm">BPED</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (22/30)</span>
                                     </div>
@@ -189,43 +189,44 @@
                             <div class="bg-white rounded-xl p-5 stat-card">
                                 <h3 class="font-semibold text-gray-800 text-lg mb-4">Research Department Status</h3>
                                 <div class="space-y-3">
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BEED</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (35/40)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BSED</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (48/55)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BSNED</span>
                                         <span class="text-sm font-medium text-red-600">Missing (25/35)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">BCAED</span>
                                         <span class="text-sm font-medium text-red-600">Missing (20/30)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2">
                                         <span class="text-sm">BPED</span>
                                         <span class="text-sm font-medium text-red-600">Missing (22/35)</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                             <!-- Extension Detailed -->
                             <div class="bg-white rounded-xl p-5 stat-card">
                                 <h3 class="font-semibold text-gray-800 text-lg mb-4">Extension Department Status</h3>
                                 <div class="space-y-3">
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">All Departments</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (156/210)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">Community Engagement</span>
                                         <span class="text-sm font-medium text-amber-600">In Progress</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2">
                                         <span class="text-sm">Outreach Programs</span>
                                         <span class="text-sm font-medium text-amber-600">In Progress</span>
                                     </div>
@@ -236,15 +237,15 @@
                             <div class="bg-white rounded-xl p-5 stat-card">
                                 <h3 class="font-semibold text-gray-800 text-lg mb-4">Employment Department Status</h3>
                                 <div class="space-y-3">
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">All Departments</span>
                                         <span class="text-sm font-medium text-amber-600">Partial (134/180)</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2 border-b border-gray-100">
                                         <span class="text-sm">Employment Contracts</span>
                                         <span class="text-sm font-medium text-green-600">Complete</span>
                                     </div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="dept-status-item flex justify-between items-center py-2">
                                         <span class="text-sm">Personnel Records</span>
                                         <span class="text-sm font-medium text-amber-600">Partial</span>
                                     </div>
@@ -253,13 +254,13 @@
                         </div>
                     </div>
 
-                    <!-- Progress Reports Tab (hidden) -->
+                    <!-- Progress Reports Tab -->
                     <div id="progressTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-lg mb-4">Monthly Progress Reports</h3>
                             
                             <div class="space-y-4">
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 April 2026 Progress Report\n\nInstruction: 77%\nResearch: 78%\nExtension: 74%\nEmployment: 74%\nNew Documents: +28\nApproved: 22\nPending: 6')">
+                                <div class="report-item border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer" onclick="alert('April 2026 Progress Report\n\nInstruction: 77%\nResearch: 78%\nExtension: 74%\nEmployment: 74%\nNew Documents: +28\nApproved: 22\nPending: 6')">
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <span class="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">Apr 2026</span>
@@ -270,7 +271,7 @@
                                     <p class="text-xs text-gray-500 mt-1">Overall completion: 76% · 28 new documents</p>
                                 </div>
                                 
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 March 2026 Progress Report\n\nInstruction: 75%\nResearch: 76%\nExtension: 72%\nEmployment: 72%\nNew Documents: +22\nApproved: 18\nPending: 4')">
+                                <div class="report-item border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer" onclick="alert('March 2026 Progress Report\n\nInstruction: 75%\nResearch: 76%\nExtension: 72%\nEmployment: 72%\nNew Documents: +22\nApproved: 18\nPending: 4')">
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Mar 2026</span>
@@ -281,7 +282,7 @@
                                     <p class="text-xs text-gray-500 mt-1">Overall completion: 74% · 22 new documents</p>
                                 </div>
                                 
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📊 Q1 2026 Quarterly Report\n\nInstruction: 73%\nResearch: 74%\nExtension: 70%\nEmployment: 70%\nKey Achievements: 15 faculty research publications')">
+                                <div class="report-item border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer" onclick="alert('Q1 2026 Quarterly Report\n\nInstruction: 73%\nResearch: 74%\nExtension: 70%\nEmployment: 70%\nKey Achievements: 15 faculty research publications')">
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Q1 2026</span>
@@ -295,7 +296,7 @@
                         </div>
                     </div>
 
-                    <!-- Gap Analysis Tab (hidden) -->
+                    <!-- Gap Analysis Tab -->
                     <div id="gapTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-lg mb-4">Gap Analysis by Category</h3>
@@ -304,21 +305,21 @@
                                 <!-- Instruction Gaps -->
                                 <div>
                                     <h4 class="font-medium mb-2 text-blue-700">Instruction Gaps</h4>
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                                    <div class="gap-item bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
                                         <div class="flex items-start gap-2">
-                                            <span class="text-red-600">⚠️</span>
+                                            <span class="text-red-600 font-bold">!</span>
                                             <div>
                                                 <span class="font-medium text-sm">BSNED - Special Needs Materials</span>
-                                                <p class="text-xs text-gray-600">Missing 12 documents: Inclusive Education Resources, Adaptive Learning Materials</p>
+                                                <p class="text-xs text-gray-600 mt-1">Missing 12 documents: Inclusive Education Resources, Adaptive Learning Materials</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                    <div class="gap-item bg-red-50 border border-red-200 rounded-lg p-3">
                                         <div class="flex items-start gap-2">
-                                            <span class="text-red-600">⚠️</span>
+                                            <span class="text-red-600 font-bold">!</span>
                                             <div>
                                                 <span class="font-medium text-sm">BCAED - Arts Curriculum</span>
-                                                <p class="text-xs text-gray-600">Missing 10 documents: Creative Arts Modules, Culture Studies</p>
+                                                <p class="text-xs text-gray-600 mt-1">Missing 10 documents: Creative Arts Modules, Culture Studies</p>
                                             </div>
                                         </div>
                                     </div>
@@ -327,21 +328,21 @@
                                 <!-- Research Gaps -->
                                 <div>
                                     <h4 class="font-medium mb-2 text-green-700">Research Gaps</h4>
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                                    <div class="gap-item bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
                                         <div class="flex items-start gap-2">
-                                            <span class="text-red-600">⚠️</span>
+                                            <span class="text-red-600 font-bold">!</span>
                                             <div>
                                                 <span class="font-medium text-sm">BSNED Research Outputs</span>
-                                                <p class="text-xs text-gray-600">Missing 10 documents: Special Education Research Papers</p>
+                                                <p class="text-xs text-gray-600 mt-1">Missing 10 documents: Special Education Research Papers</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                    <div class="gap-item bg-red-50 border border-red-200 rounded-lg p-3">
                                         <div class="flex items-start gap-2">
-                                            <span class="text-red-600">⚠️</span>
+                                            <span class="text-red-600 font-bold">!</span>
                                             <div>
                                                 <span class="font-medium text-sm">BPED Research Publications</span>
-                                                <p class="text-xs text-gray-600">Missing 13 documents: Sports Science Studies, Physical Education Research</p>
+                                                <p class="text-xs text-gray-600 mt-1">Missing 13 documents: Sports Science Studies, Physical Education Research</p>
                                             </div>
                                         </div>
                                     </div>
@@ -350,25 +351,25 @@
                         </div>
                     </div>
 
-                    <!-- Historical Data Tab (hidden) -->
+                    <!-- Historical Data Tab -->
                     <div id="historyTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-lg mb-4">Historical Performance</h3>
                             
                             <div class="space-y-4">
-                                <div class="border-l-4 border-teal-500 pl-4 py-2">
+                                <div class="history-item border-l-4 border-teal-500 pl-4 py-2">
                                     <div class="text-sm text-gray-500">2026</div>
                                     <div class="text-lg font-semibold">76% Overall Compliance</div>
                                     <div class="text-xs text-gray-500">↑ +4% from 2025</div>
                                 </div>
                                 
-                                <div class="border-l-4 border-amber-500 pl-4 py-2">
+                                <div class="history-item border-l-4 border-amber-500 pl-4 py-2">
                                     <div class="text-sm text-gray-500">2025</div>
                                     <div class="text-lg font-semibold">72% Overall Compliance</div>
                                     <div class="text-xs text-gray-500">↑ +6% from 2024</div>
                                 </div>
                                 
-                                <div class="border-l-4 border-indigo-500 pl-4 py-2">
+                                <div class="history-item border-l-4 border-indigo-500 pl-4 py-2">
                                     <div class="text-sm text-gray-500">2024</div>
                                     <div class="text-lg font-semibold">66% Overall Compliance</div>
                                     <div class="text-xs text-gray-500">Initial implementation year</div>
@@ -376,21 +377,44 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- View-only notice -->
-                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
-                        <span class="text-lg mr-2">👁️</span>
-                        All reports are view-only. Click on any report section to expand and review details.
-                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="js/evaluator-session.js"></script>
-    <script src="js/evaluator-reports.js"></script>
-    
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'evaluator' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Evaluator Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'View-Only Access · Read Only';
+            }
+        }
+        updateSidebarUser();
+
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -419,6 +443,23 @@
                 document.getElementById(tabId + 'Tab').classList.remove('hidden');
             });
         });
+
+        // Heartbeat
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
+<script src="js/evaluator-session.js"></script>
+<script src="js/evaluator-reports.js"></script>
 </html>

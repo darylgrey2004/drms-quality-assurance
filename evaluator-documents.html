@@ -27,15 +27,15 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">External Evaluator Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Evaluator Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -46,29 +46,29 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="evaluator-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="evaluator-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">📄</span> View Documents
+                    <span class="mr-3 text-teal-300 w-5">View Documents</span>
                 </a>
                 <a href="evaluator-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="evaluator-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="evaluator-reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
                 </a>
                 <a href="evaluator-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
                 <div class="flex items-center gap-2 text-xs">
                     <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                    <span class="text-teal-200/50">View-Only Access · Read Only</span>
+                    <span id="sidebarAccess" class="text-teal-200/50">View-Only Access · Read Only</span>
                 </div>
                 <div class="mt-2 text-xs text-teal-200/30">
                     © CTE · v.DRMS‑QA · Evaluator
@@ -87,7 +87,7 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-3">
                                 <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">All Documents</h1>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                                <span class="view-only-badge px-3 py-1 rounded-full text-xs font-medium">View-Only</span>
                             </div>
                             <p class="text-sm text-gray-500 mt-1">Review all QA documents · Instruction, Research, Extension, Employment</p>
                         </div>
@@ -98,20 +98,20 @@
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="flex-1">
                                 <div class="relative">
-                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
                                     <input type="text" id="filterDocuments" placeholder="Filter documents by title, category, department..." 
-                                           class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                           class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm">
                                 </div>
                             </div>
-                            <div class="flex gap-2">
-                                <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm">
+                            <div class="flex flex-wrap gap-2">
+                                <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <option value="all">All Categories</option>
                                     <option value="instruction">Instruction</option>
                                     <option value="research">Research</option>
                                     <option value="extension">Extension</option>
                                     <option value="employment">Employment</option>
                                 </select>
-                                <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm">
+                                <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <option value="all">All Departments</option>
                                     <option value="beed">BEED</option>
                                     <option value="bsed">BSED</option>
@@ -119,13 +119,16 @@
                                     <option value="bcaed">BCAED</option>
                                     <option value="bped">BPED</option>
                                 </select>
-                                <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm">
+                                <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <option value="all">All Status</option>
                                     <option value="approved">Approved</option>
                                     <option value="pending">Pending</option>
                                     <option value="draft">Draft</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="locked">Locked</option>
+                                    <option value="validated">Validated</option>
                                 </select>
-                                <button id="applyFiltersBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm">Apply</button>
+                                <button id="applyFiltersBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-sm transition-colors">Apply</button>
                             </div>
                         </div>
                     </div>
@@ -136,67 +139,18 @@
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-gray-200 text-gray-500 text-xs">
-                                        <th class="text-left py-3">Document</th>
-                                        <th class="text-left py-3">Category</th>
-                                        <th class="text-left py-3">Department</th>
-                                        <th class="text-left py-3">Status</th>
-                                        <th class="text-left py-3">Version</th>
-                                        <th class="text-left py-3">Uploaded By</th>
-                                        <th class="text-left py-3">Date</th>
-                                        <th class="text-left py-3">Actions</th>
+                                        <th class="text-left py-3 px-2">Document</th>
+                                        <th class="text-left py-3 px-2">Category</th>
+                                        <th class="text-left py-3 px-2">Department</th>
+                                        <th class="text-left py-3 px-2">Status</th>
+                                        <th class="text-left py-3 px-2">Version</th>
+                                        <th class="text-left py-3 px-2">Uploaded By</th>
+                                        <th class="text-left py-3 px-2">Date</th>
+                                        <th class="text-left py-3 px-2">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100" id="documentsTableBody">
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Syllabus - Elementary Education</div></td>
-                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
-                                        <td class="py-3 text-gray-600">BEED</td>
-                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                        <td class="py-3 text-gray-600">v3.2</td>
-                                        <td class="py-3 text-gray-500 text-xs">Dr. Santos</td>
-                                        <td class="py-3 text-gray-500 text-xs">2026-04-20</td>
-                                        <td class="py-3"><button class="view-doc" data-title="Syllabus - Elementary Education">View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Research Publication 2025</div></td>
-                                        <td class="py-3"><span class="badge-research px-2 py-1 rounded-full text-xs">Research</span></td>
-                                        <td class="py-3 text-gray-600">BSED</td>
-                                        <td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Pending</span></td>
-                                        <td class="py-3 text-gray-600">v0.3</td>
-                                        <td class="py-3 text-gray-500 text-xs">Dr. Reyes</td>
-                                        <td class="py-3 text-gray-500 text-xs">2026-04-25</td>
-                                        <td class="py-3"><button class="view-doc" data-title="Research Publication 2025">View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Community Extension Program</div></td>
-                                        <td class="py-3"><span class="badge-extension px-2 py-1 rounded-full text-xs">Extension</span></td>
-                                        <td class="py-3 text-gray-600">BPED</td>
-                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                        <td class="py-3 text-gray-600">v1.1</td>
-                                        <td class="py-3 text-gray-500 text-xs">Prof. Mendoza</td>
-                                        <td class="py-3 text-gray-500 text-xs">2026-04-22</td>
-                                        <td class="py-3"><button class="view-doc" data-title="Community Extension Program">View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Faculty Employment Contract</div></td>
-                                        <td class="py-3"><span class="badge-employment px-2 py-1 rounded-full text-xs">Employment</span></td>
-                                        <td class="py-3 text-gray-600">BEED</td>
-                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                        <td class="py-3 text-gray-600">v2.1</td>
-                                        <td class="py-3 text-gray-500 text-xs">Dean Cruz</td>
-                                        <td class="py-3 text-gray-500 text-xs">2026-04-18</td>
-                                        <td class="py-3"><button class="view-doc" data-title="Faculty Employment Contract">View</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3"><div class="font-medium text-gray-800">Inclusive Education Module</div></td>
-                                        <td class="py-3"><span class="badge-instruction px-2 py-1 rounded-full text-xs">Instruction</span></td>
-                                        <td class="py-3 text-gray-600">BSNED</td>
-                                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
-                                        <td class="py-3 text-gray-600">v1.0</td>
-                                        <td class="py-3 text-gray-500 text-xs">Prof. Garcia</td>
-                                        <td class="py-3 text-gray-500 text-xs">2026-04-15</td>
-                                        <td class="py-3"><button class="view-doc" data-title="Inclusive Education Module">View</button></td>
-                                    </tr>
+                                    <!-- Dynamic rows will be loaded by JavaScript -->
                                 </tbody>
                             </table>
                         </div>
@@ -204,21 +158,11 @@
 
                     <!-- Pagination -->
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-                        <div class="text-sm text-gray-500">Showing 1 to 5 of 847 documents</div>
-                        <div class="flex flex-wrap gap-2 justify-center">
-                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
-                            <button class="px-3 py-1.5 bg-teal-700 text-white rounded-lg">1</button>
-                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">2</button>
-                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">3</button>
-                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">4</button>
-                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Next</button>
+                        <div class="text-sm text-gray-500" id="paginationInfo">Showing 0 to 0 of 0 documents</div>
+                        <div class="flex flex-wrap gap-2 justify-center" id="paginationButtons">
+                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50" id="prevPageBtn" disabled>Previous</button>
+                            <button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50" id="nextPageBtn">Next</button>
                         </div>
-                    </div>
-
-                    <!-- View-only notice -->
-                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
-                        <span class="text-lg">👁️</span>
-                        You are in view-only mode. Documents can be reviewed but not modified.
                     </div>
                 </div>
             </div>
@@ -234,16 +178,45 @@
             </div>
             <div class="flex-1 overflow-y-auto bg-gray-50 p-6"><div id="docViewerContent" class="bg-white rounded-lg shadow p-6"><div class="flex items-center justify-center h-96"><div class="text-center"><div class="animate-spin inline-block w-8 h-8 border-4 border-gray-300 border-t-teal-600 rounded-full"></div><p class="text-gray-500 mt-4">Loading document...</p></div></div></div></div>
             <div class="flex justify-end gap-3 p-6 border-t border-gray-200 shrink-0">
-                <button id="downloadDoc" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">📥 Download</button>
-                <button id="closeModalBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">Close</button>
+                <button id="downloadDoc" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">Download</button>
+                <button id="closeModalBtn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-colors">Close</button>
             </div>
         </div>
     </div>
 
-    <script src="js/evaluator-session.js"></script>
-    <script src="js/evaluator-documents.js"></script>
-    
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'evaluator' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Evaluator Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'View-Only Access · Read Only';
+            }
+        }
+        updateSidebarUser();
+
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -258,48 +231,176 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
 
-        // Filter functionality
-        const filterInput = document.getElementById('filterDocuments');
-        const categoryFilter = document.getElementById('categoryFilter');
-        const departmentFilter = document.getElementById('departmentFilter');
-        const statusFilter = document.getElementById('statusFilter');
-        const applyBtn = document.getElementById('applyFiltersBtn');
-        const tableRows = document.querySelectorAll('#documentsTableBody tr');
+        // Sample document data (replace with real API data)
+        let allDocuments = [];
+        let filteredDocuments = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Sample data
+        const sampleData = [
+            { title: "Syllabus - Elementary Education", category: "instruction", dept: "BEED", status: "approved", version: "v3.2", author: "Dr. Santos", date: "2026-04-20" },
+            { title: "Research Publication 2025", category: "research", dept: "BSED", status: "pending", version: "v0.3", author: "Dr. Reyes", date: "2026-04-25" },
+            { title: "Community Extension Program", category: "extension", dept: "BPED", status: "approved", version: "v1.1", author: "Prof. Mendoza", date: "2026-04-22" },
+            { title: "Faculty Employment Contract", category: "employment", dept: "BEED", status: "approved", version: "v2.1", author: "Dean Cruz", date: "2026-04-18" },
+            { title: "Inclusive Education Module", category: "instruction", dept: "BSNED", status: "approved", version: "v1.0", author: "Prof. Garcia", date: "2026-04-15" },
+            { title: "Research Ethics Clearance", category: "research", dept: "BSNED", status: "approved", version: "v1.0", author: "Dr. Villanueva", date: "2026-04-12" },
+            { title: "Sports Development Program", category: "extension", dept: "BPED", status: "validated", version: "v0.8", author: "Prof. Ramos", date: "2026-04-10" },
+            { title: "Cultural Heritage Documentation", category: "extension", dept: "BCAED", status: "approved", version: "v1.2", author: "Prof. Lopez", date: "2026-04-08" },
+            { title: "Lesson Plan - Mathematics", category: "instruction", dept: "BSED", status: "draft", version: "v0.2", author: "Dr. Torres", date: "2026-04-05" },
+            { title: "Personnel Records Update", category: "employment", dept: "BEED", status: "approved", version: "v3.0", author: "HR Office", date: "2026-04-03" }
+        ];
+
+        function getCategoryBadge(category) {
+            const badges = {
+                'instruction': 'badge-instruction',
+                'research': 'badge-research',
+                'extension': 'badge-extension',
+                'employment': 'badge-employment'
+            };
+            const className = badges[category] || 'badge-instruction';
+            const displayName = category.charAt(0).toUpperCase() + category.slice(1);
+            return `<span class="${className} px-2 py-1 rounded-full text-xs">${displayName}</span>`;
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'approved': 'badge-approved',
+                'pending': 'badge-pending',
+                'pending_validation': 'badge-pending',
+                'validated': 'badge-validated',
+                'draft': 'badge-draft',
+                'rejected': 'badge-rejected',
+                'locked': 'badge-locked'
+            };
+            const className = badges[status] || 'badge-pending';
+            const displayName = status.charAt(0).toUpperCase() + status.slice(1);
+            return `<span class="${className} px-2 py-1 rounded-full text-xs">${displayName}</span>`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function loadDocuments() {
+            allDocuments = sampleData;
+            filteredDocuments = [...allDocuments];
+            renderDocuments();
+            renderPagination();
+        }
 
         function applyFilters() {
-            const searchTerm = filterInput?.value.toLowerCase() || '';
-            const category = categoryFilter?.value || 'all';
-            const department = departmentFilter?.value || 'all';
-            const status = statusFilter?.value || 'all';
+            const searchTerm = document.getElementById('filterDocuments')?.value.toLowerCase() || '';
+            const category = document.getElementById('categoryFilter')?.value || 'all';
+            const department = document.getElementById('departmentFilter')?.value || 'all';
+            const status = document.getElementById('statusFilter')?.value || 'all';
 
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const rowCategory = row.querySelector('.badge-instruction, .badge-research, .badge-extension, .badge-employment')?.textContent.toLowerCase() || '';
-                const rowDepartment = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
-                const rowStatus = row.querySelector('.badge-approved, .badge-pending')?.textContent.toLowerCase() || '';
+            filteredDocuments = allDocuments.filter(doc => {
+                const matchesSearch = !searchTerm || 
+                    doc.title.toLowerCase().includes(searchTerm) ||
+                    doc.author.toLowerCase().includes(searchTerm);
+                const matchesCategory = category === 'all' || doc.category === category;
+                const matchesDepartment = department === 'all' || doc.dept.toLowerCase() === department.toLowerCase();
+                const matchesStatus = status === 'all' || doc.status === status;
+                return matchesSearch && matchesCategory && matchesDepartment && matchesStatus;
+            });
 
-                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-                const matchesCategory = category === 'all' || rowCategory.includes(category);
-                const matchesDepartment = department === 'all' || rowDepartment.includes(department);
-                const matchesStatus = status === 'all' || rowStatus.includes(status);
+            currentPage = 1;
+            renderDocuments();
+            renderPagination();
+        }
 
-                row.style.display = (matchesSearch && matchesCategory && matchesDepartment && matchesStatus) ? '' : 'none';
+        function renderDocuments() {
+            const tableBody = document.getElementById('documentsTableBody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageDocuments = filteredDocuments.slice(start, end);
+            
+            if (pageDocuments.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-400">No documents found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = pageDocuments.map(doc => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="py-3 px-2"><div class="font-medium text-gray-800">${escapeHtml(doc.title)}</div></td>
+                    <td class="py-3 px-2">${getCategoryBadge(doc.category)}</span></td>
+                    <td class="py-3 px-2 text-gray-600">${escapeHtml(doc.dept)}</span></td>
+                    <td class="py-3 px-2">${getStatusBadge(doc.status)}</span></td>
+                    <td class="py-3 px-2 text-gray-600">${escapeHtml(doc.version)}</span></td>
+                    <td class="py-3 px-2 text-gray-500 text-xs">${escapeHtml(doc.author)}</span></td>
+                    <td class="py-3 px-2 text-gray-500 text-xs">${doc.date}</span></td>
+                    <td class="py-3 px-2"><button class="view-doc-btn" data-title="${escapeHtml(doc.title)}">View</button></td>
+                </tr>
+            `).join('');
+            
+            attachViewHandlers();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredDocuments.length);
+            const paginationInfo = document.getElementById('paginationInfo');
+            
+            if (paginationInfo) {
+                paginationInfo.textContent = `Showing ${start} to ${end} of ${filteredDocuments.length} documents`;
+            }
+            
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.classList.toggle('opacity-50', currentPage === 1);
+                prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderDocuments(); renderPagination(); } };
+            }
+            
+            if (nextBtn) {
+                nextBtn.disabled = currentPage >= totalPages;
+                nextBtn.classList.toggle('opacity-50', currentPage >= totalPages);
+                nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderDocuments(); renderPagination(); } };
+            }
+        }
+
+        function attachViewHandlers() {
+            document.querySelectorAll('.view-doc-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const title = this.getAttribute('data-title');
+                    alert(`View-Only Mode\n\nOpening: ${title}\n\nThis would display the document content in a modal.`);
+                });
             });
         }
 
-        if (applyBtn) applyBtn.addEventListener('click', applyFilters);
-        if (filterInput) filterInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') applyFilters(); });
-        if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
-        if (departmentFilter) departmentFilter.addEventListener('change', applyFilters);
-        if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+        // Event listeners
+        document.getElementById('applyFiltersBtn')?.addEventListener('click', applyFilters);
+        document.getElementById('filterDocuments')?.addEventListener('keyup', (e) => { if (e.key === 'Enter') applyFilters(); });
+        document.getElementById('categoryFilter')?.addEventListener('change', applyFilters);
+        document.getElementById('departmentFilter')?.addEventListener('change', applyFilters);
+        document.getElementById('statusFilter')?.addEventListener('change', applyFilters);
 
-        // View document buttons
-        document.querySelectorAll('.view-doc').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const title = this.getAttribute('data-title') || 'Document';
-                alert(`View-Only Mode\n\nOpening: ${title}\n\nThis would display the document content in a modal.`);
-            });
-        });
+        // Initialize
+        loadDocuments();
+
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
+<script src="js/evaluator-session.js"></script>
+<script src="js/evaluator-documents.js"></script>
 </html>

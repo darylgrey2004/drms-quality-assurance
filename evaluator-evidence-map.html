@@ -27,15 +27,15 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">External Evaluator Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Evaluator Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -46,29 +46,29 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="evaluator-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="evaluator-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> View Documents
+                    <span class="mr-3 text-teal-300/70 w-5">View Documents</span>
                 </a>
                 <a href="evaluator-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300 w-5">Evidence Map</span>
                 </a>
                 <a href="evaluator-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="evaluator-reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
                 </a>
                 <a href="evaluator-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">👤</span> Profile
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
                 </a>
             </nav>
 
             <div class="border-t border-teal-900/40 p-4">
                 <div class="flex items-center gap-2 text-xs">
                     <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                    <span class="text-teal-200/50">View-Only Access · Read Only</span>
+                    <span id="sidebarAccess" class="text-teal-200/50">View-Only Access · Read Only</span>
                 </div>
                 <div class="mt-2 text-xs text-teal-200/30">
                     © CTE · v.DRMS‑QA · Evaluator
@@ -87,76 +87,76 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-3">
                                 <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Evidence Map</h1>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                                <span class="view-only-badge px-3 py-1 rounded-full text-xs font-medium">View-Only</span>
                             </div>
                             <p class="text-sm text-gray-500 mt-1">Review document mapping to Instruction, Research, Extension, and Employment categories</p>
                         </div>
                     </div>
 
-                    <!-- Summary Cards - Updated with new categories -->
+                    <!-- Summary Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="font-semibold text-gray-800">Instruction</h3>
-                                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">245 docs</span>
+                                <span class="badge-instruction text-xs px-2.5 py-0.5 rounded-full" id="instructionCount">245 docs</span>
                             </div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-500">Documents mapped:</span>
-                                <span class="font-medium">245/320</span>
+                                <span class="font-medium"><span id="instructionUploaded">245</span>/<span id="instructionExpected">320</span></span>
                             </div>
                             <div class="w-full bg-gray-200 h-2 rounded-full">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div>
+                                <div id="instructionProgress" class="bg-blue-600 h-2 rounded-full" style="width:77%"></div>
                             </div>
-                            <div class="mt-2 text-xs text-blue-700">77% complete</div>
+                            <div class="mt-2 text-xs text-blue-700" id="instructionPercent">77% complete</div>
                         </div>
                         
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="font-semibold text-gray-800">Research</h3>
-                                <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">312 docs</span>
+                                <span class="badge-research text-xs px-2.5 py-0.5 rounded-full" id="researchCount">312 docs</span>
                             </div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-500">Documents mapped:</span>
-                                <span class="font-medium">312/400</span>
+                                <span class="font-medium"><span id="researchUploaded">312</span>/<span id="researchExpected">400</span></span>
                             </div>
                             <div class="w-full bg-gray-200 h-2 rounded-full">
-                                <div class="bg-green-600 h-2 rounded-full" style="width:78%"></div>
+                                <div id="researchProgress" class="bg-green-600 h-2 rounded-full" style="width:78%"></div>
                             </div>
-                            <div class="mt-2 text-xs text-green-700">78% complete</div>
+                            <div class="mt-2 text-xs text-green-700" id="researchPercent">78% complete</div>
                         </div>
                         
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="font-semibold text-gray-800">Extension</h3>
-                                <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full">156 docs</span>
+                                <span class="badge-extension text-xs px-2.5 py-0.5 rounded-full" id="extensionCount">156 docs</span>
                             </div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-500">Documents mapped:</span>
-                                <span class="font-medium">156/210</span>
+                                <span class="font-medium"><span id="extensionUploaded">156</span>/<span id="extensionExpected">210</span></span>
                             </div>
                             <div class="w-full bg-gray-200 h-2 rounded-full">
-                                <div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div>
+                                <div id="extensionProgress" class="bg-amber-600 h-2 rounded-full" style="width:74%"></div>
                             </div>
-                            <div class="mt-2 text-xs text-amber-700">74% complete</div>
+                            <div class="mt-2 text-xs text-amber-700" id="extensionPercent">74% complete</div>
                         </div>
                         
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="font-semibold text-gray-800">Employment</h3>
-                                <span class="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full">134 docs</span>
+                                <span class="badge-employment text-xs px-2.5 py-0.5 rounded-full" id="employmentCount">134 docs</span>
                             </div>
                             <div class="flex justify-between text-sm mb-1">
                                 <span class="text-gray-500">Documents mapped:</span>
-                                <span class="font-medium">134/180</span>
+                                <span class="font-medium"><span id="employmentUploaded">134</span>/<span id="employmentExpected">180</span></span>
                             </div>
                             <div class="w-full bg-gray-200 h-2 rounded-full">
-                                <div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div>
+                                <div id="employmentProgress" class="bg-purple-600 h-2 rounded-full" style="width:74%"></div>
                             </div>
-                            <div class="mt-2 text-xs text-purple-700">74% complete</div>
+                            <div class="mt-2 text-xs text-purple-700" id="employmentPercent">74% complete</div>
                         </div>
                     </div>
 
-                    <!-- Tabs - Updated with new categories -->
+                    <!-- Tabs -->
                     <div class="mb-4 border-b border-gray-200 overflow-x-auto">
                         <ul class="flex gap-2 text-sm font-medium" id="mapTabs">
                             <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="instruction">Instruction</a></li>
@@ -170,173 +170,202 @@
                     <div id="instructionTab" class="tab-content block">
                         <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Instruction Department Mapping</h3>
-                            <div class="space-y-3">
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BEED Documents\n\nInstruction documents for BEED:\n- Elementary Syllabus\n- Learning Modules\n- Assessment Tools\n- Lesson Plans')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BEED</span>
-                                            <h4 class="font-medium mt-2">Bachelor of Elementary Education</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">42/45 docs</span>
-                                            <div class="text-xs text-green-600">Complete</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSED Documents\n\nInstruction documents for BSED:\n- Secondary Syllabus - English\n- Secondary Syllabus - Math\n- Secondary Syllabus - Science')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSED</span>
-                                            <h4 class="font-medium mt-2">Bachelor of Secondary Education</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">58/65 docs</span>
-                                            <div class="text-xs text-green-600">Complete</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSNED Documents\n\nInstruction documents for BSNED:\n- Inclusive Education Module\n- Special Needs Assessment\n- Individualized Education Plans')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BSNED</span>
-                                            <h4 class="font-medium mt-2">Bachelor of Special Needs Education</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">28/40 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BCAED Documents\n\nInstruction documents for BCAED:\n- Arts and Culture Curriculum\n- Creative Arts Module\n- Cultural Heritage Studies')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BCAED</span>
-                                            <h4 class="font-medium mt-2">Bachelor of Culture and Arts Education</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">25/35 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BPED Documents\n\nInstruction documents for BPED:\n- Physical Education Curriculum\n- Sports Science Module\n- Fitness Assessment Tools')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">BPED</span>
-                                            <h4 class="font-medium mt-2">Bachelor of Physical Education</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">22/30 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="space-y-3" id="instructionDepartments">
+                                <!-- Dynamic content will be loaded from JavaScript -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Research Tab (hidden) -->
+                    <!-- Research Tab -->
                     <div id="researchTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Research Department Mapping</h3>
-                            <div class="space-y-3">
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BEED Research\n\nResearch documents for BEED:\n- Elementary Education Research Papers\n- Action Research Projects\n- Educational Studies')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BEED</span>
-                                            <h4 class="font-medium mt-2">Elementary Education Research</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">35/40 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BSED Research\n\nResearch documents for BSED:\n- Secondary Education Studies\n- Curriculum Research\n- Teaching Methodologies')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">BSED</span>
-                                            <h4 class="font-medium mt-2">Secondary Education Research</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">48/55 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="space-y-3" id="researchDepartments">
+                                <!-- Dynamic content will be loaded from JavaScript -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Extension Tab (hidden) -->
+                    <!-- Extension Tab -->
                     <div id="extensionTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Extension Department Mapping</h3>
-                            <div class="space-y-3">
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 BPED Extension\n\nExtension documents for BPED:\n- Sports Outreach Programs\n- Community Sports Events\n- Youth Development Programs')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">BPED</span>
-                                            <h4 class="font-medium mt-2">Physical Education Extension</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">18/25 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="space-y-3" id="extensionDepartments">
+                                <!-- Dynamic content will be loaded from JavaScript -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Employment Tab (hidden) -->
+                    <!-- Employment Tab -->
                     <div id="employmentTab" class="tab-content hidden">
                         <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base md:text-lg mb-4">Employment Department Mapping</h3>
-                            <div class="space-y-3">
-                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="alert('📋 All Departments\n\nEmployment documents across all departments:\n- Faculty Contracts\n- Personnel Records\n- Employment Benefits\n- Performance Reviews')">
-                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                                        <div>
-                                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">All Depts</span>
-                                            <h4 class="font-medium mt-2">Employment Related Documents</h4>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm font-medium">134/180 docs</span>
-                                            <div class="text-xs text-amber-600">Partial</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="space-y-3" id="employmentDepartments">
+                                <!-- Dynamic content will be loaded from JavaScript -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- View-only notice -->
-                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
-                        <span class="text-lg">👁️</span>
-                        Click on any category/department to view the documents mapped to that standard. All views are read-only.
+                    <!-- Loading indicator -->
+                    <div id="loadingMap" class="hidden text-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-700 mx-auto mb-3"></div>
+                        <p class="text-gray-500">Loading evidence map...</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="js/evaluator-session.js"></script>
-    <script src="js/evaluator-evidence-map.js"></script>
-    
     <script>
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'evaluator' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Evaluator Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'View-Only Access · Read Only';
+            }
         }
+        updateSidebarUser();
+
+        // Departments data
+        const departments = [
+            { code: 'BEED', name: 'Bachelor of Elementary Education' },
+            { code: 'BSED', name: 'Bachelor of Secondary Education' },
+            { code: 'BSNED', name: 'Bachelor of Special Needs Education' },
+            { code: 'BCAED', name: 'Bachelor of Culture and Arts Education' },
+            { code: 'BPED', name: 'Bachelor of Physical Education' }
+        ];
+
+        // Sample data for display (replace with real API data)
+        const categoryData = {
+            instruction: {
+                BEED: { current: 42, expected: 45, status: 'complete' },
+                BSED: { current: 58, expected: 65, status: 'complete' },
+                BSNED: { current: 28, expected: 40, status: 'partial' },
+                BCAED: { current: 25, expected: 35, status: 'partial' },
+                BPED: { current: 22, expected: 30, status: 'partial' }
+            },
+            research: {
+                BEED: { current: 35, expected: 40, status: 'partial' },
+                BSED: { current: 48, expected: 55, status: 'partial' },
+                BSNED: { current: 25, expected: 35, status: 'partial' },
+                BCAED: { current: 22, expected: 30, status: 'partial' },
+                BPED: { current: 18, expected: 25, status: 'partial' }
+            },
+            extension: {
+                BEED: { current: 18, expected: 25, status: 'partial' },
+                BSED: { current: 20, expected: 25, status: 'partial' },
+                BSNED: { current: 15, expected: 25, status: 'partial' },
+                BCAED: { current: 12, expected: 25, status: 'partial' },
+                BPED: { current: 18, expected: 25, status: 'partial' }
+            },
+            employment: {
+                BEED: { current: 28, expected: 30, status: 'partial' },
+                BSED: { current: 25, expected: 30, status: 'partial' },
+                BSNED: { current: 22, expected: 30, status: 'partial' },
+                BCAED: { current: 20, expected: 30, status: 'partial' },
+                BPED: { current: 18, expected: 30, status: 'partial' }
+            }
+        };
+
+        function getProgressWidth(current, expected) {
+            if (expected === 0) return 0;
+            return Math.min((current / expected) * 100, 100);
+        }
+
+        function getStatusClass(status) {
+            return status === 'complete' ? 'status-badge-complete' : 'status-badge-partial';
+        }
+
+        function getStatusText(status) {
+            return status === 'complete' ? 'Complete' : 'Partial';
+        }
+
+        function getStatusColor(status) {
+            return status === 'complete' ? 'text-green-600' : 'text-amber-600';
+        }
+
+        function renderCategoryTab(categoryId, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const data = categoryData[categoryId];
+            if (!data) return;
+            
+            container.innerHTML = departments.map(dept => {
+                const deptData = data[dept.code] || { current: 0, expected: 25, status: 'partial' };
+                const percentage = getProgressWidth(deptData.current, deptData.expected);
+                const statusColor = getStatusColor(deptData.status);
+                const statusText = getStatusText(deptData.status);
+                
+                return `
+                    <div class="evidence-item border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer" data-category="${categoryId}" data-department="${dept.code}">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${dept.code}</span>
+                                <h4 class="font-medium text-gray-800 mt-2">${dept.name}</h4>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-medium">${deptData.current}/${deptData.expected} docs</span>
+                                <div class="text-xs ${statusColor}">${statusText}</div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="w-full bg-gray-200 h-2 rounded-full">
+                                <div class="progress-bar bg-teal-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render all tabs
+        function renderAllTabs() {
+            renderCategoryTab('instruction', 'instructionDepartments');
+            renderCategoryTab('research', 'researchDepartments');
+            renderCategoryTab('extension', 'extensionDepartments');
+            renderCategoryTab('employment', 'employmentDepartments');
+        }
+
+        // Update stats counts
+        function updateStats() {
+            // Update summary card counts from category data
+            const instructionTotal = Object.values(categoryData.instruction).reduce((sum, dept) => sum + dept.current, 0);
+            const researchTotal = Object.values(categoryData.research).reduce((sum, dept) => sum + dept.current, 0);
+            const extensionTotal = Object.values(categoryData.extension).reduce((sum, dept) => sum + dept.current, 0);
+            const employmentTotal = Object.values(categoryData.employment).reduce((sum, dept) => sum + dept.current, 0);
+            
+            document.getElementById('instructionCount').textContent = `${instructionTotal} docs`;
+            document.getElementById('researchCount').textContent = `${researchTotal} docs`;
+            document.getElementById('extensionCount').textContent = `${extensionTotal} docs`;
+            document.getElementById('employmentCount').textContent = `${employmentTotal} docs`;
+        }
+
+        renderAllTabs();
+        updateStats();
 
         // Tab switching
         document.querySelectorAll('#mapTabs a').forEach(link => {
@@ -352,6 +381,57 @@
                 document.getElementById(tabId + 'Tab').classList.remove('hidden');
             });
         });
+
+        // View documents on evidence item click
+        function attachEvidenceClickHandlers() {
+            document.querySelectorAll('.evidence-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    const department = this.dataset.department;
+                    const categoryNames = {
+                        'instruction': 'Instruction',
+                        'research': 'Research',
+                        'extension': 'Extension',
+                        'employment': 'Employment'
+                    };
+                    alert(`View-Only Mode\n\nOpening documents for:\n${categoryNames[category]} - ${department}\n\nThis would display the list of documents for this category and department.`);
+                });
+            });
+        }
+
+        // Re-attach handlers after dynamic content loads
+        setTimeout(attachEvidenceClickHandlers, 100);
+
+        // Mobile Sidebar Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('mainSidebar');
+        if (menuToggle && sidebar) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
+            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+            overlay.addEventListener('click', closeSidebar);
+            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        }
+
+        // Heartbeat
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
+<script src="js/evaluator-session.js"></script>
+<script src="js/evaluator-evidence-map.js"></script>
 </html>

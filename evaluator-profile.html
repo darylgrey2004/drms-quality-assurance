@@ -27,15 +27,15 @@
                     <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
                     <span class="text-xl font-bold text-white tracking-tight">DRMS-QA</span>
                 </div>
-                <p class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">External Evaluator Portal</p>
+                <p id="sidebarPortal" class="text-teal-200/70 text-xs mt-1 font-light tracking-wide">Evaluator Portal</p>
             </div>
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg">EV</span>
+                    <span id="sidebarInitials" class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold text-lg"></span>
                     <div>
-                        <div id="sidebarName" class="text-sm font-medium text-white">Dr. Emma Villanueva</div>
-                        <div id="sidebarRole" class="text-xs text-teal-300">External Evaluator · CHED</div>
+                        <div id="sidebarName" class="text-sm font-medium text-white"></div>
+                        <div id="sidebarRole" class="text-xs text-teal-300"></div>
                     </div>
                 </div>
                 <div class="mt-2 bg-gray-700/50 text-xs text-gray-300 px-2 py-1 rounded flex items-center">
@@ -46,22 +46,22 @@
 
             <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
                 <a href="evaluator-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="evaluator-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📄</span> View Documents
+                    <span class="mr-3 text-teal-300/70 w-5">View Documents</span>
                 </a>
                 <a href="evaluator-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
                 </a>
                 <a href="evaluator-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">🔍</span> Search
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
                 </a>
                 <a href="evaluator-reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                    <span class="mr-3 text-teal-300/70">📈</span> Reports
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
                 </a>
                 <a href="evaluator-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                    <span class="mr-3 text-teal-300">👤</span> Profile
+                    <span class="mr-3 text-teal-300 w-5">Profile</span>
                 </a>
             </nav>
 
@@ -69,7 +69,7 @@
             <div class="border-t border-teal-900/40 p-4">
                 <div class="flex items-center gap-2 text-xs">
                     <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                    <span class="text-teal-200/50">View-Only Access · Read Only</span>
+                    <span id="sidebarAccess" class="text-teal-200/50">View-Only Access · Read Only</span>
                 </div>
                 <div class="mt-2 text-xs text-teal-200/30">
                     © CTE · v.DRMS‑QA · Evaluator
@@ -87,7 +87,7 @@
                     <div class="mb-6">
                         <div class="flex flex-wrap items-center gap-3">
                             <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">My Profile</h1>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">View-Only</span>
+                            <span class="view-only-badge px-3 py-1 rounded-full text-xs font-medium">View-Only</span>
                         </div>
                         <p class="text-sm text-gray-500 mt-1">View account information and evaluation access details</p>
                     </div>
@@ -100,7 +100,7 @@
                                 <div id="profileInitials" class="w-32 h-32 bg-gray-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mb-3">
                                     EV
                                 </div>
-                                <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">External Evaluator</span>
+                                <span class="view-only-badge-small px-3 py-1 rounded-full text-xs">External Evaluator</span>
                             </div>
 
                             <!-- Info Section -->
@@ -144,9 +144,9 @@
                     <div class="bg-white rounded-xl p-5 stat-card mb-6">
                         <h3 class="font-semibold text-gray-800 text-lg mb-3">Accreditation Access Details</h3>
                         
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div class="info-banner bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <div class="flex items-start gap-3">
-                                <span class="text-blue-600 text-xl">ℹ️</span>
+                                <span class="text-blue-600 text-xl font-bold">i</span>
                                 <div>
                                     <p class="text-sm font-medium text-blue-800">External Evaluator Access</p>
                                     <p class="text-xs text-blue-600 mt-1">You have view-only access to all documents for accreditation review purposes across Instruction, Research, Extension, and Employment categories. No upload, edit, or approval actions are available.</p>
@@ -155,12 +155,12 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="border rounded-lg p-3">
+                            <div class="info-item border rounded-lg p-3">
                                 <div class="text-sm font-medium mb-2">Current Evaluation Period</div>
                                 <div class="text-xs text-gray-500">April 1, 2026 - April 30, 2026</div>
                                 <div class="text-xs text-gray-500 mt-1">Level IV Accreditation Review</div>
                             </div>
-                            <div class="border rounded-lg p-3">
+                            <div class="info-item border rounded-lg p-3">
                                 <div class="text-sm font-medium mb-2">Categories for Review</div>
                                 <div class="text-xs text-gray-500">Instruction, Research, Extension, Employment</div>
                                 <div class="text-xs text-gray-500 mt-1">All departments included</div>
@@ -187,29 +187,29 @@
                         <h3 class="font-semibold text-gray-800 text-lg mb-3">Recent Evaluation Activity</h3>
                         
                         <div class="space-y-3">
-                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
-                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs">📄</span>
+                            <div class="activity-item flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs font-bold">D</span>
                                 <div class="flex-1">
                                     <p class="text-sm">Reviewed <span class="font-medium">Syllabus - Elementary Education</span> (Instruction - BEED)</p>
                                     <p class="text-xs text-gray-400">Today, 10:30 AM</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
-                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs">🗺️</span>
+                            <div class="activity-item flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs font-bold">M</span>
                                 <div class="flex-1">
                                     <p class="text-sm">Viewed <span class="font-medium">Evidence Map - Instruction Category</span></p>
                                     <p class="text-xs text-gray-400">Yesterday, 3:45 PM</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 pb-2 border-b border-gray-100">
-                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs">📊</span>
+                            <div class="activity-item flex items-start gap-3 pb-2 border-b border-gray-100">
+                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs font-bold">R</span>
                                 <div class="flex-1">
                                     <p class="text-sm">Accessed <span class="font-medium">Research Compliance Report</span></p>
                                     <p class="text-xs text-gray-400">April 25, 2026</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3">
-                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs">🔍</span>
+                            <div class="activity-item flex items-start gap-3">
+                                <span class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-xs font-bold">S</span>
                                 <div class="flex-1">
                                     <p class="text-sm">Searched for <span class="font-medium">Extension documents</span></p>
                                     <p class="text-xs text-gray-400">April 24, 2026</p>
@@ -217,21 +217,70 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- View-only notice -->
-                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-500 flex items-center flex-wrap gap-2">
-                        <span class="text-lg">👁️</span>
-                        Profile information is view-only. Contact system administrator for any updates.
-                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="js/evaluator-session.js"></script>
-    <script src="js/evaluator-profile.js"></script>
-    
     <script>
+        // Update sidebar user info
+        function updateSidebarUser() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userInitialsElem = document.getElementById('sidebarInitials');
+            const userNameElem = document.getElementById('sidebarName');
+            const userRoleElem = document.getElementById('sidebarRole');
+            const sidebarPortalElem = document.getElementById('sidebarPortal');
+            const sidebarAccessElem = document.getElementById('sidebarAccess');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (userInitialsElem) userInitialsElem.textContent = initials;
+                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.role && userRoleElem) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                userRoleElem.textContent = roleMap[user.role] || user.role;
+            }
+            if (user.role === 'evaluator' && sidebarPortalElem) {
+                sidebarPortalElem.textContent = 'Evaluator Portal';
+                if (sidebarAccessElem) sidebarAccessElem.textContent = 'View-Only Access · Read Only';
+            }
+        }
+        updateSidebarUser();
+
+        // Update profile display
+        function updateProfileDisplay() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const profileInitials = document.getElementById('profileInitials');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (profileInitials) profileInitials.textContent = initials;
+                if (profileName) profileName.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.email && profileEmail) {
+                profileEmail.textContent = user.email;
+            }
+            
+            // Set last active time
+            const lastActive = document.getElementById('profileLastActive');
+            if (lastActive) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                lastActive.textContent = `Today, ${timeString}`;
+            }
+        }
+        updateProfileDisplay();
+
         // Mobile Sidebar Toggle
         const menuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('mainSidebar');
@@ -257,6 +306,23 @@
                 }
             });
         }
+
+        // Heartbeat to keep session alive
+        const token = localStorage.getItem('token');
+        function sendHeartbeat() {
+            if (token) {
+                fetch('http://localhost:3000/api/user/heartbeat', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                }).catch(() => {});
+            }
+        }
+        if (token) {
+            sendHeartbeat();
+            setInterval(sendHeartbeat, 2 * 60 * 1000);
+        }
     </script>
 </body>
+<script src="js/evaluator-session.js"></script>
+<script src="js/evaluator-profile.js"></script>
 </html>
