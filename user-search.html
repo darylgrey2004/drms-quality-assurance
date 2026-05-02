@@ -135,6 +135,7 @@
                                     <option value="draft">Draft</option>
                                     <option value="rejected">Rejected</option>
                                     <option value="locked">Locked</option>
+                                    <option value="validated">Validated</option>
                                 </select>
                             </div>
                         </div>
@@ -159,6 +160,7 @@
                         <option value="date_desc">Newest first</option>
                         <option value="date_asc">Oldest first</option>
                         <option value="title_asc">Title A-Z</option>
+                        <option value="title_desc">Title Z-A</option>
                     </select>
                 </div>
 
@@ -175,7 +177,7 @@
 
                 <!-- No results -->
                 <div id="noResults" class="hidden text-center py-12 bg-white rounded-xl stat-card">
-                    <div class="text-5xl mb-3">Search</div>
+                    <div class="text-5xl mb-3 font-light text-gray-400">Search</div>
                     <h3 class="text-lg font-medium text-gray-800 mb-2">No documents found</h3>
                     <p class="text-gray-500 text-sm">Try adjusting your search filters or upload new documents</p>
                 </div>
@@ -305,14 +307,15 @@
 
         function getStatusBadge(status) {
             const badges = {
-                'approved': 'badge-approved',
-                'pending': 'badge-pending',
-                'draft': 'badge-pending',
-                'rejected': 'badge-pending',
-                'locked': 'badge-approved'
+                'approved': 'status-approved',
+                'pending': 'status-pending',
+                'draft': 'status-draft',
+                'rejected': 'status-pending',
+                'locked': 'status-approved',
+                'validated': 'status-pending'
             };
-            const className = badges[status] || 'badge-pending';
-            const displayName = status === 'approved' ? 'Approved' : (status === 'pending' ? 'Pending Review' : status);
+            const className = badges[status] || 'status-pending';
+            const displayName = status === 'approved' ? 'Approved' : (status === 'pending' ? 'Pending Review' : (status === 'validated' ? 'Validated' : status));
             return `<span class="${className} px-2 py-1 rounded-full text-xs">${displayName}</span>`;
         }
 
@@ -346,7 +349,7 @@
             
             if (container) {
                 container.innerHTML = pageResults.map(result => `
-                    <div class="bg-white rounded-xl p-4 stat-card search-result" data-id="${result.id}">
+                    <div class="search-result" data-id="${result.id}">
                         <div class="flex flex-col md:flex-row justify-between gap-3">
                             <div class="flex-1">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -358,7 +361,7 @@
                                 <p class="text-sm text-gray-600 mt-2 line-clamp-2">${escapeHtml(result.description)}</p>
                                 <div class="flex flex-wrap gap-2 mt-2">
                                     <span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(result.department)}</span>
-                                    ${result.keywords.slice(0, 2).map(k => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">${escapeHtml(k)}</span>`).join('')}
+                                    ${result.keywords.slice(0, 2).map(k => `<span class="keyword-badge px-2 py-1 rounded-full text-xs">${escapeHtml(k)}</span>`).join('')}
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -380,7 +383,7 @@
                 btn.addEventListener('click', () => {
                     const id = parseInt(btn.dataset.id);
                     const doc = allResults.find(r => r.id === id);
-                    if (doc) alert(`Viewing: ${doc.title}\n\nDocument preview would open here.`);
+                    if (doc) alert(`View-Only Mode\n\nOpening: ${doc.title}\n\nDocument preview would open here.`);
                 });
             });
             
@@ -410,14 +413,21 @@
             
             if (paginationButtons) {
                 let buttons = '';
-                buttons += `<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" id="prevPageBtn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+                buttons += `<button class="pagination-btn px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" id="prevPageBtn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
                 
-                for (let i = 1; i <= Math.min(totalPages, 5); i++) {
-                    const active = i === currentPage ? 'bg-teal-700 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50';
-                    buttons += `<button class="px-3 py-1.5 ${active} rounded-lg text-sm page-btn" data-page="${i}">${i}</button>`;
+                const maxButtons = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage + 1 < maxButtons) {
+                    startPage = Math.max(1, endPage - maxButtons + 1);
                 }
                 
-                buttons += `<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" id="nextPageBtn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+                for (let i = startPage; i <= endPage; i++) {
+                    const active = i === currentPage ? 'active-page bg-teal-700 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50';
+                    buttons += `<button class="pagination-btn px-3 py-1.5 ${active} rounded-lg text-sm page-btn" data-page="${i}">${i}</button>`;
+                }
+                
+                buttons += `<button class="pagination-btn px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" id="nextPageBtn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
                 
                 paginationButtons.innerHTML = buttons;
                 
@@ -455,6 +465,19 @@
                 return matchesSearch && matchesCategory && matchesDepartment && matchesStatus && matchesDate;
             });
             
+            const sortBy = document.getElementById('sortResults')?.value || 'relevance';
+            if (sortBy === 'date_desc') {
+                filteredResults.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortBy === 'date_asc') {
+                filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
+            } else if (sortBy === 'title_asc') {
+                filteredResults.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (sortBy === 'title_desc') {
+                filteredResults.sort((a, b) => b.title.localeCompare(a.title));
+            } else {
+                filteredResults.sort((a, b) => a.id - b.id);
+            }
+            
             currentPage = 1;
             renderSearchResults();
         }
@@ -474,13 +497,18 @@
         document.getElementById('filterStatus')?.addEventListener('change', performSearch);
         document.getElementById('filterDateFrom')?.addEventListener('change', performSearch);
         document.getElementById('filterDateTo')?.addEventListener('change', performSearch);
-        document.getElementById('sortResults')?.addEventListener('change', function() {
-            const sortBy = this.value;
-            if (sortBy === 'date_desc') filteredResults.sort((a, b) => new Date(b.date) - new Date(a.date));
-            else if (sortBy === 'date_asc') filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
-            else if (sortBy === 'title_asc') filteredResults.sort((a, b) => a.title.localeCompare(b.title));
-            else filteredResults.sort((a, b) => a.id - b.id);
-            renderSearchResults();
+        document.getElementById('sortResults')?.addEventListener('change', performSearch);
+
+        // Clear filters button
+        document.getElementById('clearFilters')?.addEventListener('click', () => {
+            document.getElementById('mainSearch').value = '';
+            document.getElementById('filterCategory').value = 'all';
+            document.getElementById('filterDepartment').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            document.getElementById('sortResults').value = 'relevance';
+            performSearch();
         });
 
         // Initialize with all results
@@ -501,7 +529,7 @@
             sendHeartbeat();
             setInterval(sendHeartbeat, 2 * 60 * 1000);
         }
-    </script>
+    </script> 
 </body>
 <script src="js/user-session.js"></script>
 <script src="js/user-search.js"></script>
