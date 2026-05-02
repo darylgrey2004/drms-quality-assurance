@@ -207,3 +207,8 @@ code {
         border: 1px solid #ddd;
     }
 }
+
+/* Hidden class for change password form */
+.hidden {
+    display: none;
+}
