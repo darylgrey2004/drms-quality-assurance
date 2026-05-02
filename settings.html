@@ -34,7 +34,7 @@
 
             <div class="px-5 py-4 border-b border-teal-900/40">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AD</span>
+                    <span class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg" id="userInitials">AU</span>
                     <div>
                         <div class="text-sm font-medium text-white" id="userName">Admin User</div>
                         <div class="text-xs text-teal-300" id="userRole">Administrator</div>
@@ -147,14 +147,10 @@
                         <p class="text-sm text-gray-500 mb-4">Set expected document counts per category and department. These targets determine completeness percentages in reports and dashboards.</p>
                         
                         <div class="space-y-6">
-                            <!-- Instruction Category -->
                             <div class="border rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-semibold text-gray-800 text-base">Instruction</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="instructionTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
+                                    <div class="flex items-center gap-2"><span class="text-xs text-gray-500">Total Expected:</span><span id="instructionTotal" class="font-bold text-teal-700 text-lg">0</span></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="instruction_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="45" min="0" step="1"></div>
@@ -164,15 +160,10 @@
                                     <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="instruction_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
                                 </div>
                             </div>
-
-                            <!-- Research Category -->
                             <div class="border rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-semibold text-gray-800 text-base">Research</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="researchTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
+                                    <div class="flex items-center gap-2"><span class="text-xs text-gray-500">Total Expected:</span><span id="researchTotal" class="font-bold text-teal-700 text-lg">0</span></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="research_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="40" min="0" step="1"></div>
@@ -182,15 +173,10 @@
                                     <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="research_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
                                 </div>
                             </div>
-
-                            <!-- Extension Category -->
                             <div class="border rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-semibold text-gray-800 text-base">Extension</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="extensionTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
+                                    <div class="flex items-center gap-2"><span class="text-xs text-gray-500">Total Expected:</span><span id="extensionTotal" class="font-bold text-teal-700 text-lg">0</span></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="extension_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
@@ -200,15 +186,10 @@
                                     <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="extension_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="25" min="0" step="1"></div>
                                 </div>
                             </div>
-
-                            <!-- Employment Category -->
                             <div class="border rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-semibold text-gray-800 text-base">Employment</h3>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-500">Total Expected:</span>
-                                        <span id="employmentTotal" class="font-bold text-teal-700 text-lg">0</span>
-                                    </div>
+                                    <div class="flex items-center gap-2"><span class="text-xs text-gray-500">Total Expected:</span><span id="employmentTotal" class="font-bold text-teal-700 text-lg">0</span></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div><label class="block text-sm text-gray-600 mb-1">BEED</label><input type="number" id="employment_beed" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
@@ -218,10 +199,7 @@
                                     <div><label class="block text-sm text-gray-600 mb-1">BPED</label><input type="number" id="employment_bped" class="expected-docs w-full px-3 py-2 border border-gray-200 rounded-lg" value="30" min="0" step="1"></div>
                                 </div>
                             </div>
-
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
-                                <p>These expected document counts determine completeness percentages. When a department reaches 100% of its expected documents, it will be marked as "Complete".</p>
-                            </div>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700"><p>These expected document counts determine completeness percentages. When a department reaches 100% of its expected documents, it will be marked as "Complete".</p></div>
                         </div>
                         <div class="mt-6 md:mt-8 pt-4 md:pt-5 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3">
                             <button id="resetRequirements" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Reset to Defaults</button>
@@ -285,20 +263,75 @@
 
                 <!-- Account Tab -->
                 <div id="accountTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-4 md:p-6 stat-card">
-                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-4">Account</h2>
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start md:items-center">
-                                <div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Change Password</label><p class="text-xs text-gray-400">Update your account password</p></div>
-                                <div class="md:col-span-2"><button id="changePasswordBtn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Change Password</button></div>
+                    <!-- Profile Overview Card -->
+                    <div class="bg-white rounded-xl p-5 stat-card mb-6">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex flex-col items-center">
+                                <div id="profileInitials" class="w-24 h-24 bg-teal-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-md">AD</div>
+                                <button id="editProfileBtn" class="mt-3 px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm transition-colors">Edit Profile</button>
                             </div>
-                            <div class="border-t border-gray-100 pt-4">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start md:items-center">
-                                    <div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700">Log Out</label><p class="text-xs text-gray-400">End your current session</p></div>
-                                    <div class="md:col-span-2"><button id="logoutBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Log Out</button></div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h2 id="profileName" class="text-xl font-semibold text-gray-800">Admin User</h2>
+                                    <span id="profileRoleBadge" class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Administrator</span>
+                                </div>
+                                <p id="profileDepartment" class="text-gray-500 text-sm mb-4">System Administrator</p>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div><label class="block text-xs text-gray-400 uppercase tracking-wide">Member Since</label><p id="memberSince" class="text-gray-800 font-medium">May 2026</p></div>
+                                    <div><label class="block text-xs text-gray-400 uppercase tracking-wide">Email</label><p id="profileEmail" class="text-gray-800 font-medium">admin@wmsu.edu.ph</p></div>
+                                    <div><label class="block text-xs text-gray-400 uppercase tracking-wide">Status</label><p id="profileStatus" class="text-green-600 font-medium">Approved</p></div>
                                 </div>
                             </div>
-                            <div class="border-t border-gray-100 pt-4"><p class="text-xs text-gray-400">Logged in as: <span class="font-medium text-gray-600" id="loggedInUser">Loading...</span> (<span id="loggedInRole">Loading...</span>)</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Account Status Card -->
+                    <div class="bg-white rounded-xl p-5 stat-card mb-6">
+                        <h3 class="font-semibold text-gray-800 text-base mb-4">Account Status</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-gray-600">Email verified</span><span id="emailVerified" class="text-green-600 font-medium">✓ Yes</span></div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-gray-600">Account type</span><span id="accountType" class="bg-teal-100 text-teal-700 px-2 py-1 rounded-full text-xs">Administrator</span></div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-gray-600">Account status</span><span id="accountStatus" class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Active</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information (Editable) -->
+                    <div class="bg-white rounded-xl p-5 stat-card mb-6">
+                        <h3 class="font-semibold text-gray-800 text-base mb-4">Personal Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm text-gray-600 mb-1">Last Name</label><input type="text" id="lastName" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="User" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">First Name</label><input type="text" id="firstName" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="Admin" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Middle Initial</label><input type="text" id="middleInitial" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Email Address</label><input type="email" id="personalEmail" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="admin@wmsu.edu.ph" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Date of Birth</label><input type="date" id="dob" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Age</label><input type="text" id="age" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Gender</label><select id="gender" class="profile-select w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" disabled><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Civil Status</label><select id="civilStatus" class="profile-select w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" disabled><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Nationality</label><input type="text" id="nationality" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="" readonly></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Contact Number</label><input type="tel" id="phone" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" value="" readonly></div>
+                            <div class="md:col-span-2"><label class="block text-sm text-gray-600 mb-1">Home / Permanent Address</label><textarea id="address" rows="2" class="profile-input w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" readonly></textarea></div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="bg-white rounded-xl p-5 stat-card mb-6">
+                        <h3 class="font-semibold text-gray-800 text-base mb-4">Change Password</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm text-gray-600 mb-1">Current Password</label><input type="password" id="currentPassword" class="w-full px-3 py-2 border border-gray-200 rounded-lg" placeholder="Enter current password"></div>
+                            <div></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">New Password</label><input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-200 rounded-lg" placeholder="Enter new password"><p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p></div>
+                            <div><label class="block text-sm text-gray-600 mb-1">Confirm New Password</label><input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-200 rounded-lg" placeholder="Confirm new password"></div>
+                        </div>
+                        <div id="passwordMessage" class="hidden mt-3 text-sm"></div>
+                        <div class="mt-4"><button id="changePasswordBtn" class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm transition-colors">Update Password</button></div>
+                    </div>
+
+                    <!-- Session Management -->
+                    <div class="bg-white rounded-xl p-5 stat-card border border-red-100">
+                        <h3 class="font-semibold text-gray-800 text-base mb-3">Session Management</h3>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div><p class="text-sm text-gray-700">End your current session</p><p class="text-xs text-gray-400">You will be redirected to the login page</p></div>
+                            <button id="logoutBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm">Log Out</button>
                         </div>
                     </div>
                 </div>
@@ -315,417 +348,6 @@
         </main>
     </div>
 
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Change Password</h3>
-                <button id="closePasswordModal" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                    <div class="relative">
-                        <input type="password" id="currentPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Enter current password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('currentPassword')">
-                            <svg id="currentPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                    <div class="relative">
-                        <input type="password" id="newPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Enter new password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('newPassword')">
-                            <svg id="newPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Must be at least 6 characters long</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                    <div class="relative">
-                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder="Confirm new password">
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onclick="togglePassword('confirmPassword')">
-                            <svg id="confirmPassword-eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div id="passwordError" class="hidden text-sm text-red-600 bg-red-50 p-3 rounded-lg"></div>
-                <div id="passwordSuccess" class="hidden text-sm text-green-600 bg-green-50 p-3 rounded-lg"></div>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button id="cancelPasswordBtn" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button id="submitPasswordBtn" class="flex-1 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors">Change Password</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Update sidebar user info
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        const userInitialsSpan = document.getElementById('userInitials');
-        const userNameSpan = document.getElementById('userName');
-        const userRoleSpan = document.getElementById('userRole');
-        
-        if (userData.firstName && userData.lastName) {
-            if (userInitialsSpan) userInitialsSpan.textContent = (userData.firstName[0] + userData.lastName[0]).toUpperCase();
-            if (userNameSpan) userNameSpan.textContent = `${userData.firstName} ${userData.lastName}`;
-        }
-        if (userData.role && userRoleSpan) {
-            const roleMap = {
-                'admin': 'Administrator',
-                'dean': 'Dean',
-                'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
-                'department-head': 'Dept. Head',
-                'evaluator': 'External Evaluator'
-            };
-            userRoleSpan.textContent = roleMap[userData.role] || userData.role;
-        }
-        
-        // Update logged in user info in Account tab
-        const loggedInUserElem = document.getElementById('loggedInUser');
-        const loggedInRoleElem = document.getElementById('loggedInRole');
-        if (loggedInUserElem && userData.firstName && userData.lastName) {
-            loggedInUserElem.textContent = `${userData.firstName} ${userData.lastName}`;
-        }
-        if (loggedInRoleElem && userData.role) {
-            const roleMap = {
-                'admin': 'Administrator',
-                'dean': 'Dean',
-                'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
-                'department-head': 'Dept. Head',
-                'evaluator': 'External Evaluator'
-            };
-            loggedInRoleElem.textContent = roleMap[userData.role] || userData.role;
-        }
-        
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        // Tab switching
-        document.querySelectorAll('#settingsTabs a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const tabId = this.dataset.tab;
-                document.querySelectorAll('#settingsTabs a').forEach(l => {
-                    l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
-                    l.classList.add('border-transparent', 'text-gray-500');
-                });
-                this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(tabId + 'Tab').classList.remove('hidden');
-            });
-        });
-        
-        // Function to update total expected counts
-        function updateTotals() {
-            const categories = ['instruction', 'research', 'extension', 'employment'];
-            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-            
-            categories.forEach(cat => {
-                let total = 0;
-                departments.forEach(dept => {
-                    const val = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
-                    total += val;
-                });
-                const totalSpan = document.getElementById(`${cat}Total`);
-                if (totalSpan) totalSpan.textContent = total;
-            });
-        }
-        
-        // Add event listeners to all expected docs inputs
-        document.querySelectorAll('.expected-docs').forEach(input => {
-            input.addEventListener('input', updateTotals);
-        });
-        
-        // Reset to defaults
-        document.getElementById('resetRequirements')?.addEventListener('click', () => {
-            if (confirm('Reset all document requirements to default values?')) {
-                // Instruction defaults
-                document.getElementById('instruction_beed').value = 45;
-                document.getElementById('instruction_bsed').value = 65;
-                document.getElementById('instruction_bsned').value = 40;
-                document.getElementById('instruction_bcaed').value = 35;
-                document.getElementById('instruction_bped').value = 30;
-                
-                // Research defaults
-                document.getElementById('research_beed').value = 40;
-                document.getElementById('research_bsed').value = 55;
-                document.getElementById('research_bsned').value = 35;
-                document.getElementById('research_bcaed').value = 30;
-                document.getElementById('research_bped').value = 25;
-                
-                // Extension defaults
-                document.getElementById('extension_beed').value = 25;
-                document.getElementById('extension_bsed').value = 25;
-                document.getElementById('extension_bsned').value = 25;
-                document.getElementById('extension_bcaed').value = 25;
-                document.getElementById('extension_bped').value = 25;
-                
-                // Employment defaults
-                document.getElementById('employment_beed').value = 30;
-                document.getElementById('employment_bsed').value = 30;
-                document.getElementById('employment_bsned').value = 30;
-                document.getElementById('employment_bcaed').value = 30;
-                document.getElementById('employment_bped').value = 30;
-                
-                updateTotals();
-                alert('Document requirements reset to default values.');
-            }
-        });
-        
-        // Save requirements
-        document.getElementById('saveRequirements')?.addEventListener('click', () => {
-            // Collect all values
-            const requirements = {
-                instruction: {},
-                research: {},
-                extension: {},
-                employment: {}
-            };
-            
-            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-            const categories = ['instruction', 'research', 'extension', 'employment'];
-            
-            categories.forEach(cat => {
-                departments.forEach(dept => {
-                    requirements[cat][dept] = parseInt(document.getElementById(`${cat}_${dept}`)?.value) || 0;
-                });
-            });
-            
-            // Save to localStorage (in a real app, this would be an API call)
-            localStorage.setItem('documentRequirements', JSON.stringify(requirements));
-            
-            alert('Document requirements saved successfully!\n\nThese targets will now determine completeness percentages in reports and dashboards.');
-        });
-        
-        // Load saved requirements on page load
-        function loadSavedRequirements() {
-            const saved = localStorage.getItem('documentRequirements');
-            if (saved) {
-                const requirements = JSON.parse(saved);
-                const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-                const categories = ['instruction', 'research', 'extension', 'employment'];
-                
-                categories.forEach(cat => {
-                    if (requirements[cat]) {
-                        departments.forEach(dept => {
-                            const input = document.getElementById(`${cat}_${dept}`);
-                            if (input && requirements[cat][dept]) {
-                                input.value = requirements[cat][dept];
-                            }
-                        });
-                    }
-                });
-                updateTotals();
-            }
-        }
-        
-        // Initialize totals on page load
-        updateTotals();
-        loadSavedRequirements();
-        
-        // Logout button
-        document.getElementById('logoutBtn')?.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
-        
-        // Change Password Modal
-        const changePasswordBtn = document.getElementById('changePasswordBtn');
-        const changePasswordModal = document.getElementById('changePasswordModal');
-        const closePasswordModal = document.getElementById('closePasswordModal');
-        const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
-        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
-        const currentPasswordInput = document.getElementById('currentPassword');
-        const newPasswordInput = document.getElementById('newPassword');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const passwordError = document.getElementById('passwordError');
-        const passwordSuccess = document.getElementById('passwordSuccess');
-        
-        function openPasswordModal() {
-            changePasswordModal.classList.remove('hidden');
-            changePasswordModal.classList.add('flex');
-            currentPasswordInput.value = '';
-            newPasswordInput.value = '';
-            confirmPasswordInput.value = '';
-            passwordError.classList.add('hidden');
-            passwordSuccess.classList.add('hidden');
-        }
-        
-        function closePasswordModalFn() {
-            changePasswordModal.classList.add('hidden');
-            changePasswordModal.classList.remove('flex');
-        }
-        
-        changePasswordBtn?.addEventListener('click', openPasswordModal);
-        closePasswordModal?.addEventListener('click', closePasswordModalFn);
-        cancelPasswordBtn?.addEventListener('click', closePasswordModalFn);
-        
-        // Password toggle function
-        window.togglePassword = function(fieldId) {
-            const input = document.getElementById(fieldId);
-            const eye = document.getElementById(fieldId + '-eye');
-            if (input.type === 'password') {
-                input.type = 'text';
-                eye.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
-            } else {
-                input.type = 'password';
-                eye.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
-            }
-        };
-        
-        submitPasswordBtn?.addEventListener('click', async () => {
-            const currentPassword = currentPasswordInput.value.trim();
-            const newPassword = newPasswordInput.value.trim();
-            const confirmPassword = confirmPasswordInput.value.trim();
-            
-            passwordError.classList.add('hidden');
-            passwordSuccess.classList.add('hidden');
-            
-            // Validation
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                passwordError.textContent = 'Please fill in all fields';
-                passwordError.classList.remove('hidden');
-                return;
-            }
-            
-            if (newPassword.length < 6) {
-                passwordError.textContent = 'New password must be at least 6 characters long';
-                passwordError.classList.remove('hidden');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                passwordError.textContent = 'New passwords do not match';
-                passwordError.classList.remove('hidden');
-                return;
-            }
-            
-            if (currentPassword === newPassword) {
-                passwordError.textContent = 'New password must be different from current password';
-                passwordError.classList.remove('hidden');
-                return;
-            }
-            
-            // Disable button
-            submitPasswordBtn.disabled = true;
-            submitPasswordBtn.textContent = 'Changing...';
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/auth/change-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify({ currentPassword, newPassword })
-                });
-                
-                if (!response.ok) {
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        const data = await response.json();
-                        throw new Error(data.msg || 'Failed to change password');
-                    } else {
-                        throw new Error('Server error. Please ensure you are logged in and try again.');
-                    }
-                }
-                
-                const data = await response.json();
-                
-                passwordSuccess.textContent = data.msg || 'Password changed successfully!';
-                passwordSuccess.classList.remove('hidden');
-                
-                // Clear inputs
-                currentPasswordInput.value = '';
-                newPasswordInput.value = '';
-                confirmPasswordInput.value = '';
-                
-                // Close modal after 2 seconds
-                setTimeout(() => {
-                    closePasswordModalFn();
-                }, 2000);
-                
-            } catch (error) {
-                passwordError.textContent = error.message;
-                passwordError.classList.remove('hidden');
-            } finally {
-                submitPasswordBtn.disabled = false;
-                submitPasswordBtn.textContent = 'Change Password';
-            }
-        });
-        
-        // Save buttons for other tabs
-        document.querySelectorAll('[id^="save"], #backupNowBtn').forEach(btn => {
-            if (btn.id !== 'saveRequirements' && btn.id !== 'resetRequirements') {
-                btn.addEventListener('click', () => alert('Settings saved (demo)'));
-            }
-        });
-        
-        // API Key regenerate
-        document.getElementById('regenerateApiKey')?.addEventListener('click', () => {
-            if (confirm('Regenerate API key? This will invalidate existing keys.')) {
-                alert('New API key generated: ' + Math.random().toString(36).substring(2, 15));
-            }
-        });
-        
-        // Add webhook
-        document.getElementById('addWebhookBtn')?.addEventListener('click', () => {
-            const url = document.getElementById('webhookUrl')?.value;
-            if (url) {
-                alert(`Webhook added: ${url}`);
-                document.getElementById('webhookUrl').value = '';
-            } else {
-                alert('Please enter a webhook URL');
-            }
-        });
-        
-        // Heartbeat
-        const token = localStorage.getItem('token');
-        function sendHeartbeat() {
-            if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-                }).catch(() => {});
-            }
-        }
-        if (token) {
-            sendHeartbeat();
-            setInterval(sendHeartbeat, 2 * 60 * 1000);
-        }
-    </script>
-    <script src="js/sidebar-updater.js"></script>
+    <script src="js/settings.js"></script>
 </body>
 </html>

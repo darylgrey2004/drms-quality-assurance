@@ -10,6 +10,9 @@ const itemsPerPage = 10;
 let pendingDeleteId = null;
 let pendingDeleteTitle = null;
 
+// Get current user role
+let currentUserRole = null;
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Documents page loaded - fetching from backend');
@@ -17,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     const sessionToken = localStorage.getItem('sessionToken');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    currentUserRole = (user.role || '').toLowerCase();
 
     if (!token) {
         window.location.href = 'landing.html';
@@ -65,7 +69,13 @@ function setupDeleteModal() {
     }
 }
 
-function openDeleteModal(docId, docTitle) {
+function openDeleteModal(docId, docTitle, docStatus) {
+    // Check if Dean is trying to delete a locked document
+    if (currentUserRole === 'dean' && docStatus === 'locked') {
+        showToastMessage('Locked documents cannot be deleted by Dean. Please contact Administrator.', 'error');
+        return;
+    }
+    
     pendingDeleteId = docId;
     pendingDeleteTitle = docTitle;
     
@@ -204,7 +214,7 @@ function setupDetailsModal() {
     }
     if (docDetailsModal) {
         docDetailsModal.addEventListener('click', (e) => {
-            if (e.target === docDetailsModal) closeDetailsModal();
+             if (e.target === docDetailsModal) closeDetailsModal();
         });
     }
 }
@@ -473,6 +483,16 @@ function createTableRow(doc) {
     const hasMetadata = (doc.description && doc.description.trim()) || (doc.keywords && doc.keywords.trim());
     const metadataIcon = hasMetadata ? '<span class="ml-1 text-teal-500 text-xs" title="Has description or keywords">ℹ️</span>' : '';
 
+    // Determine if delete button should be shown
+    // Dean cannot delete locked documents
+    const isLocked = doc.workflow_status === 'locked';
+    const canDelete = !(currentUserRole === 'dean' && isLocked);
+    
+    // Show delete button only if user has permission
+    const deleteButtonHtml = canDelete ? 
+        `<button class="btn-delete" data-id="${doc.id}" data-status="${doc.workflow_status}" title="Delete">Delete</button>` : 
+        (isLocked ? `<button class="btn-delete disabled-btn" disabled title="Locked documents cannot be deleted by Dean">Locked</button>` : '');
+
     return `
         <tr class="doc-row hover:bg-gray-50 transition" data-id="${doc.id}">
             <td class="py-3 px-4">
@@ -489,7 +509,7 @@ function createTableRow(doc) {
                     <button class="btn-details" data-id="${doc.id}" title="View Details (Description & Keywords)">Details</button>
                     ${doc.workflow_status === 'rejected' ? `<button class="btn-comments" data-id="${doc.id}" title="View Comments">Comments</button>` : ''}
                     <button class="btn-download" data-id="${doc.id}" title="Download">Download</button>
-                    <button class="btn-delete" data-id="${doc.id}" title="Delete">Delete</button>
+                    ${deleteButtonHtml}
                 </div>
             </td>
         </tr>
@@ -508,6 +528,12 @@ function createMobileCard(doc) {
     const hasMetadata = (doc.description && doc.description.trim()) || (doc.keywords && doc.keywords.trim());
     const metadataIcon = hasMetadata ? '<span class="ml-1 text-teal-500 text-xs" title="Has description or keywords">ℹ️</span>' : '';
 
+    const isLocked = doc.workflow_status === 'locked';
+    const canDelete = !(currentUserRole === 'dean' && isLocked);
+    const deleteButtonHtml = canDelete ? 
+        `<button class="btn-delete-sm" data-id="${doc.id}" data-status="${doc.workflow_status}">Delete</button>` : 
+        (isLocked ? `<button class="btn-delete-sm disabled-btn" disabled style="opacity:0.5; cursor:not-allowed;">Locked</button>` : '');
+
     return `
         <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
             <div class="font-medium text-gray-800">${escapeHtml(doc.title)}${metadataIcon}</div>
@@ -523,7 +549,7 @@ function createMobileCard(doc) {
                 <button class="btn-details-sm" data-id="${doc.id}">Details</button>
                 ${doc.workflow_status === 'rejected' ? `<button class="btn-comments-sm" data-id="${doc.id}">Comments</button>` : ''}
                 <button class="btn-download-sm" data-id="${doc.id}">Download</button>
-                <button class="btn-delete-sm" data-id="${doc.id}">Delete</button>
+                ${deleteButtonHtml}
             </div>
         </div>
     `;
@@ -581,7 +607,7 @@ function attachRowEventListeners() {
         btn.addEventListener('click', handleView);
     });
 
-    // Details buttons (new)
+    // Details buttons
     document.querySelectorAll('.btn-details, .btn-details-sm').forEach(btn => {
         btn.addEventListener('click', handleDetails);
     });
@@ -596,9 +622,16 @@ function attachRowEventListeners() {
         btn.addEventListener('click', handleDownload);
     });
 
-    // Delete buttons
+    // Delete buttons - Pass document status as well
     document.querySelectorAll('.btn-delete, .btn-delete-sm').forEach(btn => {
-        btn.addEventListener('click', handleDeleteClick);
+        btn.addEventListener('click', function(e) {
+            const docId = this.dataset.id;
+            const docStatus = this.dataset.status;
+            const doc = allDocuments.find(d => d.id == docId);
+            if (doc) {
+                handleDeleteClick(docId, doc.workflow_status);
+            }
+        });
     });
 }
 
@@ -725,13 +758,18 @@ async function handleDownload(e) {
     showToastMessage('Download started', 'success');
 }
 
-function handleDeleteClick(e) {
-    const docId = e.target.dataset.id;
+function handleDeleteClick(docId, docStatus) {
     const doc = allDocuments.find(d => d.id == docId);
     
     if (!doc) return;
     
-    openDeleteModal(docId, doc.title);
+    // Check if Dean is trying to delete a locked document
+    if (currentUserRole === 'dean' && docStatus === 'locked') {
+        showToastMessage('Locked documents cannot be deleted by Dean. Please contact Administrator.', 'error');
+        return;
+    }
+    
+    openDeleteModal(docId, doc.title, docStatus);
 }
 
 function setupEventListeners() {

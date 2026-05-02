@@ -105,7 +105,6 @@ code {
     .w-72.open { left: 0; }
     main { width: 100%; margin-left: 0; }
     
-    /* Fixed burger button - consistent with other pages */
     .menu-toggle {
         display: block;
         position: fixed;

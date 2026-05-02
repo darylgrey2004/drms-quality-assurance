@@ -1,4 +1,4 @@
-// js/approvals.js - Admin Approvals Page with Validation and Approval Modals
+// js/approvals.js - Admin Approvals Page with Role-Based Permissions
 
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const docPreviewFrame = document.getElementById('docPreviewFrame');
     const docPreviewTitle = document.getElementById('docPreviewTitle');
     
-    // Validate modal elements
+    // Validate modal elements (Admin only)
     const validateModal = document.getElementById('validateModal');
     const validateModalCloseBtn = document.getElementById('validateModalCloseBtn');
     const validateModalCancelBtn = document.getElementById('validateModalCancelBtn');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bulkRejectionComment = document.getElementById('bulkRejectionComment');
     const bulkRejectCount = document.getElementById('bulkRejectCount');
     
-    // Lock modal elements
+    // Lock modal elements (Admin only)
     const lockModal = document.getElementById('lockModal');
     const lockModalCloseBtn = document.getElementById('lockModalCloseBtn');
     const lockModalCancelBtn = document.getElementById('lockModalCancelBtn');
@@ -97,6 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let pendingApproveDocId = null;
     let bulkRejectIds = [];
     let toastTimer;
+
+    // Determine if user is Admin
+    const isAdmin = role === 'admin';
+    const isDean = role === 'dean';
 
     // Update user info
     updateUserInfo();
@@ -282,8 +286,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Validate modal functions
+    // Validate modal functions (Admin only)
     function openValidateModal(docId, title) {
+        if (!isAdmin) {
+            showToast('Only Administrators can validate documents.', true);
+            return;
+        }
         pendingValidateDocId = docId;
         validateDocTitle.textContent = title;
         validateComment.value = '';
@@ -301,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Approve modal functions
+    // Approve modal functions (Dean and Admin)
     function openApproveModal(docId, title) {
         pendingApproveDocId = docId;
         approveDocTitle.textContent = title;
@@ -362,8 +370,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Lock modal functions
+    // Lock modal functions (Admin only)
     function openLockModal(docId, title) {
+        if (!isAdmin) {
+            showToast('Only Administrators can lock documents.', true);
+            return;
+        }
         currentLockDocId = docId;
         if (lockDocTitle) lockDocTitle.textContent = title;
         if (lockComment) lockComment.value = '';
@@ -417,9 +429,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Action handlers with modals
     if (validateModalConfirmBtn) {
         validateModalConfirmBtn.addEventListener('click', async () => {
-            if (pendingValidateDocId) {
+            if (pendingValidateDocId && isAdmin) {
                 const comments = validateComment ? validateComment.value : '';
                 await performValidate(pendingValidateDocId, comments);
+                closeValidateModal();
+            } else if (!isAdmin) {
+                showToast('Only Administrators can validate documents.', true);
                 closeValidateModal();
             }
         });
@@ -482,15 +497,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (lockModalConfirmBtn) {
         lockModalConfirmBtn.addEventListener('click', () => {
-            if (currentLockDocId) {
+            if (currentLockDocId && isAdmin) {
                 const comments = lockComment ? lockComment.value : '';
                 confirmLockDocument(currentLockDocId, comments);
+                closeLockModal();
+            } else if (!isAdmin) {
+                showToast('Only Administrators can lock documents.', true);
                 closeLockModal();
             }
         });
     }
     
     async function performValidate(docId, comments) {
+        if (!isAdmin) {
+            showToast('Only Administrators can validate documents.', true);
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
                 method: 'POST',
@@ -552,6 +574,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function confirmLockDocument(docId, comments) {
+        if (!isAdmin) {
+            showToast('Only Administrators can lock documents.', true);
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE}/api/approvals/${docId}/lock`, {
                 method: 'POST',
@@ -687,20 +713,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function getActionButtons(doc) {
         const status = doc.workflow_status;
-        const isAdmin = role === 'admin';
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
         
         let buttons = `<button class="btn-view text-xs px-2 py-1 bg-gray-100 border border-gray-300 rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
         if (status === 'pending' || status === 'draft') {
-            buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            // Only Admin can validate
+            if (isAdmin) {
+                buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            }
+            // Both Admin and Dean can reject
             buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
         } else if (status === 'validated') {
+            // Both Admin and Dean can approve
             buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-100 border border-green-300 rounded text-green-700" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
+            // Both Admin and Dean can reject
             buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
         } else if (status === 'approved') {
-            buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-100 border border-purple-300 rounded text-purple-700" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            // Only Admin can lock
+            if (isAdmin) {
+                buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-100 border border-purple-300 rounded text-purple-700" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            }
         } else if (status === 'locked' && isAdmin) {
+            // Only Admin can unlock
             buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-100 border border-orange-300 rounded text-orange-700" data-id="${doc.id}">Unlock</button>`;
         } else if (status === 'rejected') {
             buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}">Comments</button>`;
@@ -712,19 +747,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function getMobileActionButtons(doc) {
         const status = doc.workflow_status;
-        const isAdmin = role === 'admin';
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
         
         let buttons = `<button class="btn-view text-xs px-2 py-1 bg-teal-600 text-white rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
         if (status === 'pending' || status === 'draft') {
-            buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            if (isAdmin) {
+                buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+            }
             buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
         } else if (status === 'validated') {
             buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
             buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
         } else if (status === 'approved') {
-            buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            if (isAdmin) {
+                buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            }
         } else if (status === 'locked' && isAdmin) {
             buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-600 text-white rounded" data-id="${doc.id}">Unlock</button>`;
         } else if (status === 'rejected') {
@@ -867,6 +905,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        if (action === 'validate' && !isAdmin) {
+            showToast('Only Administrators can perform bulk validation.', true);
+            return;
+        }
+        
+        if (action === 'lock' && !isAdmin) {
+            showToast('Only Administrators can lock documents.', true);
+            return;
+        }
+        
         if (action === 'validate') {
             showToast('Please use the individual Validate buttons for each document.', true);
             return;
@@ -933,16 +981,20 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Validate buttons - open modal
+        // Validate buttons - open modal (Admin only)
         document.querySelectorAll('.btn-validate').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!isAdmin) {
+                    showToast('Only Administrators can validate documents.', true);
+                    return;
+                }
                 const docId = btn.getAttribute('data-id');
                 const title = btn.getAttribute('data-title');
                 openValidateModal(docId, title);
             });
         });
         
-        // Approve buttons - open modal
+        // Approve buttons - open modal (Dean and Admin)
         document.querySelectorAll('.btn-approve').forEach(btn => {
             btn.addEventListener('click', () => {
                 const docId = btn.getAttribute('data-id');
@@ -951,9 +1003,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Lock buttons
+        // Lock buttons (Admin only)
         document.querySelectorAll('.btn-lock').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!isAdmin) {
+                    showToast('Only Administrators can lock documents.', true);
+                    return;
+                }
                 const docId = btn.getAttribute('data-id');
                 const title = btn.getAttribute('data-title');
                 openLockModal(docId, title);
@@ -1035,6 +1091,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mobile sidebar
     setupMobileSidebar();
+    
+    // Heartbeat to keep session alive
+    function sendHeartbeat() {
+        if (token) {
+            fetch(`${API_BASE}/api/user/heartbeat`, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+            }).catch(() => {});
+        }
+    }
+    if (token) {
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 2 * 60 * 1000);
+    }
 });
 
 function setupMobileSidebar() {

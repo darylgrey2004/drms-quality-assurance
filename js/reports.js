@@ -186,4 +186,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize with Overview tab active
     // Already set in HTML
-});
+}); 
