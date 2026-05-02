@@ -23,6 +23,23 @@ async function initializeUserPage() {
     return { token, user, role: normalizedRole };
 }
 
+// Function to update the approvals badge count
+function updateApprovalsBadge(count) {
+    const badge = document.getElementById('approvalsBadge');
+    if (badge) {
+        badge.textContent = count || '0';
+        if (count > 0) {
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'inline-block';
+            badge.textContent = '0';
+        }
+    }
+}
+
+// Export function to be called from other pages
+window.updateApprovalsBadge = updateApprovalsBadge;
+
 document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -51,6 +68,129 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    // Function to update sidebar navigation based on role
+    function updateSidebarNavigation() {
+        const nav = document.querySelector('aside nav');
+        if (!nav) return;
+
+        // Check if we're on a user portal page (not dean profile)
+        const isUserPortal = currentPage.includes('user-') || currentPage === 'user-dashboard.html' || 
+                            currentPage === 'user-documents.html' || currentPage === 'user-upload.html' ||
+                            currentPage === 'user-evidence-map.html' || currentPage === 'user-search.html' ||
+                            currentPage === 'user-profile.html';
+
+        if (!isUserPortal && normalizedRole !== 'dean') return;
+
+        // For Dean on profile page, use admin sidebar
+        if (normalizedRole === 'dean' && currentPage === 'user-profile.html') {
+            nav.innerHTML = `
+                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
+                </a>
+                <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Documents</span>
+                </a>
+                <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Upload</span>
+                </a>
+                <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
+                </a>
+                <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
+                </a>
+                <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Approvals</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Reports</span>
+                </a>
+                <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Users</span>
+                </a>
+                <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Audit Trail</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Settings</span>
+                </a>
+                <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
+                    <span class="mr-3 text-teal-300 w-5">Profile</span>
+                </a>
+            `;
+            return;
+        }
+
+        // Determine if user is Department Head (can see My Approvals)
+        const isDeptHead = normalizedRole === 'department-head' || normalizedRole === 'area-chair' || normalizedRole === 'area chair/program head';
+        
+        // For Faculty (no My Approvals) vs Department Head (with My Approvals)
+        if (isDeptHead) {
+            // Department Head sidebar - includes My Approvals with badge
+            nav.innerHTML = `
+                <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
+                </a>
+                <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">My Documents</span>
+                </a>
+                <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
+                </a>
+                <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
+                </a>
+                <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
+                </a>
+                <a href="user-approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">My Approvals</span>
+                    <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full" id="approvalsBadge">0</span>
+                </a>
+                <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
+                </a>
+            `;
+        } else {
+            // Faculty sidebar - NO My Approvals
+            nav.innerHTML = `
+                <a href="user-dashboard.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
+                </a>
+                <a href="user-documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">My Documents</span>
+                </a>
+                <a href="user-upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Upload Document</span>
+                </a>
+                <a href="user-evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
+                </a>
+                <a href="user-search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Search</span>
+                </a>
+                <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                    <span class="mr-3 text-teal-300/70 w-5">Profile</span>
+                </a>
+            `;
+        }
+        
+        // Update active state for current page
+        setTimeout(() => {
+            const currentHref = currentPage;
+            const navLinks = document.querySelectorAll('aside nav a');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentHref) {
+                    navLinks.forEach(l => {
+                        l.classList.remove('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
+                    });
+                    link.classList.add('active-nav', 'bg-teal-800/40', 'border-l-4', 'border-teal-400');
+                }
+            });
+        }, 50);
+    }
+
     function syncDeanProfileSidebar() {
         if (normalizedRole !== 'dean' || currentPage !== 'user-profile.html') return;
         const nav = document.querySelector('aside nav');
@@ -58,37 +198,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
         nav.innerHTML = `
             <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">📊</span> Dashboard
+                <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
             </a>
             <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">📄</span> Documents
+                <span class="mr-3 text-teal-300/70 w-5">Documents</span>
             </a>
             <a href="upload.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">⬆️</span> Upload
+                <span class="mr-3 text-teal-300/70 w-5">Upload</span>
             </a>
             <a href="evidence-map.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">🗺️</span> Evidence Map
+                <span class="mr-3 text-teal-300/70 w-5">Evidence Map</span>
             </a>
             <a href="search.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">🔍</span> Search
+                <span class="mr-3 text-teal-300/70 w-5">Search</span>
             </a>
             <a href="approvals.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">✅</span> Approvals
+                <span class="mr-3 text-teal-300/70 w-5">Approvals</span>
             </a>
             <a href="reports.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">📈</span> Reports
+                <span class="mr-3 text-teal-300/70 w-5">Reports</span>
             </a>
             <a href="users.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">👥</span> Users
+                <span class="mr-3 text-teal-300/70 w-5">Users</span>
             </a>
             <a href="audit-trail.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">📋</span> Audit Trail
+                <span class="mr-3 text-teal-300/70 w-5">Audit Trail</span>
             </a>
             <a href="settings.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
-                <span class="mr-3 text-teal-300/70">⚙️</span> Settings
+                <span class="mr-3 text-teal-300/70 w-5">Settings</span>
             </a>
             <a href="user-profile.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-100 bg-teal-800/40 border-l-4 border-teal-400 active-nav">
-                <span class="mr-3 text-teal-300">👤</span> Profile
+                <span class="mr-3 text-teal-300 w-5">Profile</span>
             </a>
         `;
     }
@@ -147,16 +287,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const portalLabels = {
             'faculty member': 'Faculty Portal',
             'faculty': 'Faculty Portal',
-            'area chair/program head': 'Dept. Head Portal',
-            'area-chair': 'Dept. Head Portal',
-            'department-head': 'Dept. Head Portal'
+            'area chair/program head': 'Department Head Portal',
+            'area-chair': 'Department Head Portal',
+            'department-head': 'Department Head Portal'
         };
         const accessLabels = {
             'faculty member': 'Faculty Access',
             'faculty': 'Faculty Access',
-            'area chair/program head': 'Dept. Head Access',
-            'area-chair': 'Dept. Head Access',
-            'department-head': 'Dept. Head Access'
+            'area chair/program head': 'Department Head Access',
+            'area-chair': 'Department Head Access',
+            'department-head': 'Department Head Access'
         };
         
         // Map role values to display names
@@ -165,9 +305,9 @@ document.addEventListener('DOMContentLoaded', function () {
             'dean': 'Dean',
             'faculty': 'Faculty',
             'faculty member': 'Faculty',
-            'area-chair': 'Dept. Head',
-            'area chair/program head': 'Dept. Head',
-            'department-head': 'Dept. Head',
+            'area-chair': 'Department Head',
+            'area chair/program head': 'Department Head',
+            'department-head': 'Department Head',
             'evaluator': 'External Evaluator'
         };
         
@@ -185,6 +325,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     syncDeanProfileSidebar();
     applyIdentity(user);
+    
+    // Update sidebar navigation based on role (for user portal pages)
+    const isUserPortalPage = currentPage.includes('user-') || currentPage === 'user-dashboard.html' || 
+                            currentPage === 'user-documents.html' || currentPage === 'user-upload.html' ||
+                            currentPage === 'user-evidence-map.html' || currentPage === 'user-search.html' ||
+                            currentPage === 'user-profile.html';
+    
+    if (isUserPortalPage && normalizedRole !== 'dean') {
+        updateSidebarNavigation();
+    }
 
     // Re-apply after page-level scripts run to prevent blank sidebar identity.
     const reapplyIdentity = () => {

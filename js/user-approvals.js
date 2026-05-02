@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Only area-chair, dean, and admin can access
     if (normalizedRole !== 'area-chair' && normalizedRole !== 'department-head' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
         window.location.href = 'user-dashboard.html';
-        return;
+        return; 
     }
 
     // ── DOM refs ──────────────────────────────────────────────────────────────
