@@ -248,14 +248,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function showUploadSuccessModal() {
-        if (!uploadSuccessModal) return;
+    function showUploadSuccessModal(documentTitle) {
+        if (!uploadSuccessModal) {
+            alert(`Upload Successful! "${documentTitle}" has been uploaded.`);
+            return;
+        }
+        
+        // Update modal content with document title
+        const modalContent = uploadSuccessModal.querySelector('.flex-1');
+        if (modalContent && documentTitle) {
+            modalContent.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800">Upload Successful!</h3>
+                <p class="text-sm text-gray-600 mt-1"><strong>"${documentTitle}"</strong> has been uploaded successfully.</p>
+                <p class="text-sm text-gray-500 mt-1">Your document is now saved and will appear in Documents and Approvals.</p>
+            `;
+        }
+        
         uploadSuccessModal.classList.remove('hidden');
+        uploadSuccessModal.classList.add('flex');
     }
 
     function hideUploadSuccessModal() {
         if (!uploadSuccessModal) return;
         uploadSuccessModal.classList.add('hidden');
+        uploadSuccessModal.classList.remove('flex');
     }
 
     if (closeUploadSuccessBtn) closeUploadSuccessBtn.addEventListener('click', hideUploadSuccessModal);
@@ -432,14 +448,15 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentIndex = 0;
             function uploadNext() {
                 if (currentIndex >= files.length) {
-                    // done
+                    // done - all files uploaded successfully
                     setTimeout(() => {
-                        showUploadSuccessModal();
+                        showUploadSuccessModal(title);
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
                         uploadForm.reset();
                         selectedFiles = [];
                         renderFileList();
+                        loadRecentUploads(); // Refresh recent uploads list
                     }, 250);
                     return;
                 }

@@ -6,6 +6,113 @@ const router = express.Router();
 const db = require('../database');
 const { auth } = require('../middleware/auth');
 
+// Function to automatically update SQL file with new document
+async function updateSQLFileWithNewDocument(document, files) {
+  const sqlFilePath = path.join(__dirname, 'drms_db.sql');
+  
+  try {
+    // Read the current SQL file
+    let sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
+    
+    // Find the documents INSERT section and get the last entry
+    const documentsInsertRegex = /INSERT INTO `documents`[\s\S]*?VALUES\s*(.*?);/;
+    const documentsMatch = sqlContent.match(documentsInsertRegex);
+    
+    if (!documentsMatch) {
+      throw new Error('Documents INSERT section not found');
+    }
+    
+    // Get the last document ID to determine next ID
+    const lastIdMatch = sqlContent.match(/\((\d+),\s*'[^']*'/g);
+    let lastId = 0;
+    if (lastIdMatch) {
+      const lastEntry = lastIdMatch[lastIdMatch.length - 1];
+      const idMatch = lastEntry.match(/\((\d+),/);
+      if (idMatch) {
+        lastId = parseInt(idMatch[1]);
+      }
+    }
+    
+    // Use the provided document ID or generate new one
+    const newDocumentId = document.id || (lastId + 1);
+    
+    // Find the end of the documents INSERT section (the last semicolon)
+    const documentsInsertStart = sqlContent.indexOf("INSERT INTO `documents`");
+    const documentsSection = sqlContent.substring(documentsInsertStart);
+    const lastSemicolonIndex = documentsSection.lastIndexOf(';');
+    const documentsInsertEnd = documentsInsertStart + lastSemicolonIndex;
+    
+    const beforeDocuments = sqlContent.substring(0, documentsInsertEnd);
+    const afterDocuments = sqlContent.substring(documentsInsertEnd);
+    
+    // Create new document INSERT statement with proper escaping
+    const escapedTitle = document.title.replace(/'/g, "''");
+    const escapedDescription = document.description ? document.description.replace(/'/g, "''") : null;
+    const escapedKeywords = document.keywords ? document.keywords.replace(/'/g, "''") : null;
+    const escapedAuthor = document.author_name.replace(/'/g, "''");
+    
+    const newDocumentInsert = `,\n(${newDocumentId}, '${escapedTitle}', '${document.category}', ${document.category_id || 'NULL'}, '${document.department}', ${document.department_id || 'NULL'}, '${document.version}', ${escapedDescription ? `'${escapedDescription}'` : 'NULL'}, ${escapedKeywords ? `'${escapedKeywords}'` : 'NULL'}, '${document.workflow_status}', ${document.uploader_id}, '${escapedAuthor}', '${document.created_at}', '${document.updated_at}', '${document.category_name}', '${document.department_code}');`;
+    
+    // Update documents section
+    sqlContent = beforeDocuments + newDocumentInsert + afterDocuments;
+    
+    // Add file entries if files exist
+    if (files && files.length > 0) {
+      const filesInsertStart = sqlContent.indexOf("INSERT INTO `document_files`");
+      if (filesInsertStart !== -1) {
+        const filesSection = sqlContent.substring(filesInsertStart);
+        const filesLastSemicolonIndex = filesSection.lastIndexOf(';');
+        const filesInsertEnd = filesInsertStart + filesLastSemicolonIndex;
+        
+        const beforeFiles = sqlContent.substring(0, filesInsertEnd);
+        const afterFiles = sqlContent.substring(filesInsertEnd);
+        
+        let fileEntries = '';
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const fileName = path.basename(file.path);
+          const escapedOriginalName = file.originalname.replace(/'/g, "''");
+          fileEntries += `,\n(${newDocumentId + 100 + i}, ${newDocumentId}, '${escapedOriginalName}', '${fileName}', '${file.mimetype}', ${file.size}, '/uploads/${fileName}', '${document.created_at}')`;
+        }
+        fileEntries += ';';
+        
+        sqlContent = beforeFiles + fileEntries + afterFiles;
+      }
+    }
+    
+    // Add audit log entry
+    const auditInsertStart = sqlContent.indexOf("INSERT INTO `audit_logs`");
+    if (auditInsertStart !== -1) {
+      const auditSection = sqlContent.substring(auditInsertStart);
+      const auditLastSemicolonIndex = auditSection.lastIndexOf(';');
+      const auditInsertEnd = auditInsertStart + auditLastSemicolonIndex;
+      
+      const beforeAudit = sqlContent.substring(0, auditInsertEnd);
+      const afterAudit = sqlContent.substring(auditInsertEnd);
+      
+      const auditData = {
+        title: document.title,
+        category: document.category,
+        department: document.department,
+        status: document.workflow_status
+      };
+      const escapedAuditData = JSON.stringify(auditData).replace(/'/g, "''");
+      
+      const newAuditEntry = `,\n(${newDocumentId + 200}, ${document.uploader_id}, 'DOCUMENT_UPLOAD', 'document', ${newDocumentId}, NULL, '${escapedAuditData}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '${document.created_at}');`;
+      
+      sqlContent = beforeAudit + newAuditEntry + afterAudit;
+    }
+    
+    // Write the updated content back to the file
+    fs.writeFileSync(sqlFilePath, sqlContent, 'utf8');
+    console.log(`SQL file updated with new document: ${document.title} (ID: ${newDocumentId})`);
+    
+  } catch (error) {
+    console.error('Error updating SQL file:', error);
+    throw error;
+  }
+}
+
 function normalizeRole(role) {
   return (role || '').toString().toLowerCase().trim();
 }
@@ -165,6 +272,38 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       );
     } catch (auditErr) { console.log('Audit log skipped:', auditErr.message); }
 
+    // Auto-update SQL file with new document
+    try {
+      const documentData = {
+        id: documentId,
+        title,
+        category: categoryName,
+        category_id: resolvedCategoryId,
+        department,
+        department_id: departmentId,
+        version: version || 'v1.0',
+        description: description || null,
+        keywords: keywords || null,
+        workflow_status: status,
+        uploader_id: req.user.id,
+        author_name: author,
+        created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updated_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        category_name: categoryName,
+        department_code: department.toUpperCase()
+      };
+      
+      console.log('Attempting to update SQL file with document:', documentData);
+      console.log('Files to add:', files.length);
+      
+      await updateSQLFileWithNewDocument(documentData, files);
+      console.log('SQL file updated successfully with new document:', title);
+    } catch (sqlErr) {
+      console.error('SQL file update failed:', sqlErr);
+      console.error('SQL file update error details:', sqlErr.message);
+      console.error('Stack trace:', sqlErr.stack);
+    }
+
     res.status(201).json({
       msg: 'Document uploaded successfully',
       document: {
@@ -175,11 +314,435 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
         version: version || 'v1.0',
         workflow_status: status,
         files_count: files.length
-      }
+      },
+      realtime: true // Flag to trigger immediate dashboard refresh
     });
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ msg: 'Server error during upload' });
+  }
+});
+
+// @route   POST /api/documents/test-sql-update
+// @desc    Test SQL file update functionality
+// @access  Private
+router.post('/test-sql-update', auth, async (req, res) => {
+  try {
+    const testDocument = {
+      id: 999,
+      title: 'Test Document ' + Date.now(),
+      category: 'instruction',
+      category_id: 1,
+      department: 'BEED',
+      department_id: 1,
+      version: 'v1.0',
+      description: 'Test document for SQL update',
+      keywords: 'test',
+      workflow_status: 'pending',
+      uploader_id: req.user.id,
+      author_name: 'Test User',
+      created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      updated_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      category_name: 'instruction',
+      department_code: 'BEED'
+    };
+    
+    console.log('Testing SQL file update with:', testDocument);
+    
+    await updateSQLFileWithNewDocument(testDocument, []);
+    
+    res.status(200).json({
+      msg: 'SQL file update test successful',
+      testDocument: testDocument
+    });
+  } catch (error) {
+    console.error('SQL file update test failed:', error);
+    res.status(500).json({
+      msg: 'SQL file update test failed',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/documents/stats/dashboard
+// @desc    Get real dashboard statistics from database
+// @access  Private
+router.get('/stats/dashboard', auth, async (req, res) => {
+  try {
+    console.log('Fetching real dashboard statistics from database...');
+    
+    // Get total documents count
+    const [totalDocsResult] = await db.query('SELECT COUNT(*) as total FROM documents');
+    const totalDocuments = totalDocsResult[0].total;
+    
+    // Get documents by status
+    const [statusResult] = await db.query(`
+      SELECT workflow_status, COUNT(*) as count 
+      FROM documents 
+      GROUP BY workflow_status
+    `);
+    
+    let approvedCount = 0;
+    let pendingCount = 0;
+    let rejectedCount = 0;
+    let lockedCount = 0;
+    
+    statusResult.forEach(row => {
+      switch(row.workflow_status) {
+        case 'approved':
+        case 'locked':
+          approvedCount += row.count;
+          break;
+        case 'pending':
+          pendingCount += row.count;
+          break;
+        case 'rejected':
+          rejectedCount += row.count;
+          break;
+      }
+    });
+    
+    // Get documents by category
+    const [categoryResult] = await db.query(`
+      SELECT c.display_name, COUNT(*) as count 
+      FROM documents d
+      LEFT JOIN categories c ON d.category_id = c.id
+      GROUP BY c.display_name
+    `);
+    
+    const categoryStats = {};
+    for (const row of categoryResult) {
+      const categoryName = row.display_name || 'Unknown';
+      const total = row.count;
+      
+      // Get approved count for this category
+      const [approvedCategoryResult] = await db.query(`
+        SELECT COUNT(*) as approved_count 
+        FROM documents d
+        LEFT JOIN categories c ON d.category_id = c.id
+        WHERE c.display_name = ? AND (d.workflow_status = 'approved' OR d.workflow_status = 'locked')
+      `, [categoryName]);
+      
+      const approvedCount = approvedCategoryResult[0].approved_count;
+      const percentage = total > 0 ? Math.round((approvedCount / total) * 100) : 0;
+      
+      categoryStats[categoryName.toLowerCase()] = {
+        total: total,
+        completed: approvedCount,
+        percentage: percentage
+      };
+    }
+    
+    // Calculate monthly change (documents created this month vs last month)
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    
+    const [currentMonthResult] = await db.query(`
+      SELECT COUNT(*) as count 
+      FROM documents 
+      WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?
+    `, [currentMonth + 1, currentYear]);
+    
+    const [lastMonthResult] = await db.query(`
+      SELECT COUNT(*) as count 
+      FROM documents 
+      WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?
+    `, [lastMonth + 1, lastMonthYear]);
+    
+    const monthlyChange = currentMonthResult[0].count - lastMonthResult[0].count;
+    
+    const stats = {
+      total_documents: totalDocuments,
+      approved_count: approvedCount,
+      pending_count: pendingCount,
+      rejected_count: rejectedCount,
+      expiring_count: 0, // Could be calculated based on some expiry logic
+      monthly_change: monthlyChange,
+      urgent_count: pendingCount, // Pending documents as urgent
+      instruction: categoryStats['instruction'] || { total: 0, completed: 0, percentage: 0 },
+      research: categoryStats['research'] || { total: 0, completed: 0, percentage: 0 },
+      extension: categoryStats['extension'] || { total: 0, completed: 0, percentage: 0 },
+      employment: categoryStats['employment'] || { total: 0, completed: 0, percentage: 0 }
+    };
+    
+    console.log('Real dashboard stats calculated:', stats);
+    res.json(stats);
+    
+  } catch (err) {
+    console.error('Get dashboard stats error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/activity
+// @desc    Get recent activities from audit_logs
+// @access  Private
+router.get('/activity', auth, async (req, res) => {
+  try {
+    console.log('Fetching activities from database...');
+    
+    // Get recent activities from audit_logs with user information
+    const [activities] = await db.query(`
+      SELECT 
+        al.id,
+        al.user_id,
+        al.action,
+        al.entity_type,
+        al.entity_id,
+        al.new_values,
+        al.created_at,
+        u.firstName,
+        u.lastName,
+        d.title as document_title
+      FROM audit_logs al
+      LEFT JOIN users u ON al.user_id = u.id
+      LEFT JOIN documents d ON al.entity_id = d.id AND al.entity_type = 'document'
+      WHERE al.action IN ('DOCUMENT_UPLOAD', 'DOCUMENT_APPROVED', 'DOCUMENT_REJECTED', 'DOCUMENT_VALIDATED', 'DOCUMENT_LOCKED', 'DOCUMENT_DELETE')
+      ORDER BY al.created_at DESC
+      LIMIT 10
+    `);
+    
+    console.log('Raw activities from database:', activities.length);
+    
+    // Format activities for frontend
+    const formattedActivities = activities.map(activity => {
+      let user_name = 'System';
+      let initial = 'S';
+      
+      if (activity.user_id) {
+        if (activity.firstName || activity.lastName) {
+          user_name = `${activity.firstName || ''} ${activity.lastName || ''}`.trim();
+          initial = (activity.firstName || 'U')[0].toUpperCase();
+        } else {
+          user_name = 'Unknown User';
+          initial = 'U';
+        }
+      }
+      
+      let document_title = activity.document_title;
+      if (!document_title && activity.new_values) {
+        try {
+          const parsed = JSON.parse(activity.new_values || '{}');
+          document_title = parsed.title;
+        } catch (e) {
+          document_title = null;
+        }
+      }
+      
+      return {
+        id: activity.id,
+        user_name: user_name,
+        action: activity.action,
+        document_title: document_title,
+        created_at: activity.created_at,
+        initial: initial
+      };
+    });
+    
+    console.log('Formatted activities:', formattedActivities.length);
+    console.log('Sample activity:', formattedActivities[0]);
+    
+    res.json(formattedActivities);
+    
+  } catch (err) {
+    console.error('Get activities error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/analytics/overview
+// @desc    Get comprehensive analytics overview from database
+// @access  Private
+router.get('/analytics/overview', auth, async (req, res) => {
+  try {
+    console.log('Fetching comprehensive analytics from database...');
+    
+    // Total documents by status
+    const [statusStats] = await db.query(`
+      SELECT 
+        workflow_status,
+        COUNT(*) as count,
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM documents), 2) as percentage
+      FROM documents 
+      GROUP BY workflow_status
+      ORDER BY count DESC
+    `);
+    
+    // Documents by category
+    const [categoryStats] = await db.query(`
+      SELECT 
+        c.display_name as category,
+        COUNT(*) as total,
+        SUM(CASE WHEN d.workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN d.workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN d.workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+        ROUND(SUM(CASE WHEN d.workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as approval_rate
+      FROM documents d
+      LEFT JOIN categories c ON d.category_id = c.id
+      GROUP BY c.display_name
+      ORDER BY total DESC
+    `);
+    
+    // Documents by department
+    const [departmentStats] = await db.query(`
+      SELECT 
+        department_code,
+        COUNT(*) as total,
+        SUM(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected
+      FROM documents 
+      GROUP BY department_code
+      ORDER BY total DESC
+    `);
+    
+    // Monthly trends (last 6 months)
+    const [monthlyTrends] = await db.query(`
+      SELECT 
+        DATE_FORMAT(created_at, '%Y-%m') as month,
+        COUNT(*) as documents_uploaded,
+        SUM(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected
+      FROM documents 
+      WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+      ORDER BY month ASC
+    `);
+    
+    // Recent activity summary
+    const [recentActivity] = await db.query(`
+      SELECT 
+        action,
+        COUNT(*) as count
+      FROM audit_logs 
+      WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+      GROUP BY action
+      ORDER BY count DESC
+    `);
+    
+    // Top uploaders
+    const [topUploaders] = await db.query(`
+      SELECT 
+        u.firstName,
+        u.lastName,
+        COUNT(d.id) as documents_uploaded
+      FROM documents d
+      LEFT JOIN users u ON d.uploader_id = u.id
+      WHERE d.uploader_id IS NOT NULL
+      GROUP BY u.id, u.firstName, u.lastName
+      ORDER BY documents_uploaded DESC
+      LIMIT 5
+    `);
+    
+    const analytics = {
+      status_distribution: statusStats,
+      category_breakdown: categoryStats,
+      department_breakdown: departmentStats,
+      monthly_trends: monthlyTrends,
+      recent_activity_summary: recentActivity,
+      top_uploaders: topUploaders,
+      generated_at: new Date().toISOString()
+    };
+    
+    console.log('Analytics overview generated successfully');
+    res.json(analytics);
+    
+  } catch (err) {
+    console.error('Analytics overview error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/reports/summary
+// @desc    Get detailed report summary from database
+// @access  Private
+router.get('/reports/summary', auth, async (req, res) => {
+  try {
+    console.log('Generating detailed report summary from database...');
+    
+    // Overall statistics
+    const [overallStats] = await db.query(`
+      SELECT 
+        COUNT(*) as total_documents,
+        SUM(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+        AVG(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) * 100 as approval_rate
+      FROM documents
+    `);
+    
+    // Category performance
+    const [categoryPerformance] = await db.query(`
+      SELECT 
+        c.display_name as category,
+        COUNT(*) as total,
+        SUM(CASE WHEN d.workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN d.workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN d.workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+        ROUND(AVG(CASE WHEN d.workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) * 100, 2) as approval_rate
+      FROM documents d
+      LEFT JOIN categories c ON d.category_id = c.id
+      GROUP BY c.display_name
+      ORDER BY approval_rate DESC
+    `);
+    
+    // Department performance
+    const [departmentPerformance] = await db.query(`
+      SELECT 
+        department_code,
+        COUNT(*) as total,
+        SUM(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+        ROUND(AVG(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) * 100, 2) as approval_rate
+      FROM documents 
+      GROUP BY department_code
+      ORDER BY approval_rate DESC
+    `);
+    
+    // Workflow efficiency (time to approval)
+    const [workflowEfficiency] = await db.query(`
+      SELECT 
+        AVG(DATEDIFF(
+          (SELECT MAX(created_at) FROM audit_logs al2 WHERE al2.entity_id = d.id AND al2.action IN ('DOCUMENT_APPROVED', 'DOCUMENT_LOCKED')),
+          d.created_at
+        )) as avg_days_to_approval
+      FROM documents d
+      WHERE d.workflow_status IN ('approved', 'locked')
+      AND EXISTS (
+        SELECT 1 FROM audit_logs al 
+        WHERE al.entity_id = d.id AND al.action IN ('DOCUMENT_APPROVED', 'DOCUMENT_LOCKED')
+      )
+    `);
+    
+    // File statistics
+    const [fileStats] = await db.query(`
+      SELECT 
+        COUNT(*) as total_files,
+        AVG(size_bytes) as avg_file_size,
+        MAX(size_bytes) as max_file_size,
+        MIN(size_bytes) as min_file_size
+      FROM document_files
+    `);
+    
+    const reportSummary = {
+      overall_statistics: overallStats[0],
+      category_performance: categoryPerformance,
+      department_performance: departmentPerformance,
+      workflow_efficiency: workflowEfficiency[0],
+      file_statistics: fileStats[0],
+      generated_at: new Date().toISOString()
+    };
+    
+    console.log('Report summary generated successfully');
+    res.json(reportSummary);
+    
+  } catch (err) {
+    console.error('Report summary error:', err);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 

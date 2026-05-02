@@ -43,9 +43,6 @@ CREATE TABLE `approval_workflow` (
 --
 
 INSERT INTO `approval_workflow` (`id`, `document_id`, `stage`, `status`, `action_by`, `comments`, `created_at`, `completed_at`) VALUES
-(3, 18, 'validation', 'completed', 1, NULL, '2026-04-29 19:18:01', '2026-04-29 19:18:01'),
-(4, 18, 'approval', 'completed', 1, NULL, '2026-04-29 19:18:04', '2026-04-29 19:18:04'),
-(5, 18, 'lock', 'completed', 1, 's', '2026-04-29 19:18:07', '2026-04-29 19:18:07'),
 (7, 19, 'validation', 'completed', 1, NULL, '2026-04-29 19:19:53', '2026-04-29 19:19:53'),
 (8, 19, 'approval', 'completed', 1, NULL, '2026-04-29 19:19:56', '2026-04-29 19:19:56'),
 (9, 19, 'lock', 'completed', 1, 'ss', '2026-04-29 19:20:26', '2026-04-29 19:20:26'),
@@ -93,10 +90,6 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity_type`, `entity_id`,
 (5, 1, 'DOCUMENT_DELETE', 'document', 15, '{\"id\":15,\"title\":\"Relevant Source Code\",\"category\":\"research\",\"category_id\":2,\"area\":\"beed\",\"department_id\":1,\"version\":\"v1.0\",\"description\":\"da\",\"keywords\":\"dad\",\"workflow_status\":\"rejected\",\"uploader_id\":1,\"author_name\":\"Admin\",\"created_at\":\"2026-04-29T15:02:02.000Z\",\"updated_at\":\"2026-04-29T18:55:58.000Z\",\"category_name\":\"research\",\"department_code\":\"BEED\"}', NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 18:56:04'),
 (6, 1, 'DOCUMENT_DELETE', 'document', 16, '{\"id\":16,\"title\":\"Relevant Source Code\",\"category\":\"research\",\"category_id\":2,\"area\":\"beed\",\"department_id\":1,\"version\":\"v2.0\",\"description\":\"dada\",\"keywords\":\"dadada\",\"workflow_status\":\"rejected\",\"uploader_id\":1,\"author_name\":\"Admin\",\"created_at\":\"2026-04-29T18:39:51.000Z\",\"updated_at\":\"2026-04-29T18:56:00.000Z\",\"category_name\":\"research\",\"department_code\":\"BEED\"}', NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 18:56:06'),
 (7, 1, 'DOCUMENT_UPLOAD', 'document', 17, NULL, '{\"title\":\"Relevant Source Code\",\"category\":\"instruction\",\"department\":\"beed\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 18:56:20'),
-(8, 1, 'DOCUMENT_UPLOAD', 'document', 18, NULL, '{\"title\":\"k\",\"category\":\"research\",\"department\":\"bsed\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:07:50'),
-(9, 1, 'DOCUMENT_VALIDATED', 'document', 18, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:18:01'),
-(10, 1, 'DOCUMENT_APPROVED', 'document', 18, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:18:04'),
-(11, 1, 'DOCUMENT_LOCKED', 'document', 18, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"s\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:18:07'),
 (12, 1, 'DOCUMENT_REJECTED', 'document', 17, NULL, '{\"workflow_status\":\"rejected\",\"reason\":\"secret\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:18:37'),
 (13, 1, 'DOCUMENT_UPLOAD', 'document', 19, NULL, '{\"title\":\"Capstone Manuscript\",\"category\":\"research\",\"department\":\"bped\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:19:25'),
 (14, 1, 'DOCUMENT_VALIDATED', 'document', 19, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:19:53'),
@@ -135,6 +128,22 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity_type`, `entity_id`,
 (47, 53, 'DOCUMENT_UPLOAD', 'document', 30, NULL, '{\"title\":\"Faculty File\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:02:02'),
 (48, NULL, 'DOCUMENT_UPLOAD', 'document', 31, NULL, '{\"title\":\"Faculty File Create by Admin\",\"category\":\"instruction\",\"department\":\"No department assigned\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:03:35'),
 (49, NULL, 'DOCUMENT_UPLOAD', 'document', 32, NULL, '{\"title\":\"Faculty File Created by Admin\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:09:44'),
+(52, 1, 'DOCUMENT_UPLOAD', 'document', 33, NULL, '{\"title\":\"fck\",\"category\":\"research\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-02 23:15:30'),
+(53, 1, 'DOCUMENT_UPLOAD', 'document', 34, NULL, '{\"title\":\"kabus\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-02 23:30:00'),
+(54, 1, 'DOCUMENT_UPLOAD', 'document', 19, NULL, '{\"title\":\"Capstone Manuscript\",\"category\":\"research\",\"department\":\"bped\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:19:25'),
+(55, 1, 'DOCUMENT_VALIDATED', 'document', 19, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:19:53'),
+(56, 1, 'DOCUMENT_APPROVED', 'document', 19, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:19:56'),
+(57, 1, 'DOCUMENT_LOCKED', 'document', 19, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"ss\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 19:20:26'),
+(58, NULL, 'DOCUMENT_UPLOAD', 'document', 20, NULL, '{\"title\":\"Testing 2\",\"category\":\"extension\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:33:29'),
+(59, NULL, 'DOCUMENT_VALIDATED', 'document', 20, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:55:34'),
+(60, 1, 'DOCUMENT_APPROVED', 'document', 20, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:55:54'),
+(61, NULL, 'DOCUMENT_UPLOAD', 'document', 21, NULL, '{\"title\":\"Source Code\",\"category\":\"employment\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:46:17'),
+(62, 1, 'DOCUMENT_VALIDATED', 'document', 21, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:48:11'),
+(63, 1, 'DOCUMENT_APPROVED', 'document', 21, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 20:48:17'),
+(64, NULL, 'DOCUMENT_UPLOAD', 'document', 22, NULL, '{\"title\":\"C\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 21:05:41'),
+(65, 1, 'DOCUMENT_VALIDATED', 'document', 22, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 21:05:55'),
+(66, 1, 'DOCUMENT_APPROVED', 'document', 22, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-29 21:06:01'),
+(67, 1, 'DOCUMENT_LOCKED', 'document', 22, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 19:43:55');
 (50, NULL, 'DOCUMENT_VALIDATED', 'document', 32, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:16'),
 (51, 1, 'DOCUMENT_REJECTED', 'document', 31, NULL, '{\"workflow_status\":\"rejected\",\"reason\":\"Delete this trash\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:32'),
 (52, 1, 'DOCUMENT_APPROVED', 'document', 32, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:37'),
@@ -279,7 +288,6 @@ CREATE TABLE `documents` (
 --
 
 INSERT INTO `documents` (`id`, `title`, `category`, `category_id`, `area`, `department_id`, `version`, `description`, `keywords`, `workflow_status`, `uploader_id`, `author_name`, `created_at`, `updated_at`, `category_name`, `department_code`) VALUES
-(18, 'k', 'research', 2, 'bsed', 2, 'v1.0', 'dada', 'dada', 'locked', 1, 'Admin', '2026-04-29 19:07:50', '2026-04-29 19:18:07', 'research', 'BSED'),
 (19, 'Capstone Manuscript', 'research', 2, 'bped', 5, 'v1.0', 'sas', 'sasa', 'locked', 1, 'Admin', '2026-04-29 19:19:25', '2026-04-29 19:20:26', 'research', 'BPED'),
 (20, 'Testing 2', 'extension', 3, 'BEED', 1, 'v1.0', 'sas', 'sasa', 'approved', NULL, 'Guilmar Quimba', '2026-04-29 20:33:29', '2026-04-29 21:03:42', 'extension', 'BEED'),
 (21, 'Source Code', 'employment', 4, 'BEED', 1, 'v1.0', 'sdsd', 'dsd', 'approved', NULL, 'Guilmar Quimba', '2026-04-29 20:46:17', '2026-04-29 21:03:42', 'employment', 'BEED'),
@@ -287,7 +295,9 @@ INSERT INTO `documents` (`id`, `title`, `category`, `category_id`, `area`, `depa
 (28, 'Last Testing', 'instruction', 1, 'BEED', 1, 'v1.0', 'as', 'sasa', 'rejected', NULL, 'Guilmar Quimba', '2026-04-30 20:30:00', '2026-05-01 06:25:06', 'instruction', 'BEED'),
 (29, 'Capstone Vitae', 'research', 2, 'beed', 1, 'v1.0', 'Check mo', 'Check mo', 'approved', 1, 'Admin', '2026-04-30 20:31:30', '2026-04-30 20:33:02', 'research', 'BEED'),
 (30, 'Faculty File', 'instruction', 1, 'BEED', 1, 'v1.0', 'dad', 'adad', 'pending', 53, 'Guilmars Quimbas', '2026-04-30 21:02:02', '2026-04-30 21:02:02', 'instruction', 'BEED'),
-(32, 'Faculty File Created by Admin', 'instruction', 1, 'BEED', 1, 'v1.0', 'dad', 'dad', 'approved', NULL, 'Jelmar Kemba', '2026-04-30 21:09:44', '2026-05-01 06:56:25', 'instruction', 'BEED');
+(32, 'Faculty File Created by Admin', 'instruction', 1, 'BEED', 1, 'v1.0', 'dad', 'dad', 'approved', NULL, 'Jelmar Kemba', '2026-04-30 21:09:44', '2026-05-01 06:56:25', 'instruction', 'BEED'),
+(33, 'fck', 'research', 2, 'BEED', 1, 'v1.0', 'New uploaded document', 'fck test', 'pending', 1, 'Admin User', '2026-05-02 23:15:30', '2026-05-02 23:15:30', 'research', 'BEED'),
+(34, 'kabus', 'instruction', 1, 'BEED', 1, 'v1.0', 'Test document upload', 'kabus test', 'pending', 1, 'Admin User', '2026-05-02 23:30:00', '2026-05-02 23:30:00', 'instruction', 'BEED');
 
 -- --------------------------------------------------------
 
@@ -325,7 +335,6 @@ CREATE TABLE `document_files` (
 --
 
 INSERT INTO `document_files` (`id`, `document_id`, `original_name`, `stored_name`, `mime_type`, `size_bytes`, `url_path`, `uploaded_at`) VALUES
-(18, 18, 'k.pdf', '1777489670219-617794012-k.pdf', 'application/pdf', 109045, '/uploads/1777489670219-617794012-k.pdf', '2026-04-29 19:07:50'),
 (19, 19, 'REVISED-Present and Ready - Capstone Project Manuscript.pdf', '1777490364992-520333285-REVISED-Present and Ready - Capstone Project Manuscript.pdf', 'application/pdf', 3527186, '/uploads/1777490364992-520333285-REVISED-Present and Ready - Capstone Project Manuscript.pdf', '2026-04-29 19:19:25'),
 (20, 20, 'k.pdf', '1777494809076-438449111-k.pdf', 'application/pdf', 109045, '/uploads/1777494809076-438449111-k.pdf', '2026-04-29 20:33:29'),
 (21, 21, 'RELEVANT-SOURCE-CODE.pdf', '1777495577611-155887565-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777495577611-155887565-RELEVANT-SOURCE-CODE.pdf', '2026-04-29 20:46:17'),
@@ -333,7 +342,9 @@ INSERT INTO `document_files` (`id`, `document_id`, `original_name`, `stored_name
 (28, 28, 'Flight_Itinerary.pdf', '1777581000372-446527135-Flight_Itinerary.pdf', 'application/pdf', 804014, '/uploads/1777581000372-446527135-Flight_Itinerary.pdf', '2026-04-30 20:30:00'),
 (29, 29, 'Curriculum Vitae.pdf', '1777581090038-409953167-Curriculum Vitae.pdf', 'application/pdf', 156856, '/uploads/1777581090038-409953167-Curriculum Vitae.pdf', '2026-04-30 20:31:30'),
 (30, 30, 'k.pdf', '1777582922552-668674743-k.pdf', 'application/pdf', 109045, '/uploads/1777582922552-668674743-k.pdf', '2026-04-30 21:02:02'),
-(32, 32, 'k.pdf', '1777583384693-522216522-k.pdf', 'application/pdf', 109045, '/uploads/1777583384693-522216522-k.pdf', '2026-04-30 21:09:44');
+(32, 32, 'k.pdf', '1777583384693-522216522-k.pdf', 'application/pdf', 109045, '/uploads/1777583384693-522216522-k.pdf', '2026-04-30 21:09:44'),
+(33, 33, 'fck.pdf', '1777583384694-123456789-fck.pdf', 'application/pdf', 250000, '/uploads/1777583384694-123456789-fck.pdf', '2026-05-02 23:15:30'),
+(34, 34, 'kabus.pdf', '1777583384695-987654321-kabus.pdf', 'application/pdf', 180000, '/uploads/1777583384695-987654321-kabus.pdf', '2026-05-02 23:30:00');
 
 -- --------------------------------------------------------
 

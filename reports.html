@@ -139,31 +139,31 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex justify-between items-start">
-                                <div><span class="text-gray-500 text-sm">Total Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">847</div></div>
+                                <div><span class="text-gray-500 text-sm">Total Documents</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="totalDocs">0</div></div>
                                 <span class="bg-teal-100 text-teal-700 p-2 rounded-lg text-lg">Total</span>
                             </div>
-                            <div class="text-xs text-green-600 mt-2">↑ 12% from last month</div>
+                            <div class="text-xs text-green-600 mt-2" id="totalChange">Loading...</div>
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex justify-between items-start">
-                                <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">692</div></div>
+                                <div><span class="text-gray-500 text-sm">Approved</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="approvedDocs">0</div></div>
                                 <span class="bg-green-100 text-green-700 p-2 rounded-lg text-lg">Approved</span>
                             </div>
-                            <div class="text-xs text-green-600 mt-2">81.7% approval rate</div>
+                            <div class="text-xs text-green-600 mt-2" id="approvalRate">Loading...</div>
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex justify-between items-start">
-                                <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">38</div></div>
+                                <div><span class="text-gray-500 text-sm">Pending Review</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="pendingDocs">0</div></div>
                                 <span class="bg-amber-100 text-amber-700 p-2 rounded-lg text-lg">Pending</span>
                             </div>
-                            <div class="text-xs text-amber-600 mt-2">5 urgent · 2 overdue</div>
+                            <div class="text-xs text-amber-600 mt-2" id="pendingInfo">Loading...</div>
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <div class="flex justify-between items-start">
-                                <div><span class="text-gray-500 text-sm">Active Users</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">24</div></div>
+                                <div><span class="text-gray-500 text-sm">Active Users</span><div class="text-2xl md:text-3xl font-bold text-gray-800 mt-2" id="activeUsers">0</div></div>
                                 <span class="bg-blue-100 text-blue-700 p-2 rounded-lg text-lg">Users</span>
                             </div>
-                            <div class="text-xs text-blue-600 mt-2">6 roles · 18 faculty</div>
+                            <div class="text-xs text-blue-600 mt-2" id="userInfo">Loading...</div>
                         </div>
                     </div>
 
@@ -171,21 +171,15 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base mb-4">Documents by Category</h3>
-                            <div class="space-y-4">
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Instruction</span><span class="font-medium">245 (29%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full" style="width:29%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Research</span><span class="font-medium">312 (37%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:37%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Extension</span><span class="font-medium">156 (18%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:18%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Employment</span><span class="font-medium">134 (16%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-purple-600 h-2 rounded-full" style="width:16%"></div></div></div>
+                            <div class="space-y-4" id="categoryChart">
+                                <div class="text-center text-gray-500 py-4">Loading...</div>
                             </div>
-                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between text-sm"><span class="text-gray-500">Total documents:</span><span class="font-medium">847</span></div></div>
+                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between text-sm"><span class="text-gray-500">Total documents:</span><span class="font-medium" id="categoryTotal">0</span></div></div>
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base mb-4">Documents by Status</h3>
-                            <div class="space-y-4">
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Approved</span><span class="font-medium text-green-700">692 (82%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:82%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Pending Review</span><span class="font-medium text-amber-700">38 (4%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:4%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Draft</span><span class="font-medium text-gray-600">85 (10%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-gray-600 h-2 rounded-full" style="width:10%"></div></div></div>
-                                <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Expired</span><span class="font-medium text-red-700">32 (4%)</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-red-600 h-2 rounded-full" style="width:4%"></div></div></div>
+                            <div class="space-y-4" id="statusChart">
+                                <div class="text-center text-gray-500 py-4">Loading...</div>
                             </div>
                         </div>
                     </div>
@@ -197,36 +191,15 @@
                             <a href="#" class="text-sm text-teal-700 hover:text-teal-800">View All</a>
                         </div>
                         <div class="overflow-x-auto">
-                            <div class="min-w-[600px]">
-                                <div class="divide-y">
-                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
-                                        <div class="col-span-5"><div class="font-medium">Completeness Report - Q1 2026</div><div class="text-xs text-gray-400">Apr 26, 2026</div></div>
-                                        <div class="col-span-2">PDF</div>
-                                        <div class="col-span-2">2.4 MB</div>
-                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
-                                    </div>
-                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
-                                        <div class="col-span-5"><div class="font-medium">Instruction Category Status</div><div class="text-xs text-gray-400">Apr 25, 2026</div></div>
-                                        <div class="col-span-2">Excel</div>
-                                        <div class="col-span-2">1.8 MB</div>
-                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
-                                    </div>
-                                    <div class="grid grid-cols-12 py-3 text-sm items-center">
-                                        <div class="col-span-5"><div class="font-medium">Research Gap Analysis</div><div class="text-xs text-gray-400">Apr 24, 2026</div></div>
-                                        <div class="col-span-2">PDF</div>
-                                        <div class="col-span-2">3.1 MB</div>
-                                        <div class="col-span-3 text-right"><button class="text-teal-600 hover:text-teal-800 mr-3">Download</button><button class="text-gray-500 hover:text-gray-700">View</button></div>
-                                    </div>
-                                </div>
+                            <div class="min-w-[600px]" id="recentReportsTable">
+                                <div class="text-center text-gray-500 py-4">No reports generated yet</div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Mobile recent reports -->
-                    <div class="block md:hidden space-y-3 mt-4">
-                        <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Completeness Report - Q1 2026</div><div class="text-xs text-gray-400 mb-2">Apr 26, 2026 · PDF · 2.4 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
-                        <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Instruction Category Status</div><div class="text-xs text-gray-400 mb-2">Apr 25, 2026 · Excel · 1.8 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
-                        <div class="bg-white rounded-xl p-4 stat-card"><div class="font-medium">Research Gap Analysis</div><div class="text-xs text-gray-400 mb-2">Apr 24, 2026 · PDF · 3.1 MB</div><div class="flex gap-3"><button class="text-teal-600 text-sm">Download</button><button class="text-gray-500 text-sm">View</button></div></div>
+                    <div class="block md:hidden space-y-3 mt-4" id="recentReportsMobile">
+                        <div class="text-center text-gray-500 py-4">No reports generated yet</div>
                     </div>
                 </div>
 

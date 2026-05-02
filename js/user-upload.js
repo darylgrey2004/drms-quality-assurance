@@ -291,14 +291,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (uploadStatusText) uploadStatusText.textContent = statusText;
     }
 
-    function showUploadSuccessModal() {
+    function showUploadSuccessModal(documentTitle) {
         if (!uploadSuccessModal) return;
+        
+        // Update modal content with document title
+        const modalContent = uploadSuccessModal.querySelector('.flex-1');
+        if (modalContent && documentTitle) {
+            modalContent.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800">Upload Successful!</h3>
+                <p class="text-sm text-gray-600 mt-1"><strong>"${documentTitle}"</strong> has been uploaded successfully.</p>
+                <p class="text-sm text-gray-500 mt-1">Your document is now saved and will appear in Documents and Approvals.</p>
+            `;
+        }
+        
         uploadSuccessModal.classList.remove('hidden');
+        uploadSuccessModal.classList.add('flex');
     }
 
     function hideUploadSuccessModal() {
         if (!uploadSuccessModal) return;
         uploadSuccessModal.classList.add('hidden');
+        uploadSuccessModal.classList.remove('flex');
     }
 
     if (closeUploadSuccessBtn) closeUploadSuccessBtn.addEventListener('click', hideUploadSuccessModal);
@@ -394,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 updateProgressUI(100, 'Upload completed');
                 console.log('Upload successful:', data);
 
-                showUploadSuccessModal();
+                showUploadSuccessModal(title);
                 uploadForm.reset();
                 if (fileInfo) fileInfo.classList.add('hidden');
                 if (dropZone) dropZone.classList.remove('border-teal-500', 'bg-teal-50');
