@@ -531,6 +531,24 @@ CREATE TABLE `otps` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `report_history`
+--
+
+CREATE TABLE `report_history` (
+  `id` int(11) NOT NULL,
+  `report_type` varchar(50) NOT NULL,
+  `period` varchar(50) DEFAULT NULL,
+  `date_from` date DEFAULT NULL,
+  `date_to` date DEFAULT NULL,
+  `format` varchar(20) DEFAULT NULL,
+  `filters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`filters`)),
+  `generated_by` int(11) DEFAULT NULL,
+  `generated_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `standards`
 --
 
@@ -776,6 +794,14 @@ ALTER TABLE `otps`
   ADD KEY `email` (`email`);
 
 --
+-- Indexes for table `report_history`
+--
+ALTER TABLE `report_history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_report_generated_by` (`generated_by`),
+  ADD KEY `idx_report_generated_at` (`generated_at`);
+
+--
 -- Indexes for table `standards`
 --
 ALTER TABLE `standards`
@@ -900,6 +926,12 @@ ALTER TABLE `otps`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
+-- AUTO_INCREMENT for table `report_history`
+--
+ALTER TABLE `report_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `standards`
 --
 ALTER TABLE `standards`
@@ -1005,6 +1037,12 @@ ALTER TABLE `notifications`
 --
 ALTER TABLE `otps`
   ADD CONSTRAINT `otps_ibfk_1` FOREIGN KEY (`email`) REFERENCES `users` (`email`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `report_history`
+--
+ALTER TABLE `report_history`
+  ADD CONSTRAINT `report_history_ibfk_1` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `standards`

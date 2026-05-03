@@ -118,19 +118,23 @@ router.get('/pending', auth, async (req, res) => {
       params
     );
 
-    // Attach standards via category-based inheritance
+    // Attach standards via document_standards join table (specific per document)
     if (rows.length > 0) {
-      const categoryIds = [...new Set(rows.map(r => r.category_id).filter(Boolean))];
+      const docIds = rows.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT id, name, category_id FROM standards WHERE is_active = 1 AND category_id IN (?) ORDER BY sort_order ASC`,
-        [categoryIds]
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
       );
       const stdMap = {};
       stdRows.forEach(s => {
-        if (!stdMap[s.category_id]) stdMap[s.category_id] = [];
-        stdMap[s.category_id].push(s.name);
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
       });
-      rows.forEach(r => { r.standards = stdMap[r.category_id] || []; });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
     }
 
     res.json(rows);

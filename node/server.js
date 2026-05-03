@@ -13,6 +13,8 @@ const profileRoutes = require('./routes/profile');
 const documentRoutes = require('./routes/documents');
 const approvalsRoutes = require('./routes/approvals');
 const analyticsRoutes = require('./routes/analytics');
+const auditRoutes = require('./routes/audit');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,6 +32,8 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/approvals', approvalsRoutes);
 app.use('/api/documents/analytics', analyticsRoutes);
 app.use('/api/documents/reports', analyticsRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/reports', reportsRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

@@ -473,7 +473,7 @@ function initializeReportsPage() {
     
     // Generate report button
     if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
+        generateBtn.addEventListener('click', async function() {
             const period = reportPeriod ? reportPeriod.value : 'this-month';
             const format = reportFormat ? reportFormat.value : 'pdf';
             
@@ -491,11 +491,35 @@ function initializeReportsPage() {
             this.innerHTML = '<span class="mr-2">⏳</span> Generating...';
             this.disabled = true;
             
-            setTimeout(() => {
-                alert(`Report generated successfully!\n\nType: ${activeTab} report\nPeriod: ${period}\nFormat: ${format}\n\nIn a full system, this would download the report.`);
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/api/reports/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({
+                        report_type: activeTab,
+                        period: period,
+                        format: format
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Report generated successfully!\n\nType: ${activeTab} report\nPeriod: ${period}\nFormat: ${format}\nReport ID: ${result.report_id}`);
+                    loadReportHistory();
+                } else {
+                    alert('Failed to generate report');
+                }
+            } catch (error) {
+                console.error('Report generation error:', error);
+                alert('Failed to generate report');
+            } finally {
                 this.innerHTML = originalText;
                 this.disabled = false;
-            }, 1500);
+            }
         });
     }
     
@@ -509,9 +533,24 @@ function initializeReportsPage() {
     
     // Generate Gap Report button
     if (generateGapReport) {
-        generateGapReport.addEventListener('click', function(e) {
+        generateGapReport.addEventListener('click', async function(e) {
             e.preventDefault();
-            alert('Generating detailed gap analysis report...\n\nThis would create a comprehensive report of all missing documents by area and priority.');
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/api/reports/gap-analysis`, {
+                    headers: { 'x-auth-token': token }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Gap Analysis Report\n\nFound ${data.gaps.length} gaps in document completeness.\n\nThis would generate a detailed report.`);
+                } else {
+                    alert('Failed to generate gap report');
+                }
+            } catch (error) {
+                console.error('Gap report error:', error);
+                alert('Failed to generate gap report');
+            }
         });
     }
     
@@ -536,9 +575,12 @@ function initializeReportsPage() {
     if (viewAllLink) {
         viewAllLink.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('Viewing all generated reports...\n\nThis would navigate to a full reports archive.');
+            loadReportHistory();
         });
     }
+    
+    // Load report history on page load
+    loadReportHistory();
     
     // Active navigation state
     const currentPath = window.location.pathname.split('/').pop() || 'reports.html';
@@ -555,4 +597,81 @@ function initializeReportsPage() {
             link.style.background = '#1a4450';
         }
     });
+}
+
+// Load report history
+async function loadReportHistory() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/api/reports/history?limit=5`, {
+            headers: { 'x-auth-token': token }
+        });
+
+        if (response.ok) {
+            const reports = await response.json();
+            renderReportHistory(reports);
+        }
+    } catch (error) {
+        console.error('Failed to load report history:', error);
+    }
+}
+
+// Render report history
+function renderReportHistory(reports) {
+    const tableContainer = document.getElementById('recentReportsTable');
+    const mobileContainer = document.getElementById('recentReportsMobile');
+
+    if (reports.length === 0) {
+        if (tableContainer) tableContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No reports generated yet</div>';
+        if (mobileContainer) mobileContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No reports generated yet</div>';
+        return;
+    }
+
+    // Desktop table
+    if (tableContainer) {
+        tableContainer.innerHTML = `
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b text-gray-500 text-xs">
+                        <th class="text-left py-2">Report Type</th>
+                        <th class="text-left py-2">Period</th>
+                        <th class="text-left py-2">Format</th>
+                        <th class="text-left py-2">Generated By</th>
+                        <th class="text-left py-2">Date</th>
+                        <th class="text-left py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    ${reports.map(report => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 font-medium">${report.report_type}</td>
+                            <td class="py-3">${report.period}</td>
+                            <td class="py-3"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${report.format.toUpperCase()}</span></td>
+                            <td class="py-3">${report.generated_by}</td>
+                            <td class="py-3 text-gray-500">${new Date(report.generated_at).toLocaleDateString()}</td>
+                            <td class="py-3"><button class="text-teal-600 hover:text-teal-800 text-sm">Download</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // Mobile cards
+    if (mobileContainer) {
+        mobileContainer.innerHTML = reports.map(report => `
+            <div class="bg-white p-4 rounded-lg border">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="font-medium">${report.report_type}</span>
+                    <span class="bg-gray-100 px-2 py-1 rounded text-xs">${report.format.toUpperCase()}</span>
+                </div>
+                <div class="text-sm text-gray-500 space-y-1">
+                    <div>Period: ${report.period}</div>
+                    <div>By: ${report.generated_by}</div>
+                    <div>${new Date(report.generated_at).toLocaleDateString()}</div>
+                </div>
+                <button class="mt-3 text-teal-600 hover:text-teal-800 text-sm">Download</button>
+            </div>
+        `).join('');
+    }
 }

@@ -3,7 +3,14 @@
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Settings page JS loaded successfully');
-    
+
+    // ── Access guard: Admin only ──
+    const _user = JSON.parse(localStorage.getItem('user') || '{}');
+    if ((_user.role || '').toLowerCase().trim() !== 'admin') {
+        window.location.href = 'homepage.html';
+        return;
+    }
+
     // ── Heartbeat: Update lastActive status ──
     const token = localStorage.getItem('token');
     function sendHeartbeat() {

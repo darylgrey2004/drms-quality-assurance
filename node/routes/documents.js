@@ -181,7 +181,8 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       description,
       keywords,
       workflow,
-      expiryDate
+      expiryDate,
+      standard_id
     } = req.body || {};
 
     const files = req.files || [];
@@ -261,6 +262,18 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
           relPath
         ]
       );
+    }
+
+    // Save selected standard into document_standards join table
+    if (standard_id && Number(standard_id)) {
+      try {
+        await db.query(
+          'INSERT IGNORE INTO document_standards (document_id, standard_id) VALUES (?, ?)',
+          [documentId, Number(standard_id)]
+        );
+      } catch (stdErr) {
+        console.warn('document_standards insert skipped:', stdErr.message);
+      }
     }
 
     try {
@@ -840,19 +853,23 @@ router.get('/', auth, async (req, res) => {
       params
     );
 
-    // Attach standards via category-based inheritance
+    // Attach standards via document_standards join table (specific per document)
     if (rows.length > 0) {
-      const categoryIds = [...new Set(rows.map(r => r.category_id).filter(Boolean))];
+      const docIds = rows.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT id, name, category_id FROM standards WHERE is_active = 1 AND category_id IN (?) ORDER BY sort_order ASC`,
-        [categoryIds]
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
       );
       const stdMap = {};
       stdRows.forEach(s => {
-        if (!stdMap[s.category_id]) stdMap[s.category_id] = [];
-        stdMap[s.category_id].push(s.name);
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
       });
-      rows.forEach(r => { r.standards = stdMap[r.category_id] || []; });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
     }
 
     res.json(rows);
