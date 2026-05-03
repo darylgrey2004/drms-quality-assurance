@@ -375,4 +375,26 @@ router.put('/profile/:userId', adminAuth, async (req, res) => {
   }
 });
 
+// @route   PATCH api/admin/standards/:id
+// @desc    Toggle is_active on a standard
+// @access  Private (Admin only)
+router.patch('/standards/:id', adminAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  const { is_active } = req.body;
+  if (typeof is_active !== 'boolean' && is_active !== 0 && is_active !== 1) {
+    return res.status(400).json({ msg: 'is_active must be a boolean' });
+  }
+  try {
+    const [result] = await db.query(
+      'UPDATE standards SET is_active = ? WHERE id = ?',
+      [is_active ? 1 : 0, id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ msg: 'Standard not found' });
+    res.json({ msg: 'Standard updated', id, is_active: !!is_active });
+  } catch (err) {
+    console.error('Update standard error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

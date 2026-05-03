@@ -45,6 +45,38 @@ document.addEventListener('DOMContentLoaded', function() {
     populateAuthorField();
     setupVersionAutoIncrement();
 
+    // Standard dropdown — reacts to category selection
+    const categorySelect = document.getElementById('category');
+    const standardSelect = document.getElementById('standard');
+    if (categorySelect && standardSelect) {
+        categorySelect.addEventListener('change', function () {
+            loadStandards(this.value);
+        });
+    }
+
+    function loadStandards(categoryId) {
+        if (!standardSelect) return;
+        standardSelect.innerHTML = '<option value="">Select standard</option>';
+        if (!categoryId) return;
+        fetch(`${API_BASE}/api/documents/standards?category_id=${categoryId}`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(standards => {
+            if (!standards.length) {
+                standardSelect.innerHTML = '<option value="">No standards available</option>';
+                return;
+            }
+            standards.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.name} (${s.code})`;
+                standardSelect.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('Load standards error:', err));
+    }
+
     function populateAuthorField() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const authorInput = document.getElementById('author');

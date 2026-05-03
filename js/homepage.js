@@ -481,6 +481,10 @@ function renderDocuments(documents, tableBody, mobileContainer) {
     if (tableBody) {
         tableBody.innerHTML = '';
         documents.forEach(doc => {
+            const stds = Array.isArray(doc.standards) && doc.standards.length
+                ? doc.standards.slice(0, 2).map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ')
+                    + (doc.standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${doc.standards.length - 2}</span>` : '')
+                : '<span class="text-gray-400 text-xs">—</span>';
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="py-3">
@@ -488,6 +492,7 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                     <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${formatDate(doc.created_at)}</div>
                 </td>
                 <td class="py-3"><span class="${getCategoryBadgeClass(doc.category_display_name)} px-2 py-1 rounded-full text-xs">${doc.category_display_name}</span></td>
+                <td class="py-3"><div class="flex flex-wrap gap-1">${stds}</div></td>
                 <td class="py-3 text-xs text-gray-600">${doc.department_code}</td>
                 <td class="py-3"><span class="${getStatusBadgeClass(doc.workflow_status)} px-2 py-1 rounded-full text-xs">${doc.workflow_status}</span></td>
                 <td class="py-3 text-xs text-gray-500">${doc.version}</td>
@@ -506,6 +511,10 @@ function renderDocuments(documents, tableBody, mobileContainer) {
     if (mobileContainer) {
         mobileContainer.innerHTML = '';
         documents.forEach(doc => {
+            const stds = Array.isArray(doc.standards) && doc.standards.length
+                ? doc.standards.slice(0, 2).map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ')
+                    + (doc.standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${doc.standards.length - 2}</span>` : '')
+                : '<span class="text-gray-400 text-xs">—</span>';
             const card = document.createElement('div');
             card.className = 'border rounded-lg p-4 bg-white';
             card.innerHTML = `
@@ -515,6 +524,7 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                     <span class="${getCategoryBadgeClass(doc.category_display_name)} px-2 py-1 rounded-full text-xs">${doc.category_display_name}</span>
                     <span class="${getStatusBadgeClass(doc.workflow_status)} px-2 py-1 rounded-full text-xs">${doc.workflow_status}</span>
                 </div>
+                <div class="flex flex-wrap gap-1 mb-2">${stds}</div>
                 <div class="text-sm text-gray-600 mb-2">${doc.department_code} · ${doc.version}</div>
                 <div class="flex gap-2">
                     <button onclick="viewDocument(${doc.id}, '${doc.title}')">View</button>

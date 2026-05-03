@@ -555,6 +555,7 @@ function createTableRow(doc) {
                 <div class="text-xs text-gray-400">by ${escapeHtml(uploader)} · ${date}</div>
             </td>
             <td class="py-3 px-4">${categoryBadge}</td>
+            <td class="py-3 px-4">${renderStandardsBadges(doc.standards)}</td>
             <td class="py-3 px-4">${departmentBadge}</td>
             <td class="py-3 px-4">${statusBadge}</td>
             <td class="py-3 px-4 text-gray-600 text-sm">${escapeHtml(doc.version || 'v1.0')}</td>
@@ -598,7 +599,8 @@ function createMobileCard(doc) {
                 ${departmentBadge}
                 ${statusBadge}
             </div>
-            <div class="text-sm text-gray-600 mb-3">Version: ${escapeHtml(doc.version || 'v1.0')}</div>
+            <div class="text-sm text-gray-600 mb-1">Version: ${escapeHtml(doc.version || 'v1.0')}</div>
+            <div class="mb-3">${renderStandardsBadges(doc.standards)}</div>
             <div class="flex flex-wrap gap-2">
                 <button class="btn-view-sm" data-id="${doc.id}">View</button>
                 <button class="btn-details-sm" data-id="${doc.id}">Details</button>
@@ -608,6 +610,14 @@ function createMobileCard(doc) {
             </div>
         </div>
     `;
+}
+
+function renderStandardsBadges(standards, limit) {
+    if (!standards || standards.length === 0) return '<span class="text-gray-400 text-xs">—</span>';
+    const items = limit ? standards.slice(0, limit) : standards;
+    const badges = items.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${escapeHtml(s)}</span>`).join(' ');
+    const more = limit && standards.length > limit ? `<span class="text-gray-400 text-xs">+${standards.length - limit}</span>` : '';
+    return `<div class="flex flex-wrap gap-1">${badges}${more}</div>`;
 }
 
 function getStatusBadge(status) {

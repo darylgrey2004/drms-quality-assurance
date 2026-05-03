@@ -943,9 +943,75 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (saveStandards) {
         saveStandards.addEventListener('click', () => {
-            showToastMessage('Standards configuration saved successfully!', 'success');
+            saveStandardsToAPI();
         });
     }
+
+    // ============================================
+    // STANDARDS MANAGEMENT
+    // ============================================
+
+    function loadStandardsSettings() {
+        const container = document.getElementById('standardsListContainer');
+        if (!container) return;
+        fetch('http://localhost:3000/api/documents/standards', {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(activeStandards => {
+            // Also fetch all standards (including inactive) via admin route
+            return fetch('http://localhost:3000/api/documents/standards', {
+                headers: { 'x-auth-token': token }
+            })
+            .then(r => r.json())
+            .then(standards => renderStandardsCheckboxes(container, standards));
+        })
+        .catch(err => console.error('Load standards settings error:', err));
+    }
+
+    function renderStandardsCheckboxes(container, standards) {
+        if (!standards.length) {
+            container.innerHTML = '<p class="text-gray-500 text-sm">No standards found.</p>';
+            return;
+        }
+        // Group by category_name
+        const grouped = standards.reduce((acc, s) => {
+            const key = s.category_name || 'Uncategorized';
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(s);
+            return acc;
+        }, {});
+        container.innerHTML = Object.entries(grouped).map(([cat, items]) => `
+            <div class="mb-4">
+                <h4 class="font-semibold text-gray-700 mb-2">${escapeHtml(cat)}</h4>
+                ${items.map(s => `
+                    <label class="flex items-center gap-2 py-1 cursor-pointer">
+                        <input type="checkbox" class="standard-toggle w-4 h-4 accent-teal-600"
+                            data-id="${s.id}" ${s.is_active ? 'checked' : ''}>
+                        <span class="text-sm text-gray-700">${escapeHtml(s.name)}
+                            <span class="text-xs text-gray-400">(${escapeHtml(s.code)})</span>
+                        </span>
+                    </label>
+                `).join('')}
+            </div>
+        `).join('');
+    }
+
+    function saveStandardsToAPI() {
+        const checkboxes = document.querySelectorAll('.standard-toggle');
+        const promises = Array.from(checkboxes).map(cb =>
+            fetch(`http://localhost:3000/api/admin/standards/${cb.dataset.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                body: JSON.stringify({ is_active: cb.checked })
+            })
+        );
+        Promise.all(promises)
+            .then(() => showToastMessage('Standards saved successfully!', 'success'))
+            .catch(() => showToastMessage('Failed to save some standards', 'error'));
+    }
+
+    loadStandardsSettings();
     
     // Cancel buttons
     const cancelButtons = document.querySelectorAll('.cancel-btn');

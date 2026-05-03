@@ -840,6 +840,21 @@ router.get('/', auth, async (req, res) => {
       params
     );
 
+    // Attach standards via category-based inheritance
+    if (rows.length > 0) {
+      const categoryIds = [...new Set(rows.map(r => r.category_id).filter(Boolean))];
+      const [stdRows] = await db.query(
+        `SELECT id, name, category_id FROM standards WHERE is_active = 1 AND category_id IN (?) ORDER BY sort_order ASC`,
+        [categoryIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.category_id]) stdMap[s.category_id] = [];
+        stdMap[s.category_id].push(s.name);
+      });
+      rows.forEach(r => { r.standards = stdMap[r.category_id] || []; });
+    }
+
     res.json(rows);
   } catch (err) {
     console.error('Get documents error:', err);
@@ -1075,6 +1090,33 @@ router.get('/category-requirements', auth, async (req, res) => {
     res.json(requirements);
   } catch (err) {
     console.error('Category requirements error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/standards
+// @desc    Get active standards, optionally filtered by category_id
+// @access  Private
+router.get('/standards', auth, async (req, res) => {
+  try {
+    const { category_id } = req.query;
+    const params = [];
+    let where = 'WHERE s.is_active = 1';
+    if (category_id) {
+      where += ' AND s.category_id = ?';
+      params.push(Number(category_id));
+    }
+    const [rows] = await db.query(
+      `SELECT s.id, s.name, s.code, s.description, s.category_id, c.display_name AS category_name
+       FROM standards s
+       LEFT JOIN categories c ON s.category_id = c.id
+       ${where}
+       ORDER BY s.sort_order ASC`,
+      params
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Get standards error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

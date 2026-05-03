@@ -93,6 +93,7 @@ router.get('/pending', auth, async (req, res) => {
         d.workflow_status,
         d.created_at,
         d.updated_at,
+        d.category_id,
         CONCAT(COALESCE(u.firstName, ''), ' ', COALESCE(u.lastName, '')) AS author_name,
         dept.name AS department_name,
         c.display_name AS category_display_name,
@@ -116,6 +117,21 @@ router.get('/pending', auth, async (req, res) => {
       `,
       params
     );
+
+    // Attach standards via category-based inheritance
+    if (rows.length > 0) {
+      const categoryIds = [...new Set(rows.map(r => r.category_id).filter(Boolean))];
+      const [stdRows] = await db.query(
+        `SELECT id, name, category_id FROM standards WHERE is_active = 1 AND category_id IN (?) ORDER BY sort_order ASC`,
+        [categoryIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.category_id]) stdMap[s.category_id] = [];
+        stdMap[s.category_id].push(s.name);
+      });
+      rows.forEach(r => { r.standards = stdMap[r.category_id] || []; });
+    }
 
     res.json(rows);
   } catch (err) {

@@ -785,7 +785,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Desktop view
-        approvalsList.innerHTML = pageDocuments.map(doc => `
+        approvalsList.innerHTML = pageDocuments.map(doc => {
+            const stds = Array.isArray(doc.standards) && doc.standards.length
+                ? doc.standards.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${escapeHtml(s)}</span>`).join(' ')
+                : '<span class="text-gray-400 text-xs">—</span>';
+            return `
             <tr class="approval-item hover:bg-gray-50 transition" data-id="${doc.id}" data-stage="${getWorkflowStage(doc.workflow_status)}" data-status="${doc.workflow_status}">
                 <td class="py-3 px-4"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600" data-id="${doc.id}"></td>
                 <td class="py-3 px-4">
@@ -793,15 +797,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="text-xs text-gray-400">by ${escapeHtml(doc.author_name || 'Unknown')} · ${new Date(doc.created_at).toLocaleDateString()}</div>
                 </td>
                 <td class="py-3 px-4"><span class="badge-${doc.category || 'other'} px-2 py-1 rounded-full text-xs">${escapeHtml((doc.category_name || doc.category || 'N/A').toUpperCase())}</span></td>
+                <td class="py-3 px-4"><div class="flex flex-wrap gap-1">${stds}</div></td>
                 <td class="py-3 px-4"><span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${escapeHtml(doc.department_code || 'N/A')}</span></td>
                 <td class="py-3 px-4"><span class="${getStatusBadge(doc.workflow_status)} px-2 py-1 rounded-full text-xs font-medium">${getStatusText(doc.workflow_status)}</span></td>
                 <td class="py-3 px-4 text-gray-600">${escapeHtml(doc.version || 'v1.0')}</td>
                 <td class="py-3 px-4"><div class="flex flex-wrap gap-2">${getActionButtons(doc)}</div></td>
             </tr>
-        `).join('');
+        `}).join('');
 
         // Mobile view
-        mobileApprovalsList.innerHTML = pageDocuments.map(doc => `
+        mobileApprovalsList.innerHTML = pageDocuments.map(doc => {
+            const stds = Array.isArray(doc.standards) && doc.standards.length
+                ? doc.standards.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${escapeHtml(s)}</span>`).join(' ')
+                : '<span class="text-gray-400 text-xs">—</span>';
+            return `
             <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">
                 <div class="flex items-start gap-2 mb-2">
                     <input type="checkbox" class="doc-checkbox mt-1 rounded border-gray-300 text-teal-600" data-id="${doc.id}">
@@ -815,10 +824,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="badge-department px-2 py-1 rounded-full text-xs font-semibold">${escapeHtml(doc.department_code || 'N/A')}</span>
                     <span class="${getStatusBadge(doc.workflow_status)} px-2 py-1 rounded-full text-xs font-medium">${getStatusText(doc.workflow_status)}</span>
                 </div>
+                <div class="flex flex-wrap gap-1 mb-2">${stds}</div>
                 <div class="text-sm text-gray-600 mb-3">${escapeHtml(doc.version || 'v1.0')}</div>
                 <div class="flex flex-wrap gap-2">${getMobileActionButtons(doc)}</div>
             </div>
-        `).join('');
+        `}).join('');
 
         attachActionHandlers();
     }
