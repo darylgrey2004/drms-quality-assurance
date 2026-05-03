@@ -18,7 +18,7 @@
         ☰
     </button>
     <div class="sidebar-overlay"></div>
-
+ 
     <!-- main grid: sidebar + content -->
     <div class="flex h-screen overflow-hidden">
 
@@ -91,17 +91,14 @@
                 <!-- header row -->
                 <div class="mb-6">
                     <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Reports & Analytics</h1>
-                    <p class="text-sm text-gray-500 mt-1">Generate and view reports on document completeness, validity, and compliance</p>
+                    <p class="text-sm text-gray-500 mt-1">Generate and view reports on document completeness and overall metrics</p>
                 </div>
 
-                <!-- report type tabs -->
+                <!-- report type tabs - Only Overview and Completeness -->
                 <div class="mb-4 border-b border-gray-200 overflow-x-auto">
                     <ul class="flex gap-1 text-sm font-medium" id="reportTabs">
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-teal-600 text-teal-700 active-tab" data-tab="overview">Overview</a></li>
                         <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="completeness">Completeness</a></li>
-                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="compliance">Compliance</a></li>
-                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="workflow">Workflow</a></li>
-                        <li><a href="#" class="inline-block px-3 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-tab="audit">Audit Summary</a></li>
                     </ul>
                 </div>
 
@@ -208,11 +205,8 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                         <div class="lg:col-span-2 bg-white rounded-xl p-5 stat-card">
                             <h3 class="font-semibold text-gray-800 text-base mb-4">Document Completeness by Category</h3>
-                            <div class="space-y-5">
-                                <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Instruction</span><span class="text-sm font-semibold text-blue-700">77%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>245 of 320 documents verified</span><span>75 missing</span></div></div>
-                                <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Research</span><span class="text-sm font-semibold text-green-700">78%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:78%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>312 of 400 documents verified</span><span>88 missing</span></div></div>
-                                <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Extension</span><span class="text-sm font-semibold text-amber-700">74%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>156 of 210 documents verified</span><span>54 missing</span></div></div>
-                                <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Employment</span><span class="text-sm font-semibold text-purple-700">74%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>134 of 180 documents verified</span><span>46 missing</span></div></div>
+                            <div class="space-y-5" id="completenessChart">
+                                <div class="text-center text-gray-500 py-4">Loading completeness data...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl p-5 stat-card">
@@ -248,93 +242,11 @@
                                         <th class="text-left py-2">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y">
-                                    <tr><td class="py-3">BEED</td><td>Instruction</td><td>45</td><td>42</td><td>40</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:89%"></div></div></td><td><span class="badge-approved px-2 py-1 rounded-full text-xs">Complete</span></td></tr>
-                                    <tr><td class="py-3">BSED</td><td>Instruction</td><td>65</td><td>58</td><td>55</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:85%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                                    <tr><td class="py-3">BSNED</td><td>Instruction</td><td>40</td><td>28</td><td>25</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:63%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                                    <tr><td class="py-3">BSED</td><td>Research</td><td>55</td><td>48</td><td>45</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:82%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                                    <tr><td class="py-3">BEED</td><td>Research</td><td>40</td><td>35</td><td>33</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:83%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-                                    <tr><td class="py-3">BPED</td><td>Extension</td><td>25</td><td>18</td><td>16</td><td><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-yellow-600 h-2 rounded-full" style="width:64%"></div></div></td><td><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
+                                <tbody class="divide-y" id="departmentBreakdownTable">
+                                    <tr><td colspan="7" class="text-center py-4 text-gray-500">Loading department data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Compliance Tab -->
-                <div id="complianceTab" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-base mb-4">Instruction Compliance</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between"><span>Curriculum Development</span><span class="text-green-700">Compliant</span></div>
-                                <div class="flex justify-between"><span>Teaching Materials</span><span class="text-green-700">Compliant</span></div>
-                                <div class="flex justify-between"><span>Assessment Tools</span><span class="text-amber-700">Partial</span></div>
-                                <div class="flex justify-between"><span>Learning Modules</span><span class="text-green-700">Compliant</span></div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Instruction Compliance:</span><span class="font-bold text-blue-700">77%</span></div></div>
-                        </div>
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-base mb-4">Research Compliance</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between"><span>Publications</span><span class="text-green-700">Compliant</span></div>
-                                <div class="flex justify-between"><span>Research Proposals</span><span class="text-amber-700">Partial</span></div>
-                                <div class="flex justify-between"><span>Ethics Clearance</span><span class="text-red-700">Non-compliant</span></div>
-                                <div class="flex justify-between"><span>Research Outputs</span><span class="text-green-700">Compliant</span></div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Research Compliance:</span><span class="font-bold text-green-700">78%</span></div></div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-base mb-4">Extension Compliance</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between"><span>Community Programs</span><span class="text-amber-700">Partial</span></div>
-                                <div class="flex justify-between"><span>Outreach Documentation</span><span class="text-amber-700">Partial</span></div>
-                                <div class="flex justify-between"><span>Impact Assessment</span><span class="text-red-700">Non-compliant</span></div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Extension Compliance:</span><span class="font-bold text-amber-700">74%</span></div></div>
-                        </div>
-                        <div class="bg-white rounded-xl p-5 stat-card">
-                            <h3 class="font-semibold text-gray-800 text-base mb-4">Employment Compliance</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between"><span>Employment Contracts</span><span class="text-green-700">Compliant</span></div>
-                                <div class="flex justify-between"><span>Personnel Records</span><span class="text-amber-700">Partial</span></div>
-                                <div class="flex justify-between"><span>Benefits Documentation</span><span class="text-amber-700">Partial</span></div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t"><div class="flex justify-between"><span class="font-medium">Overall Employment Compliance:</span><span class="font-bold text-purple-700">74%</span></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Workflow Tab -->
-                <div id="workflowTab" class="tab-content hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold mb-2">Average Processing Time</h3><div class="text-3xl font-bold">3.2 days</div><div class="text-xs text-green-600">↓ 0.5 days</div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold mb-2">Approval Rate</h3><div class="text-3xl font-bold">87%</div><div class="text-xs text-green-600">↑ 5% from last month</div></div>
-                        <div class="bg-white rounded-xl p-5 stat-card"><h3 class="font-semibold mb-2">Rejection Rate</h3><div class="text-3xl font-bold">13%</div><div class="text-xs text-amber-600">Within acceptable range</div></div>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h3 class="font-semibold text-base mb-4">Workflow Bottlenecks</h3>
-                        <div class="space-y-4">
-                            <div><div class="flex justify-between text-sm mb-1"><span>Validation Stage</span><span class="text-amber-700">12 items · 3.5 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:65%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span>Approval Stage</span><span class="text-green-700">8 items · 2.1 days avg</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:40%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span>Lock Stage</span><span class="text-green-700">0 items · instant</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:0%"></div></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Audit Tab -->
-                <div id="auditTab" class="tab-content hidden">
-                    <div class="bg-white rounded-xl p-5 stat-card">
-                        <h3 class="font-semibold text-base mb-4">Recent Audit Activity</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 text-xs font-bold">U</span><div><p class="text-sm"><span class="font-medium">Document Uploaded</span> · Syllabus - Elementary Education</p><p class="text-xs text-gray-400">by Dr. Santos · 2026-04-26</p></div></div>
-                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-700 text-xs font-bold">A</span><div><p class="text-sm"><span class="font-medium">Document Approved</span> · Research Publication 2025</p><p class="text-xs text-gray-400">by Dean Cruz · 2026-04-26</p></div></div>
-                            <div class="flex items-start gap-3 pb-2 border-b"><span class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 text-xs font-bold">R</span><div><p class="text-sm"><span class="font-medium">Document Rejected</span> · Learning Module v0.5</p><p class="text-xs text-gray-400">by QA Office · 2026-04-25</p></div></div>
-                            <div class="flex items-start gap-3"><span class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xs font-bold">L</span><div><p class="text-sm"><span class="font-medium">Document Locked</span> · Employment Contract</p><p class="text-xs text-gray-400">System · 2026-04-25</p></div></div>
-                        </div>
-                        <div class="mt-4 pt-2"><a href="audit-trail.html" class="text-teal-700 text-sm">View Full Audit Trail →</a></div>
                     </div>
                 </div>
             </div>
@@ -397,10 +309,6 @@
         document.getElementById('generateReport')?.addEventListener('click', () => alert('Generating report...'));
         document.getElementById('exportReport')?.addEventListener('click', () => alert('Exporting report...'));
         document.getElementById('generateGapReport')?.addEventListener('click', (e) => { e.preventDefault(); alert('Generating gap report...'); });
-        document.querySelectorAll('.text-teal-600, .text-gray-500').forEach(btn => { 
-            if (btn.textContent === 'Download' || btn.textContent === 'View') 
-                btn.addEventListener('click', () => alert('Report action triggered')); 
-        });
         
         // Heartbeat
         const token = localStorage.getItem('token');

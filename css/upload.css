@@ -154,6 +154,35 @@ input[type="radio"] {
     width: 100%;
 }
 
+/* Modal styling */
+.modal-overlay {
+    backdrop-filter: blur(4px);
+}
+
+#uploadSuccessModal {
+    transition: all 0.3s ease;
+}
+
+#uploadSuccessModal:not(.hidden) {
+    display: flex;
+}
+
+/* Modal animation */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#uploadSuccessModal .relative {
+    animation: modalSlideIn 0.25s ease-out;
+}
+
 /* Sidebar - Mobile Responsive */
 @media (max-width: 768px) {
     .w-72 {
@@ -307,6 +336,15 @@ input[type="radio"] {
     flex-wrap: wrap;
 }
 
+.upload-item-chip {
+    font-size: 0.65rem;
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 20px;
+    color: #475569;
+    font-weight: 500;
+}
+
 .upload-item-name {
     font-size: 0.85rem;
     color: #1e293b;
@@ -369,18 +407,15 @@ input[type="radio"] {
     }
 }
 
-/* Modal styling */
-#uploadSuccessModal.hidden {
-    display: none;
-}
-
-#uploadSuccessModal {
-    display: flex;
+/* Loading state */
+.submit-btn-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* Print styles */
 @media print {
-    .sidebar, nav, .menu-toggle, button, .bg-teal-700 {
+    .sidebar, nav, .menu-toggle, button, .bg-teal-700, .modal-overlay {
         display: none !important;
     }
     

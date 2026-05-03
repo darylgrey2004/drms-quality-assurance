@@ -62,6 +62,341 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // ============================================
+    // CATEGORIES & DEPARTMENTS MANAGEMENT
+    // ============================================
+    
+    // Data storage
+    let categories = [];
+    let departments = [];
+    let currentEditCategoryId = null;
+    let currentEditDeptId = null;
+    let deleteTarget = { type: null, id: null };
+    
+    // Default categories - Fixed to Instruction, Research, Extension, Employment
+    const defaultCategories = [
+        { id: 'cat1', name: 'Instruction', code: 'INST' },
+        { id: 'cat2', name: 'Research', code: 'RES' },
+        { id: 'cat3', name: 'Extension', code: 'EXT' },
+        { id: 'cat4', name: 'Employment', code: 'EMP' }
+    ];
+    
+    const defaultDepartments = [
+        { id: 'dept1', code: 'BEED', name: 'Bachelor of Elementary Education' },
+        { id: 'dept2', code: 'BSED', name: 'Bachelor of Secondary Education' },
+        { id: 'dept3', code: 'BSNED', name: 'Bachelor of Special Needs Education' },
+        { id: 'dept4', code: 'BCAED', name: 'Bachelor of Culture and Arts Education' },
+        { id: 'dept5', code: 'BPED', name: 'Bachelor of Physical Education' }
+    ];
+    
+    // Load data from localStorage
+    function loadCategoriesData() {
+        const saved = localStorage.getItem('systemCategories');
+        if (saved) {
+            categories = JSON.parse(saved);
+        } else {
+            categories = [...defaultCategories];
+            localStorage.setItem('systemCategories', JSON.stringify(categories));
+        }
+        renderCategoriesTable();
+    }
+    
+    function loadDepartmentsData() {
+        const saved = localStorage.getItem('systemDepartments');
+        if (saved) {
+            departments = JSON.parse(saved);
+        } else {
+            departments = [...defaultDepartments];
+            localStorage.setItem('systemDepartments', JSON.stringify(departments));
+        }
+        renderDepartmentsTable();
+    }
+    
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Render categories table
+    function renderCategoriesTable() {
+        const tbody = document.getElementById('categoriesTableBody');
+        if (!tbody) return;
+        
+        if (categories.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">No categories found. Click "Add Category" to create one.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = categories.map(cat => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4 font-medium text-gray-800">${escapeHtml(cat.name)}</td>
+                <td class="py-3 px-4 text-gray-600">${escapeHtml(cat.code || '—')}</td>
+                <td class="py-3 px-4 text-center">
+                    <button onclick="window.editCategory('${cat.id}')" class="text-teal-600 hover:text-teal-800 mr-3 text-sm font-medium">Edit</button>
+                    <button onclick="window.deleteCategory('${cat.id}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    // Render departments table
+    function renderDepartmentsTable() {
+        const tbody = document.getElementById('departmentsTableBody');
+        if (!tbody) return;
+        
+        if (departments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">No departments found. Click "Add Department" to create one.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = departments.map(dept => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4 font-medium text-gray-800">${escapeHtml(dept.code)}</td>
+                <td class="py-3 px-4 text-gray-700">${escapeHtml(dept.name)}</td>
+                <td class="py-3 px-4 text-center">
+                    <button onclick="window.editDepartment('${dept.id}')" class="text-teal-600 hover:text-teal-800 mr-3 text-sm font-medium">Edit</button>
+                    <button onclick="window.deleteDepartment('${dept.id}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    // Make functions globally accessible for inline onclick
+    window.editCategory = function(id) {
+        console.log('Edit category called with id:', id);
+        const category = categories.find(c => c.id === id);
+        if (category) {
+            currentEditCategoryId = id;
+            document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+            document.getElementById('categoryName').value = category.name;
+            document.getElementById('categoryCode').value = category.code || '';
+            document.getElementById('categoryModal').classList.remove('hidden');
+        } else {
+            console.error('Category not found:', id);
+        }
+    };
+    
+    window.deleteCategory = function(id) {
+        deleteTarget = { type: 'category', id: id };
+        const category = categories.find(c => c.id === id);
+        document.getElementById('deleteMessage').textContent = `Are you sure you want to delete the category "${category?.name}"?`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    };
+    
+    window.editDepartment = function(id) {
+        console.log('Edit department called with id:', id);
+        const department = departments.find(d => d.id === id);
+        if (department) {
+            currentEditDeptId = id;
+            document.getElementById('departmentModalTitle').textContent = 'Edit Department';
+            document.getElementById('deptCode').value = department.code;
+            document.getElementById('deptFullName').value = department.name;
+            document.getElementById('departmentModal').classList.remove('hidden');
+        } else {
+            console.error('Department not found:', id);
+        }
+    };
+    
+    window.deleteDepartment = function(id) {
+        deleteTarget = { type: 'department', id: id };
+        const department = departments.find(d => d.id === id);
+        document.getElementById('deleteMessage').textContent = `Are you sure you want to delete the department "${department?.code} - ${department?.name}"?`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    };
+    
+    // Add Category Button
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    if (addCategoryBtn) {
+        addCategoryBtn.addEventListener('click', () => {
+            currentEditCategoryId = null;
+            document.getElementById('categoryModalTitle').textContent = 'Add Category';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryCode').value = '';
+            document.getElementById('categoryModal').classList.remove('hidden');
+        });
+    }
+    
+    // Add Department Button
+    const addDeptBtn = document.getElementById('addDeptBtn');
+    if (addDeptBtn) {
+        addDeptBtn.addEventListener('click', () => {
+            currentEditDeptId = null;
+            document.getElementById('departmentModalTitle').textContent = 'Add Department';
+            document.getElementById('deptCode').value = '';
+            document.getElementById('deptFullName').value = '';
+            document.getElementById('departmentModal').classList.remove('hidden');
+        });
+    }
+    
+    // Save Category
+    const saveCategoryBtn = document.getElementById('saveCategoryBtn');
+    if (saveCategoryBtn) {
+        saveCategoryBtn.addEventListener('click', () => {
+            const name = document.getElementById('categoryName').value.trim();
+            const code = document.getElementById('categoryCode').value.trim();
+            
+            if (!name) {
+                showToastMessage('Category name is required', 'error');
+                return;
+            }
+            
+            if (currentEditCategoryId) {
+                // Edit existing
+                const index = categories.findIndex(c => c.id === currentEditCategoryId);
+                if (index !== -1) {
+                    categories[index] = {
+                        ...categories[index],
+                        name: name,
+                        code: code
+                    };
+                    showToastMessage('Category updated successfully', 'success');
+                }
+            } else {
+                // Check for duplicate name
+                const exists = categories.some(c => c.name.toLowerCase() === name.toLowerCase());
+                if (exists) {
+                    showToastMessage('Category name already exists', 'error');
+                    return;
+                }
+                // Add new
+                const newId = 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                categories.push({
+                    id: newId,
+                    name: name,
+                    code: code
+                });
+                showToastMessage('Category added successfully', 'success');
+            }
+            
+            localStorage.setItem('systemCategories', JSON.stringify(categories));
+            renderCategoriesTable();
+            document.getElementById('categoryModal').classList.add('hidden');
+        });
+    }
+    
+    // Save Department
+    const saveDepartmentBtn = document.getElementById('saveDepartmentBtn');
+    if (saveDepartmentBtn) {
+        saveDepartmentBtn.addEventListener('click', () => {
+            const code = document.getElementById('deptCode').value.trim().toUpperCase();
+            const name = document.getElementById('deptFullName').value.trim();
+            
+            if (!code) {
+                showToastMessage('Department code is required', 'error');
+                return;
+            }
+            if (!name) {
+                showToastMessage('Department full name is required', 'error');
+                return;
+            }
+            
+            // Check for duplicate code when adding new
+            if (!currentEditDeptId) {
+                const exists = departments.some(d => d.code === code);
+                if (exists) {
+                    showToastMessage('Department code already exists', 'error');
+                    return;
+                }
+            } else {
+                // Check duplicate for edit (excluding current)
+                const exists = departments.some(d => d.code === code && d.id !== currentEditDeptId);
+                if (exists) {
+                    showToastMessage('Department code already exists', 'error');
+                    return;
+                }
+            }
+            
+            if (currentEditDeptId) {
+                // Edit existing
+                const index = departments.findIndex(d => d.id === currentEditDeptId);
+                if (index !== -1) {
+                    departments[index] = {
+                        ...departments[index],
+                        code: code,
+                        name: name
+                    };
+                    showToastMessage('Department updated successfully', 'success');
+                }
+            } else {
+                // Add new
+                const newId = 'dept_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                departments.push({
+                    id: newId,
+                    code: code,
+                    name: name
+                });
+                showToastMessage('Department added successfully', 'success');
+            }
+            
+            localStorage.setItem('systemDepartments', JSON.stringify(departments));
+            renderDepartmentsTable();
+            document.getElementById('departmentModal').classList.add('hidden');
+        });
+    }
+    
+    // Delete confirmation
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (deleteTarget.type === 'category') {
+                categories = categories.filter(c => c.id !== deleteTarget.id);
+                localStorage.setItem('systemCategories', JSON.stringify(categories));
+                renderCategoriesTable();
+                showToastMessage('Category deleted successfully', 'success');
+            } else if (deleteTarget.type === 'department') {
+                departments = departments.filter(d => d.id !== deleteTarget.id);
+                localStorage.setItem('systemDepartments', JSON.stringify(departments));
+                renderDepartmentsTable();
+                showToastMessage('Department deleted successfully', 'success');
+            }
+            document.getElementById('deleteModal').classList.add('hidden');
+            deleteTarget = { type: null, id: null };
+        });
+    }
+    
+    // Close modals
+    const closeCategoryModal = document.getElementById('closeCategoryModal');
+    const closeDepartmentModal = document.getElementById('closeDepartmentModal');
+    const closeDeleteModal = document.getElementById('closeDeleteModal');
+    
+    if (closeCategoryModal) {
+        closeCategoryModal.addEventListener('click', () => {
+            document.getElementById('categoryModal').classList.add('hidden');
+        });
+    }
+    
+    if (closeDepartmentModal) {
+        closeDepartmentModal.addEventListener('click', () => {
+            document.getElementById('departmentModal').classList.add('hidden');
+        });
+    }
+    
+    if (closeDeleteModal) {
+        closeDeleteModal.addEventListener('click', () => {
+            document.getElementById('deleteModal').classList.add('hidden');
+        });
+    }
+    
+    // Close modals when clicking outside
+    const modals = ['categoryModal', 'departmentModal', 'deleteModal'];
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+    });
+    
+    // Load data on page load
+    loadCategoriesData();
+    loadDepartmentsData();
+    
+    // ============================================
     // PROFILE MANAGEMENT
     // ============================================
     

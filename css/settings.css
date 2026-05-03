@@ -85,6 +85,12 @@ code {
 /* mobile header spacer */
 .mobile-header-spacer { height: 60px; width: 100%; }
 
+/* Modal overlay */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
 /* ============================================ */
 /* RESPONSIVE DESIGN */
 /* ============================================ */

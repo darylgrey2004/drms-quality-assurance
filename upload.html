@@ -208,60 +208,12 @@
                                 <div class="col-span-2">DEPARTMENT</div>
                                 <div class="col-span-3">UPLOADED</div>
                             </div>
-                            <div class="divide-y divide-gray-100">
-                                <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Syllabus - Elementary Education</div>
-                                    <div class="col-span-2 text-gray-600">Instruction</div>
-                                    <div class="col-span-2 text-gray-600">BEED</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">20 Feb 2026</div>
-                                </div>
-                                <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Research Publication 2025</div>
-                                    <div class="col-span-2 text-gray-600">Research</div>
-                                    <div class="col-span-2 text-gray-600">BSED</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">25 Feb 2026</div>
-                                </div>
-                                <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Inclusive Education Module</div>
-                                    <div class="col-span-2 text-gray-600">Instruction</div>
-                                    <div class="col-span-2 text-gray-600">BSNED</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">22 Feb 2026</div>
-                                </div>
-                                <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Cultural Heritage Documentation</div>
-                                    <div class="col-span-2 text-gray-600">Extension</div>
-                                    <div class="col-span-2 text-gray-600">BCAED</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">18 Feb 2026</div>
-                                </div>
-                                <div class="grid grid-cols-12 py-2 text-sm items-center">
-                                    <div class="col-span-5 text-gray-700">Faculty Employment Contract</div>
-                                    <div class="col-span-2 text-gray-600">Employment</div>
-                                    <div class="col-span-2 text-gray-600">BEED</div>
-                                    <div class="col-span-3 text-gray-400 text-xs">15 Feb 2026</div>
-                                </div>
+                            <div class="divide-y divide-gray-100" id="recentUploadsDesktop">
+                                <div class="py-4 text-center text-gray-500 text-sm">Loading recent uploads...</div>
                             </div>
                         </div>
-                        <div class="block md:hidden space-y-3">
-                            <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Syllabus - Elementary Education</div>
-                                <div class="text-xs text-gray-500">Instruction · BEED · 20 Feb 2026</div>
-                            </div>
-                            <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Research Publication 2025</div>
-                                <div class="text-xs text-gray-500">Research · BSED · 25 Feb 2026</div>
-                            </div>
-                            <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Inclusive Education Module</div>
-                                <div class="text-xs text-gray-500">Instruction · BSNED · 22 Feb 2026</div>
-                            </div>
-                            <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Cultural Heritage Documentation</div>
-                                <div class="text-xs text-gray-500">Extension · BCAED · 18 Feb 2026</div>
-                            </div>
-                            <div class="border-b pb-2">
-                                <div class="font-medium text-gray-800 text-sm">Faculty Employment Contract</div>
-                                <div class="text-xs text-gray-500">Employment · BEED · 15 Feb 2026</div>
-                            </div>
+                        <div class="block md:hidden space-y-3" id="recentUploadsMobile">
+                            <div class="py-4 text-center text-gray-500 text-sm">Loading recent uploads...</div>
                         </div>
                     </div>
                 </div>
@@ -269,45 +221,54 @@
         </main>
     </div>
 
-    <!-- Upload success modal -->
-    <div id="uploadSuccessModal" class="fixed inset-0 hidden items-center justify-center z-50">
-        <div id="uploadSuccessBackdrop" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-        <div class="relative bg-white w-[90vw] max-w-md rounded-2xl shadow-2xl p-6 mx-4 animate-scale-in">
-            <div class="flex items-start gap-3">
-                <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-2xl flex-shrink-0">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Upload Success Modal - Stays open until user closes -->
+    <div id="uploadSuccessModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50">
+        <div id="uploadSuccessBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white w-[90vw] max-w-md rounded-2xl shadow-2xl mx-4 transform transition-all duration-300 scale-100 opacity-100">
+            <!-- Close X button -->
+            <button id="modalCloseX" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Success icon header -->
+            <div class="absolute -top-5 left-1/2 transform -translate-x-1/2">
+                <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-800">Upload Successful!</h3>
-                    <p class="text-sm text-gray-500 mt-1">Your document has been uploaded successfully and will appear in Documents and Approvals.</p>
-                </div>
             </div>
-            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-2">
-                <button type="button" id="closeUploadSuccessBtn" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
-                <a href="documents.html" id="goToDocumentsBtn" class="px-4 py-2 rounded-lg bg-teal-700 text-white hover:bg-teal-800 text-center transition-colors">View Documents</a>
+            
+            <!-- Modal content -->
+            <div class="pt-8 pb-6 px-6 text-center">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Upload Successful!</h3>
+                <div id="modalDocumentTitle" class="text-teal-600 font-medium text-sm mb-2">Document Title</div>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Your document has been uploaded successfully and will appear in Documents and Approvals.
+                </p>
+                
+                <!-- Divider -->
+                <div class="my-5 h-px bg-gray-100"></div>
+                
+                <!-- Action buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button type="button" id="closeUploadSuccessBtn" class="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                        Close
+                    </button>
+                    <a href="documents.html" id="goToDocumentsBtn" class="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-center transition-colors font-medium">
+                        View Documents
+                    </a>
+                    <button type="button" id="uploadAnotherBtn" class="px-5 py-2 rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors font-medium">
+                        Upload Another
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <style>
-        @keyframes scale-in {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        .animate-scale-in {
-            animation: scale-in 0.2s ease-out;
-        }
-    </style>
-
-    <!-- Session Manager -->
+    <!-- Session Manager Scripts -->
     <script src="js/sidebar-updater.js"></script>
     <script src="js/session-manager.js"></script>
     <!-- Upload JS -->
