@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const bcrypt = require('bcrypt');
+const { auth } = require('../middleware/auth');
 
 // @route   POST api/profile/faculty
 // @desc    Create a new user and faculty profile
@@ -74,6 +75,96 @@ router.post('/faculty', async (req, res) => {
     } catch (err) {
         console.error('Error during faculty profile creation:', err.message);
         res.status(500).json({ msg: `Server error: ${err.message}` });
+    }
+});
+
+// @route   PUT api/profile/update
+// @desc    Update user profile information
+// @access  Private
+router.put('/update', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {
+            firstName,
+            lastName,
+            middleInitial,
+            dateOfBirth,
+            age,
+            gender,
+            civilStatus,
+            nationality,
+            phone,
+            address
+        } = req.body;
+
+        // Update users table
+        await db.query(
+            'UPDATE users SET firstName = ?, lastName = ?, middleInitial = ? WHERE id = ?',
+            [firstName, lastName, middleInitial, userId]
+        );
+
+        // Check if faculty profile exists
+        const [profile] = await db.query('SELECT id FROM faculty_profiles WHERE user_id = ?', [userId]);
+        
+        if (profile.length > 0) {
+            // Update existing profile
+            await db.query(
+                `UPDATE faculty_profiles SET 
+                    dateOfBirth = ?, age = ?, gender = ?, civilStatus = ?, 
+                    nationality = ?, phone = ?, address = ?
+                WHERE user_id = ?`,
+                [dateOfBirth, age, gender, civilStatus, nationality, phone, address, userId]
+            );
+        } else {
+            // Create new profile
+            await db.query(
+                `INSERT INTO faculty_profiles 
+                (user_id, dateOfBirth, age, gender, civilStatus, nationality, phone, address) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [userId, dateOfBirth, age, gender, civilStatus, nationality, phone, address]
+            );
+        }
+
+        res.json({ msg: 'Profile updated successfully' });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET api/profile/me
+// @desc    Get current user profile
+// @access  Private
+router.get('/me', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        const [users] = await db.query(
+            'SELECT id, email, firstName, lastName, middleInitial, role, status FROM users WHERE id = ?',
+            [userId]
+        );
+        
+        if (users.length === 0) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        
+        const user = users[0];
+        
+        // Get faculty profile if exists
+        const [profiles] = await db.query(
+            'SELECT * FROM faculty_profiles WHERE user_id = ?',
+            [userId]
+        );
+        
+        const profile = profiles.length > 0 ? profiles[0] : null;
+        
+        res.json({
+            user,
+            profile
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({ msg: 'Server error' });
     }
 });
 

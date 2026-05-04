@@ -146,9 +146,9 @@
                     <div class="bg-white rounded-xl p-5 stat-card">
                         <div class="flex justify-between items-start">
                             <div><span class="text-gray-500 text-sm">Approved</span><div id="statApproved" class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">0</div></div>
-                            <span class="badge-approved p-2 rounded-lg text-lg font-medium">App</span>
+                            <span class="badge-approved p-2 rounded-lg text-lg font-medium">✓</span>
                         </div>
-                        <div class="text-xs text-green-600 mt-2" id="approvalRate">Loading...</div>
+                        <div class="text-xs text-green-600 mt-2" id="approvalRate">Approved + Locked</div>
                     </div>
                     
                     <div class="bg-white rounded-xl p-5 stat-card">
@@ -182,15 +182,16 @@
                                     <tr class="border-b border-gray-200 text-gray-500 text-xs">
                                         <th class="text-left py-3 px-2">Document</th>
                                         <th class="text-left py-3 px-2">Category</th>
+                                        <th class="text-left py-3 px-2">Standards</th>
                                         <th class="text-left py-3 px-2">Department</th>
                                         <th class="text-left py-3 px-2">Status</th>
                                         <th class="text-left py-3 px-2">Version</th>
                                         <th class="text-left py-3 px-2">Uploaded By</th>
                                         <th class="text-left py-3 px-2">Actions</th>
-                                    <tr>
+                                    </tr>
                                 </thead>
                                 <tbody id="recentDocsTable" class="divide-y divide-gray-100">
-                                    <tr><td colspan="7" class="py-8 text-center text-gray-400">Loading documents...</td></tr>
+                                    <tr><td colspan="8" class="py-8 text-center text-gray-400">Loading documents...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -329,7 +330,8 @@
             if (!token) return;
 
             try {
-                const response = await fetch('http://localhost:3000/api/documents?scope=all', {
+                // Evaluators can only see LOCKED documents
+                const response = await fetch('http://localhost:3000/api/documents?status=locked', {
                     headers: { 'x-auth-token': token }
                 });
                 

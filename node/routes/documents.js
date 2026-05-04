@@ -6,112 +6,9 @@ const router = express.Router();
 const db = require('../database');
 const { auth } = require('../middleware/auth');
 
-// Function to automatically update SQL file with new document
-async function updateSQLFileWithNewDocument(document, files) {
-  const sqlFilePath = path.join(__dirname, 'drms_db.sql');
-  
-  try {
-    // Read the current SQL file
-    let sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
-    
-    // Find the documents INSERT section and get the last entry
-    const documentsInsertRegex = /INSERT INTO `documents`[\s\S]*?VALUES\s*(.*?);/;
-    const documentsMatch = sqlContent.match(documentsInsertRegex);
-    
-    if (!documentsMatch) {
-      throw new Error('Documents INSERT section not found');
-    }
-    
-    // Get the last document ID to determine next ID
-    const lastIdMatch = sqlContent.match(/\((\d+),\s*'[^']*'/g);
-    let lastId = 0;
-    if (lastIdMatch) {
-      const lastEntry = lastIdMatch[lastIdMatch.length - 1];
-      const idMatch = lastEntry.match(/\((\d+),/);
-      if (idMatch) {
-        lastId = parseInt(idMatch[1]);
-      }
-    }
-    
-    // Use the provided document ID or generate new one
-    const newDocumentId = document.id || (lastId + 1);
-    
-    // Find the end of the documents INSERT section (the last semicolon)
-    const documentsInsertStart = sqlContent.indexOf("INSERT INTO `documents`");
-    const documentsSection = sqlContent.substring(documentsInsertStart);
-    const lastSemicolonIndex = documentsSection.lastIndexOf(';');
-    const documentsInsertEnd = documentsInsertStart + lastSemicolonIndex;
-    
-    const beforeDocuments = sqlContent.substring(0, documentsInsertEnd);
-    const afterDocuments = sqlContent.substring(documentsInsertEnd);
-    
-    // Create new document INSERT statement with proper escaping
-    const escapedTitle = document.title.replace(/'/g, "''");
-    const escapedDescription = document.description ? document.description.replace(/'/g, "''") : null;
-    const escapedKeywords = document.keywords ? document.keywords.replace(/'/g, "''") : null;
-    const escapedAuthor = document.author_name.replace(/'/g, "''");
-    
-    const newDocumentInsert = `,\n(${newDocumentId}, '${escapedTitle}', '${document.category}', ${document.category_id || 'NULL'}, '${document.department}', ${document.department_id || 'NULL'}, '${document.version}', ${escapedDescription ? `'${escapedDescription}'` : 'NULL'}, ${escapedKeywords ? `'${escapedKeywords}'` : 'NULL'}, '${document.workflow_status}', ${document.uploader_id}, '${escapedAuthor}', '${document.created_at}', '${document.updated_at}', '${document.category_name}', '${document.department_code}');`;
-    
-    // Update documents section
-    sqlContent = beforeDocuments + newDocumentInsert + afterDocuments;
-    
-    // Add file entries if files exist
-    if (files && files.length > 0) {
-      const filesInsertStart = sqlContent.indexOf("INSERT INTO `document_files`");
-      if (filesInsertStart !== -1) {
-        const filesSection = sqlContent.substring(filesInsertStart);
-        const filesLastSemicolonIndex = filesSection.lastIndexOf(';');
-        const filesInsertEnd = filesInsertStart + filesLastSemicolonIndex;
-        
-        const beforeFiles = sqlContent.substring(0, filesInsertEnd);
-        const afterFiles = sqlContent.substring(filesInsertEnd);
-        
-        let fileEntries = '';
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const fileName = path.basename(file.path);
-          const escapedOriginalName = file.originalname.replace(/'/g, "''");
-          fileEntries += `,\n(${newDocumentId + 100 + i}, ${newDocumentId}, '${escapedOriginalName}', '${fileName}', '${file.mimetype}', ${file.size}, '/uploads/${fileName}', '${document.created_at}')`;
-        }
-        fileEntries += ';';
-        
-        sqlContent = beforeFiles + fileEntries + afterFiles;
-      }
-    }
-    
-    // Add audit log entry
-    const auditInsertStart = sqlContent.indexOf("INSERT INTO `audit_logs`");
-    if (auditInsertStart !== -1) {
-      const auditSection = sqlContent.substring(auditInsertStart);
-      const auditLastSemicolonIndex = auditSection.lastIndexOf(';');
-      const auditInsertEnd = auditInsertStart + auditLastSemicolonIndex;
-      
-      const beforeAudit = sqlContent.substring(0, auditInsertEnd);
-      const afterAudit = sqlContent.substring(auditInsertEnd);
-      
-      const auditData = {
-        title: document.title,
-        category: document.category,
-        department: document.department,
-        status: document.workflow_status
-      };
-      const escapedAuditData = JSON.stringify(auditData).replace(/'/g, "''");
-      
-      const newAuditEntry = `,\n(${newDocumentId + 200}, ${document.uploader_id}, 'DOCUMENT_UPLOAD', 'document', ${newDocumentId}, NULL, '${escapedAuditData}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '${document.created_at}');`;
-      
-      sqlContent = beforeAudit + newAuditEntry + afterAudit;
-    }
-    
-    // Write the updated content back to the file
-    fs.writeFileSync(sqlFilePath, sqlContent, 'utf8');
-    console.log(`SQL file updated with new document: ${document.title} (ID: ${newDocumentId})`);
-    
-  } catch (error) {
-    console.error('Error updating SQL file:', error);
-    throw error;
-  }
-}
+// REMOVED: SQL file auto-update function
+// Reason: SQL files should be version-controlled, not auto-updated
+// This functionality was causing unnecessary complexity and is not needed for production
 
 function normalizeRole(role) {
   return (role || '').toString().toLowerCase().trim();
@@ -181,7 +78,8 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       description,
       keywords,
       workflow,
-      expiryDate
+      expiryDate,
+      standard_id
     } = req.body || {};
 
     const files = req.files || [];
@@ -207,13 +105,17 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
     const categoryName = categoryRow ? categoryRow.name : String(category_id);
     const resolvedCategoryId = categoryRow ? categoryRow.id : null;
 
-    // Get department_id from departments table — try code first, then name
+    // Get department_id from departments table — STANDARDIZED: exact match only
     const [departments] = await db.query(
-      'SELECT id, code FROM departments WHERE code = ? OR name = ? LIMIT 1',
-      [department.toUpperCase(), department]
+      'SELECT id, code FROM departments WHERE UPPER(code) = UPPER(?) OR LOWER(name) = LOWER(?) LIMIT 1',
+      [department, department]
     );
     const departmentId = departments.length > 0 ? departments[0].id : null;
     const departmentCode = departments.length > 0 ? departments[0].code : department.toUpperCase();
+    
+    if (!departmentId) {
+      console.warn(`Department not found in departments table: "${department}". Document will be created with null department_id.`);
+    }
 
     // Insert document record
     const [result] = await db.query(
@@ -263,6 +165,18 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       );
     }
 
+    // Save selected standard into document_standards join table
+    if (standard_id && Number(standard_id)) {
+      try {
+        await db.query(
+          'INSERT IGNORE INTO document_standards (document_id, standard_id) VALUES (?, ?)',
+          [documentId, Number(standard_id)]
+        );
+      } catch (stdErr) {
+        console.warn('document_standards insert skipped:', stdErr.message);
+      }
+    }
+
     try {
       const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       await db.query(
@@ -272,37 +186,7 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
       );
     } catch (auditErr) { console.log('Audit log skipped:', auditErr.message); }
 
-    // Auto-update SQL file with new document
-    try {
-      const documentData = {
-        id: documentId,
-        title,
-        category: categoryName,
-        category_id: resolvedCategoryId,
-        department,
-        department_id: departmentId,
-        version: version || 'v1.0',
-        description: description || null,
-        keywords: keywords || null,
-        workflow_status: status,
-        uploader_id: req.user.id,
-        author_name: author,
-        created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        updated_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        category_name: categoryName,
-        department_code: department.toUpperCase()
-      };
-      
-      console.log('Attempting to update SQL file with document:', documentData);
-      console.log('Files to add:', files.length);
-      
-      await updateSQLFileWithNewDocument(documentData, files);
-      console.log('SQL file updated successfully with new document:', title);
-    } catch (sqlErr) {
-      console.error('SQL file update failed:', sqlErr);
-      console.error('SQL file update error details:', sqlErr.message);
-      console.error('Stack trace:', sqlErr.stack);
-    }
+    // SQL file auto-update removed - not needed for production
 
     res.status(201).json({
       msg: 'Document uploaded successfully',
@@ -323,46 +207,7 @@ router.post('/upload', auth, upload.array('files', 10), async (req, res) => {
   }
 });
 
-// @route   POST /api/documents/test-sql-update
-// @desc    Test SQL file update functionality
-// @access  Private
-router.post('/test-sql-update', auth, async (req, res) => {
-  try {
-    const testDocument = {
-      id: 999,
-      title: 'Test Document ' + Date.now(),
-      category: 'instruction',
-      category_id: 1,
-      department: 'BEED',
-      department_id: 1,
-      version: 'v1.0',
-      description: 'Test document for SQL update',
-      keywords: 'test',
-      workflow_status: 'pending',
-      uploader_id: req.user.id,
-      author_name: 'Test User',
-      created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      updated_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      category_name: 'instruction',
-      department_code: 'BEED'
-    };
-    
-    console.log('Testing SQL file update with:', testDocument);
-    
-    await updateSQLFileWithNewDocument(testDocument, []);
-    
-    res.status(200).json({
-      msg: 'SQL file update test successful',
-      testDocument: testDocument
-    });
-  } catch (error) {
-    console.error('SQL file update test failed:', error);
-    res.status(500).json({
-      msg: 'SQL file update test failed',
-      error: error.message
-    });
-  }
-});
+// Test route removed - SQL auto-update functionality removed
 
 // @route   GET /api/documents/stats/dashboard
 // @desc    Get real dashboard statistics from database
@@ -760,10 +605,10 @@ router.get('/', auth, async (req, res) => {
     const where = [];
     const params = [];
 
-    // Evaluators can only see approved documents
+    // Evaluators can only see locked documents
     if (isEvaluator) {
       where.push('d.workflow_status = ?');
-      params.push('approved');
+      params.push('locked');
     } else if (isDeptHead) {
       // Dept. Head can see their own documents + documents from their department faculty
       // First get the Dept. Head's department
@@ -774,14 +619,10 @@ router.get('/', auth, async (req, res) => {
       
       if (deptHeadProfile.length > 0 && deptHeadProfile[0].department) {
         const deptName = deptHeadProfile[0].department;
-        // Get department_id from departments table - try multiple matching strategies
+        // STANDARDIZED: Get department_id using exact match only
         const [deptInfo] = await db.query(
-          `SELECT id FROM departments 
-           WHERE name = ? OR code = ? OR 
-           name LIKE CONCAT('%', ?, '%') OR 
-           ? LIKE CONCAT('%', code, '%')
-           LIMIT 1`,
-          [deptName, deptName.toUpperCase(), deptName, deptName]
+          'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+          [deptName, deptName]
         );
         
         if (deptInfo.length > 0) {
@@ -789,9 +630,10 @@ router.get('/', auth, async (req, res) => {
           where.push('(d.uploader_id = ? OR d.department_id = ?)');
           params.push(req.user.id, deptInfo[0].id);
         } else {
-          // If department not found by ID, try matching by department_code or area field
-          where.push('(d.uploader_id = ? OR d.department_code = ? OR d.area = ?)');
-          params.push(req.user.id, deptName.toUpperCase(), deptName);
+          console.warn(`Department not found for Dept. Head: "${deptName}". Showing only own documents.`);
+          // If department not found by exact match, only show their own documents
+          where.push('d.uploader_id = ?');
+          params.push(req.user.id);
         }
       } else {
         // If no department profile, only show their own documents
@@ -839,6 +681,25 @@ router.get('/', auth, async (req, res) => {
       `,
       params
     );
+
+    // Attach standards via document_standards join table (specific per document)
+    if (rows.length > 0) {
+      const docIds = rows.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
+      });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
 
     res.json(rows);
   } catch (err) {
@@ -907,11 +768,14 @@ router.get('/user/department', auth, async (req, res) => {
       // Join didn't resolve — try a direct lookup using the raw stored value
       const raw = (profile[0].raw_department || '').trim();
       if (raw) {
+        // STANDARDIZED: Exact match only on name or code
         const [dept] = await db.query(
-          'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE name = ? OR code = ? OR name LIKE ? LIMIT 1',
-          [raw, raw.toUpperCase(), `%${raw}%`]
+          'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+          [raw, raw]
         );
         if (dept.length) return res.json(dept[0]);
+        
+        console.warn(`Department not found for user ${req.user.id}: "${raw}"`);
       }
       // Return raw value so the upload form at least shows something
       return res.json({ department_id: null, department_name: profile[0].raw_department, department_code: null });
@@ -954,6 +818,25 @@ router.get('/approvals', auth, async (req, res) => {
       `
     );
     
+    // Attach standards for each document
+    if (rows.length > 0) {
+      const docIds = rows.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
+      });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
+    
     res.json(rows);
   } catch (err) {
     console.error('Approvals error:', err);
@@ -961,90 +844,142 @@ router.get('/approvals', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/documents/stats
-// @desc    Get dashboard statistics for evaluator
+// @route   GET /api/documents/stats/evaluator
+// @desc    Get dashboard statistics for evaluator (locked documents only)
 // @access  Private (Evaluator)
-router.get('/stats/dashboard', auth, async (req, res) => {
+router.get('/stats/evaluator', auth, async (req, res) => {
   try {
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
     
-    // Evaluators can only see approved documents stats
-    const statusFilter = isEvaluator ? "WHERE d.workflow_status = 'approved'" : '';
+    if (!isEvaluator) {
+      return res.status(403).json({ msg: 'This endpoint is for evaluators only' });
+    }
     
-    // Get total documents count
+    // Evaluators can see locked documents in the main view, but stats show all approved+locked
+    const statusFilter = "WHERE d.workflow_status = 'locked'";
+    
+    // Get total locked documents count (for main stats and categories)
     const [totalResult] = await db.query(
       `SELECT COUNT(*) as total FROM documents d ${statusFilter}`
     );
     const totalDocuments = totalResult[0]?.total || 0;
     
-    // Get counts by category
+    // Get total required documents from category_requirements (sum across all categories and departments)
+    const [totalRequiredResult] = await db.query(
+      `SELECT SUM(expected_documents) as total_required FROM category_requirements`
+    );
+    const totalRequiredDocuments = totalRequiredResult[0]?.total_required || 0;
+    
+    // Get total active departments count
+    const [totalDepartmentsResult] = await db.query(
+      `SELECT COUNT(*) as total FROM departments WHERE is_active = 1`
+    );
+    const totalDepartmentsCount = totalDepartmentsResult[0]?.total || 0;
+    
+    // Get ALL approved documents count (approved + locked, since locked is also approved)
+    const [approvedResult] = await db.query(
+      `SELECT COUNT(*) as total FROM documents WHERE workflow_status IN ('approved', 'locked')`
+    );
+    const approvedDocuments = approvedResult[0]?.total || 0;
+    
+    // Get locked documents count separately
+    const [lockedResult] = await db.query(
+      `SELECT COUNT(*) as total FROM documents WHERE workflow_status = 'locked'`
+    );
+    const lockedDocuments = lockedResult[0]?.total || 0;
+    
+    // Get pending documents count
+    const [pendingResult] = await db.query(
+      `SELECT COUNT(*) as total FROM documents WHERE workflow_status IN ('pending', 'validated')`
+    );
+    const pendingDocuments = pendingResult[0]?.total || 0;
+    
+    // Get counts by category (only locked documents) with requirements from category_requirements
     const [categoryStats] = await db.query(
       `SELECT 
         c.name,
         c.display_name,
         COUNT(d.id) as count,
-        ROUND((COUNT(d.id) * 100.0 / ?), 1) as percentage
+        ROUND((COUNT(d.id) * 100.0 / ?), 1) as percentage,
+        SUM(cr.expected_documents) as total_required
        FROM categories c
-       LEFT JOIN documents d ON c.id = d.category_id ${statusFilter ? 'AND d.workflow_status = \'approved\'' : ''}
+       LEFT JOIN documents d ON c.id = d.category_id AND d.workflow_status = 'locked'
+       LEFT JOIN category_requirements cr ON c.id = cr.category_id
        WHERE c.is_active = 1
        GROUP BY c.id, c.name, c.display_name
        ORDER BY c.sort_order ASC`,
       [totalDocuments || 1]
     );
     
-    // Get counts by status
-    const [statusStats] = await db.query(
-      `SELECT 
-        workflow_status as status,
-        COUNT(*) as count
-       FROM documents d
-       ${statusFilter}
-       GROUP BY workflow_status`
-    );
-    
-    // Get counts by department
+    // Get counts by department (only locked documents)
     const [departmentStats] = await db.query(
       `SELECT 
         dept.code,
         dept.name,
         COUNT(d.id) as count
        FROM departments dept
-       LEFT JOIN documents d ON dept.id = d.department_id ${statusFilter ? 'AND d.workflow_status = \'approved\'' : ''}
+       LEFT JOIN documents d ON dept.id = d.department_id AND d.workflow_status = 'locked'
        WHERE dept.is_active = 1
        GROUP BY dept.id, dept.code, dept.name
        ORDER BY dept.code ASC`
     );
     
-    // Get recent documents (limit 10 for dashboard)
+    // Get recent locked documents (limit 10 for dashboard)
     const [recentDocs] = await db.query(
       `SELECT 
         d.id,
         d.title,
         d.category,
+        d.category_name,
         d.department_code as department,
         d.workflow_status as status,
         d.version,
         d.author_name,
         d.created_at,
         c.display_name as category_display_name,
+        dept.name as department_name,
         (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
        FROM documents d
        LEFT JOIN categories c ON d.category_id = c.id
+       LEFT JOIN departments dept ON d.department_id = dept.id
        ${statusFilter}
        ORDER BY d.created_at DESC
        LIMIT 10`
     );
     
+    // Attach standards to recent documents
+    if (recentDocs.length > 0) {
+      const docIds = recentDocs.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.name, s.code
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
+      });
+      recentDocs.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
+    
     res.json({
       total: totalDocuments,
+      total_required: totalRequiredDocuments,
+      total_departments: totalDepartmentsCount,
+      locked: lockedDocuments,
+      approved: approvedDocuments,
+      pending: pendingDocuments,
       categories: categoryStats,
-      statuses: statusStats,
       departments: departmentStats,
       recentDocuments: recentDocs
     });
   } catch (err) {
-    console.error('Dashboard stats error:', err);
+    console.error('Evaluator dashboard stats error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -1079,66 +1014,34 @@ router.get('/category-requirements', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/documents/:id
-// @desc    Get single document with all files
+// @route   GET /api/documents/standards
+// @desc    Get active standards, optionally filtered by category_id
 // @access  Private
-router.get('/:id', auth, async (req, res) => {
+router.get('/standards', auth, async (req, res) => {
   try {
-    const docId = Number(req.params.id);
-    
-    const [docs] = await db.query(
-      `
-      SELECT 
-        d.*,
-        u.firstName AS uploader_firstName,
-        u.lastName AS uploader_lastName,
-        u.email AS uploader_email,
-        c.display_name AS category_display_name,
-        dept.name AS department_name,
-        dept.code AS department_code
-      FROM documents d
-      LEFT JOIN users u ON d.uploader_id = u.id
-      LEFT JOIN categories c ON d.category_id = c.id
-      LEFT JOIN departments dept ON d.department_id = dept.id
-      WHERE d.id = ?
-      `,
-      [docId]
+    const { category_id } = req.query;
+    const params = [];
+    let where = 'WHERE s.is_active = 1';
+    if (category_id) {
+      where += ' AND s.category_id = ?';
+      params.push(Number(category_id));
+    }
+    const [rows] = await db.query(
+      `SELECT s.id, s.name, s.code, s.description, s.category_id, c.display_name AS category_name
+       FROM standards s
+       LEFT JOIN categories c ON s.category_id = c.id
+       ${where}
+       ORDER BY s.sort_order ASC`,
+      params
     );
-
-    if (docs.length === 0) {
-      return res.status(404).json({ msg: 'Document not found' });
-    }
-
-    const document = docs[0];
-
-    // Check permissions
-    const normalizedRole = normalizeRole(req.user.role);
-    const isEvaluator = normalizedRole === 'evaluator';
-    const viewAll = canViewAll(req.user.role);
-
-    if (isEvaluator && document.workflow_status !== 'approved') {
-      return res.status(403).json({ msg: 'Evaluators can only view approved documents' });
-    }
-
-    if (!viewAll && document.uploader_id !== req.user.id) {
-      return res.status(403).json({ msg: 'Not authorized to view this document' });
-    }
-
-    // Get all files for this document
-    const [files] = await db.query(
-      'SELECT * FROM document_files WHERE document_id = ? ORDER BY id ASC',
-      [docId]
-    );
-
-    document.files = files;
-
-    res.json(document);
+    res.json(rows);
   } catch (err) {
-    console.error('Get document error:', err);
+    console.error('Get standards error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
+// @route   GET /api/documents/evidence-map
 // @route   PUT /api/documents/:id/status
 // @desc    Update document workflow status
 // @access  Private (Admin, Dean)
@@ -1236,15 +1139,10 @@ router.get('/:id/comments', auth, async (req, res) => {
         const deptValue = profile[0].department.trim();
         console.log('Dept. Head department value:', deptValue);
         
-        // Try multiple matching strategies
+        // STANDARDIZED: Exact match only on name or code
         const [dept] = await db.query(
-          `SELECT id FROM departments 
-           WHERE name = ? OR code = ? 
-           OR name LIKE ? OR code LIKE ?
-           OR ? LIKE CONCAT('%', code, '%')
-           OR ? LIKE CONCAT('%', name, '%')
-           LIMIT 1`,
-          [deptValue, deptValue.toUpperCase(), `%${deptValue}%`, `%${deptValue.toUpperCase()}%`, deptValue, deptValue]
+          'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+          [deptValue, deptValue]
         );
         console.log('Department lookup result:', dept);
         
@@ -1344,15 +1242,10 @@ router.delete('/:id', auth, async (req, res) => {
         const deptValue = profile[0].department.trim();
         console.log('Dept. Head department value:', deptValue);
         
-        // Try multiple matching strategies
+        // STANDARDIZED: Exact match only on name or code
         const [dept] = await db.query(
-          `SELECT id FROM departments 
-           WHERE name = ? OR code = ? 
-           OR name LIKE ? OR code LIKE ?
-           OR ? LIKE CONCAT('%', code, '%')
-           OR ? LIKE CONCAT('%', name, '%')
-           LIMIT 1`,
-          [deptValue, deptValue.toUpperCase(), `%${deptValue}%`, `%${deptValue.toUpperCase()}%`, deptValue, deptValue]
+          'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+          [deptValue, deptValue]
         );
         console.log('Department lookup result:', dept);
         
@@ -1407,4 +1300,346 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/documents/evidence-map
+// @desc    Get evidence map data (category requirements by department)
+// @access  Private (Evaluator)
+router.get('/evidence-map', auth, async (req, res) => {
+  try {
+    // Get category requirements with current document counts
+    const [evidenceData] = await db.query(
+      `SELECT 
+        c.id as category_id,
+        c.name as category_name,
+        c.display_name as category_display_name,
+        d.id as department_id,
+        d.code as department_code,
+        d.name as department_name,
+        cr.expected_documents,
+        COUNT(doc.id) as current_documents
+       FROM categories c
+       CROSS JOIN departments d
+       LEFT JOIN category_requirements cr ON c.id = cr.category_id AND d.id = cr.department_id
+       LEFT JOIN documents doc ON c.id = doc.category_id AND d.id = doc.department_id AND doc.workflow_status = 'locked'
+       WHERE c.is_active = 1 AND d.is_active = 1
+       GROUP BY c.id, c.name, c.display_name, d.id, d.code, d.name, cr.expected_documents
+       ORDER BY c.sort_order ASC, d.code ASC`
+    );
+    
+    // Group by category
+    const categories = {};
+    evidenceData.forEach(row => {
+      const catName = row.category_name;
+      if (!categories[catName]) {
+        categories[catName] = {
+          category_id: row.category_id,
+          category_name: row.category_name,
+          category_display_name: row.category_display_name,
+          departments: [],
+          total_current: 0,
+          total_expected: 0
+        };
+      }
+      
+      const current = row.current_documents || 0;
+      const expected = row.expected_documents || 0;
+      
+      categories[catName].departments.push({
+        department_id: row.department_id,
+        department_code: row.department_code,
+        department_name: row.department_name,
+        current: current,
+        expected: expected,
+        status: current >= expected ? 'complete' : 'partial'
+      });
+      
+      categories[catName].total_current += current;
+      categories[catName].total_expected += expected;
+    });
+    
+    res.json(categories);
+  } catch (err) {
+    console.error('Evidence map error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/search
+// @desc    Search documents with filters (evaluator sees only locked)
+// @access  Private
+router.get('/search', auth, async (req, res) => {
+  try {
+    const { q, category, department, status, sort } = req.query;
+    const normalizedRole = normalizeRole(req.user.role);
+    const isEvaluator = normalizedRole === 'evaluator';
+    
+    const where = [];
+    const params = [];
+    
+    // Evaluators can only see locked documents
+    if (isEvaluator) {
+      where.push('d.workflow_status = ?');
+      params.push('locked');
+    } else if (status) {
+      where.push('d.workflow_status = ?');
+      params.push(status);
+    }
+    
+    // Search query
+    if (q) {
+      where.push('(d.title LIKE ? OR d.author_name LIKE ? OR d.description LIKE ? OR d.keywords LIKE ?)');
+      const searchTerm = `%${q}%`;
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+    
+    // Category filter
+    if (category && category !== 'all') {
+      where.push('c.name = ?');
+      params.push(category);
+    }
+    
+    // Department filter
+    if (department && department !== 'all') {
+      where.push('dept.code = ?');
+      params.push(department.toUpperCase());
+    }
+    
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    
+    // Sort order
+    let orderBy = 'ORDER BY d.created_at DESC';
+    if (sort === 'date_asc') orderBy = 'ORDER BY d.created_at ASC';
+    else if (sort === 'title_asc') orderBy = 'ORDER BY d.title ASC';
+    else if (sort === 'title_desc') orderBy = 'ORDER BY d.title DESC';
+    
+    const [documents] = await db.query(
+      `SELECT 
+        d.*,
+        c.display_name as category_display_name,
+        dept.name as department_name,
+        dept.code as department_code,
+        (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
+       FROM documents d
+       LEFT JOIN categories c ON d.category_id = c.id
+       LEFT JOIN departments dept ON d.department_id = dept.id
+       ${whereSql}
+       ${orderBy}
+       LIMIT 100`,
+      params
+    );
+    
+    // Attach standards
+    if (documents.length > 0) {
+      const docIds = documents.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
+      });
+      documents.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
+    
+    res.json(documents);
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/reports/compliance
+// @desc    Get compliance summary report
+// @access  Private (Evaluator)
+router.get('/reports/compliance', auth, async (req, res) => {
+  try {
+    // Get category compliance data
+    const [categoryCompliance] = await db.query(
+      `SELECT 
+        c.id as category_id,
+        c.name as category_name,
+        c.display_name as category_display_name,
+        SUM(cr.expected_documents) as total_expected,
+        COUNT(DISTINCT CASE WHEN d.workflow_status = 'locked' THEN d.id END) as total_current
+       FROM categories c
+       LEFT JOIN category_requirements cr ON c.id = cr.category_id
+       LEFT JOIN documents d ON c.id = d.category_id
+       WHERE c.is_active = 1
+       GROUP BY c.id, c.name, c.display_name
+       ORDER BY c.sort_order ASC`
+    );
+    
+    // Get department breakdown per category
+    const [departmentBreakdown] = await db.query(
+      `SELECT 
+        c.name as category_name,
+        d.code as department_code,
+        d.name as department_name,
+        cr.expected_documents,
+        COUNT(doc.id) as current_documents
+       FROM categories c
+       CROSS JOIN departments d
+       LEFT JOIN category_requirements cr ON c.id = cr.category_id AND d.id = cr.department_id
+       LEFT JOIN documents doc ON c.id = doc.category_id AND d.id = doc.department_id AND doc.workflow_status = 'locked'
+       WHERE c.is_active = 1 AND d.is_active = 1
+       GROUP BY c.name, d.code, d.name, cr.expected_documents
+       ORDER BY c.name ASC, d.code ASC`
+    );
+    
+    // Format response
+    const compliance = {
+      categories: categoryCompliance.map(cat => ({
+        category_name: cat.category_name,
+        category_display_name: cat.category_display_name,
+        total_current: cat.total_current || 0,
+        total_expected: cat.total_expected || 0,
+        percentage: cat.total_expected > 0 ? Math.round((cat.total_current / cat.total_expected) * 100) : 0
+      })),
+      departments: {}
+    };
+    
+    // Group departments by category
+    departmentBreakdown.forEach(row => {
+      if (!compliance.departments[row.category_name]) {
+        compliance.departments[row.category_name] = [];
+      }
+      const current = row.current_documents || 0;
+      const expected = row.expected_documents || 0;
+      compliance.departments[row.category_name].push({
+        department_code: row.department_code,
+        department_name: row.department_name,
+        current: current,
+        expected: expected,
+        status: current >= expected ? 'complete' : (current > 0 ? 'partial' : 'missing')
+      });
+    });
+    
+    res.json(compliance);
+  } catch (err) {
+    console.error('Compliance report error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/reports/gap-analysis
+// @desc    Get gap analysis report
+// @access  Private (Evaluator)
+router.get('/reports/gap-analysis', auth, async (req, res) => {
+  try {
+    // Find gaps (departments with missing documents)
+    const [gaps] = await db.query(
+      `SELECT 
+        c.name as category_name,
+        c.display_name as category_display_name,
+        d.code as department_code,
+        d.name as department_name,
+        cr.expected_documents,
+        COUNT(doc.id) as current_documents,
+        (cr.expected_documents - COUNT(doc.id)) as missing_documents
+       FROM categories c
+       CROSS JOIN departments d
+       LEFT JOIN category_requirements cr ON c.id = cr.category_id AND d.id = cr.department_id
+       LEFT JOIN documents doc ON c.id = doc.category_id AND d.id = doc.department_id AND doc.workflow_status = 'locked'
+       WHERE c.is_active = 1 AND d.is_active = 1 AND cr.expected_documents IS NOT NULL
+       GROUP BY c.name, c.display_name, d.code, d.name, cr.expected_documents
+       HAVING missing_documents > 0
+       ORDER BY missing_documents DESC, c.name ASC`
+    );
+    
+    // Group by category
+    const gapsByCategory = {};
+    gaps.forEach(gap => {
+      if (!gapsByCategory[gap.category_name]) {
+        gapsByCategory[gap.category_name] = {
+          category_display_name: gap.category_display_name,
+          gaps: []
+        };
+      }
+      gapsByCategory[gap.category_name].gaps.push({
+        department_code: gap.department_code,
+        department_name: gap.department_name,
+        expected: gap.expected_documents,
+        current: gap.current_documents || 0,
+        missing: gap.missing_documents
+      });
+    });
+    
+    res.json(gapsByCategory);
+  } catch (err) {
+    console.error('Gap analysis error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/:id
+// @desc    Get single document with all files
+// @access  Private
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const docId = Number(req.params.id);
+    
+    // Validate docId is a valid number
+    if (isNaN(docId) || docId <= 0) {
+      return res.status(400).json({ msg: 'Invalid document ID' });
+    }
+    
+    const [docs] = await db.query(
+      `
+      SELECT 
+        d.*,
+        u.firstName AS uploader_firstName,
+        u.lastName AS uploader_lastName,
+        u.email AS uploader_email,
+        c.display_name AS category_display_name,
+        dept.name AS department_name,
+        dept.code AS department_code
+      FROM documents d
+      LEFT JOIN users u ON d.uploader_id = u.id
+      LEFT JOIN categories c ON d.category_id = c.id
+      LEFT JOIN departments dept ON d.department_id = dept.id
+      WHERE d.id = ?
+      `,
+      [docId]
+    );
+
+    if (docs.length === 0) {
+      return res.status(404).json({ msg: 'Document not found' });
+    }
+
+    const document = docs[0];
+
+    // Check permissions
+    const normalizedRole = normalizeRole(req.user.role);
+    const isEvaluator = normalizedRole === 'evaluator';
+    const viewAll = canViewAll(req.user.role);
+
+    if (isEvaluator && document.workflow_status !== 'locked') {
+      return res.status(403).json({ msg: 'Evaluators can only view locked documents' });
+    }
+
+    if (!viewAll && document.uploader_id !== req.user.id) {
+      return res.status(403).json({ msg: 'Not authorized to view this document' });
+    }
+
+    // Get all files for this document
+    const [files] = await db.query(
+      'SELECT * FROM document_files WHERE document_id = ? ORDER BY id ASC',
+      [docId]
+    );
+
+    document.files = files;
+
+    res.json(document);
+  } catch (err) {
+    console.error('Get document error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
+

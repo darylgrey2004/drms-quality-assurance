@@ -18,32 +18,45 @@ function canFinalApprove(role) {
 }
 
 // Resolves the department_id for an area-chair. Returns null if not found.
+// STANDARDIZED: Uses exact matching only (name or code), no fuzzy matching
 async function getAreaChairDeptId(userId) {
   try {
-    // Try faculty_profiles first
+    // Try faculty_profiles first - get department string
     const [profile] = await db.query(
       'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
       [userId]
     );
+    
     if (profile.length && profile[0].department) {
       const deptValue = profile[0].department.trim();
+      
+      // STANDARDIZED: Exact match only on name or code (case-insensitive)
       const [dept] = await db.query(
-        'SELECT id FROM departments WHERE name = ? OR code = ? LIMIT 1',
-        [deptValue, deptValue.toUpperCase()]
+        'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+        [deptValue, deptValue]
       );
-      if (dept.length) return dept[0].id;
-      const [deptPartial] = await db.query(
-        'SELECT id FROM departments WHERE name LIKE ? OR code LIKE ? LIMIT 1',
-        [`%${deptValue}%`, `%${deptValue.toUpperCase()}%`]
-      );
-      if (deptPartial.length) return deptPartial[0].id;
+      
+      if (dept.length) {
+        console.log(`Department resolved: ${deptValue} -> ID ${dept[0].id}`);
+        return dept[0].id;
+      }
+      
+      console.warn(`Department not found in departments table: "${deptValue}" for user ${userId}`);
     }
+    
     // Fallback: look up department_id directly from the user's uploaded documents
     const [docDept] = await db.query(
       'SELECT department_id FROM documents WHERE uploader_id = ? AND department_id IS NOT NULL LIMIT 1',
       [userId]
     );
-    return docDept.length ? docDept[0].department_id : null;
+    
+    if (docDept.length) {
+      console.log(`Department resolved from user's documents: user ${userId} -> dept_id ${docDept[0].department_id}`);
+      return docDept[0].department_id;
+    }
+    
+    console.warn(`No department found for user ${userId}`);
+    return null;
   } catch (err) {
     console.error('getAreaChairDeptId error:', err.message);
     return null;
@@ -93,6 +106,7 @@ router.get('/pending', auth, async (req, res) => {
         d.workflow_status,
         d.created_at,
         d.updated_at,
+        d.category_id,
         CONCAT(COALESCE(u.firstName, ''), ' ', COALESCE(u.lastName, '')) AS author_name,
         dept.name AS department_name,
         c.display_name AS category_display_name,
@@ -116,6 +130,25 @@ router.get('/pending', auth, async (req, res) => {
       `,
       params
     );
+
+    // Attach standards via document_standards join table (specific per document)
+    if (rows.length > 0) {
+      const docIds = rows.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.name
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push(s.name);
+      });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
 
     res.json(rows);
   } catch (err) {

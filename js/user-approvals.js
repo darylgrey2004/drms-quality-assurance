@@ -377,15 +377,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         desktopContainer.innerHTML = page.map(doc => `
             <div class="grid grid-cols-12 py-3 text-sm items-center" data-id="${doc.id}">
                 <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                <div class="col-span-3">
+                <div class="col-span-2">
                     <div class="font-medium text-gray-800">${doc.title}</div>
                     <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
                 </div>
                 <div class="col-span-2"><span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span></div>
+                <div class="col-span-2">${renderStandardsBadges(doc.standards || [])}</div>
                 <div class="col-span-1"><span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${doc.department_code || 'N/A'}</span></div>
                 <div class="col-span-2"><span class="${statusBadges[doc.workflow_status] || 'bg-gray-100 text-gray-700'} text-xs px-2 py-1 rounded-full font-medium">${statusTexts[doc.workflow_status] || doc.workflow_status}</span></div>
                 <div class="col-span-1 text-gray-600">${doc.version || 'v1.0'}</div>
-                <div class="col-span-2"><div class="flex flex-wrap gap-1">${getActionButtons(doc)}</div></div>
+                <div class="col-span-1"><div class="flex flex-wrap gap-1">${getActionButtons(doc)}</div></div>
             </div>`).join('');
 
         mobileContainer.innerHTML = page.map(doc => `
@@ -407,6 +408,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             </div>`).join('');
 
         attachActionHandlers();
+    }
+
+    function renderStandardsBadges(standards) {
+        if (!standards || standards.length === 0) {
+            return '<span class="text-xs text-gray-400">—</span>';
+        }
+        const visible = standards.slice(0, 2);
+        const remaining = standards.length - 2;
+        let html = visible.map(s => `<span class="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs mr-1 mb-1">${s}</span>`).join('');
+        if (remaining > 0) {
+            html += `<span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">+${remaining}</span>`;
+        }
+        return html;
     }
 
     function renderPagination() {
