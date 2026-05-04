@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!documentsTable) return;
 
         if (pageDocuments.length === 0) {
-            documentsTable.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-500">No documents found</td></tr>';
+            documentsTable.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No documents found</td></tr>';
             return;
         }
 
@@ -243,6 +243,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             const categoryName = doc.category_display_name || doc.category_name || doc.category || 'N/A';
             const uploaderName = doc.author_name || `${doc.uploader_firstName || ''} ${doc.uploader_lastName || ''}`.trim() || 'Unknown';
             const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
+            
+            // Render standards badges
+            const standardsBadges = renderStandardsBadges(doc.standards);
 
             return `
                 <tr data-id="${doc.id}">
@@ -251,6 +254,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <div class="text-xs text-gray-400">by ${uploaderName}</div>
                     </td>
                     <td class="py-3"><span class="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">${categoryName}</span></td>
+                    <td class="py-3">${standardsBadges}</td>
                     <td class="py-3 text-gray-600">${doc.department_code || doc.area || '-'}</td>
                     <td class="py-3"><span class="${statusBadge} px-2 py-1 rounded-full text-xs">${statusText}</span></td>
                     <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
@@ -268,6 +272,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         }).join('');
 
         attachActionHandlers();
+    }
+    
+    function renderStandardsBadges(standards) {
+        if (!standards || standards.length === 0) return '<span class="text-gray-400 text-xs">—</span>';
+        const items = standards.slice(0, 2);
+        const badges = items.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ');
+        const more = standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${standards.length - 2}</span>` : '';
+        return `<div class="flex flex-wrap gap-1">${badges}${more}</div>`;
     }
 
     function renderPagination() {

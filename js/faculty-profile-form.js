@@ -18,19 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registrationData.department) {
         const departmentInput = document.getElementById('department');
         if (departmentInput) {
-            // Map department codes to full names
-            const departmentMap = {
-                'BEED': 'Bachelor of Elementary Education (BEED)',
-                'BSED': 'Bachelor of Secondary Education (BSED)',
-                'BSNED': 'Bachelor of Special Needs Education (BSNED) (SPED)',
-                'BCAED': 'Bachelor of Culture and Arts Education (BCAED)',
-                'BPED': 'Bachelor of Physical Education (BPED)'
-            };
-            
-            const fullDepartmentName = departmentMap[registrationData.department] || registrationData.department;
-            departmentInput.value = fullDepartmentName;
-            
-            console.log('Auto-filled department:', fullDepartmentName);
+            // Store the CODE only (e.g., "BEED") - don't convert to full name
+            departmentInput.value = registrationData.department;
+            console.log('Auto-filled department code:', registrationData.department);
         }
     }
     

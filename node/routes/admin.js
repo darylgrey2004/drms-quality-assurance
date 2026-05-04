@@ -375,6 +375,24 @@ router.put('/profile/:userId', adminAuth, async (req, res) => {
   }
 });
 
+// @route   GET api/admin/standards/all
+// @desc    Get all standards (including inactive) for admin settings
+// @access  Private (Admin only)
+router.get('/standards/all', adminAuth, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT s.id, s.name, s.code, s.description, s.category_id, s.is_active, c.name AS category_name
+       FROM standards s
+       LEFT JOIN categories c ON s.category_id = c.id
+       ORDER BY c.sort_order ASC, s.sort_order ASC`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Get all standards error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   PATCH api/admin/standards/:id
 // @desc    Toggle is_active on a standard
 // @access  Private (Admin only)

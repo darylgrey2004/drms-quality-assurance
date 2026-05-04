@@ -18,32 +18,45 @@ function canFinalApprove(role) {
 }
 
 // Resolves the department_id for an area-chair. Returns null if not found.
+// STANDARDIZED: Uses exact matching only (name or code), no fuzzy matching
 async function getAreaChairDeptId(userId) {
   try {
-    // Try faculty_profiles first
+    // Try faculty_profiles first - get department string
     const [profile] = await db.query(
       'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
       [userId]
     );
+    
     if (profile.length && profile[0].department) {
       const deptValue = profile[0].department.trim();
+      
+      // STANDARDIZED: Exact match only on name or code (case-insensitive)
       const [dept] = await db.query(
-        'SELECT id FROM departments WHERE name = ? OR code = ? LIMIT 1',
-        [deptValue, deptValue.toUpperCase()]
+        'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+        [deptValue, deptValue]
       );
-      if (dept.length) return dept[0].id;
-      const [deptPartial] = await db.query(
-        'SELECT id FROM departments WHERE name LIKE ? OR code LIKE ? LIMIT 1',
-        [`%${deptValue}%`, `%${deptValue.toUpperCase()}%`]
-      );
-      if (deptPartial.length) return deptPartial[0].id;
+      
+      if (dept.length) {
+        console.log(`Department resolved: ${deptValue} -> ID ${dept[0].id}`);
+        return dept[0].id;
+      }
+      
+      console.warn(`Department not found in departments table: "${deptValue}" for user ${userId}`);
     }
+    
     // Fallback: look up department_id directly from the user's uploaded documents
     const [docDept] = await db.query(
       'SELECT department_id FROM documents WHERE uploader_id = ? AND department_id IS NOT NULL LIMIT 1',
       [userId]
     );
-    return docDept.length ? docDept[0].department_id : null;
+    
+    if (docDept.length) {
+      console.log(`Department resolved from user's documents: user ${userId} -> dept_id ${docDept[0].department_id}`);
+      return docDept[0].department_id;
+    }
+    
+    console.warn(`No department found for user ${userId}`);
+    return null;
   } catch (err) {
     console.error('getAreaChairDeptId error:', err.message);
     return null;

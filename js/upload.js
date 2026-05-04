@@ -483,6 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const category = document.getElementById('category')?.value;
             const department = document.getElementById('department')?.value;
             const author = document.getElementById('author')?.value;
+            const standard = document.getElementById('standard')?.value;
             const files = selectedFiles;
             
             if (!files || files.length === 0) {
@@ -492,6 +493,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!title || !category || !department || !author) {
                 alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (!standard) {
+                alert('Please select a standard for this document');
                 return;
             }
             
@@ -539,6 +545,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('description', document.getElementById('description')?.value || '');
                 formData.append('keywords', document.getElementById('keywords')?.value || '');
                 formData.append('workflow', document.querySelector('input[name="workflow"]:checked')?.value || 'submit');
+                
+                // Add standard_id if selected
+                const standardId = document.getElementById('standard')?.value;
+                if (standardId) {
+                    formData.append('standard_id', standardId);
+                }
+                
                 formData.append('files', file);
 
                 const xhr = new XMLHttpRequest();

@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'Pending';
     }
 
-    // Fetch documents from API
+    // Fetch documents from API (evaluators see only LOCKED documents)
     async function loadDocuments() {
         if (isLoading) return;
         isLoading = true;
@@ -162,13 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show loading state immediately to prevent flash
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center"><div class="inline-block animate-spin rounded-full h-6 w-6 border-3 border-teal-600 border-t-transparent"></div><p class="text-gray-500 mt-2">Loading documents...</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center"><div class="inline-block animate-spin rounded-full h-6 w-6 border-3 border-teal-600 border-t-transparent"></div><p class="text-gray-500 mt-2">Loading locked documents...</p></td></tr>';
         }
         
         try {
-            console.log('Fetching documents for evaluator...');
-            // Evaluators automatically get only approved documents from backend
-            const response = await fetch('http://127.0.0.1:3000/api/documents', {
+            console.log('Fetching locked documents for evaluator...');
+            // Evaluators can only see LOCKED documents (final approved documents)
+            const response = await fetch('http://127.0.0.1:3000/api/documents?status=locked', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -181,13 +181,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const documents = await response.json();
-            console.log('Documents fetched:', documents.length);
-            console.log('All documents are approved (evaluator role):', documents.every(d => d.workflow_status === 'approved'));
+            console.log('Locked documents fetched:', documents.length);
+            console.log('All documents are locked:', documents.every(d => d.workflow_status === 'locked'));
 
             if (!tbody) return;
 
             if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No approved documents available for review</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No locked documents available for review</td></tr>';
                 isLoading = false;
                 return;
             }
@@ -205,20 +205,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Document:', doc);
                 const row = document.createElement('tr');
                 const categoryClass = getCategoryClass(doc.category);
-                const statusClass = getStatusClass(doc.workflow_status);
-                const statusText = getStatusText(doc.workflow_status);
-                const categoryDisplay = doc.category || 'N/A';
-                const departmentDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
+                const categoryDisplay = doc.category_display_name || doc.category || 'N/A';
+                const departmentDisplay = doc.department_name || doc.department_code || doc.area || 'N/A';
                 const authorDisplay = doc.author_name || doc.author || 'Unknown';
                 const dateDisplay = doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-CA') : 'N/A';
                 const versionDisplay = doc.version || 'v1.0';
                 const titleDisplay = doc.title || 'Untitled Document';
                 
+                // Render standards badges (show up to 2 standards with +X indicator)
+                const standards = doc.standards || [];
+                let standardsHtml = '';
+                if (standards.length > 0) {
+                    const displayStandards = standards.slice(0, 2);
+                    standardsHtml = displayStandards.map(s => 
+                        `<span class="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs mr-1">${escapeHtml(s)}</span>`
+                    ).join('');
+                    if (standards.length > 2) {
+                        standardsHtml += `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">+${standards.length - 2}</span>`;
+                    }
+                } else {
+                    standardsHtml = '<span class="text-gray-400 text-xs">None</span>';
+                }
+                
                 row.innerHTML = `
                     <td class="py-3"><div class="font-medium text-gray-800">${escapeHtml(titleDisplay)}</div></td>
                     <td class="py-3"><span class="${categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(categoryDisplay)}</span></td>
+                    <td class="py-3">${standardsHtml}</td>
                     <td class="py-3 text-gray-600">${escapeHtml(departmentDisplay)}</td>
-                    <td class="py-3"><span class="${statusClass} px-2 py-1 rounded-full text-xs">${statusText}</span></td>
+                    <td class="py-3"><span class="badge-locked px-2 py-1 rounded-full text-xs">Locked</span></td>
                     <td class="py-3 text-gray-600">${escapeHtml(versionDisplay)}</td>
                     <td class="py-3 text-gray-500 text-xs">${escapeHtml(authorDisplay)}</td>
                     <td class="py-3 text-gray-500 text-xs">${dateDisplay}</td>
@@ -237,9 +251,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
         } catch (error) {
-            console.error('Error loading documents:', error);
+            console.error('Error loading locked documents:', error);
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading documents. Please try again later.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-red-500">Error loading locked documents. Please try again later.</td></tr>';
             }
         } finally {
             isLoading = false;

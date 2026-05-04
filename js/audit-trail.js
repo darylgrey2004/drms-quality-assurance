@@ -58,29 +58,49 @@ async function loadAuditStats() {
 
 // Update stats display
 function updateStatsDisplay(stats) {
-    const statsCards = document.querySelectorAll('.stat-card');
-    if (statsCards.length >= 4) {
-        // Total Events
-        statsCards[0].querySelector('.text-3xl').textContent = stats.total_events || 0;
-        statsCards[0].querySelector('.text-xs').textContent = `${stats.recent_activity || 0} this week`;
-
-        // Document Actions
-        const docActions = stats.events_by_type.find(e => e.event_type === 'document');
-        statsCards[1].querySelector('.text-3xl').textContent = docActions?.count || 0;
-        const docPercent = stats.total_events > 0 ? ((docActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
-        statsCards[1].querySelector('.text-xs').textContent = `${docPercent}% of total`;
-
-        // User Actions
-        const userActions = stats.events_by_type.find(e => e.event_type === 'user');
-        statsCards[2].querySelector('.text-3xl').textContent = userActions?.count || 0;
-        const userPercent = stats.total_events > 0 ? ((userActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
-        statsCards[2].querySelector('.text-xs').textContent = `${userPercent}% of total`;
-
-        // System Events
-        const sysActions = stats.events_by_type.find(e => e.event_type === 'system');
-        statsCards[3].querySelector('.text-3xl').textContent = sysActions?.count || 0;
-        const sysPercent = stats.total_events > 0 ? ((sysActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
-        statsCards[3].querySelector('.text-xs').textContent = `${sysPercent}% of total`;
+    // Update stat cards
+    const totalEventsEl = document.getElementById('totalEvents');
+    const weeklyEventsEl = document.getElementById('weeklyEvents');
+    const docActionsEl = document.getElementById('docActions');
+    const docPercentEl = document.getElementById('docPercent');
+    const userActionsEl = document.getElementById('userActions');
+    const userPercentEl = document.getElementById('userPercent');
+    const sysEventsEl = document.getElementById('sysEvents');
+    const sysPercentEl = document.getElementById('sysPercent');
+    
+    if (totalEventsEl) totalEventsEl.textContent = stats.total_events || 0;
+    if (weeklyEventsEl) weeklyEventsEl.textContent = `+${stats.recent_activity || 0} this week`;
+    
+    const docActions = stats.events_by_type?.find(e => e.event_type === 'document');
+    if (docActionsEl) docActionsEl.textContent = docActions?.count || 0;
+    const docPercent = stats.total_events > 0 ? ((docActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
+    if (docPercentEl) docPercentEl.textContent = `${docPercent}% of total`;
+    
+    const userActions = stats.events_by_type?.find(e => e.event_type === 'user');
+    if (userActionsEl) userActionsEl.textContent = userActions?.count || 0;
+    const userPercent = stats.total_events > 0 ? ((userActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
+    if (userPercentEl) userPercentEl.textContent = `${userPercent}% of total`;
+    
+    const sysActions = stats.events_by_type?.find(e => e.event_type === 'system');
+    if (sysEventsEl) sysEventsEl.textContent = sysActions?.count || 0;
+    const sysPercent = stats.total_events > 0 ? ((sysActions?.count || 0) / stats.total_events * 100).toFixed(0) : 0;
+    if (sysPercentEl) sysPercentEl.textContent = `${sysPercent}% of total`;
+    
+    // Update version summary
+    const versionSummary = document.getElementById('versionSummary');
+    if (versionSummary && stats.version_summary) {
+        versionSummary.innerHTML = `
+            <div class="flex justify-between"><span class="text-sm">Total versions tracked:</span><span class="font-medium">${stats.version_summary.total_versions || 0}</span></div>
+            <div class="flex justify-between"><span class="text-sm">Documents with multiple versions:</span><span class="font-medium">${stats.version_summary.multi_version_docs || 0}</span></div>
+            <div class="flex justify-between"><span class="text-sm">Average versions per document:</span><span class="font-medium">${stats.version_summary.avg_versions || 0}</span></div>
+        `;
+    }
+    
+    // Update last verification
+    const lastVerification = document.getElementById('lastVerification');
+    if (lastVerification) {
+        const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        lastVerification.textContent = `Last audit log verification: ${today}`;
     }
 }
 
@@ -96,6 +116,7 @@ async function loadAuditLogs() {
 
         if (response.ok) {
             const data = await response.json();
+            window.currentAuditLogs = data.logs; // Store for timeline view
             renderAuditLogs(data.logs);
             renderPagination(data.pagination);
             updateEventCount(data.pagination);
@@ -149,6 +170,100 @@ function renderAuditLogs(logs) {
             </tr>
         `;
     }).join('');
+    
+    // Also render timeline view
+    renderTimelineView(logs);
+}
+
+// Render timeline view
+function renderTimelineView(logs) {
+    const timelineContent = document.getElementById('timelineContent');
+    if (!timelineContent) return;
+    
+    if (logs.length === 0) {
+        timelineContent.innerHTML = '<div class="text-center text-gray-500 py-4">No audit logs found</div>';
+        return;
+    }
+    
+    // Group logs by date
+    const groupedLogs = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    logs.forEach(log => {
+        const logDate = new Date(log.created_at);
+        logDate.setHours(0, 0, 0, 0);
+        
+        let dateKey;
+        if (logDate.getTime() === today.getTime()) {
+            dateKey = 'Today';
+        } else if (logDate.getTime() === yesterday.getTime()) {
+            dateKey = 'Yesterday';
+        } else {
+            dateKey = logDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        
+        if (!groupedLogs[dateKey]) {
+            groupedLogs[dateKey] = [];
+        }
+        groupedLogs[dateKey].push(log);
+    });
+    
+    // Render grouped logs
+    const colors = ['teal', 'amber', 'green', 'blue', 'purple'];
+    let colorIndex = 0;
+    
+    timelineContent.innerHTML = Object.keys(groupedLogs).map(dateKey => {
+        const color = colors[colorIndex % colors.length];
+        colorIndex++;
+        
+        const logsHtml = groupedLogs[dateKey].map(log => {
+            const logTime = new Date(log.created_at);
+            const timeStr = logTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const userName = log.user_name || 'System';
+            const actionText = formatActionText(log.action);
+            const docTitle = log.document_title || 'a document';
+            
+            return `
+                <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-${color}-200 pl-4 pb-2">
+                    <span class="w-8 h-8 bg-${color}-100 rounded-full flex items-center justify-center text-${color}-700 text-xs font-bold">${timeStr}</span>
+                    <div>
+                        <p class="text-sm"><span class="font-medium">${userName}</span> ${actionText} ${docTitle}</p>
+                        <p class="text-xs text-gray-400">${log.category_name || ''} · ${log.department_code || ''} · IP: ${log.ip_address || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        return `
+            <div>
+                <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                    <span class="w-2 h-2 bg-${color}-500 rounded-full mr-2"></span>${dateKey}
+                </h3>
+                <div class="space-y-3 pl-4">
+                    ${logsHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Format action text for timeline
+function formatActionText(action) {
+    const actionMap = {
+        'DOCUMENT_UPLOAD': 'uploaded',
+        'DOCUMENT_VALIDATED': 'validated',
+        'DOCUMENT_APPROVED': 'approved',
+        'DOCUMENT_REJECTED': 'rejected',
+        'DOCUMENT_LOCKED': 'locked',
+        'DOCUMENT_DELETE': 'deleted',
+        'USER_LOGIN': 'logged in',
+        'USER_LOGOUT': 'logged out',
+        'PASSWORD_CHANGED': 'changed password for'
+    };
+    return actionMap[action] || action.toLowerCase().replace(/_/g, ' ');
 }
 
 // Get action badge HTML
@@ -171,10 +286,21 @@ function getActionBadge(action) {
 
 // Render pagination
 function renderPagination(pagination) {
-    const paginationContainer = document.querySelector('.flex.flex-wrap.gap-2.justify-center');
-    if (!paginationContainer) return;
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationButtons = document.getElementById('paginationButtons');
+    
+    if (!paginationButtons) return;
 
-    const { current_page, total_pages } = pagination;
+    const { current_page, total_pages, per_page, total_records } = pagination;
+    
+    // Update info text
+    if (paginationInfo) {
+        const start = (current_page - 1) * per_page + 1;
+        const end = Math.min(start + per_page - 1, total_records);
+        paginationInfo.textContent = `Showing ${start} to ${end} of ${total_records} events`;
+    }
+    
+    // Update buttons
     let html = '<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm transition-colors" onclick="changePage(' + (current_page - 1) + ')" ' + (current_page === 1 ? 'disabled' : '') + '>Previous</button>';
 
     for (let i = 1; i <= Math.min(total_pages, 5); i++) {
@@ -184,7 +310,7 @@ function renderPagination(pagination) {
 
     html += '<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm" onclick="changePage(' + (current_page + 1) + ')" ' + (current_page === total_pages ? 'disabled' : '') + '>Next</button>';
 
-    paginationContainer.innerHTML = html;
+    paginationButtons.innerHTML = html;
 }
 
 // Update event count
@@ -307,12 +433,19 @@ function setupEventListeners() {
             this.classList.add('active-view', 'bg-teal-700', 'text-white');
             this.classList.remove('bg-white', 'text-gray-600');
 
+            const listView = document.getElementById('listView');
+            const timelineView = document.getElementById('timelineView');
+            
             if (view === 'list') {
-                document.getElementById('listView').classList.remove('hidden');
-                document.getElementById('timelineView').classList.add('hidden');
+                listView.classList.remove('hidden');
+                timelineView.classList.add('hidden');
             } else {
-                document.getElementById('listView').classList.add('hidden');
-                document.getElementById('timelineView').classList.remove('hidden');
+                listView.classList.add('hidden');
+                timelineView.classList.remove('hidden');
+                // Reload timeline when switching to it
+                if (window.currentAuditLogs && window.currentAuditLogs.length > 0) {
+                    renderTimelineView(window.currentAuditLogs);
+                }
             }
         });
     });

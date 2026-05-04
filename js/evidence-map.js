@@ -4,19 +4,19 @@ const API_BASE = 'http://localhost:3000';
 let allDocuments = [];
 let departments = ['BEED', 'BSED', 'BSNED', 'BCAED', 'BPED'];
 let categories = [
-    { id: 'instruction', name: 'Instruction', color: 'blue', expectedCount: 320 },
-    { id: 'research', name: 'Research', color: 'green', expectedCount: 400 },
-    { id: 'extension', name: 'Extension', color: 'amber', expectedCount: 210 },
-    { id: 'employment', name: 'Employment', color: 'purple', expectedCount: 180 }
+    { id: 'instruction', name: 'Instruction', color: 'blue', expectedCount: 0 },
+    { id: 'research', name: 'Research', color: 'green', expectedCount: 0 },
+    { id: 'extension', name: 'Extension', color: 'amber', expectedCount: 0 },
+    { id: 'employment', name: 'Employment', color: 'purple', expectedCount: 0 }
 ];
 
-// Department expected document counts (default values)
-const departmentExpected = {
-    'BEED': { instruction: 45, research: 40, extension: 25, employment: 30 },
-    'BSED': { instruction: 65, research: 55, extension: 25, employment: 30 },
-    'BSNED': { instruction: 40, research: 35, extension: 25, employment: 30 },
-    'BCAED': { instruction: 35, research: 30, extension: 25, employment: 30 },
-    'BPED': { instruction: 30, research: 25, extension: 25, employment: 30 }
+// Department expected document counts (will be loaded from API)
+let departmentExpected = {
+    'BEED': { instruction: 0, research: 0, extension: 0, employment: 0 },
+    'BSED': { instruction: 0, research: 0, extension: 0, employment: 0 },
+    'BSNED': { instruction: 0, research: 0, extension: 0, employment: 0 },
+    'BCAED': { instruction: 0, research: 0, extension: 0, employment: 0 },
+    'BPED': { instruction: 0, research: 0, extension: 0, employment: 0 }
 };
 
 // Wait for DOM to be fully loaded
@@ -33,8 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update user info in sidebar
     updateUserInfo();
     
-    // Load documents from backend
-    loadDocuments();
+    // Load requirements from API first, then load documents
+    loadRequirements().then(() => {
+        loadDocuments();
+    });
     
     // Setup event listeners
     setupEventListeners();
@@ -72,6 +74,47 @@ function updateUserInfo() {
             'evaluator': 'External Evaluator'
         };
         userRole.textContent = roleMap[user.role] || user.role;
+    }
+}
+
+async function loadRequirements() {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/settings/requirements`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!response.ok) {
+            console.warn('Failed to load requirements, using defaults');
+            return;
+        }
+        
+        const requirements = await response.json();
+        
+        // Update departmentExpected with values from database
+        departments.forEach(dept => {
+            const deptLower = dept.toLowerCase();
+            categories.forEach(cat => {
+                if (requirements[cat.id] && requirements[cat.id][deptLower] !== undefined) {
+                    departmentExpected[dept][cat.id] = requirements[cat.id][deptLower];
+                }
+            });
+        });
+        
+        // Calculate total expected counts per category
+        categories.forEach(cat => {
+            let total = 0;
+            departments.forEach(dept => {
+                total += departmentExpected[dept][cat.id] || 0;
+            });
+            cat.expectedCount = total;
+        });
+        
+        console.log('Requirements loaded from database:', departmentExpected);
+        
+    } catch (error) {
+        console.error('Error loading requirements:', error);
     }
 }
 

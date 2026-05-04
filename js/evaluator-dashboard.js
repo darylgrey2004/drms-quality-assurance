@@ -155,11 +155,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return category || 'N/A';
     }
 
-    // Fetch dashboard statistics from API
+    // Fetch dashboard statistics from API (evaluator-specific endpoint)
     async function loadDashboardStats() {
         try {
-            console.log('Fetching dashboard statistics...');
-            const response = await fetch('http://127.0.0.1:3000/api/documents/stats/dashboard', {
+            console.log('Fetching evaluator dashboard statistics (locked documents only)...');
+            const response = await fetch('http://127.0.0.1:3000/api/documents/stats/evaluator', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -172,15 +172,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const stats = await response.json();
-            console.log('Dashboard stats fetched:', stats);
+            console.log('Evaluator dashboard stats fetched:', stats);
 
-            // Update total documents
-            const totalElement = document.querySelector('.stat-card .text-2xl, .stat-card .text-3xl');
-            if (totalElement && totalElement.closest('.stat-card')?.querySelector('.text-gray-500')?.textContent === 'Total Documents') {
+            // Update total locked documents with requirements
+            const totalElement = document.getElementById('statTotalDocs');
+            const totalDetailElement = totalElement?.closest('.stat-card')?.querySelector('.text-xs.text-gray-500');
+            if (totalElement) {
                 totalElement.textContent = stats.total || 0;
             }
+            if (totalDetailElement) {
+                const currentCount = stats.total || 0;
+                const requiredCount = stats.total_required || 0;
+                totalDetailElement.textContent = `${currentCount} / ${requiredCount} documents`;
+            }
 
-            // Update category stats
+            // Update category stats (locked documents per category with requirements)
             stats.categories?.forEach(cat => {
                 const categoryCard = Array.from(document.querySelectorAll('.stat-card')).find(card => {
                     const label = card.querySelector('.text-gray-500')?.textContent;
@@ -190,68 +196,74 @@ document.addEventListener('DOMContentLoaded', function() {
                     const countElement = categoryCard.querySelector('.text-2xl, .text-3xl');
                     const percentElement = categoryCard.querySelector('.text-xs.text-gray-500');
                     if (countElement) countElement.textContent = cat.count || 0;
-                    if (percentElement) percentElement.textContent = `${cat.percentage || 0}% of total`;
+                    if (percentElement) {
+                        const currentCount = cat.count || 0;
+                        const requiredCount = cat.total_required || 0;
+                        percentElement.textContent = `${currentCount} / ${requiredCount} documents`;
+                    }
                 }
             });
 
-            // Update status stats
-            const approvedStat = stats.statuses?.find(s => s.status === 'approved');
-            const pendingStat = stats.statuses?.find(s => s.status === 'pending');
-            
-            const approvedCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
-                card.querySelector('.text-gray-500')?.textContent === 'Approved'
-            );
-            if (approvedCard && approvedStat) {
-                const countElement = approvedCard.querySelector('.text-2xl, .text-3xl');
-                const percentElement = approvedCard.querySelector('.text-xs');
-                if (countElement) countElement.textContent = approvedStat.count || 0;
-                if (percentElement && stats.total > 0) {
-                    const percentage = ((approvedStat.count / stats.total) * 100).toFixed(1);
-                    percentElement.textContent = `${percentage}% approved`;
+            // Update Approved card - shows ALL approved documents (approved + locked)
+            const approvedElement = document.getElementById('statApproved');
+            const approvalRateElement = document.getElementById('approvalRate');
+            if (approvedElement) {
+                approvedElement.textContent = stats.approved || 0;
+            }
+            if (approvalRateElement) {
+                const approvedCount = stats.approved || 0;
+                const lockedCount = stats.locked || 0;
+                const notLockedCount = approvedCount - lockedCount;
+                if (approvedCount > 0) {
+                    approvalRateElement.textContent = `${lockedCount} locked, ${notLockedCount} not locked`;
+                } else {
+                    approvalRateElement.textContent = 'No approved documents';
                 }
             }
 
-            const pendingCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
-                card.querySelector('.text-gray-500')?.textContent === 'Pending'
-            );
-            if (pendingCard && pendingStat) {
-                const countElement = pendingCard.querySelector('.text-2xl, .text-3xl');
-                if (countElement) countElement.textContent = pendingStat.count || 0;
+            // Update Pending card - shows pending documents
+            const pendingElement = document.getElementById('statPending');
+            const pendingNoteElement = document.getElementById('pendingNote');
+            if (pendingElement) {
+                pendingElement.textContent = stats.pending || 0;
+            }
+            if (pendingNoteElement) {
+                const pendingCount = stats.pending || 0;
+                pendingNoteElement.textContent = pendingCount > 0 ? `${pendingCount} awaiting review` : 'No pending documents';
             }
 
-            // Update departments count
+            // Update departments count (total active departments from database)
             const deptCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
                 card.querySelector('.text-gray-500')?.textContent === 'Departments'
             );
             if (deptCard) {
                 const countElement = deptCard.querySelector('.text-2xl, .text-3xl');
                 const detailElement = deptCard.querySelector('.text-xs');
-                if (countElement) countElement.textContent = stats.departments?.length || 0;
+                if (countElement) countElement.textContent = stats.total_departments || 0;
                 if (detailElement && stats.departments) {
-                    const deptCodes = stats.departments.map(d => d.code).join(', ');
-                    detailElement.textContent = deptCodes;
+                    const deptCodes = stats.departments.filter(d => d.count > 0).map(d => d.code).join(', ');
+                    detailElement.textContent = deptCodes || 'None';
                 }
             }
 
         } catch (error) {
-            console.error('Error loading dashboard stats:', error);
+            console.error('Error loading evaluator dashboard stats:', error);
         }
     }
 
-    // Fetch recent approved documents from API
+    // Fetch recent locked documents from API (evaluators see only LOCKED documents from ALL departments)
     async function loadRecentApprovedDocuments() {
-        const tableTbody = document.querySelector('#recentDocumentsTable tbody');
-        const fallbackTbody = document.querySelector('table tbody');
-        const targetTbody = tableTbody || fallbackTbody;
+        const tableTbody = document.querySelector('#recentDocumentsTable tbody') || document.querySelector('#recentDocsTable');
         
-        if (!targetTbody) {
+        if (!tableTbody) {
             console.log('No table body found on this page');
             return;
         }
         
         try {
-            console.log('Fetching recent approved documents...');
-            const response = await fetch('http://127.0.0.1:3000/api/documents?status=approved', {
+            console.log('Fetching recent locked documents (evaluator view - all departments)...');
+            // Evaluators can only see LOCKED documents from ALL departments
+            const response = await fetch('http://127.0.0.1:3000/api/documents?status=locked', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -264,17 +276,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const documents = await response.json();
-            console.log('Documents fetched:', documents.length);
+            console.log('Locked documents fetched:', documents.length);
+            console.log('Sample document:', documents[0]);
 
-            if (targetTbody) {
+            if (tableTbody) {
                 // Clear existing rows
-                targetTbody.innerHTML = '';
+                tableTbody.innerHTML = '';
 
                 // Take only first 4 documents for dashboard
                 const recentDocs = documents.slice(0, 4);
 
                 if (recentDocs.length === 0) {
-                    targetTbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-500">No approved documents available</td></tr>';
+                    tableTbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-gray-500">No locked documents available</td></tr>';
                     return;
                 }
 
@@ -285,26 +298,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Populate table with documents
                 recentDocs.forEach(doc => {
-                    console.log('Document data:', doc);
+                    console.log('Rendering document:', doc.title, 'Standards:', doc.standards);
                     const row = document.createElement('tr');
                     const categoryClass = getCategoryClass(doc.category);
-                    const categoryDisplay = getCategoryDisplay(doc.category);
-                    const departmentDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
+                    const categoryDisplay = doc.category_display_name || getCategoryDisplay(doc.category);
+                    const departmentDisplay = doc.department_name || doc.department_code || doc.area || 'N/A';
+                    
+                    // Render standards badges (show up to 2 standards with +X indicator)
+                    const standards = doc.standards || [];
+                    let standardsHtml = '';
+                    if (standards.length > 0) {
+                        const displayStandards = standards.slice(0, 2);
+                        standardsHtml = displayStandards.map(s => 
+                            `<span class="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs mr-1">${escapeHtml(s)}</span>`
+                        ).join('');
+                        if (standards.length > 2) {
+                            standardsHtml += `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">+${standards.length - 2}</span>`;
+                        }
+                    } else {
+                        standardsHtml = '<span class="text-gray-400 text-xs">None</span>';
+                    }
                     
                     row.innerHTML = `
                         <td class="py-3">
                             <div class="font-medium text-gray-800">${escapeHtml(doc.title || 'Untitled')}</div>
                         </td>
                         <td class="py-3"><span class="${categoryClass} px-2 py-1 rounded-full text-xs">${escapeHtml(categoryDisplay)}</span></td>
+                        <td class="py-3">${standardsHtml}</td>
                         <td class="py-3 text-gray-600">${escapeHtml(departmentDisplay)}</td>
-                        <td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Approved</span></td>
+                        <td class="py-3"><span class="badge-locked px-2 py-1 rounded-full text-xs">Locked</span></td>
                         <td class="py-3 text-gray-600">${escapeHtml(doc.version || 'v1.0')}</td>
                         <td class="py-3 text-gray-500 text-xs">${escapeHtml(doc.author_name || 'Unknown')}</td>
                         <td class="py-3">
                             <button class="view-doc text-teal-600 hover:text-teal-800 text-sm font-medium" title="View Document (Read Only)" data-doc-id="${doc.id}">View</button>
                         </td>
                     `;
-                    targetTbody.appendChild(row);
+                    tableTbody.appendChild(row);
                 });
 
                 // Attach event listeners to view buttons
@@ -321,9 +350,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } catch (error) {
-            console.error('Error loading documents:', error);
-            if (targetTbody) {
-                targetTbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-red-500">Error loading approved documents</td></tr>';
+            console.error('Error loading locked documents:', error);
+            if (tableTbody) {
+                tableTbody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading locked documents</td></tr>';
             }
         }
     }

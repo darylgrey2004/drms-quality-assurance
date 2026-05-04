@@ -67,6 +67,30 @@ input[type="radio"] { accent-color: #0f766e; }
 .bg-red-600 { background-color: #dc2626; }
 .bg-red-600:hover { background-color: #b91c1c; }
 
+/* Account header with logout button */
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.logout-btn {
+    padding: 0.5rem 1.5rem;
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: #b91c1c;
+}
+
 /* code block */
 code {
     font-family: 'Courier New', monospace;
@@ -85,10 +109,39 @@ code {
 /* mobile header spacer */
 .mobile-header-spacer { height: 60px; width: 100%; }
 
+/* Main content area fix */
+main {
+    padding-top: 0;
+}
+
+/* Ensure proper layout */
+.flex.h-screen {
+    height: 100vh;
+}
+
+.flex-1.overflow-y-auto {
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
+}
+
 /* Modal overlay */
 .modal-overlay {
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+}
+
+/* Modal display fix */
+#categoryModal.hidden,
+#departmentModal.hidden,
+#deleteModal.hidden {
+    display: none;
+}
+
+#categoryModal:not(.hidden),
+#departmentModal:not(.hidden),
+#deleteModal:not(.hidden) {
+    display: flex;
 }
 
 /* ============================================ */

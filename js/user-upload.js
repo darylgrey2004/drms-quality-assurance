@@ -54,6 +54,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     autoFillUserData();
     setupVersionAutoIncrement();
 
+    // Standard dropdown — reacts to category selection
+    const standardSelect = document.getElementById('standard');
+    if (categorySelect && standardSelect) {
+        categorySelect.addEventListener('change', function () {
+            loadStandards(this.value);
+        });
+    }
+
+    function loadStandards(categoryId) {
+        if (!standardSelect) return;
+        standardSelect.innerHTML = '<option value="">Select standard</option>';
+        if (!categoryId) return;
+        fetch(`${API_BASE}/api/documents/standards?category_id=${categoryId}`, {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => r.json())
+        .then(standards => {
+            if (!standards.length) {
+                standardSelect.innerHTML = '<option value="">No standards available</option>';
+                return;
+            }
+            standards.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.name} (${s.code})`;
+                standardSelect.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('Load standards error:', err));
+    }
+
     function loadCategories() {
         fetch(`${API_BASE}/api/documents/categories`, {
             headers: { 'x-auth-token': token }
@@ -339,6 +370,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const description = document.getElementById('description')?.value || '';
             const keywords = document.getElementById('keywords')?.value || '';
             const workflow = document.querySelector('input[name="workflow"]:checked')?.value || 'submit';
+            const standard = document.getElementById('standard')?.value;
             const files = fileInput?.files;
 
             if (!files || files.length === 0) {
@@ -352,6 +384,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (!author) missing.push('Author');
                 if (!department) missing.push('Department');
                 showErrorModal(`Please fill in the following required fields: ${missing.join(', ')}`);
+                return;
+            }
+            if (!standard) {
+                showErrorModal('Please select a standard for this document.');
                 return;
             }
 
@@ -379,6 +415,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             formData.append('description', description);
             formData.append('keywords', keywords);
             formData.append('workflow', workflow === 'draft' ? 'draft' : workflow === 'validate' ? 'approve' : 'submit');
+            
+            // Add standard_id if selected
+            if (standard) {
+                formData.append('standard_id', standard);
+            }
 
             // Append all files
             for (let i = 0; i < files.length; i++) {

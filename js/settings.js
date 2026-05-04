@@ -4,15 +4,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Settings page JS loaded successfully');
 
-    // ── Access guard: Admin only ──
+    // ── Access guard: Admin and Dean can access settings ──
     const _user = JSON.parse(localStorage.getItem('user') || '{}');
-    if ((_user.role || '').toLowerCase().trim() !== 'admin') {
+    const userRole = (_user.role || '').toLowerCase().trim();
+    const isAdmin = userRole === 'admin';
+    const isDean = userRole === 'dean';
+    
+    if (!isAdmin && !isDean) {
         window.location.href = 'homepage.html';
         return;
     }
 
-    // ── Heartbeat: Update lastActive status ──
+    // ── Check token validity ──
     const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('No authentication token found');
+        window.location.href = 'landing.html';
+        return;
+    }
     function sendHeartbeat() {
         fetch('http://localhost:3000/api/user/heartbeat', {
             method: 'POST', 
@@ -22,6 +31,61 @@ document.addEventListener('DOMContentLoaded', function() {
     if (token) {
         sendHeartbeat();
         setInterval(sendHeartbeat, 2 * 60 * 1000);
+    }
+    
+    // ── Hide/Disable tabs based on role ──
+    if (isDean) {
+        // Update page subtitle for dean
+        const subtitle = document.getElementById('settingsSubtitle');
+        if (subtitle) {
+            subtitle.innerHTML = 'View document requirements and manage your account <span class="text-amber-600 font-medium">(Read-Only Access)</span>';
+        }
+        
+        // Dean can only view Requirements and Account tabs
+        // Hide General, Workflow, Standards, Categories & Depts tabs
+        const restrictedTabs = ['general', 'workflow', 'standards', 'categories-depts'];
+        restrictedTabs.forEach(tabName => {
+            const tabLink = document.querySelector(`a[data-tab="${tabName}"]`);
+            if (tabLink) {
+                tabLink.parentElement.style.display = 'none';
+            }
+        });
+        
+        // Disable save buttons in Requirements tab
+        const saveRequirementsBtn = document.getElementById('saveRequirements');
+        const resetRequirementsBtn = document.getElementById('resetRequirements');
+        if (saveRequirementsBtn) {
+            saveRequirementsBtn.style.display = 'none';
+        }
+        if (resetRequirementsBtn) {
+            resetRequirementsBtn.style.display = 'none';
+        }
+        
+        // Make all requirement inputs readonly
+        document.querySelectorAll('.expected-docs').forEach(input => {
+            input.setAttribute('readonly', 'readonly');
+            input.style.backgroundColor = '#f9fafb';
+            input.style.cursor = 'not-allowed';
+        });
+        
+        // Add read-only notice to Requirements tab
+        setTimeout(() => {
+            const requirementsTab = document.getElementById('requirementsTab');
+            if (requirementsTab) {
+                const notice = document.createElement('div');
+                notice.className = 'bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4';
+                notice.innerHTML = '<p class="text-sm text-amber-700"><strong>Note:</strong> You have read-only access to document requirements. Contact an administrator to make changes.</p>';
+                requirementsTab.insertBefore(notice, requirementsTab.firstChild);
+            }
+        }, 200);
+        
+        // Set default tab to requirements for dean
+        setTimeout(() => {
+            const requirementsTab = document.querySelector('a[data-tab="requirements"]');
+            if (requirementsTab) {
+                requirementsTab.click();
+            }
+        }, 100);
     }
     
     // DOM elements
@@ -37,9 +101,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutBtn = document.getElementById('logoutBtn');
     
     // Tab switching functionality
+    console.log('Tab links found:', tabLinks.length);
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Tab clicked:', this.getAttribute('data-tab'));
             
             // Get tab id
             const tabId = this.getAttribute('data-tab');
@@ -64,6 +130,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (activeTab) {
                 activeTab.classList.remove('hidden');
                 activeTab.classList.add('block');
+            }
+            
+            // Load departments when switching to categories-depts tab
+            if (tabId === 'categories-depts') {
+                loadDepartmentsData();
             }
         });
     });
@@ -108,14 +179,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function loadDepartmentsData() {
-        const saved = localStorage.getItem('systemDepartments');
-        if (saved) {
-            departments = JSON.parse(saved);
-        } else {
-            departments = [...defaultDepartments];
-            localStorage.setItem('systemDepartments', JSON.stringify(departments));
+        const tbody = document.getElementById('departmentsTableBody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Loading departments...</td></tr>';
         }
-        renderDepartmentsTable();
+        
+        console.log('Loading departments with token:', token ? 'Token exists' : 'No token');
+        
+        fetch('http://localhost:3000/api/settings/departments', {
+            headers: { 'x-auth-token': token }
+        })
+        .then(r => {
+            console.log('Departments response status:', r.status);
+            if (!r.ok) {
+                return r.json().then(data => {
+                    console.error('Departments error response:', data);
+                    throw new Error(data.msg || `HTTP ${r.status}: Failed to fetch departments`);
+                }).catch(err => {
+                    if (err.message.includes('HTTP')) throw err;
+                    throw new Error(`HTTP ${r.status}: Failed to fetch departments`);
+                });
+            }
+            return r.json();
+        })
+        .then(data => {
+            console.log('Departments data received:', data);
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid departments data format');
+            }
+            departments = data.map(d => ({
+                id: d.id,
+                code: d.code,
+                name: d.name
+            }));
+            console.log('Departments mapped:', departments);
+            renderDepartmentsTable();
+        })
+        .catch(err => {
+            console.error('Load departments error:', err);
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-red-500">Error: ${err.message}</td></tr>`;
+            }
+        });
     }
     
     // Helper function to escape HTML
@@ -286,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save Department
     const saveDepartmentBtn = document.getElementById('saveDepartmentBtn');
     if (saveDepartmentBtn) {
-        saveDepartmentBtn.addEventListener('click', () => {
+        saveDepartmentBtn.addEventListener('click', async () => {
             const code = document.getElementById('deptCode').value.trim().toUpperCase();
             const name = document.getElementById('deptFullName').value.trim();
             
@@ -299,64 +404,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Check for duplicate code when adding new
-            if (!currentEditDeptId) {
-                const exists = departments.some(d => d.code === code);
-                if (exists) {
-                    showToastMessage('Department code already exists', 'error');
-                    return;
+            try {
+                let response;
+                if (currentEditDeptId) {
+                    // Edit existing
+                    response = await fetch(`http://localhost:3000/api/settings/departments/${currentEditDeptId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify({ code, name })
+                    });
+                } else {
+                    // Add new
+                    response = await fetch('http://localhost:3000/api/settings/departments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify({ code, name })
+                    });
                 }
-            } else {
-                // Check duplicate for edit (excluding current)
-                const exists = departments.some(d => d.code === code && d.id !== currentEditDeptId);
-                if (exists) {
-                    showToastMessage('Department code already exists', 'error');
-                    return;
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToastMessage(data.msg, 'success');
+                    loadDepartmentsData();
+                    document.getElementById('departmentModal').classList.add('hidden');
+                } else {
+                    showToastMessage(data.msg || 'Failed to save department', 'error');
                 }
+            } catch (error) {
+                console.error('Save department error:', error);
+                showToastMessage('Failed to save department', 'error');
             }
-            
-            if (currentEditDeptId) {
-                // Edit existing
-                const index = departments.findIndex(d => d.id === currentEditDeptId);
-                if (index !== -1) {
-                    departments[index] = {
-                        ...departments[index],
-                        code: code,
-                        name: name
-                    };
-                    showToastMessage('Department updated successfully', 'success');
-                }
-            } else {
-                // Add new
-                const newId = 'dept_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                departments.push({
-                    id: newId,
-                    code: code,
-                    name: name
-                });
-                showToastMessage('Department added successfully', 'success');
-            }
-            
-            localStorage.setItem('systemDepartments', JSON.stringify(departments));
-            renderDepartmentsTable();
-            document.getElementById('departmentModal').classList.add('hidden');
         });
     }
     
     // Delete confirmation
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', () => {
+        confirmDeleteBtn.addEventListener('click', async () => {
             if (deleteTarget.type === 'category') {
                 categories = categories.filter(c => c.id !== deleteTarget.id);
                 localStorage.setItem('systemCategories', JSON.stringify(categories));
                 renderCategoriesTable();
                 showToastMessage('Category deleted successfully', 'success');
             } else if (deleteTarget.type === 'department') {
-                departments = departments.filter(d => d.id !== deleteTarget.id);
-                localStorage.setItem('systemDepartments', JSON.stringify(departments));
-                renderDepartmentsTable();
-                showToastMessage('Department deleted successfully', 'success');
+                try {
+                    const response = await fetch(`http://localhost:3000/api/settings/departments/${deleteTarget.id}`, {
+                        method: 'DELETE',
+                        headers: { 'x-auth-token': token }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showToastMessage(data.msg, 'success');
+                        loadDepartmentsData();
+                    } else {
+                        showToastMessage(data.msg || 'Failed to delete department', 'error');
+                    }
+                } catch (error) {
+                    console.error('Delete department error:', error);
+                    showToastMessage('Failed to delete department', 'error');
+                }
             }
             document.getElementById('deleteModal').classList.add('hidden');
             deleteTarget = { type: null, id: null };
@@ -365,11 +480,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Close modals
     const closeCategoryModal = document.getElementById('closeCategoryModal');
+    const closeCategoryModal2 = document.getElementById('closeCategoryModal2');
     const closeDepartmentModal = document.getElementById('closeDepartmentModal');
     const closeDeleteModal = document.getElementById('closeDeleteModal');
     
     if (closeCategoryModal) {
         closeCategoryModal.addEventListener('click', () => {
+            document.getElementById('categoryModal').classList.add('hidden');
+        });
+    }
+    
+    if (closeCategoryModal2) {
+        closeCategoryModal2.addEventListener('click', () => {
             document.getElementById('categoryModal').classList.add('hidden');
         });
     }
@@ -380,8 +502,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    const closeDepartmentModal2 = document.getElementById('closeDepartmentModal2');
+    if (closeDepartmentModal2) {
+        closeDepartmentModal2.addEventListener('click', () => {
+            document.getElementById('departmentModal').classList.add('hidden');
+        });
+    }
+    
     if (closeDeleteModal) {
         closeDeleteModal.addEventListener('click', () => {
+            document.getElementById('deleteModal').classList.add('hidden');
+        });
+    }
+    
+    const closeDeleteModal2 = document.getElementById('closeDeleteModal2');
+    if (closeDeleteModal2) {
+        closeDeleteModal2.addEventListener('click', () => {
             document.getElementById('deleteModal').classList.add('hidden');
         });
     }
@@ -401,7 +537,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load data on page load
     loadCategoriesData();
-    loadDepartmentsData();
+    
+    // Load departments when switching to categories-depts tab or on page load if admin
+    if (isAdmin) {
+        // For admin, check if we need to load departments
+        setTimeout(() => {
+            const categoriesDeptsTab = document.querySelector('a[data-tab="categories-depts"]');
+            if (categoriesDeptsTab && categoriesDeptsTab.parentElement.style.display !== 'none') {
+                loadDepartmentsData();
+            }
+        }, 100);
+    }
     
     // ============================================
     // PROFILE MANAGEMENT
@@ -414,86 +560,125 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileSelects = ['gender', 'civilStatus'];
     
     // Load user data into profile
-    function loadUserProfile() {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        // Update profile header
-        const profileInitials = document.getElementById('profileInitials');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileRoleBadge = document.getElementById('profileRoleBadge');
-        const personalEmail = document.getElementById('personalEmail');
-        const profileDepartment = document.getElementById('profileDepartment');
-        const profileStatus = document.getElementById('profileStatus');
-        
-        if (user.firstName && user.lastName) {
-            const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
-            if (profileInitials) profileInitials.textContent = initials;
-            if (profileName) profileName.textContent = `${user.firstName} ${user.lastName}`;
-        }
-        if (user.email) {
-            if (profileEmail) profileEmail.textContent = user.email;
-            if (personalEmail) personalEmail.value = user.email;
-        }
-        if (user.role && profileRoleBadge) {
-            const roleMap = {
-                'admin': 'Administrator',
-                'dean': 'Dean',
-                'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
-                'department-head': 'Dept. Head',
-                'evaluator': 'External Evaluator'
-            };
-            profileRoleBadge.textContent = roleMap[user.role] || user.role;
+    async function loadUserProfile() {
+        try {
+            const response = await fetch('http://localhost:3000/api/profile/me', {
+                headers: { 'x-auth-token': token }
+            });
             
-            // Update department based on role
-            if (profileDepartment) {
-                if (user.role === 'admin') {
-                    profileDepartment.textContent = 'System Administrator';
-                } else if (user.role === 'dean') {
-                    profileDepartment.textContent = 'Dean\'s Office';
-                } else {
-                    profileDepartment.textContent = user.department || 'Not Assigned';
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.msg || 'Failed to load profile');
+            }
+            
+            const data = await response.json();
+            const user = data.user;
+            const profile = data.profile;
+            
+            // Update profile header
+            const profileInitials = document.getElementById('profileInitials');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            const profileRoleBadge = document.getElementById('profileRoleBadge');
+            const personalEmail = document.getElementById('personalEmail');
+            const profileStatus = document.getElementById('profileStatus');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (profileInitials) profileInitials.textContent = initials;
+                if (profileName) profileName.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.email) {
+                if (profileEmail) profileEmail.textContent = user.email;
+                if (personalEmail) personalEmail.value = user.email;
+            }
+            if (user.role && profileRoleBadge) {
+                const roleMap = {
+                    'admin': 'Administrator',
+                    'dean': 'Dean',
+                    'faculty': 'Faculty Member',
+                    'area-chair': 'Dept. Head',
+                    'department-head': 'Dept. Head',
+                    'evaluator': 'External Evaluator'
+                };
+                profileRoleBadge.textContent = roleMap[user.role] || user.role;
+            }
+            if (profileStatus) {
+                profileStatus.textContent = user.status === 'approved' ? 'Approved' : (user.status || 'Active');
+                profileStatus.className = user.status === 'approved' ? 'text-green-600 font-medium text-xs' : 'text-amber-600 font-medium text-xs';
+            }
+            
+            // Load profile data
+            const lastNameInput = document.getElementById('lastName');
+            const firstNameInput = document.getElementById('firstName');
+            const middleInitialInput = document.getElementById('middleInitial');
+            
+            if (lastNameInput) lastNameInput.value = user.lastName || '';
+            if (firstNameInput) firstNameInput.value = user.firstName || '';
+            if (middleInitialInput) middleInitialInput.value = user.middleInitial || '';
+            
+            if (profile) {
+                const dobInput = document.getElementById('dob');
+                const ageInput = document.getElementById('age');
+                const genderInput = document.getElementById('gender');
+                const civilStatusInput = document.getElementById('civilStatus');
+                const nationalityInput = document.getElementById('nationality');
+                const phoneInput = document.getElementById('phone');
+                const addressInput = document.getElementById('address');
+                
+                if (dobInput) dobInput.value = profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '';
+                if (ageInput) ageInput.value = profile.age || '';
+                if (genderInput) genderInput.value = profile.gender || '';
+                if (civilStatusInput) civilStatusInput.value = profile.civilStatus || '';
+                if (nationalityInput) nationalityInput.value = profile.nationality || '';
+                if (phoneInput) phoneInput.value = profile.phone || '';
+                if (addressInput) addressInput.value = profile.address || '';
+            }
+            
+            // Calculate age if DOB is set
+            const dobInput = document.getElementById('dob');
+            const ageInput = document.getElementById('age');
+            if (dobInput && ageInput && dobInput.value) {
+                const birthDate = new Date(dobInput.value);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
                 }
+                ageInput.value = age;
             }
-        }
-        if (profileStatus) {
-            profileStatus.textContent = user.status === 'approved' ? 'Approved' : (user.status || 'Active');
-            profileStatus.className = user.status === 'approved' ? 'text-green-600 font-medium' : 'text-amber-600 font-medium';
-        }
-        
-        // Load saved profile data from localStorage
-        const savedProfile = localStorage.getItem('adminProfile');
-        if (savedProfile) {
-            const profile = JSON.parse(savedProfile);
-            document.getElementById('lastName').value = profile.lastName || user.lastName || '';
-            document.getElementById('firstName').value = profile.firstName || user.firstName || '';
-            document.getElementById('middleInitial').value = profile.middleInitial || '';
-            document.getElementById('dob').value = profile.dob || '';
-            document.getElementById('age').value = profile.age || '';
-            document.getElementById('gender').value = profile.gender || '';
-            document.getElementById('civilStatus').value = profile.civilStatus || '';
-            document.getElementById('nationality').value = profile.nationality || '';
-            document.getElementById('phone').value = profile.phone || '';
-            document.getElementById('address').value = profile.address || '';
-        } else {
-            document.getElementById('lastName').value = user.lastName || '';
-            document.getElementById('firstName').value = user.firstName || '';
-            document.getElementById('middleInitial').value = user.middleInitial || '';
-        }
-        
-        // Calculate age if DOB is set
-        const dobInput = document.getElementById('dob');
-        const ageInput = document.getElementById('age');
-        if (dobInput && ageInput && dobInput.value) {
-            const birthDate = new Date(dobInput.value);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
+        } catch (error) {
+            console.error('Load profile error:', error);
+            // Don't show error toast for admin users without profiles
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.role !== 'admin' && user.role !== 'dean') {
+                showToastMessage('Failed to load profile: ' + error.message, 'error');
             }
-            ageInput.value = age;
+            // Load basic user info from localStorage for all users
+            const lastNameInput = document.getElementById('lastName');
+            const firstNameInput = document.getElementById('firstName');
+            const middleInitialInput = document.getElementById('middleInitial');
+            const personalEmail = document.getElementById('personalEmail');
+            
+            if (lastNameInput) lastNameInput.value = user.lastName || '';
+            if (firstNameInput) firstNameInput.value = user.firstName || '';
+            if (middleInitialInput) middleInitialInput.value = user.middleInitial || '';
+            if (personalEmail) personalEmail.value = user.email || '';
+            
+            // Update profile header from localStorage
+            const profileInitials = document.getElementById('profileInitials');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            
+            if (user.firstName && user.lastName) {
+                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+                if (profileInitials) profileInitials.textContent = initials;
+                if (profileName) profileName.textContent = `${user.firstName} ${user.lastName}`;
+            }
+            if (user.email && profileEmail) {
+                profileEmail.textContent = user.email;
+            }
         }
     }
     
@@ -540,51 +725,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Save profile changes
-    function saveProfileChanges() {
+    async function saveProfileChanges() {
         const profileData = {
             lastName: document.getElementById('lastName')?.value || '',
             firstName: document.getElementById('firstName')?.value || '',
             middleInitial: document.getElementById('middleInitial')?.value || '',
-            dob: document.getElementById('dob')?.value || '',
-            age: document.getElementById('age')?.value || '',
-            gender: document.getElementById('gender')?.value || '',
-            civilStatus: document.getElementById('civilStatus')?.value || '',
+            dateOfBirth: document.getElementById('dob')?.value || null,
+            age: document.getElementById('age')?.value || null,
+            gender: document.getElementById('gender')?.value || null,
+            civilStatus: document.getElementById('civilStatus')?.value || null,
             nationality: document.getElementById('nationality')?.value || '',
             phone: document.getElementById('phone')?.value || '',
             address: document.getElementById('address')?.value || ''
         };
         
-        localStorage.setItem('adminProfile', JSON.stringify(profileData));
-        
-        // Update user name in localStorage
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.firstName = profileData.firstName;
-        user.lastName = profileData.lastName;
-        user.middleInitial = profileData.middleInitial;
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        // Update sidebar
-        const userInitialsSpan = document.getElementById('userInitials');
-        const userNameSpan = document.getElementById('userName');
-        if (userInitialsSpan && profileData.firstName && profileData.lastName) {
-            userInitialsSpan.textContent = (profileData.firstName[0] + profileData.lastName[0]).toUpperCase();
+        try {
+            const response = await fetch('http://localhost:3000/api/profile/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify(profileData)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update profile');
+            }
+            
+            // Update user name in localStorage
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user.firstName = profileData.firstName;
+            user.lastName = profileData.lastName;
+            user.middleInitial = profileData.middleInitial;
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            // Update sidebar
+            const userInitialsSpan = document.getElementById('userInitials');
+            const userNameSpan = document.getElementById('userName');
+            if (userInitialsSpan && profileData.firstName && profileData.lastName) {
+                userInitialsSpan.textContent = (profileData.firstName[0] + profileData.lastName[0]).toUpperCase();
+            }
+            if (userNameSpan) {
+                userNameSpan.textContent = `${profileData.firstName} ${profileData.lastName}`;
+            }
+            
+            // Update profile header
+            const profileInitials = document.getElementById('profileInitials');
+            const profileName = document.getElementById('profileName');
+            if (profileInitials && profileData.firstName && profileData.lastName) {
+                profileInitials.textContent = (profileData.firstName[0] + profileData.lastName[0]).toUpperCase();
+            }
+            if (profileName) {
+                profileName.textContent = `${profileData.firstName} ${profileData.lastName}`;
+            }
+            
+            showToastMessage('Profile updated successfully!', 'success');
+            toggleEditMode(); // Exit edit mode
+        } catch (error) {
+            console.error('Save profile error:', error);
+            showToastMessage('Failed to update profile', 'error');
         }
-        if (userNameSpan) {
-            userNameSpan.textContent = `${profileData.firstName} ${profileData.lastName}`;
-        }
-        
-        // Update profile header
-        const profileInitials = document.getElementById('profileInitials');
-        const profileName = document.getElementById('profileName');
-        if (profileInitials && profileData.firstName && profileData.lastName) {
-            profileInitials.textContent = (profileData.firstName[0] + profileData.lastName[0]).toUpperCase();
-        }
-        if (profileName) {
-            profileName.textContent = `${profileData.firstName} ${profileData.lastName}`;
-        }
-        
-        showToastMessage('Profile updated successfully!', 'success');
-        toggleEditMode(); // Exit edit mode
     }
     
     // Age calculation on DOB change
@@ -817,38 +1018,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset to defaults
     const resetRequirementsBtn = document.getElementById('resetRequirements');
     if (resetRequirementsBtn) {
-        resetRequirementsBtn.addEventListener('click', () => {
+        resetRequirementsBtn.addEventListener('click', async () => {
             if (confirm('Reset all document requirements to default values?')) {
-                // Instruction defaults
-                document.getElementById('instruction_beed').value = 45;
-                document.getElementById('instruction_bsed').value = 65;
-                document.getElementById('instruction_bsned').value = 40;
-                document.getElementById('instruction_bcaed').value = 35;
-                document.getElementById('instruction_bped').value = 30;
-                
-                // Research defaults
-                document.getElementById('research_beed').value = 40;
-                document.getElementById('research_bsed').value = 55;
-                document.getElementById('research_bsned').value = 35;
-                document.getElementById('research_bcaed').value = 30;
-                document.getElementById('research_bped').value = 25;
-                
-                // Extension defaults
-                document.getElementById('extension_beed').value = 25;
-                document.getElementById('extension_bsed').value = 25;
-                document.getElementById('extension_bsned').value = 25;
-                document.getElementById('extension_bcaed').value = 25;
-                document.getElementById('extension_bped').value = 25;
-                
-                // Employment defaults
-                document.getElementById('employment_beed').value = 30;
-                document.getElementById('employment_bsed').value = 30;
-                document.getElementById('employment_bsned').value = 30;
-                document.getElementById('employment_bcaed').value = 30;
-                document.getElementById('employment_bped').value = 30;
-                
-                updateTotals();
-                alert('Document requirements reset to default values.');
+                try {
+                    const response = await fetch('http://localhost:3000/api/settings/requirements/reset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showToastMessage('Requirements reset to defaults successfully!', 'success');
+                        loadSavedRequirements();
+                    } else {
+                        const data = await response.json();
+                        showToastMessage(data.msg || 'Failed to reset requirements', 'error');
+                    }
+                } catch (error) {
+                    console.error('Reset requirements error:', error);
+                    showToastMessage('Failed to reset requirements', 'error');
+                }
             }
         });
     }
@@ -856,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save requirements
     const saveRequirementsBtn = document.getElementById('saveRequirements');
     if (saveRequirementsBtn) {
-        saveRequirementsBtn.addEventListener('click', () => {
+        saveRequirementsBtn.addEventListener('click', async () => {
             const requirements = {
                 instruction: {},
                 research: {},
@@ -873,30 +1064,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             
-            localStorage.setItem('documentRequirements', JSON.stringify(requirements));
-            alert('Document requirements saved successfully!');
+            try {
+                const response = await fetch('http://localhost:3000/api/settings/requirements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(requirements)
+                });
+                
+                if (response.ok) {
+                    showToastMessage('Document requirements saved successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showToastMessage(data.msg || 'Failed to save requirements', 'error');
+                }
+            } catch (error) {
+                console.error('Save requirements error:', error);
+                showToastMessage('Failed to save requirements', 'error');
+            }
         });
     }
     
     // Load saved requirements on page load
-    function loadSavedRequirements() {
-        const saved = localStorage.getItem('documentRequirements');
-        if (saved) {
-            const requirements = JSON.parse(saved);
-            const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
-            const categories = ['instruction', 'research', 'extension', 'employment'];
-            
-            categories.forEach(cat => {
-                if (requirements[cat]) {
-                    departments.forEach(dept => {
-                        const input = document.getElementById(`${cat}_${dept}`);
-                        if (input && requirements[cat][dept]) {
-                            input.value = requirements[cat][dept];
-                        }
-                    });
-                }
+    async function loadSavedRequirements() {
+        try {
+            const response = await fetch('http://localhost:3000/api/settings/requirements', {
+                headers: { 'x-auth-token': token }
             });
-            updateTotals();
+            
+            if (response.ok) {
+                const requirements = await response.json();
+                const departments = ['beed', 'bsed', 'bsned', 'bcaed', 'bped'];
+                const categories = ['instruction', 'research', 'extension', 'employment'];
+                
+                categories.forEach(cat => {
+                    if (requirements[cat]) {
+                        departments.forEach(dept => {
+                            const input = document.getElementById(`${cat}_${dept}`);
+                            if (input && requirements[cat][dept] !== undefined) {
+                                input.value = requirements[cat][dept];
+                            }
+                        });
+                    }
+                });
+                updateTotals();
+            } else {
+                console.warn('No saved requirements found, loading from database');
+                // Load from database if no saved settings
+                loadRequirementsFromDatabase();
+            }
+        } catch (error) {
+            console.error('Load requirements error:', error);
+            // Try loading from database as fallback
+            loadRequirementsFromDatabase();
+        }
+    }
+    
+    // Load requirements from database (category_requirements table)
+    async function loadRequirementsFromDatabase() {
+        try {
+            const response = await fetch('http://localhost:3000/api/documents/category-requirements', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const dbRequirements = await response.json();
+                console.log('Loaded requirements from database:', dbRequirements);
+                
+                // Map database requirements to form inputs
+                dbRequirements.forEach(req => {
+                    const category = (req.category_name || '').toLowerCase();
+                    const dept = (req.department_code || '').toLowerCase();
+                    const input = document.getElementById(`${category}_${dept}`);
+                    if (input) {
+                        input.value = req.expected_documents || 0;
+                    }
+                });
+                updateTotals();
+            } else {
+                console.warn('Failed to load requirements from database');
+            }
+        } catch (error) {
+            console.error('Load requirements from database error:', error);
         }
     }
     
@@ -924,27 +1175,65 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     
     if (saveGeneral) {
-        saveGeneral.addEventListener('click', () => {
+        saveGeneral.addEventListener('click', async () => {
             const settings = {
                 systemName: document.getElementById('systemName')?.value || 'DRMS-QA',
                 institutionName: document.getElementById('institutionName')?.value || 'College of Teacher Education',
                 systemEmail: document.getElementById('systemEmail')?.value || 'qa@cte.edu'
             };
-            localStorage.setItem('generalSettings', JSON.stringify(settings));
-            showToastMessage('General settings saved successfully!', 'success');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/settings/general', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    showToastMessage('General settings saved successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showToastMessage(data.msg || 'Failed to save settings', 'error');
+                }
+            } catch (error) {
+                console.error('Save general settings error:', error);
+                showToastMessage('Failed to save settings', 'error');
+            }
         });
     }
     
     if (saveWorkflow) {
-        saveWorkflow.addEventListener('click', () => {
+        saveWorkflow.addEventListener('click', async () => {
             const settings = {
                 workflowType: document.querySelector('input[name="workflowType"]:checked')?.value || 'standard',
                 autoApproveAdmin: document.getElementById('autoApproveAdmin')?.checked || false,
                 autoApproveDean: document.getElementById('autoApproveDean')?.checked || false,
                 autoApproveDeptHead: document.getElementById('autoApproveDeptHead')?.checked || false
             };
-            localStorage.setItem('workflowSettings', JSON.stringify(settings));
-            showToastMessage('Workflow settings saved successfully!', 'success');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/settings/workflow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    showToastMessage('Workflow settings saved successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showToastMessage(data.msg || 'Failed to save settings', 'error');
+                }
+            } catch (error) {
+                console.error('Save workflow settings error:', error);
+                showToastMessage('Failed to save settings', 'error');
+            }
         });
     }
     
@@ -959,53 +1248,89 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function loadStandardsSettings() {
-        const container = document.getElementById('standardsListContainer');
-        if (!container) return;
-        fetch('http://localhost:3000/api/documents/standards', {
+        // Use admin endpoint to get ALL standards (including inactive)
+        fetch('http://localhost:3000/api/admin/standards/all', {
             headers: { 'x-auth-token': token }
         })
-        .then(r => r.json())
-        .then(activeStandards => {
-            // Also fetch all standards (including inactive) via admin route
-            return fetch('http://localhost:3000/api/documents/standards', {
-                headers: { 'x-auth-token': token }
-            })
-            .then(r => r.json())
-            .then(standards => renderStandardsCheckboxes(container, standards));
+        .then(r => {
+            if (!r.ok) throw new Error('Failed to fetch standards');
+            return r.json();
         })
-        .catch(err => console.error('Load standards settings error:', err));
+        .then(standards => {
+            if (Array.isArray(standards)) {
+                renderStandardsByCategory(standards);
+            } else {
+                throw new Error('Invalid standards data format');
+            }
+        })
+        .catch(err => {
+            console.error('Load standards settings error:', err);
+            // Show error in all containers
+            ['instruction', 'research', 'extension', 'employment'].forEach(cat => {
+                const container = document.getElementById(`${cat}Standards`);
+                if (container) {
+                    container.innerHTML = '<p class="text-sm text-red-500 col-span-full">Failed to load standards</p>';
+                }
+            });
+        });
     }
 
-    function renderStandardsCheckboxes(container, standards) {
-        if (!standards.length) {
-            container.innerHTML = '<p class="text-gray-500 text-sm">No standards found.</p>';
-            return;
-        }
-        // Group by category_name
-        const grouped = standards.reduce((acc, s) => {
-            const key = s.category_name || 'Uncategorized';
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(s);
-            return acc;
-        }, {});
-        container.innerHTML = Object.entries(grouped).map(([cat, items]) => `
-            <div class="mb-4">
-                <h4 class="font-semibold text-gray-700 mb-2">${escapeHtml(cat)}</h4>
-                ${items.map(s => `
-                    <label class="flex items-center gap-2 py-1 cursor-pointer">
-                        <input type="checkbox" class="standard-toggle w-4 h-4 accent-teal-600"
-                            data-id="${s.id}" ${s.is_active ? 'checked' : ''}>
-                        <span class="text-sm text-gray-700">${escapeHtml(s.name)}
-                            <span class="text-xs text-gray-400">(${escapeHtml(s.code)})</span>
-                        </span>
-                    </label>
-                `).join('')}
-            </div>
-        `).join('');
+    function renderStandardsByCategory(standards) {
+        // Group standards by category
+        const grouped = {
+            instruction: [],
+            research: [],
+            extension: [],
+            employment: []
+        };
+        
+        standards.forEach(s => {
+            const categoryName = (s.category_name || '').toLowerCase();
+            if (grouped[categoryName]) {
+                grouped[categoryName].push(s);
+            }
+        });
+        
+        // Render each category
+        Object.keys(grouped).forEach(category => {
+            const container = document.getElementById(`${category}Standards`);
+            const countSpan = document.getElementById(`${category}StandardsCount`);
+            
+            if (!container) return;
+            
+            const items = grouped[category];
+            
+            // Update count
+            if (countSpan) {
+                countSpan.textContent = items.length;
+            }
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 col-span-full">No standards available</p>';
+                return;
+            }
+            
+            // Render checkboxes in grid layout
+            container.innerHTML = items.map(s => `
+                <label class="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                    <input type="checkbox" class="standard-toggle mt-0.5 w-4 h-4 accent-teal-600 flex-shrink-0"
+                        data-id="${s.id}" ${s.is_active ? 'checked' : ''}>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-700 leading-tight">${escapeHtml(s.name)}</div>
+                        <div class="text-xs text-gray-400 mt-0.5">${escapeHtml(s.code)}</div>
+                    </div>
+                </label>
+            `).join('');
+        });
     }
 
     function saveStandardsToAPI() {
         const checkboxes = document.querySelectorAll('.standard-toggle');
+        if (checkboxes.length === 0) {
+            showToastMessage('No standards to save', 'error');
+            return;
+        }
+        
         const promises = Array.from(checkboxes).map(cb =>
             fetch(`http://localhost:3000/api/admin/standards/${cb.dataset.id}`, {
                 method: 'PATCH',
@@ -1013,9 +1338,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ is_active: cb.checked })
             })
         );
+        
         Promise.all(promises)
-            .then(() => showToastMessage('Standards saved successfully!', 'success'))
-            .catch(() => showToastMessage('Failed to save some standards', 'error'));
+            .then(responses => {
+                const allOk = responses.every(r => r.ok);
+                if (allOk) {
+                    showToastMessage('Standards saved successfully!', 'success');
+                } else {
+                    showToastMessage('Some standards failed to save', 'error');
+                }
+            })
+            .catch(() => showToastMessage('Failed to save standards', 'error'));
     }
 
     loadStandardsSettings();
@@ -1031,15 +1364,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Load saved general settings on page load
-    function loadSavedGeneralSettings() {
-        const saved = localStorage.getItem('generalSettings');
-        if (saved) {
-            const settings = JSON.parse(saved);
-            if (document.getElementById('systemName')) document.getElementById('systemName').value = settings.systemName || '';
-            if (document.getElementById('institutionName')) document.getElementById('institutionName').value = settings.institutionName || '';
-            if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = settings.systemEmail || '';
-        } else {
-            // Set default values
+    async function loadSavedGeneralSettings() {
+        try {
+            const response = await fetch('http://localhost:3000/api/settings/general', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const settings = await response.json();
+                if (document.getElementById('systemName')) document.getElementById('systemName').value = settings.system_name || 'DRMS-QA';
+                if (document.getElementById('institutionName')) document.getElementById('institutionName').value = settings.institution_name || 'College of Teacher Education';
+                if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = settings.system_email || 'qa@cte.edu';
+            } else {
+                // Set default values
+                if (document.getElementById('systemName')) document.getElementById('systemName').value = 'DRMS-QA';
+                if (document.getElementById('institutionName')) document.getElementById('institutionName').value = 'College of Teacher Education';
+                if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = 'qa@cte.edu';
+            }
+        } catch (error) {
+            console.error('Load general settings error:', error);
+            // Set default values on error
             if (document.getElementById('systemName')) document.getElementById('systemName').value = 'DRMS-QA';
             if (document.getElementById('institutionName')) document.getElementById('institutionName').value = 'College of Teacher Education';
             if (document.getElementById('systemEmail')) document.getElementById('systemEmail').value = 'qa@cte.edu';
@@ -1047,17 +1391,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Load saved workflow settings on page load
-    function loadSavedWorkflowSettings() {
-        const saved = localStorage.getItem('workflowSettings');
-        if (saved) {
-            const settings = JSON.parse(saved);
-            if (settings.workflowType) {
-                const radio = document.querySelector(`input[name="workflowType"][value="${settings.workflowType}"]`);
-                if (radio) radio.checked = true;
+    async function loadSavedWorkflowSettings() {
+        try {
+            const response = await fetch('http://localhost:3000/api/settings/workflow', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const settings = await response.json();
+                if (settings.workflowType) {
+                    const radio = document.querySelector(`input[name="workflowType"][value="${settings.workflowType}"]`);
+                    if (radio) radio.checked = true;
+                }
+                if (document.getElementById('autoApproveAdmin')) document.getElementById('autoApproveAdmin').checked = settings.autoApproveAdmin || false;
+                if (document.getElementById('autoApproveDean')) document.getElementById('autoApproveDean').checked = settings.autoApproveDean || false;
+                if (document.getElementById('autoApproveDeptHead')) document.getElementById('autoApproveDeptHead').checked = settings.autoApproveDeptHead || false;
             }
-            if (document.getElementById('autoApproveAdmin')) document.getElementById('autoApproveAdmin').checked = settings.autoApproveAdmin || false;
-            if (document.getElementById('autoApproveDean')) document.getElementById('autoApproveDean').checked = settings.autoApproveDean || false;
-            if (document.getElementById('autoApproveDeptHead')) document.getElementById('autoApproveDeptHead').checked = settings.autoApproveDeptHead || false;
+        } catch (error) {
+            console.error('Load workflow settings error:', error);
         }
     }
     

@@ -284,36 +284,17 @@ function updateCategoryCard(category, approved, required) {
 
 
 function useFallbackData() {
-    // Fallback data based on database requirements
-    const requirements = {
-        instruction: 215,  // Sum of all departments: 45+65+40+35+30
-        research: 185,     // Sum: 40+55+35+30+25
-        extension: 125,    // Sum: 25+25+25+25+25
-        employment: 150    // Sum: 30+30+30+30+30
-    };
+    // Show zeros when data cannot be loaded
+    document.getElementById('totalDocs').textContent = 0;
+    document.getElementById('approvedDocs').textContent = 0;
+    document.getElementById('pendingDocs').textContent = 0;
+    document.getElementById('approvalRate').textContent = '0% of required';
+    document.getElementById('monthlyChange').textContent = '0/0 required';
     
-    const approved = {
-        instruction: 4,
-        research: 2,
-        extension: 1,
-        employment: 1
-    };
-    
-    const totalRequired = Object.values(requirements).reduce((a, b) => a + b, 0);
-    const totalApproved = Object.values(approved).reduce((a, b) => a + b, 0);
-    
-    document.getElementById('totalDocs').textContent = 10;
-    document.getElementById('approvedDocs').textContent = totalApproved;
-    document.getElementById('pendingDocs').textContent = 5;
-    
-    const approvalRate = ((totalApproved / totalRequired) * 100).toFixed(1);
-    document.getElementById('approvalRate').textContent = `${approvalRate}% of required`;
-    document.getElementById('monthlyChange').textContent = `${totalApproved}/${totalRequired} required`;
-    
-    updateCategoryCard('instruction', approved.instruction, requirements.instruction);
-    updateCategoryCard('research', approved.research, requirements.research);
-    updateCategoryCard('extension', approved.extension, requirements.extension);
-    updateCategoryCard('employment', approved.employment, requirements.employment);
+    updateCategoryCard('instruction', 0, 0);
+    updateCategoryCard('research', 0, 0);
+    updateCategoryCard('extension', 0, 0);
+    updateCategoryCard('employment', 0, 0);
 }
 
 // Load recent activities from backend database
@@ -455,15 +436,8 @@ async function loadRecentDocuments() {
             throw new Error(`API Error: ${response.status}`);
         }
     } catch (err) {
-        console.log('API failed, using fallback:', err.message);
-        // Fallback data
-        documents = [
-            { id: 33, title: 'fck', author_name: 'Admin User', created_at: '2026-05-02 23:15:30', category_display_name: 'Research', department_code: 'BEED', workflow_status: 'pending', version: 'v1.0' },
-            { id: 32, title: 'Faculty File Created by Admin', author_name: 'Jelmar Kemba', created_at: '2026-04-30 21:09:44', category_display_name: 'Instruction', department_code: 'BEED', workflow_status: 'approved', version: 'v1.0' },
-            { id: 30, title: 'Faculty File', author_name: 'Guilmars Quimbas', created_at: '2026-04-30 21:02:02', category_display_name: 'Instruction', department_code: 'BEED', workflow_status: 'pending', version: 'v1.0' },
-            { id: 29, title: 'Capstone Vitae', author_name: 'Admin', created_at: '2026-04-30 20:31:30', category_display_name: 'Research', department_code: 'BEED', workflow_status: 'approved', version: 'v1.0' },
-            { id: 28, title: 'Last Testing', author_name: 'Guilmar Quimba', created_at: '2026-04-30 20:30:00', category_display_name: 'Instruction', department_code: 'BEED', workflow_status: 'rejected', version: 'v1.0' }
-        ];
+        console.log('API failed:', err.message);
+        documents = [];
     }
     
     // Sort by date (most recent first) and limit to 8 documents

@@ -261,6 +261,7 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
                     <div class="text-xs text-gray-400">By ${doc.author_name || 'You'}</div>
                 </td>
                 <td class="py-3"><span class="${getCategoryBadgeClass(doc.category_display_name || doc.category)} px-2 py-1 rounded-full text-xs">${doc.category_display_name || doc.category}</span></td>
+                <td class="py-3">${renderStandardsBadges(doc.standards || [])}</td>
                 <td class="py-3 text-gray-600">${doc.department_code || doc.area}</td>
                 <td class="py-3"><span class="${getStatusBadgeClass(doc.workflow_status)} px-2 py-1 rounded-full text-xs">${formatStatus(doc.workflow_status)}</span></td>
                 <td class="py-3 text-gray-600">${doc.version || 'v1.0'}</td>
@@ -483,6 +484,19 @@ function formatTimeAgo(dateString) {
 function viewDocument(docId, title) {
     console.log('View document:', docId, title);
     window.location.href = `view-document.html?id=${docId}`;
+}
+
+function renderStandardsBadges(standards) {
+    if (!standards || standards.length === 0) {
+        return '<span class="text-xs text-gray-400">—</span>';
+    }
+    const visible = standards.slice(0, 2);
+    const remaining = standards.length - 2;
+    let html = visible.map(s => `<span class="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs mr-1 mb-1">${s}</span>`).join('');
+    if (remaining > 0) {
+        html += `<span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">+${remaining}</span>`;
+    }
+    return html;
 }
 
 function downloadDocument(docId, title) {

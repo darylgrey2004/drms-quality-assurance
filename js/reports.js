@@ -50,7 +50,7 @@ async function loadAnalyticsData() {
             fetch(`${API_BASE}/api/documents?scope=all`, {
                 headers: { 'x-auth-token': token }
             }),
-            fetch(`${API_BASE}/api/category-requirements`, {
+            fetch(`${API_BASE}/api/documents/category-requirements`, {
                 headers: { 'x-auth-token': token }
             })
         ]);
@@ -83,20 +83,28 @@ async function loadAnalyticsData() {
 
 // Calculate analytics based on requirements
 function calculateRequirementsAnalytics(documents, requirements) {
-    // Calculate total requirements per category
+    // Calculate total requirements per category from database
     const categoryRequirements = {
-        instruction: 320,
-        research: 400,
-        extension: 210,
-        employment: 180
+        instruction: 0,
+        research: 0,
+        extension: 0,
+        employment: 0
     };
     
-    // Count documents by category and status
+    // Sum requirements from database
+    requirements.forEach(req => {
+        const categoryName = (req.category_name || '').toLowerCase();
+        if (categoryRequirements[categoryName] !== undefined) {
+            categoryRequirements[categoryName] += req.expected_documents || 0;
+        }
+    });
+    
+    // Calculate requirements-based analytics
     const categoryBreakdown = [
-        { category: 'Instruction', total: 0, approved: 0, pending: 0, rejected: 0, required: 320 },
-        { category: 'Research', total: 0, approved: 0, pending: 0, rejected: 0, required: 400 },
-        { category: 'Extension', total: 0, approved: 0, pending: 0, rejected: 0, required: 210 },
-        { category: 'Employment', total: 0, approved: 0, pending: 0, rejected: 0, required: 180 }
+        { category: 'Instruction', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.instruction },
+        { category: 'Research', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.research },
+        { category: 'Extension', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.extension },
+        { category: 'Employment', total: 0, approved: 0, pending: 0, rejected: 0, required: categoryRequirements.employment }
     ];
     
     documents.forEach(doc => {
@@ -185,7 +193,7 @@ async function loadCompletenessData() {
             fetch(`${API_BASE}/api/documents?scope=all`, {
                 headers: { 'x-auth-token': token }
             }),
-            fetch(`${API_BASE}/api/category-requirements`, {
+            fetch(`${API_BASE}/api/documents/category-requirements`, {
                 headers: { 'x-auth-token': token }
             })
         ]);
@@ -209,68 +217,97 @@ function updateCompletenessDisplay(documents) {
     
     if (!container) return;
     
-    // Categories with requirements
-    const categories = [
-        { name: 'Instruction', required: 320, color: 'bg-blue-600' },
-        { name: 'Research', required: 400, color: 'bg-green-600' },
-        { name: 'Extension', required: 210, color: 'bg-amber-600' },
-        { name: 'Employment', required: 180, color: 'bg-purple-600' }
-    ];
-    
-    // Count documents by category
-    const counts = { Instruction: 0, Research: 0, Extension: 0, Employment: 0 };
-    documents.forEach(doc => {
-        const cat = (doc.category || doc.category_name || '');
-        if (cat === 'Instruction' || cat === 'instruction') counts.Instruction++;
-        else if (cat === 'Research' || cat === 'research') counts.Research++;
-        else if (cat === 'Extension' || cat === 'extension') counts.Extension++;
-        else if (cat === 'Employment' || cat === 'employment') counts.Employment++;
-    });
-    
-    // Render completeness chart
-    container.innerHTML = categories.map(cat => {
-        const uploaded = counts[cat.name];
-        const percentage = cat.required > 0 ? ((uploaded / cat.required) * 100).toFixed(0) : 0;
-        const missing = Math.max(0, cat.required - uploaded);
-        const status = uploaded >= cat.required ? 'Complete' : 'Partial';
-        const statusColor = uploaded >= cat.required ? 'text-green-600' : 'text-amber-600';
+    // Load requirements from API
+    const token = localStorage.getItem('token');
+    fetch(`${API_BASE}/api/documents/category-requirements`, {
+        headers: { 'x-auth-token': token }
+    })
+    .then(res => res.json())
+    .then(requirements => {
+        console.log('Requirements loaded:', requirements);
+        // Calculate category totals from requirements
+        const categoryTotals = { Instruction: 0, Research: 0, Extension: 0, Employment: 0 };
+        requirements.forEach(req => {
+            const cat = req.category_display_name;
+            if (categoryTotals[cat] !== undefined) {
+                categoryTotals[cat] += req.expected_documents || 0;
+            }
+        });
         
-        return `
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium">${cat.name}</span>
-                    <span class="text-sm font-semibold ${statusColor}">${percentage}%</span>
+        // Categories with requirements from database
+        const categories = [
+            { name: 'Instruction', required: categoryTotals.Instruction, color: 'bg-blue-600' },
+            { name: 'Research', required: categoryTotals.Research, color: 'bg-green-600' },
+            { name: 'Extension', required: categoryTotals.Extension, color: 'bg-amber-600' },
+            { name: 'Employment', required: categoryTotals.Employment, color: 'bg-purple-600' }
+        ];
+        
+        // Count documents by category
+        const counts = { Instruction: 0, Research: 0, Extension: 0, Employment: 0 };
+        documents.forEach(doc => {
+            const cat = (doc.category || doc.category_name || '');
+            if (cat === 'Instruction' || cat === 'instruction') counts.Instruction++;
+            else if (cat === 'Research' || cat === 'research') counts.Research++;
+            else if (cat === 'Extension' || cat === 'extension') counts.Extension++;
+            else if (cat === 'Employment' || cat === 'employment') counts.Employment++;
+        });
+        
+        // Render completeness chart
+        container.innerHTML = categories.map(cat => {
+            const uploaded = counts[cat.name];
+            const percentage = cat.required > 0 ? ((uploaded / cat.required) * 100).toFixed(0) : 0;
+            const missing = Math.max(0, cat.required - uploaded);
+            const status = uploaded >= cat.required ? 'Complete' : 'Partial';
+            const statusColor = uploaded >= cat.required ? 'text-green-600' : 'text-amber-600';
+            
+            return `
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">${cat.name}</span>
+                        <span class="text-sm font-semibold ${statusColor}">${percentage}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 rounded-full">
+                        <div class="${cat.color} h-2 rounded-full" style="width:${percentage}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>${uploaded} of ${cat.required} documents</span>
+                        <span>${missing} missing</span>
+                    </div>
                 </div>
-                <div class="w-full bg-gray-200 h-2 rounded-full">
-                    <div class="${cat.color} h-2 rounded-full" style="width:${percentage}%"></div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>${uploaded} of ${cat.required} documents</span>
-                    <span>${missing} missing</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    // Department breakdown table
-    const departments = ['BEED', 'BSED', 'BSNED', 'BCAED', 'BPED'];
-    const categoryList = ['Instruction', 'Research', 'Extension', 'Employment'];
-    
-    // Sample data for department breakdown
-    const deptData = {
-        'BEED': { Instruction: { req: 45, uploaded: 42, verified: 40 }, Research: { req: 40, uploaded: 35, verified: 33 }, Extension: { req: 25, uploaded: 18, verified: 16 }, Employment: { req: 30, uploaded: 25, verified: 22 } },
-        'BSED': { Instruction: { req: 65, uploaded: 58, verified: 55 }, Research: { req: 55, uploaded: 48, verified: 45 }, Extension: { req: 25, uploaded: 20, verified: 18 }, Employment: { req: 30, uploaded: 28, verified: 25 } },
-        'BSNED': { Instruction: { req: 40, uploaded: 28, verified: 25 }, Research: { req: 35, uploaded: 22, verified: 20 }, Extension: { req: 25, uploaded: 15, verified: 12 }, Employment: { req: 30, uploaded: 20, verified: 18 } },
-        'BCAED': { Instruction: { req: 35, uploaded: 30, verified: 28 }, Research: { req: 30, uploaded: 25, verified: 22 }, Extension: { req: 25, uploaded: 18, verified: 15 }, Employment: { req: 30, uploaded: 22, verified: 20 } },
-        'BPED': { Instruction: { req: 30, uploaded: 25, verified: 22 }, Research: { req: 25, uploaded: 20, verified: 18 }, Extension: { req: 25, uploaded: 16, verified: 14 }, Employment: { req: 30, uploaded: 24, verified: 21 } }
-    };
-    
-    if (tableBody) {
-        let tableHtml = '';
-        for (const dept of departments) {
-            for (const cat of categoryList) {
-                const data = deptData[dept]?.[cat];
-                if (data) {
+            `;
+        }).join('');
+        
+        // Department breakdown table - load from database
+        if (tableBody) {
+            // Group requirements by department and category
+            const deptMap = {};
+            requirements.forEach(req => {
+                const dept = req.department_code;
+                const cat = req.category_name;
+                if (!deptMap[dept]) deptMap[dept] = {};
+                deptMap[dept][cat] = {
+                    req: req.expected_documents || 0,
+                    uploaded: 0,
+                    verified: 0
+                };
+            });
+            
+            // Count uploaded and verified documents
+            documents.forEach(doc => {
+                const dept = doc.department_code;
+                const cat = doc.category_display_name || doc.category;
+                if (deptMap[dept] && deptMap[dept][cat]) {
+                    deptMap[dept][cat].uploaded++;
+                    if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                        deptMap[dept][cat].verified++;
+                    }
+                }
+            });
+            
+            let tableHtml = '';
+            for (const dept in deptMap) {
+                for (const cat in deptMap[dept]) {
+                    const data = deptMap[dept][cat];
                     const percentage = data.req > 0 ? ((data.uploaded / data.req) * 100).toFixed(0) : 0;
                     const status = data.uploaded >= data.req ? 'Complete' : 'Partial';
                     const statusClass = status === 'Complete' ? 'badge-approved' : 'badge-pending';
@@ -296,9 +333,14 @@ function updateCompletenessDisplay(documents) {
                     `;
                 }
             }
+            tableBody.innerHTML = tableHtml || '<tr><td colspan="7" class="text-center py-4 text-gray-500">No data available</td></tr>';
         }
-        tableBody.innerHTML = tableHtml;
-    }
+    })
+    .catch(err => {
+        console.error('Failed to load requirements:', err);
+        if (container) container.innerHTML = '<div class="text-center text-gray-500 py-4">Failed to load completeness data</div>';
+        if (tableBody) tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Failed to load data</td></tr>';
+    });
 }
 
 // Update analytics display with real data
@@ -353,20 +395,20 @@ function useFallbackAnalytics() {
     console.log('Using fallback analytics...');
     const fallbackAnalytics = {
         status_distribution: [
-            { workflow_status: 'approved', count: 156, percentage: 43.3 },
-            { workflow_status: 'pending', count: 124, percentage: 34.4 },
-            { workflow_status: 'rejected', count: 80, percentage: 22.2 }
+            { workflow_status: 'approved', count: 0, percentage: 0 },
+            { workflow_status: 'pending', count: 0, percentage: 0 },
+            { workflow_status: 'rejected', count: 0, percentage: 0 }
         ],
         category_breakdown: [
-            { category: 'Instruction', total: 98, approved: 78, pending: 20, rejected: 0, required: 320, approval_rate: 24.4 },
-            { category: 'Research', total: 87, approved: 68, pending: 19, rejected: 0, required: 400, approval_rate: 17.0 },
-            { category: 'Extension', total: 54, approved: 44, pending: 10, rejected: 0, required: 210, approval_rate: 21.0 },
-            { category: 'Employment', total: 67, approved: 52, pending: 15, rejected: 0, required: 180, approval_rate: 28.9 }
+            { category: 'Instruction', total: 0, approved: 0, pending: 0, rejected: 0, required: 0, approval_rate: 0 },
+            { category: 'Research', total: 0, approved: 0, pending: 0, rejected: 0, required: 0, approval_rate: 0 },
+            { category: 'Extension', total: 0, approved: 0, pending: 0, rejected: 0, required: 0, approval_rate: 0 },
+            { category: 'Employment', total: 0, approved: 0, pending: 0, rejected: 0, required: 0, approval_rate: 0 }
         ],
         department_breakdown: [],
         monthly_trends: [],
-        top_uploaders: [{ firstName: 'Admin', lastName: 'User', documents_uploaded: 306 }],
-        requirements: { instruction: 320, research: 400, extension: 210, employment: 180 }
+        top_uploaders: [],
+        requirements: { instruction: 0, research: 0, extension: 0, employment: 0 }
     };
     updateAnalyticsDisplay(fallbackAnalytics);
 }
@@ -377,23 +419,11 @@ function useFallbackCompleteness() {
     const tableBody = document.getElementById('departmentBreakdownTable');
     
     if (container) {
-        container.innerHTML = `
-            <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Instruction</span><span class="text-sm font-semibold text-amber-600">77%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-blue-600 h-2 rounded-full" style="width:77%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>245 of 320 documents</span><span>75 missing</span></div></div>
-            <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Research</span><span class="text-sm font-semibold text-amber-600">78%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:78%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>312 of 400 documents</span><span>88 missing</span></div></div>
-            <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Extension</span><span class="text-sm font-semibold text-amber-600">74%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:74%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>156 of 210 documents</span><span>54 missing</span></div></div>
-            <div><div class="flex justify-between items-center mb-2"><span class="font-medium">Employment</span><span class="text-sm font-semibold text-amber-600">74%</span></div><div class="w-full bg-gray-200 h-2 rounded-full"><div class="bg-purple-600 h-2 rounded-full" style="width:74%"></div></div><div class="flex justify-between text-xs text-gray-500 mt-1"><span>134 of 180 documents</span><span>46 missing</span></div></div>
-        `;
+        container.innerHTML = '<div class="text-center text-gray-500 py-4">Failed to load completeness data</div>';
     }
     
     if (tableBody) {
-        tableBody.innerHTML = `
-            <tr class="border-b"><td class="py-3 font-medium">BEED</td><td class="py-3">Instruction</td><td class="py-3">45</td><td class="py-3">42</td><td class="py-3">40</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-green-600 h-2 rounded-full" style="width:89%"></div></div><span class="text-xs">89%</span></div></td><td class="py-3"><span class="badge-approved px-2 py-1 rounded-full text-xs">Complete</span></td></tr>
-            <tr class="border-b"><td class="py-3 font-medium">BSED</td><td class="py-3">Instruction</td><td class="py-3">65</td><td class="py-3">58</td><td class="py-3">55</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:85%"></div></div><span class="text-xs">85%</span></div></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-            <tr class="border-b"><td class="py-3 font-medium">BSNED</td><td class="py-3">Instruction</td><td class="py-3">40</td><td class="py-3">28</td><td class="py-3">25</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:63%"></div></div><span class="text-xs">63%</span></div></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-            <tr class="border-b"><td class="py-3 font-medium">BSED</td><td class="py-3">Research</td><td class="py-3">55</td><td class="py-3">48</td><td class="py-3">45</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:82%"></div></div><span class="text-xs">82%</span></div></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-            <tr class="border-b"><td class="py-3 font-medium">BEED</td><td class="py-3">Research</td><td class="py-3">40</td><td class="py-3">35</td><td class="py-3">33</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:83%"></div></div><span class="text-xs">83%</span></div></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-            <tr><td class="py-3 font-medium">BPED</td><td class="py-3">Extension</td><td class="py-3">25</td><td class="py-3">18</td><td class="py-3">16</td><td class="py-3"><div class="flex items-center gap-2"><div class="w-20 bg-gray-200 h-2 rounded-full"><div class="bg-amber-600 h-2 rounded-full" style="width:64%"></div></div><span class="text-xs">64%</span></div></td><td class="py-3"><span class="badge-pending px-2 py-1 rounded-full text-xs">Partial</span></td></tr>
-        `;
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Failed to load data</td></tr>';
     }
 }
 

@@ -13,6 +13,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePassword = document.getElementById('togglePassword');
     const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 
+    // Load departments from API
+    async function loadDepartments() {
+        try {
+            const response = await fetch(`${API_BASE}/api/departments`);
+            if (!response.ok) throw new Error('Failed to load departments');
+            
+            const departments = await response.json();
+            console.log('Departments loaded:', departments);
+            
+            departmentSelect.innerHTML = '<option value="" disabled selected>Select department</option>';
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.code; // Store CODE only (e.g., "BEED")
+                option.textContent = `${dept.code} - ${dept.name}`; // Display "BEED - Bachelor of Elementary Education"
+                departmentSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading departments:', error);
+            departmentSelect.innerHTML = '<option value="" disabled selected>Error loading departments</option>';
+        }
+    }
+    
+    // Load departments on page load
+    loadDepartments();
+
     // Modal elements
     const alertModal = document.getElementById('alertModal');
     const alertIcon = document.getElementById('alertIcon');

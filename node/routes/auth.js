@@ -37,6 +37,21 @@ async function createSession(userId, req) {
   }
 }
 
+// @route   GET api/departments
+// @desc    Get all active departments (public endpoint for registration)
+// @access  Public
+router.get('/departments', async (req, res) => {
+  try {
+    const [departments] = await db.query(
+      'SELECT id, code, name FROM departments WHERE is_active = 1 ORDER BY code ASC'
+    );
+    res.json(departments);
+  } catch (err) {
+    console.error('Get departments error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   GET api/auth/check-dept-head/:department
 // @desc    Check if department head exists for a department
 // @access  Public
