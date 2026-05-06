@@ -595,18 +595,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function handleUnlock(docId) {
-        if (!confirm('Unlock this document? It will return to approved status.')) return;
+        console.log('handleUnlock called with docId:', docId);
+        if (!isAdmin) {
+            console.log('User is not admin, showing error');
+            showToast('Only Administrators can unlock documents.', true);
+            return;
+        }
+        if (!confirm('Unlock this document? It will return to approved status.')) {
+            console.log('User cancelled unlock');
+            return;
+        }
         try {
+            console.log('Sending unlock request to API...');
             const response = await fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
                 method: 'POST',
-                headers: { 'x-auth-token': token }
+                headers: { 
+                    'x-auth-token': token,
+                    'Content-Type': 'application/json'
+                }
             });
+            console.log('Unlock response status:', response.status);
             const data = await response.json();
+            console.log('Unlock response data:', data);
             if (!response.ok) throw new Error(data.msg || 'Unlock failed');
             showToast(data.msg || 'Document unlocked successfully.');
             updateDocumentStatus(parseInt(docId), 'approved');
             loadStats();
+            loadDocuments();
         } catch (err) {
+            console.error('Unlock error:', err);
             showErrorModal('Failed to unlock document: ' + err.message);
         }
     }
@@ -714,6 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function getActionButtons(doc) {
         const status = doc.workflow_status;
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
+        const isLocked = status === 'locked';
         
         let buttons = `<button class="btn-view text-xs px-2 py-1 bg-gray-100 border border-gray-300 rounded" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
@@ -734,9 +752,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isAdmin) {
                 buttons += ` <button class="btn-lock text-xs px-2 py-1 bg-purple-100 border border-purple-300 rounded text-purple-700" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
             }
-        } else if (status === 'locked' && isAdmin) {
+        } else if (status === 'locked') {
             // Only Admin can unlock
-            buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-100 border border-orange-300 rounded text-orange-700" data-id="${doc.id}">Unlock</button>`;
+            if (isAdmin) {
+                buttons += ` <button class="btn-unlock text-xs px-2 py-1 bg-orange-100 border border-orange-300 rounded text-orange-700" data-id="${doc.id}">Unlock</button>`;
+            }
+            // RULE: Non-admin users cannot download or delete locked documents
+            // No download/delete buttons shown for locked documents for non-admin
         } else if (status === 'rejected') {
             buttons += ` <button class="btn-comments text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}">Comments</button>`;
             buttons += ` <button class="btn-delete text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}">Delete</button>`;
@@ -1028,7 +1050,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Unlock buttons
         document.querySelectorAll('.btn-unlock').forEach(btn => {
-            btn.addEventListener('click', () => handleUnlock(btn.getAttribute('data-id')));
+            btn.addEventListener('click', () => {
+                console.log('Unlock button clicked for document ID:', btn.getAttribute('data-id'));
+                handleUnlock(btn.getAttribute('data-id'));
+            });
         });
         
         // Reject buttons

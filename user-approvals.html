@@ -148,6 +148,26 @@
                     </div>
                 </div>
 
+                <!-- Bulk Actions Bar -->
+                <div class="bg-white rounded-xl p-4 stat-card mb-6" id="bulkActionsBar">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-teal-600 w-4 h-4">
+                            <label for="selectAll" class="text-sm text-gray-700 font-medium">Select All</label>
+                            <span id="selectedCount" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">0 selected</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <select id="bulkAction" class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">Bulk Actions</option>
+                                <option value="validate">Validate Selected</option>
+                                <option value="approve">Approve Selected</option>
+                                <option value="reject">Reject Selected</option>
+                            </select>
+                            <button id="applyBulk" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg transition">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- tabs -->
                 <div class="mb-4 border-b border-gray-200 overflow-x-auto">
                     <ul class="flex gap-1 text-sm font-medium" id="workflowTabs">
@@ -160,44 +180,37 @@
                 </div>
 
                 <!-- Desktop Table View -->
-                <div class="hidden md:block bg-white rounded-xl p-5 stat-card overflow-x-auto">
-                    <div class="min-w-[900px]">
-                        <div class="grid grid-cols-12 text-xs font-medium text-gray-500 pb-2 border-b border-gray-100">
-                            <div class="col-span-1"><input type="checkbox" id="headerCheckbox" class="rounded border-gray-300 text-teal-600"></div>
-                            <div class="col-span-2">DOCUMENT</div>
-                            <div class="col-span-2">CATEGORY</div>
-                            <div class="col-span-2">STANDARDS</div>
-                            <div class="col-span-1">DEPARTMENT</div>
-                            <div class="col-span-2">STATUS</div>
-                            <div class="col-span-1">VERSION</div>
-                            <div class="col-span-1">ACTIONS</div>
-                        </div>
-                        <div id="desktopApprovalsList" class="divide-y divide-gray-100">
-                        </div>
+                <div class="hidden md:block bg-white rounded-xl overflow-hidden stat-card">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50">
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs w-10">Select</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">DOCUMENT</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">CATEGORY</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">STANDARDS</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">DEPARTMENT</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">STATUS</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">VERSION</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-medium text-xs">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsList" class="divide-y divide-gray-100">
+                                <!-- Dynamic content loaded from backend -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Approvals list - Mobile Card View -->
+                <!-- Mobile Card View -->
                 <div id="mobileApprovalsList" class="block md:hidden space-y-4">
+                    <!-- Dynamic content loaded from backend -->
                 </div>
 
-                <!-- bulk actions -->
+                <!-- pagination -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-teal-600 w-4 h-4">
-                        <label for="selectAll" class="text-sm text-gray-600">Select All</label>
-                        <select id="bulkAction" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="">Bulk Actions</option>
-                            <option value="validate">Validate Selected</option>
-                            <option value="approve">Approve Selected</option>
-                            <option value="reject">Reject Selected</option>
-                        </select>
-                        <button id="applyBulk" class="px-4 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-sm rounded-lg transition-colors">Apply</button>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span id="paginationInfo" class="text-sm text-gray-500">Loading...</span>
-                        <div id="paginationButtons" class="flex gap-1"></div>
-                    </div>
+                    <div class="text-sm text-gray-500" id="paginationInfo">Showing 0 to 0 of 0 results</div>
+                    <div class="flex flex-wrap gap-2 justify-center" id="paginationButtons"></div>
                 </div>
 
                 <!-- guidelines -->
@@ -320,8 +333,88 @@
         </div>
     </div>
 
+    <!-- VALIDATE CONFIRMATION MODAL -->
+    <div id="validateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-md">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Validate Document</h3>
+                <button id="validateModalCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-2">You are about to validate:</p>
+                    <p id="validateDocTitle" class="font-semibold text-gray-900 mb-4"></p>
+                    <p class="text-sm text-blue-600 bg-blue-50 p-3 rounded">
+                        Validating this document means you confirm it meets the required standards and it will proceed to the approval stage.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <label for="validateComment" class="block text-sm font-medium text-gray-700 mb-2">Comments (Optional)</label>
+                    <textarea id="validateComment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add any validation notes..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t bg-gray-50">
+                <button id="validateModalCancelBtn" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                <button id="validateModalConfirmBtn" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Confirm Validation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPROVE CONFIRMATION MODAL -->
+    <div id="approveModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-md">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Approve Document</h3>
+                <button id="approveModalCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-2">You are about to approve:</p>
+                    <p id="approveDocTitle" class="font-semibold text-gray-900 mb-4"></p>
+                    <p class="text-sm text-green-600 bg-green-50 p-3 rounded">
+                        Approving this document means it meets all requirements and will proceed to the locking stage.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <label for="approveComment" class="block text-sm font-medium text-gray-700 mb-2">Comments (Optional)</label>
+                    <textarea id="approveComment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Add any approval notes..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t bg-gray-50">
+                <button id="approveModalCancelBtn" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                <button id="approveModalConfirmBtn" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">Confirm Approval</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK REJECTION MODAL -->
+    <div id="bulkRejectionModal" class="rejection-modal hidden">
+        <div class="rejection-modal-container">
+            <div class="rejection-modal-header">
+                <h2>Bulk Reject Documents</h2>
+                <button id="closeBulkRejectionModal" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="rejection-modal-body">
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Documents Selected</div>
+                        <div class="info-value" id="bulkRejectCount">0</div>
+                    </div>
+                </div>
+                <div class="comment-section">
+                    <label for="bulkRejectionComment" class="comment-label">Reason for Rejection (will apply to all selected)</label>
+                    <textarea id="bulkRejectionComment" class="comment-textarea" rows="5" placeholder="Please provide detailed reason for rejecting these documents..."></textarea>
+                </div>
+            </div>
+            <div class="rejection-modal-footer">
+                <button id="cancelBulkRejection" class="btn-cancel">Cancel</button>
+                <button id="submitBulkRejection" class="btn-submit">Reject All Selected</button>
+            </div>
+        </div>
+    </div>
+
     <!-- DOCUMENT PREVIEW MODAL -->
-    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" style="z-index: 10000;">
         <div class="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
             <div class="flex items-center justify-between p-4 border-b">
                 <h3 id="docPreviewTitle" class="text-lg font-semibold text-gray-800">Document Preview</h3>

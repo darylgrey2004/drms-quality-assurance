@@ -297,6 +297,19 @@
         </div>
     </div>
 
+    <!-- Document Preview Modal -->
+    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" style="z-index: 10000;">
+        <div class="bg-white rounded-xl w-full max-w-6xl h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docPreviewTitle" class="text-lg font-semibold text-gray-800">Document Preview</h3>
+                <button id="docPreviewCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <iframe id="docPreviewFrame" class="w-full h-full" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Set current date
         function setCurrentDate() {
@@ -379,9 +392,8 @@
             });
         });
         
-        // View and Download button handlers
+        // View and Edit button handlers
         document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => alert('Document viewer would open here')));
-        document.querySelectorAll('.download-btn').forEach(btn => btn.addEventListener('click', () => alert('Document download would start here')));
         document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => alert('Edit document would open here')));
         
         // Heartbeat to keep session alive

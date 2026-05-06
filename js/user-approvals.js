@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const approvalStatus    = document.getElementById('approvalStatus');
     const refreshBtn        = document.getElementById('refreshApprovals');
     const tabLinks          = document.querySelectorAll('#workflowTabs a');
-    const desktopContainer  = document.getElementById('desktopApprovalsList');
+    const desktopContainer  = document.getElementById('approvalsList');
     const mobileContainer   = document.getElementById('mobileApprovalsList');
     const paginationInfo    = document.getElementById('paginationInfo');
     const paginationButtons = document.getElementById('paginationButtons');
@@ -349,8 +349,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 btns += ` <span class="${cls.awaiting}" title="Awaiting Dean/Admin approval">Awaiting Approval</span>`;
             }
         } else if (s === 'approved') {
-            // Area-chair, dean, admin can lock
-            btns += ` <button class="${cls.lock} btn-lock-action" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            // RULE: Only Admin can lock documents
+            if (isAdmin) {
+                btns += ` <button class="${cls.lock} btn-lock-action" data-id="${doc.id}" data-title="${doc.title}">Lock</button>`;
+            }
         } else if (s === 'locked' && isAdmin) {
             btns += ` <button class="btn-unlock text-xs btn-unlock-action" data-id="${doc.id}">Unlock</button>`;
         } else if (s === 'rejected') {
@@ -369,25 +371,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!desktopContainer || !mobileContainer) return;
 
         if (page.length === 0) {
-            desktopContainer.innerHTML = '<div class="col-span-12 py-8 text-center text-gray-500">No documents found</div>';
+            desktopContainer.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-gray-500">No documents found</td></tr>';
             mobileContainer.innerHTML  = '<div class="py-8 text-center text-gray-500">No documents found</div>';
             return;
         }
 
         desktopContainer.innerHTML = page.map(doc => `
-            <div class="grid grid-cols-12 py-3 text-sm items-center" data-id="${doc.id}">
-                <div class="col-span-1"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></div>
-                <div class="col-span-2">
+            <tr class="hover:bg-gray-50" data-id="${doc.id}">
+                <td class="py-3 px-4"><input type="checkbox" class="doc-checkbox rounded border-gray-300 text-teal-600"></td>
+                <td class="py-3 px-4">
                     <div class="font-medium text-gray-800">${doc.title}</div>
                     <div class="text-xs text-gray-400">by ${doc.author_name || 'Unknown'} · ${new Date(doc.created_at).toLocaleDateString()}</div>
-                </div>
-                <div class="col-span-2"><span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span></div>
-                <div class="col-span-2">${renderStandardsBadges(doc.standards || [])}</div>
-                <div class="col-span-1"><span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${doc.department_code || 'N/A'}</span></div>
-                <div class="col-span-2"><span class="${statusBadges[doc.workflow_status] || 'bg-gray-100 text-gray-700'} text-xs px-2 py-1 rounded-full font-medium">${statusTexts[doc.workflow_status] || doc.workflow_status}</span></div>
-                <div class="col-span-1 text-gray-600">${doc.version || 'v1.0'}</div>
-                <div class="col-span-1"><div class="flex flex-wrap gap-1">${getActionButtons(doc)}</div></div>
-            </div>`).join('');
+                </td>
+                <td class="py-3 px-4"><span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">${(doc.category_name || doc.category || 'N/A').toUpperCase()}</span></td>
+                <td class="py-3 px-4">${renderStandardsBadges(doc.standards || [])}</td>
+                <td class="py-3 px-4"><span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">${doc.department_code || 'N/A'}</span></td>
+                <td class="py-3 px-4"><span class="${statusBadges[doc.workflow_status] || 'bg-gray-100 text-gray-700'} text-xs px-2 py-1 rounded-full font-medium">${statusTexts[doc.workflow_status] || doc.workflow_status}</span></td>
+                <td class="py-3 px-4 text-gray-600">${doc.version || 'v1.0'}</td>
+                <td class="py-3 px-4"><div class="flex flex-wrap gap-1">${getActionButtons(doc)}</div></td>
+            </tr>`).join('');
 
         mobileContainer.innerHTML = page.map(doc => `
             <div class="border rounded-lg p-4 bg-white" data-id="${doc.id}">

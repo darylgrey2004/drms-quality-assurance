@@ -413,13 +413,14 @@ router.post('/:documentId/validate', auth, async (req, res) => {
 });
 
 // @route   POST /api/approvals/:documentId/lock
-// @desc    Lock a document (final stage)
-// @access  Private (Admin, Dean, Area-Chair)
+// @desc    Lock a document (final stage) - ADMIN ONLY
+// @access  Private (Admin only)
 router.post('/:documentId/lock', auth, async (req, res) => {
   try {
     const role = normalizeRole(req.user.role);
-    if (role !== 'admin' && role !== 'dean' && role !== 'area-chair' && role !== 'department-head') {
-      return res.status(403).json({ msg: 'Not authorized to lock documents' });
+    // RULE: Only Admin can lock documents
+    if (role !== 'admin') {
+      return res.status(403).json({ msg: 'Only Administrator can lock documents' });
     }
 
     const documentId = parseInt(req.params.documentId);
@@ -432,18 +433,9 @@ router.post('/:documentId/lock', auth, async (req, res) => {
 
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
 
-    // Area-chair/Dept. Head can only lock their department's documents or own uploads
-    if (role === 'area-chair' || role === 'department-head') {
-      const deptId = await getAreaChairDeptId(req.user.id);
-      const isOwnUpload = docs[0].uploader_id == req.user.id;
-      const isInDept = deptId && docs[0].department_id == deptId;
-      if (!isOwnUpload && !isInDept) {
-        return res.status(403).json({ msg: 'Not authorized to lock documents outside your department' });
-      }
-    }
-
+    // RULE: Only approved documents can be locked
     if (docs[0].workflow_status !== 'approved') {
-      return res.status(400).json({ msg: 'Only approved documents can be locked' });
+      return res.status(400).json({ msg: 'Only approved documents can be locked', currentStatus: docs[0].workflow_status });
     }
 
     // Update document status to locked

@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (docPreviewFrame) docPreviewFrame.src = 'about:blank';
     }
 
+    let allStandards = []; // Store all standards globally
+
     async function loadFilterOptions() {
         try {
             console.log('Loading filter options...');
@@ -115,6 +117,23 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
                 console.log('Category filter populated with', categories.length, 'options');
             }
+
+            // Load all standards
+            console.log('Fetching standards from:', `${API_BASE}/api/documents/standards`);
+            const standardsRes = await fetch(`${API_BASE}/api/documents/standards`, {
+                headers: { 'x-auth-token': token }
+            });
+            console.log('Standards response status:', standardsRes.status);
+            
+            if (!standardsRes.ok) {
+                throw new Error(`Failed to load standards: ${standardsRes.status}`);
+            }
+            
+            allStandards = await standardsRes.json();
+            console.log('Standards loaded:', allStandards);
+            
+            // Initially populate with all standards
+            updateStandardsDropdown('all');
 
             // Load departments
             console.log('Fetching departments from:', `${API_BASE}/api/documents/departments`);
@@ -143,6 +162,34 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error('Load filter options error:', err);
             showToast('Failed to load filter options: ' + err.message, true);
         }
+    }
+
+    // Function to update standards dropdown based on selected category
+    function updateStandardsDropdown(categoryName) {
+        const standardsFilter = document.getElementById('standardsFilter');
+        if (!standardsFilter) return;
+
+        // Filter standards by category
+        let filteredStandards = allStandards;
+        if (categoryName !== 'all') {
+            // Get category ID from categories
+            const selectedCategory = Array.from(categoryFilter.options).find(opt => opt.value === categoryName);
+            if (selectedCategory) {
+                // Filter standards that belong to this category
+                filteredStandards = allStandards.filter(std => {
+                    // Match by category name or display name
+                    return std.category_name && std.category_name.toLowerCase().includes(categoryName.toLowerCase());
+                });
+            }
+        }
+
+        // Populate standards dropdown
+        standardsFilter.innerHTML = '<option value="all">All Standards</option>';
+        filteredStandards.forEach(std => {
+            standardsFilter.innerHTML += `<option value="${std.name}">${std.name}</option>`;
+        });
+        
+        console.log('Standards dropdown updated for category:', categoryName, 'Count:', filteredStandards.length);
     }
 
     function loadDocuments() {
@@ -182,6 +229,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         const category = categoryFilter?.value || 'all';
         const departmentFilter = document.getElementById('departmentFilter');
         const department = departmentFilter?.value || 'all';
+        const standardsFilter = document.getElementById('standardsFilter');
+        const standard = standardsFilter?.value || 'all';
 
         filteredDocuments = allDocuments.filter(doc => {
             const matchesSearch = !searchTerm ||
@@ -192,8 +241,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             const matchesStatus = status === 'all' || doc.workflow_status === status;
             const matchesCategory = category === 'all' || doc.category === category || doc.category_name === category;
             const matchesDepartment = department === 'all' || doc.department_code === department;
+            
+            // Fix standards matching - check if document's standards array includes the selected standard name
+            const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => s === standard || s.includes(standard)));
 
-            return matchesSearch && matchesStatus && matchesCategory && matchesDepartment;
+            return matchesSearch && matchesStatus && matchesCategory && matchesDepartment && matchesStandard;
         });
 
         currentPage = 1;
@@ -261,7 +313,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <td class="py-3 text-gray-400">${new Date(doc.created_at).toLocaleDateString()}</td>
                     <td class="py-3">
                         <div class="flex flex-wrap gap-2">
-                            <button class="btn-view view-doc" data-url="${fileUrl}" data-title="${doc.title}">View</button>
+                            <button class="btn-view view-doc" data-id="${doc.id}" data-title="${doc.title}">View</button>
                             ${doc.workflow_status === 'rejected' ? `<button class="btn-comments" data-id="${doc.id}">Comments</button>` : ''}
                             ${doc.workflow_status === 'rejected' ? `<button class="btn-delete delete-doc" data-id="${doc.id}">Delete</button>` : ''}
                             ${doc.uploader_id === user.id && doc.workflow_status === 'draft' ? `<button class="btn-delete delete-doc" data-id="${doc.id}">Delete</button>` : ''}
@@ -317,11 +369,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     function attachActionHandlers() {
         // View buttons
         document.querySelectorAll('.view-doc').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', async function(e) {
                 e.preventDefault();
-                const url = this.getAttribute('data-url');
+                const docId = this.getAttribute('data-id');
                 const title = this.getAttribute('data-title');
-                openPreviewModal(url, title);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/documents/${docId}/download`, {
+                        method: 'GET',
+                        headers: { 'x-auth-token': token }
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.msg || 'Failed to view document');
+                    }
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    openPreviewModal(url, title);
+                } catch (error) {
+                    console.error('View error:', error);
+                    showToast(error.message || 'Failed to view document', true);
+                }
             });
         });
 
@@ -461,8 +531,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Event listeners
     if (searchInput) searchInput.addEventListener('input', applyFilters);
     if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-    if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            // Update standards dropdown when category changes
+            updateStandardsDropdown(this.value);
+            applyFilters();
+        });
+    }
     const departmentFilter = document.getElementById('departmentFilter');
     if (departmentFilter) departmentFilter.addEventListener('change', applyFilters);
-    if (filterBtn) filterBtn.addEventListener('click', applyFilters);
+    const standardsFilter = document.getElementById('standardsFilter');
+    if (standardsFilter) standardsFilter.addEventListener('change', applyFilters);
+    
+    // Upload button
+    const uploadBtn = document.getElementById('uploadBtn');
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', () => {
+            window.location.href = 'user-upload.html';
+        });
+    }
 });

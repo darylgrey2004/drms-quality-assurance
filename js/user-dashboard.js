@@ -234,6 +234,9 @@ async function loadUserRecentDocuments(token, user) {
         // Render documents
         renderUserDocuments(recentDocuments, tableBody, mobileContainer);
         
+        // Attach event listeners
+        attachButtonListeners();
+        
     } catch (error) {
         console.error('Error loading user documents:', error);
         if (tableBody) {
@@ -251,9 +254,9 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
         tableBody.innerHTML = '';
         documents.forEach(doc => {
             const row = document.createElement('tr');
-            const editOrDownload = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
-                '<button class="action-btn edit-btn">Edit</button>' : 
-                `<button onclick="downloadDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">Download</button>`;
+            
+            const editButton = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
+                `<button class="btn-edit" data-id="${doc.id}">Edit</button>` : '';
             
             row.innerHTML = `
                 <td class="py-3">
@@ -268,8 +271,8 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
                 <td class="py-3 text-gray-400">${formatDate(doc.created_at)}</td>
                 <td class="py-3">
                     <div class="flex gap-2">
-                        <button onclick="viewDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">View</button>
-                        ${editOrDownload}
+                        <button class="btn-view" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
+                        ${editButton}
                     </div>
                 </td>
             `;
@@ -283,9 +286,9 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
         documents.forEach(doc => {
             const card = document.createElement('div');
             card.className = 'border rounded-lg p-4 bg-white';
-            const editOrDownload = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
-                '<button class="action-btn-sm edit-btn">Edit</button>' : 
-                `<button onclick="downloadDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">Download</button>`;
+            
+            const editButton = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
+                `<button class="btn-edit-sm" data-id="${doc.id}">Edit</button>` : '';
             
             card.innerHTML = `
                 <div class="font-medium text-gray-800">${doc.title}</div>
@@ -296,8 +299,8 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
                 </div>
                 <div class="text-sm text-gray-600 mb-3">${doc.department_code || doc.area} · ${doc.version || 'v1.0'}</div>
                 <div class="flex gap-2">
-                    <button onclick="viewDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">View</button>
-                    ${editOrDownload}
+                    <button class="btn-view-sm" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
+                    ${editButton}
                 </div>
             `;
             mobileContainer.appendChild(card);
@@ -483,7 +486,86 @@ function formatTimeAgo(dateString) {
 
 function viewDocument(docId, title) {
     console.log('View document:', docId, title);
-    window.location.href = `view-document.html?id=${docId}`;
+    const token = localStorage.getItem('token');
+    
+    // Fetch the file with auth token and display in modal
+    fetch(`${API_BASE}/api/documents/${docId}/download`, {
+        method: 'GET',
+        headers: {
+            'x-auth-token': token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.msg || 'Failed to view document');
+            });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        openPreviewModal(url, title);
+    })
+    .catch(error => {
+        console.error('View error:', error);
+        alert(error.message || 'Failed to view document');
+    });
+}
+
+function openPreviewModal(url, title) {
+    const modal = document.getElementById('docPreviewModal');
+    const iframe = document.getElementById('docPreviewFrame');
+    const titleElem = document.getElementById('docPreviewTitle');
+    
+    if (!modal || !iframe) {
+        console.error('Preview modal not found');
+        return;
+    }
+    
+    if (titleElem) titleElem.textContent = title || 'Document Preview';
+    iframe.src = url;
+    
+    // Show modal with proper flex centering
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+}
+
+function closePreviewModal() {
+    const modal = document.getElementById('docPreviewModal');
+    const iframe = document.getElementById('docPreviewFrame');
+    
+    if (!modal) return;
+    
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    if (iframe) {
+        const url = iframe.src;
+        iframe.src = 'about:blank';
+        if (url && url.startsWith('blob:')) {
+            window.URL.revokeObjectURL(url);
+        }
+    }
+}
+
+// Setup preview modal event listeners
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', function() {
+        const closeBtn = document.getElementById('docPreviewCloseBtn');
+        const modal = document.getElementById('docPreviewModal');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closePreviewModal);
+        }
+        
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closePreviewModal();
+            });
+        }
+    });
 }
 
 function renderStandardsBadges(standards) {
@@ -499,7 +581,27 @@ function renderStandardsBadges(standards) {
     return html;
 }
 
-function downloadDocument(docId, title) {
-    console.log('Download document:', docId, title);
-    window.location.href = `${API_BASE}/api/documents/${docId}/download`;
+
+
+function editDocument(docId) {
+    console.log('Edit document:', docId);
+    window.location.href = `user-upload.html?edit=${docId}`;
+}
+
+// Add event listeners after rendering
+function attachButtonListeners() {
+    document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const docId = this.dataset.id;
+            const title = this.dataset.title;
+            viewDocument(docId, title);
+        });
+    });
+    
+    document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const docId = this.dataset.id;
+            editDocument(docId);
+        });
+    });
 }
