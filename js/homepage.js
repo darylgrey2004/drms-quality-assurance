@@ -448,6 +448,9 @@ async function loadRecentDocuments() {
     
     // Render documents
     renderDocuments(recentDocuments, tableBody, mobileContainer);
+    
+    // Attach event listeners
+    attachButtonListeners();
 }
 
 function renderDocuments(documents, tableBody, mobileContainer) {
@@ -460,6 +463,17 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                     + (doc.standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${doc.standards.length - 2}</span>` : '')
                 : '<span class="text-gray-400 text-xs">—</span>';
             const row = document.createElement('tr');
+            
+            // Check if document is locked and user is not admin
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = (user.role || '').toLowerCase();
+            const isLocked = doc.workflow_status === 'locked';
+            const canDownload = !(userRole !== 'admin' && isLocked);
+            
+            const downloadButtonHtml = canDownload ? 
+                `<button class="btn-download" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">Download</button>` : 
+                `<button class="btn-download disabled-btn" disabled title="Locked documents cannot be downloaded">Locked</button>`;
+            
             row.innerHTML = `
                 <td class="py-3">
                     <div class="font-medium text-gray-800">${doc.title}</div>
@@ -471,9 +485,9 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                 <td class="py-3"><span class="${getStatusBadgeClass(doc.workflow_status)} px-2 py-1 rounded-full text-xs">${doc.workflow_status}</span></td>
                 <td class="py-3 text-xs text-gray-500">${doc.version}</td>
                 <td class="py-3">
-                    <div class="flex gap-1">
-                        <button onclick="viewDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">View</button>
-                        <button onclick="downloadDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">Download</button>
+                    <div class="flex gap-2">
+                        <button class="btn-view" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
+                        ${downloadButtonHtml}
                     </div>
                 </td>
             `;
@@ -491,6 +505,17 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                 : '<span class="text-gray-400 text-xs">—</span>';
             const card = document.createElement('div');
             card.className = 'border rounded-lg p-4 bg-white';
+            
+            // Check if document is locked and user is not admin
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = (user.role || '').toLowerCase();
+            const isLocked = doc.workflow_status === 'locked';
+            const canDownload = !(userRole !== 'admin' && isLocked);
+            
+            const downloadButtonHtml = canDownload ? 
+                `<button class="btn-download-sm" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">Download</button>` : 
+                `<button class="btn-download-sm disabled-btn" disabled style="opacity:0.5; cursor:not-allowed;">Locked</button>`;
+            
             card.innerHTML = `
                 <div class="font-medium text-gray-800">${doc.title}</div>
                 <div class="text-xs text-gray-400 mb-2">by ${doc.author_name || 'Unknown'} · ${formatDate(doc.created_at)}</div>
@@ -499,10 +524,10 @@ function renderDocuments(documents, tableBody, mobileContainer) {
                     <span class="${getStatusBadgeClass(doc.workflow_status)} px-2 py-1 rounded-full text-xs">${doc.workflow_status}</span>
                 </div>
                 <div class="flex flex-wrap gap-1 mb-2">${stds}</div>
-                <div class="text-sm text-gray-600 mb-2">${doc.department_code} · ${doc.version}</div>
+                <div class="text-sm text-gray-600 mb-3">${doc.department_code} · ${doc.version}</div>
                 <div class="flex gap-2">
-                    <button onclick="viewDocument(${doc.id}, '${doc.title}')">View</button>
-                    <button onclick="downloadDocument(${doc.id}, '${doc.title}')">Download</button>
+                    <button class="btn-view-sm" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
+                    ${downloadButtonHtml}
                 </div>
             `;
             mobileContainer.appendChild(card);
@@ -545,10 +570,142 @@ function formatDate(dateString) {
 
 function viewDocument(docId, title) {
     console.log('View document:', docId, title);
-    window.location.href = `view-document.html?id=${docId}`;
+    const token = localStorage.getItem('token');
+    
+    // Fetch the file with auth token and display in modal
+    fetch(`${API_BASE}/api/documents/${docId}/download`, {
+        method: 'GET',
+        headers: {
+            'x-auth-token': token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.msg || 'Failed to view document');
+            });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        openPreviewModal(url, title);
+    })
+    .catch(error => {
+        console.error('View error:', error);
+        alert(error.message || 'Failed to view document');
+    });
 }
+
+function openPreviewModal(url, title) {
+    console.log('openPreviewModal called with:', { url, title });
+    const modal = document.getElementById('docPreviewModal');
+    const iframe = document.getElementById('docPreviewFrame');
+    const titleElem = document.getElementById('docPreviewTitle');
+    
+    if (!modal || !iframe) {
+        console.error('Preview modal not found');
+        return;
+    }
+    
+    if (titleElem) titleElem.textContent = title || 'Document Preview';
+    iframe.src = url;
+    
+    // Show modal with proper flex centering
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    
+    console.log('Modal opened successfully');
+}
+
+function closePreviewModal() {
+    const modal = document.getElementById('docPreviewModal');
+    const iframe = document.getElementById('docPreviewFrame');
+    
+    if (!modal) return;
+    
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    
+    if (iframe) {
+        const url = iframe.src;
+        iframe.src = 'about:blank';
+        if (url && url.startsWith('blob:')) {
+            window.URL.revokeObjectURL(url);
+        }
+    }
+}
+
+// Setup preview modal event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.getElementById('docPreviewCloseBtn');
+    const modal = document.getElementById('docPreviewModal');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePreviewModal);
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePreviewModal();
+        });
+    }
+});
 
 function downloadDocument(docId, title) {
     console.log('Download document:', docId, title);
-    window.location.href = `${API_BASE}/api/documents/${docId}/download`;
+    const token = localStorage.getItem('token');
+    
+    // Fetch the file with auth token and download header
+    fetch(`${API_BASE}/api/documents/${docId}/download?download=true`, {
+        method: 'GET',
+        headers: {
+            'x-auth-token': token,
+            'x-download': 'true'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.msg || 'Download failed');
+            });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = title || 'document';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+        console.error('Download error:', error);
+        alert(error.message || 'Failed to download document');
+    });
+}
+
+// Add event listeners after rendering
+function attachButtonListeners() {
+    document.querySelectorAll('.btn-view, .btn-view-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const docId = this.dataset.id;
+            const title = this.dataset.title;
+            viewDocument(docId, title);
+        });
+    });
+    
+    document.querySelectorAll('.btn-download, .btn-download-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const docId = this.dataset.id;
+            const title = this.dataset.title;
+            downloadDocument(docId, title);
+        });
+    });
 }

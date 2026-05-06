@@ -1210,26 +1210,34 @@ router.delete('/:id', auth, async (req, res) => {
     console.log('Normalized Role:', normalizedRole);
     
     const isAdmin = normalizedRole === 'admin';
+    const isDean = normalizedRole === 'dean';
     const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
     const isOwner = document.uploader_id === req.user.id;
     const isDraft = document.workflow_status === 'draft';
     const isRejected = document.workflow_status === 'rejected';
+    const isLocked = document.workflow_status === 'locked';
 
-    console.log('Authorization checks:', { isAdmin, isDeptHead, isOwner, isDraft, isRejected });
+    console.log('Authorization checks:', { isAdmin, isDean, isDeptHead, isOwner, isDraft, isRejected, isLocked });
+
+    // RULE: Non-admin users cannot delete locked documents
+    if (isLocked && !isAdmin) {
+      console.log('NOT Authorized: Locked documents can only be deleted by Admin');
+      return res.status(403).json({ msg: 'Locked documents can only be deleted by Administrator' });
+    }
 
     let authorized = false;
 
-    // Admin can delete any document
+    // Admin can delete any document (including locked)
     if (isAdmin) {
       console.log('Authorized: Admin');
       authorized = true;
     }
-    // Owner can delete their own draft or rejected documents
+    // Owner can delete their own draft or rejected documents (but not locked)
     else if (isOwner && (isDraft || isRejected)) {
       console.log('Authorized: Owner of draft/rejected');
       authorized = true;
     }
-    // Dept. Head can delete rejected documents from their department
+    // Dept. Head can delete rejected documents from their department (but not locked)
     else if (isDeptHead && isRejected) {
       console.log('Checking Dept. Head department...');
       const [profile] = await db.query(
@@ -1637,6 +1645,74 @@ router.get('/:id', auth, async (req, res) => {
     res.json(document);
   } catch (err) {
     console.error('Get document error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/:id/download
+// @desc    Download document file
+// @access  Private (Admin can download any, non-admin cannot download locked documents)
+router.get('/:id/download', auth, async (req, res) => {
+  try {
+    const docId = Number(req.params.id);
+    
+    console.log('=== DOWNLOAD REQUEST ===');
+    console.log('Document ID:', docId);
+    console.log('User ID:', req.user.id);
+    console.log('User Role (raw):', req.user.role);
+    
+    const [docs] = await db.query('SELECT * FROM documents WHERE id = ?', [docId]);
+    if (docs.length === 0) {
+      return res.status(404).json({ msg: 'Document not found' });
+    }
+
+    const document = docs[0];
+    const normalizedRole = normalizeRole(req.user.role);
+    const isAdmin = normalizedRole === 'admin';
+    const isLocked = document.workflow_status === 'locked';
+    
+    console.log('Document status:', document.workflow_status);
+    console.log('Is Admin:', isAdmin);
+    console.log('Is Locked:', isLocked);
+    
+    // Check if this is a download request (has download query param or specific header)
+    const isDownloadRequest = req.query.download === 'true' || req.headers['x-download'] === 'true';
+    
+    console.log('Is Download Request:', isDownloadRequest);
+    
+    // Get the first file for this document
+    const [files] = await db.query(
+      'SELECT * FROM document_files WHERE document_id = ? ORDER BY id ASC LIMIT 1',
+      [docId]
+    );
+    
+    if (files.length === 0) {
+      return res.status(404).json({ msg: 'No files found for this document' });
+    }
+    
+    const file = files[0];
+    const filePath = path.join(uploadRoot, file.stored_name);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ msg: 'File not found on server' });
+    }
+    
+    // Set headers - only set Content-Disposition for actual downloads
+    if (isDownloadRequest) {
+      res.setHeader('Content-Disposition', `attachment; filename="${file.original_name}"`);
+    } else {
+      // For viewing in browser/iframe
+      res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`);
+    }
+    res.setHeader('Content-Type', file.mime_type);
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+    
+    console.log('Download/View authorized and started');
+  } catch (err) {
+    console.error('Download error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

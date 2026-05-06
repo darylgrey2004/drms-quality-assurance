@@ -5,6 +5,7 @@ let allDocuments = [];
 let filteredDocuments = [];
 let currentPage = 1;
 const itemsPerPage = 10;
+let allStandards = []; // Store all standards globally
 
 // Variables for delete confirmation
 let pendingDeleteId = null;
@@ -29,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update user info in sidebar
     updateUserInfo(user);
+
+    // Load filter options (categories, standards, departments)
+    loadFilterOptions();
 
     // Check for URL parameters from evidence-map
     checkAndApplyEvidenceMapFilters();
@@ -539,7 +543,7 @@ function createTableRow(doc) {
     const metadataIcon = hasMetadata ? '<span class="ml-1 text-teal-500 text-xs" title="Has description or keywords">ℹ️</span>' : '';
 
     // Determine if delete button should be shown
-    // Dean cannot delete locked documents
+    // RULE: Dean cannot delete locked documents, but can download them
     const isLocked = doc.workflow_status === 'locked';
     const canDelete = !(currentUserRole === 'dean' && isLocked);
     
@@ -586,6 +590,7 @@ function createMobileCard(doc) {
 
     const isLocked = doc.workflow_status === 'locked';
     const canDelete = !(currentUserRole === 'dean' && isLocked);
+    
     const deleteButtonHtml = canDelete ? 
         `<button class="btn-delete-sm" data-id="${doc.id}" data-status="${doc.workflow_status}">Delete</button>` : 
         (isLocked ? `<button class="btn-delete-sm disabled-btn" disabled style="opacity:0.5; cursor:not-allowed;">Locked</button>` : '');
@@ -806,21 +811,43 @@ function setupCommentsModalEventListeners() {
 async function handleDownload(e) {
     const docId = e.target.dataset.id;
     const doc = allDocuments.find(d => d.id == docId);
+    const token = localStorage.getItem('token');
     
-    if (!doc || !doc.file_url) {
-        showToastMessage('No file available for download', 'error');
+    if (!doc) {
+        showToastMessage('Document not found', 'error');
         return;
     }
 
-    const fileUrl = `${API_BASE}${doc.file_url}`;
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = doc.title || 'document';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showToastMessage('Download started', 'success');
+    try {
+        const response = await fetch(`${API_BASE}/api/documents/${docId}/download?download=true`, {
+            method: 'GET',
+            headers: {
+                'x-auth-token': token,
+                'x-download': 'true'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.msg || 'Download failed');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = doc.title || 'document';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        showToastMessage('Download started', 'success');
+    } catch (error) {
+        console.error('Download error:', error);
+        showToastMessage(error.message || 'Failed to download document', 'error');
+    }
 }
 
 function handleDeleteClick(docId, docStatus) {
@@ -837,6 +864,47 @@ function handleDeleteClick(docId, docStatus) {
     openDeleteModal(docId, doc.title, docStatus);
 }
 
+async function loadFilterOptions() {
+    const token = localStorage.getItem('token');
+    
+    try {
+        // Load standards
+        const standardsRes = await fetch(`${API_BASE}/api/documents/standards`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (standardsRes.ok) {
+            allStandards = await standardsRes.json();
+            console.log('Standards loaded:', allStandards.length);
+            updateStandardsDropdown('all');
+        }
+    } catch (err) {
+        console.error('Load filter options error:', err);
+    }
+}
+
+// Function to update standards dropdown based on selected category
+function updateStandardsDropdown(categoryName) {
+    const standardsFilter = document.getElementById('standardsFilter');
+    if (!standardsFilter) return;
+
+    // Filter standards by category
+    let filteredStandards = allStandards;
+    if (categoryName !== 'all') {
+        filteredStandards = allStandards.filter(std => {
+            return std.category_name && std.category_name.toLowerCase().includes(categoryName.toLowerCase());
+        });
+    }
+
+    // Populate standards dropdown
+    standardsFilter.innerHTML = '<option value="all">All Standards</option>';
+    filteredStandards.forEach(std => {
+        standardsFilter.innerHTML += `<option value="${std.name}">${std.name}</option>`;
+    });
+    
+    console.log('Standards dropdown updated for category:', categoryName, 'Count:', filteredStandards.length);
+}
+
 function setupEventListeners() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -846,10 +914,17 @@ function setupEventListeners() {
     const categoryFilter = document.getElementById('categoryFilter');
     const departmentFilter = document.getElementById('departmentFilter');
     const statusFilter = document.getElementById('statusFilter');
+    const standardsFilter = document.getElementById('standardsFilter');
 
-    if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            updateStandardsDropdown(this.value);
+            applyFilters();
+        });
+    }
     if (departmentFilter) departmentFilter.addEventListener('change', applyFilters);
     if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    if (standardsFilter) standardsFilter.addEventListener('change', applyFilters);
 
     const uploadBtn = document.getElementById('uploadBtn');
     if (uploadBtn) {
@@ -888,6 +963,7 @@ function applyFilters() {
     const category = document.getElementById('categoryFilter')?.value || 'all';
     const department = document.getElementById('departmentFilter')?.value || 'all';
     const status = document.getElementById('statusFilter')?.value || 'all';
+    const standard = document.getElementById('standardsFilter')?.value || 'all';
 
     filteredDocuments = allDocuments.filter(doc => {
         const matchesSearch = !searchTerm || 
@@ -899,8 +975,9 @@ function applyFilters() {
         const matchesCategory = category === 'all' || doc.category === category;
         const matchesDepartment = department === 'all' || doc.department_code?.toLowerCase() === department.toLowerCase();
         const matchesStatus = status === 'all' || doc.workflow_status === status;
+        const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => s === standard || s.includes(standard)));
 
-        return matchesSearch && matchesCategory && matchesDepartment && matchesStatus;
+        return matchesSearch && matchesCategory && matchesDepartment && matchesStatus && matchesStandard;
     });
 
     currentPage = 1;

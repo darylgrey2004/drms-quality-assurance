@@ -77,9 +77,16 @@
             <div class="mobile-header-spacer md:hidden"></div>
             
             <div class="p-4 md:p-7">
-                <div class="mb-6">
-                    <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">My Documents</h1>
-                    <p class="text-sm text-gray-500 mt-1">View and manage your uploaded documents</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">My Documents</h1>
+                        <p class="text-sm text-gray-500 mt-1">View and manage your uploaded documents</p>
+                    </div>
+                    <div class="mt-3 sm:mt-0">
+                        <button id="uploadBtn" class="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                            Upload New
+                        </button>
+                    </div>
                 </div>
 
                 <!-- filters -->
@@ -93,6 +100,15 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
+                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Categories</option>
+                            </select>
+                            <select id="standardsFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Standards</option>
+                            </select>
+                            <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Departments</option>
+                            </select>
                             <select id="statusFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 <option value="all">All Status</option>
                                 <option value="approved">Approved</option>
@@ -101,13 +117,6 @@
                                 <option value="draft">Draft</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-                            <select id="categoryFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <option value="all">All Categories</option>
-                            </select>
-                            <select id="departmentFilter" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <option value="all">All Departments</option>
-                            </select>
-                            <button id="filterBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors text-sm">Filter</button>
                         </div>
                     </div>
                 </div>
