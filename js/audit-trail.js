@@ -5,6 +5,9 @@ const API_BASE = 'http://localhost:3000';
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Audit Trail page loaded');
 
+    // Update sidebar user info
+    updateSidebarUser();
+
     // Heartbeat
     const token = localStorage.getItem('token');
     function sendHeartbeat() {
@@ -28,6 +31,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     setupEventListeners();
 });
+
+function updateSidebarUser() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userInitialsSpan = document.getElementById('userInitials');
+    const userNameSpan = document.getElementById('userName');
+    const userRoleSpan = document.getElementById('userRole');
+    
+    if (user.firstName && user.lastName) {
+        if (userInitialsSpan) userInitialsSpan.textContent = (user.firstName[0] + user.lastName[0]).toUpperCase();
+        if (userNameSpan) userNameSpan.textContent = `${user.firstName} ${user.lastName}`;
+    }
+    if (user.role && userRoleSpan) {
+        const roleMap = {
+            'admin': 'Administrator',
+            'dean': 'Dean',
+            'faculty': 'Faculty Member',
+            'area-chair': 'Dept. Head',
+            'department-head': 'Dept. Head',
+            'evaluator': 'External Evaluator'
+        };
+        userRoleSpan.textContent = roleMap[user.role] || user.role;
+    }
+}
 
 // Current filters
 let currentFilters = {
@@ -116,23 +142,27 @@ async function loadAuditLogs() {
 
         if (response.ok) {
             const data = await response.json();
-            window.currentAuditLogs = data.logs; // Store for timeline view
+            window.currentAuditLogs = data.logs;
             renderAuditLogs(data.logs);
             renderPagination(data.pagination);
             updateEventCount(data.pagination);
         }
     } catch (error) {
         console.error('Failed to load audit logs:', error);
+        const tbody = document.querySelector('#listView tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-red-500">Failed to load audit logs</td></tr>';
+        }
     }
 }
 
-// Render audit logs in table
+// Render audit logs in table - IP COLUMN REMOVED
 function renderAuditLogs(logs) {
     const tbody = document.querySelector('#listView tbody');
     if (!tbody) return;
 
     if (logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">No audit logs found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">No audit logs found</td></tr>';
         return;
     }
 
@@ -149,33 +179,46 @@ function renderAuditLogs(logs) {
         const userName = log.user_name || 'System';
         const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 
+        // Version column - show version or dash
+        const version = log.version || '—';
+
         return `
             <tr class="audit-row hover:bg-gray-50">
                 <td class="py-3 px-2 text-gray-600 whitespace-nowrap text-xs">${timestamp}</td>
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
                         <span class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold">${userInitials}</span>
-                        <span>${userName}</span>
+                        <span>${escapeHtml(userName)}</span>
                     </div>
-                </td>
+                 </td>
                 <td class="py-3 px-2">${actionBadge}</td>
-                <td class="py-3 px-2 font-medium text-gray-800 text-sm">${log.document_title || '—'}</td>
-                <td class="py-3 px-2 text-gray-600 text-xs">${log.category_name || '—'}</td>
-                <td class="py-3 px-2 text-gray-600 text-xs">${log.department_code || '—'}</td>
-                <td class="py-3 px-2 text-gray-600 text-xs">—</td>
-                <td class="py-3 px-2 text-gray-400 text-xs">${log.ip_address || '—'}</td>
+                <td class="py-3 px-2 font-medium text-gray-800 text-sm">${escapeHtml(log.document_title || '—')}</td>
+                <td class="py-3 px-2 text-gray-600 text-xs">${escapeHtml(log.category_name || '—')}</td>
+                <td class="py-3 px-2 text-gray-600 text-xs">${escapeHtml(log.department_code || '—')}</td>
+                <td class="py-3 px-2 text-gray-600 text-xs">${version}</td>
                 <td class="py-3 px-2">
                     <button onclick="viewLogDetails(${log.id})" class="view-details-btn px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50 transition-colors">Details</button>
                 </td>
-            </tr>
+             </tr>
         `;
     }).join('');
     
-    // Also render timeline view
+    // Also render timeline view (without IP)
     renderTimelineView(logs);
 }
 
-// Render timeline view
+// Escape HTML to prevent XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Render timeline view - IP COLUMN REMOVED
 function renderTimelineView(logs) {
     const timelineContent = document.getElementById('timelineContent');
     if (!timelineContent) return;
@@ -230,8 +273,8 @@ function renderTimelineView(logs) {
                 <div class="flex flex-col sm:flex-row sm:items-start gap-3 border-l-2 border-${color}-200 pl-4 pb-2">
                     <span class="w-8 h-8 bg-${color}-100 rounded-full flex items-center justify-center text-${color}-700 text-xs font-bold">${timeStr}</span>
                     <div>
-                        <p class="text-sm"><span class="font-medium">${userName}</span> ${actionText} ${docTitle}</p>
-                        <p class="text-xs text-gray-400">${log.category_name || ''} · ${log.department_code || ''} · IP: ${log.ip_address || 'N/A'}</p>
+                        <p class="text-sm"><span class="font-medium">${escapeHtml(userName)}</span> ${actionText} ${escapeHtml(docTitle)}</p>
+                        <p class="text-xs text-gray-400">${escapeHtml(log.category_name || '')} · ${escapeHtml(log.department_code || '')}</p>
                     </div>
                 </div>
             `;
@@ -362,7 +405,7 @@ function populateUserFilter(users) {
     if (!userFilter) return;
 
     userFilter.innerHTML = '<option value="all">All Users</option>' +
-        users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+        users.map(user => `<option value="${user.id}">${escapeHtml(user.name)}</option>`).join('');
 }
 
 // Populate action filter
@@ -475,11 +518,45 @@ async function exportAuditLogs() {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
+            showToastMessage('Audit logs exported successfully', 'success');
+        } else {
+            throw new Error('Export failed');
         }
     } catch (error) {
         console.error('Failed to export audit logs:', error);
-        alert('Failed to export audit logs');
+        showToastMessage('Failed to export audit logs', 'error');
     }
+}
+
+// Show toast message
+function showToastMessage(message, type = 'success') {
+    let toast = document.querySelector('.custom-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 10000;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+    }
+    
+    toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+    toast.textContent = message;
+    toast.style.transform = 'translateX(0)';
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateX(400px)';
+    }, 3000);
 }
 
 // View log details

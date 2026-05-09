@@ -15,7 +15,7 @@ body {
 }
 
 /* custom navy/teal palette */
-.bg-navy-sidebar {
+.bg-navy-sidebar { 
     background-color: #0c2538;
 }
 
@@ -118,6 +118,30 @@ body {
     font-weight: 500;
 }
 
+/* Standard badges */
+.standard-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.standard-complete {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+}
+
+.standard-partial {
+    background-color: #fef9e7;
+    color: #b78103;
+}
+
+.standard-missing {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
 /* dashboard background */
 .bg-dashboard-bg {
     background-color: #f4f7fb;
@@ -153,6 +177,49 @@ input:focus, select:focus {
 #mapTabs a.active-tab {
     color: #0f766e;
     border-bottom-color: #0f766e;
+}
+
+/* department card */
+.department-card {
+    transition: all 0.2s ease;
+    border: 1px solid #eef2f6;
+}
+
+.department-card:hover {
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+}
+
+/* standards grid */
+.standards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+/* standard item */
+.standard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.standard-item:hover {
+    background-color: #f3f4f6;
+}
+
+.standard-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.standard-status {
+    font-size: 0.7rem;
 }
 
 /* clause item */
@@ -194,26 +261,50 @@ input:focus, select:focus {
     font-weight: 500;
 }
 
+/* Expand/Collapse button */
+.expand-btn {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.expand-btn:hover {
+    background-color: #f3f4f6;
+}
+
+/* Rotate animation for expand icon */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Standards section */
+.standards-section {
+    border-top: 1px solid #e5e7eb;
+    background-color: #fafafa;
+}
+
 /* ============================================ */
-/* DOCUMENT DETAILS MODAL */
+/* MODAL STYLES */
 /* ============================================ */
-#docDetailsModal {
+#standardsModal, #docDetailsModal {
     backdrop-filter: blur(2px);
 }
 
-#docDetailsContent {
+#standardsModalContent, #docDetailsContent {
     scrollbar-width: thin;
 }
 
+#standardsModalContent::-webkit-scrollbar,
 #docDetailsContent::-webkit-scrollbar {
     width: 6px;
 }
 
+#standardsModalContent::-webkit-scrollbar-track,
 #docDetailsContent::-webkit-scrollbar-track {
     background: #e2e8f0;
     border-radius: 10px;
 }
 
+#standardsModalContent::-webkit-scrollbar-thumb,
 #docDetailsContent::-webkit-scrollbar-thumb {
     background: #0d9488;
     border-radius: 10px;
@@ -321,6 +412,13 @@ input:focus, select:focus {
     #mapTabs li a { padding: 0.5rem 0.75rem; font-size: 0.7rem; }
 }
 
+/* Standards grid responsive */
+@media (max-width: 640px) {
+    .standards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Clause items responsive */
 @media (max-width: 640px) {
     .clause-item { padding: 0.75rem !important; }
@@ -329,7 +427,7 @@ input:focus, select:focus {
 
 /* Touch-friendly */
 @media (max-width: 768px) {
-    button, a, .view-clause-btn { min-height: 44px; min-width: 44px; }
+    button, a, .view-clause-btn, .expand-btn { min-height: 44px; min-width: 44px; }
     body { font-size: 14px; }
     input, select { font-size: 16px !important; }
 }

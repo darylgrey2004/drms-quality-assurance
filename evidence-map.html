@@ -17,7 +17,7 @@
     <button id="mobileMenuToggle" class="menu-toggle md:hidden fixed top-4 left-4 z-50 bg-navy-sidebar text-white p-2 rounded-lg shadow-lg text-xl">
         ☰
     </button>
-    <div class="sidebar-overlay"></div>
+    <div class="sidebar-overlay"></div> 
 
     <!-- main grid: sidebar + content -->
     <div class="flex h-screen overflow-hidden">
@@ -91,7 +91,7 @@
                 <!-- header row -->
                 <div class="mb-6">
                     <h1 class="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">Evidence Map</h1>
-                    <p class="text-sm text-gray-500 mt-1">Map documents to categories: Instruction, Research, Extension, Employment</p>
+                    <p class="text-sm text-gray-500 mt-1">Map documents to categories and accreditation standards</p>
                 </div>
 
                 <!-- category overview cards - dynamic -->
@@ -105,7 +105,7 @@
                         <div class="flex-1">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">Search</span>
-                                <input type="text" id="searchMap" placeholder="Search by department or document..." 
+                                <input type="text" id="searchMap" placeholder="Search by department, standard, or document..." 
                                        class="w-full pl-16 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                             </div>
                         </div>
@@ -147,7 +147,7 @@
                 <div id="instructionTab" class="tab-content block">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Instruction - Department Mapping</h3>
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Instruction - Department & Standards Mapping</h3>
                             <div class="text-sm text-gray-500">
                                 Total Documents: <span id="instructionTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
@@ -162,7 +162,7 @@
                 <div id="researchTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Research - Department Mapping</h3>
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Research - Department & Standards Mapping</h3>
                             <div class="text-sm text-gray-500">
                                 Total Documents: <span id="researchTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
@@ -177,7 +177,7 @@
                 <div id="extensionTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Extension - Department Mapping</h3>
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Extension - Department & Standards Mapping</h3>
                             <div class="text-sm text-gray-500">
                                 Total Documents: <span id="extensionTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
@@ -192,7 +192,7 @@
                 <div id="employmentTab" class="tab-content hidden">
                     <div class="bg-white rounded-xl p-4 md:p-5 stat-card">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Employment - Department Mapping</h3>
+                            <h3 class="font-semibold text-gray-800 text-base md:text-lg">Employment - Department & Standards Mapping</h3>
                             <div class="text-sm text-gray-500">
                                 Total Documents: <span id="employmentTotalCount" class="font-semibold text-teal-700">0</span>
                             </div>
@@ -241,6 +241,25 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- STANDARDS DETAILS MODAL -->
+    <div id="standardsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-3xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <div>
+                    <h3 id="standardsModalTitle" class="text-lg font-semibold text-gray-800">Standards Details</h3>
+                    <p id="standardsModalSubtitle" class="text-sm text-gray-500 mt-1">Department</p>
+                </div>
+                <button id="standardsModalCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-4" id="standardsModalContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button id="standardsModalCloseBtn2" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
     </div>
 
     <!-- DOCUMENT DETAILS MODAL -->

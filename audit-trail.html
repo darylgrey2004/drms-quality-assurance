@@ -165,13 +165,13 @@
                         <button class="px-4 py-2 bg-teal-700 text-white text-sm view-toggle active-view" data-view="list">List View</button>
                         <button class="px-4 py-2 bg-white text-gray-600 hover:bg-gray-50 text-sm view-toggle" data-view="timeline">Timeline</button>
                     </div>
-                    <div class="text-sm text-gray-500"><span id="eventCount">Showing 24 events</span></div>
+                    <div class="text-sm text-gray-500"><span id="eventCount">Showing 0 events</span></div>
                 </div>
 
-                <!-- list view -->
+                <!-- list view - IP COLUMN REMOVED -->
                 <div id="listView" class="block">
                     <div class="bg-white rounded-xl p-5 stat-card overflow-x-auto">
-                        <div class="min-w-[800px]">
+                        <div class="min-w-[750px]">
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-gray-200 text-gray-500 text-xs">
@@ -182,12 +182,11 @@
                                         <th class="text-left py-3 px-2">Category</th>
                                         <th class="text-left py-3 px-2">Department</th>
                                         <th class="text-left py-3 px-2">Version</th>
-                                        <th class="text-left py-3 px-2">IP</th>
                                         <th class="text-left py-3 px-2"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100" id="auditTableBody">
-                                    <tr><td colspan="9" class="py-4 text-center text-gray-500">Loading audit logs...</td></tr>
+                                    <tr><td colspan="8" class="py-4 text-center text-gray-500">Loading audit logs...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -235,83 +234,5 @@
     </div>
 
     <script src="js/audit-trail.js"></script>
-    <script>
-        // Update sidebar user info
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        const userInitialsSpan = document.getElementById('userInitials');
-        const userNameSpan = document.getElementById('userName');
-        const userRoleSpan = document.getElementById('userRole');
-        
-        if (userData.firstName && userData.lastName) {
-            if (userInitialsSpan) userInitialsSpan.textContent = (userData.firstName[0] + userData.lastName[0]).toUpperCase();
-            if (userNameSpan) userNameSpan.textContent = `${userData.firstName} ${userData.lastName}`;
-        }
-        if (userData.role && userRoleSpan) {
-            const roleMap = {
-                'admin': 'Administrator',
-                'dean': 'Dean',
-                'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
-                'department-head': 'Dept. Head',
-                'evaluator': 'External Evaluator'
-            };
-            userRoleSpan.textContent = roleMap[userData.role] || userData.role;
-        }
-        
-        // Mobile Sidebar Toggle
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.getElementById('mainSidebar');
-        if (menuToggle && sidebar) {
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; document.body.appendChild(overlay); }
-            function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-            function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
-            menuToggle.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-            overlay.addEventListener('click', closeSidebar);
-            document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
-            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-        }
-        
-        // View toggle
-        const listView = document.getElementById('listView');
-        const timelineView = document.getElementById('timelineView');
-        document.querySelectorAll('.view-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const view = this.dataset.view;
-                document.querySelectorAll('.view-toggle').forEach(t => t.classList.remove('active-view', 'bg-teal-700', 'text-white'));
-                this.classList.add('active-view', 'bg-teal-700', 'text-white');
-                if (view === 'list') { listView.classList.remove('hidden'); timelineView.classList.add('hidden'); }
-                else { listView.classList.add('hidden'); timelineView.classList.remove('hidden'); }
-            });
-        });
-        
-        // View details buttons
-        document.querySelectorAll('.view-details-btn').forEach(btn => { 
-            btn.addEventListener('click', () => alert('Event details would appear here')); 
-        });
-        
-        // Export button
-        document.getElementById('exportAuditBtn')?.addEventListener('click', () => alert('Exporting audit log as CSV...'));
-        
-        // Filter change handlers
-        ['searchAudit', 'actionTypeFilter', 'userFilter', 'dateRangeFilter'].forEach(id => {
-            document.getElementById(id)?.addEventListener('change', () => alert('Filter applied'));
-        });
-        
-        // Heartbeat
-        const token = localStorage.getItem('token');
-        function sendHeartbeat() {
-            if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-                }).catch(() => {});
-            }
-        }
-        if (token) {
-            sendHeartbeat();
-            setInterval(sendHeartbeat, 2 * 60 * 1000);
-        }
-    </script>
 </body>
 </html>

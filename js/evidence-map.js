@@ -2,6 +2,7 @@
 
 const API_BASE = 'http://localhost:3000';
 let allDocuments = [];
+let allStandards = [];
 let departments = ['BEED', 'BSED', 'BSNED', 'BCAED', 'BPED'];
 let categories = [
     { id: 'instruction', name: 'Instruction', color: 'blue', expectedCount: 0 },
@@ -10,7 +11,7 @@ let categories = [
     { id: 'employment', name: 'Employment', color: 'purple', expectedCount: 0 }
 ];
 
-// Department expected document counts (will be loaded from API)
+// Department expected document counts
 let departmentExpected = {
     'BEED': { instruction: 0, research: 0, extension: 0, employment: 0 },
     'BSED': { instruction: 0, research: 0, extension: 0, employment: 0 },
@@ -18,6 +19,17 @@ let departmentExpected = {
     'BCAED': { instruction: 0, research: 0, extension: 0, employment: 0 },
     'BPED': { instruction: 0, research: 0, extension: 0, employment: 0 }
 };
+
+// Define default standards for each category (will be replaced by API data)
+let standardsByCategory = {
+    instruction: [],
+    research: [],
+    extension: [],
+    employment: []
+};
+
+// Track expanded departments
+let expandedDepartments = {};
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -33,12 +45,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update user info in sidebar
     updateUserInfo();
     
-    // Load requirements from API first, then load documents
-    loadRequirements().then(() => {
-        loadDocuments();
+    // Load standards first, then requirements, then documents
+    loadStandards().then(() => {
+        return loadRequirements();
+    }).then(() => {
+        return loadDocuments();
+    }).catch(error => {
+        console.error('Error loading data:', error);
+        loadDocuments(); // Still try to load documents
     });
     
-    // Setup event listeners
+    // Setup event listeners using event delegation
     setupEventListeners();
     
     // Heartbeat
@@ -77,6 +94,80 @@ function updateUserInfo() {
     }
 }
 
+async function loadStandards() {
+    const token = localStorage.getItem('token');
+    
+    try {
+        // Load all standards (including inactive ones for admin view)
+        const response = await fetch(`${API_BASE}/api/admin/standards/all`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!response.ok) {
+            console.warn('Failed to load standards, using defaults');
+            setDefaultStandards();
+            return;
+        }
+        
+        allStandards = await response.json();
+        
+        // Group standards by category
+        standardsByCategory = {
+            instruction: [],
+            research: [],
+            extension: [],
+            employment: []
+        };
+        
+        allStandards.forEach(standard => {
+            const categoryName = (standard.category_name || '').toLowerCase();
+            if (standardsByCategory[categoryName]) {
+                standardsByCategory[categoryName].push(standard);
+            }
+        });
+        
+        console.log('Standards loaded:', standardsByCategory);
+        
+    } catch (error) {
+        console.error('Error loading standards:', error);
+        setDefaultStandards();
+    }
+}
+
+function setDefaultStandards() {
+    standardsByCategory = {
+        instruction: [
+            { id: 1, name: 'Curriculum Development', code: 'INST-CURDEV', is_active: true },
+            { id: 2, name: 'Teaching Materials', code: 'INST-TEACHMAT', is_active: true },
+            { id: 3, name: 'Assessment Tools', code: 'INST-ASSESS', is_active: true },
+            { id: 4, name: 'Learning Modules', code: 'INST-LEARNMOD', is_active: true },
+            { id: 5, name: 'Syllabi', code: 'INST-SYLLABI', is_active: true },
+            { id: 6, name: 'Lesson Plans', code: 'INST-LESSON', is_active: true }
+        ],
+        research: [
+            { id: 7, name: 'Publications', code: 'RES-PUB', is_active: true },
+            { id: 8, name: 'Research Proposals', code: 'RES-PROP', is_active: true },
+            { id: 9, name: 'Ethics Clearance', code: 'RES-ETHICS', is_active: true },
+            { id: 10, name: 'Research Outputs', code: 'RES-OUTPUT', is_active: true },
+            { id: 11, name: 'Grants and Funding', code: 'RES-GRANTS', is_active: false },
+            { id: 12, name: 'Conference Presentations', code: 'RES-CONF', is_active: false }
+        ],
+        extension: [
+            { id: 13, name: 'Community Programs', code: 'EXT-COMM', is_active: true },
+            { id: 14, name: 'Outreach Documentation', code: 'EXT-OUTREACH', is_active: true },
+            { id: 15, name: 'Impact Assessment', code: 'EXT-IMPACT', is_active: true },
+            { id: 16, name: 'Partnership Agreements', code: 'EXT-PARTNER', is_active: false },
+            { id: 17, name: 'Beneficiary Feedback', code: 'EXT-FEEDBACK', is_active: false }
+        ],
+        employment: [
+            { id: 18, name: 'Employment Contracts', code: 'EMP-CONTRACT', is_active: true },
+            { id: 19, name: 'Personnel Records', code: 'EMP-RECORDS', is_active: true },
+            { id: 20, name: 'Benefits Documentation', code: 'EMP-BENEFITS', is_active: true },
+            { id: 21, name: 'Performance Reviews', code: 'EMP-PERFORM', is_active: false }
+        ]
+    };
+}
+
 async function loadRequirements() {
     const token = localStorage.getItem('token');
     
@@ -98,6 +189,15 @@ async function loadRequirements() {
             categories.forEach(cat => {
                 if (requirements[cat.id] && requirements[cat.id][deptLower] !== undefined) {
                     departmentExpected[dept][cat.id] = requirements[cat.id][deptLower];
+                } else {
+                    // Set default values if not found
+                    const defaultValues = {
+                        instruction: 45,
+                        research: 40,
+                        extension: 25,
+                        employment: 30
+                    };
+                    departmentExpected[dept][cat.id] = defaultValues[cat.id] || 25;
                 }
             });
         });
@@ -149,34 +249,50 @@ async function loadDocuments() {
 function processEvidenceMap() {
     // Calculate counts per category and department
     const counts = {};
+    // Track which standards are covered by each document
+    const standardCoverage = {};
     
     categories.forEach(cat => {
         counts[cat.id] = {};
+        standardCoverage[cat.id] = {};
         departments.forEach(dept => {
             counts[cat.id][dept] = 0;
+            standardCoverage[cat.id][dept] = {};
+            // Initialize standard coverage for this category and department
+            if (standardsByCategory[cat.id]) {
+                standardsByCategory[cat.id].forEach(standard => {
+                    standardCoverage[cat.id][dept][standard.id] = false;
+                });
+            }
         });
     });
     
-    // Count documents
+    // Count documents and check standard coverage
     allDocuments.forEach(doc => {
         const category = doc.category || getCategoryFromId(doc.category_id);
         const department = doc.department_code || doc.area;
+        const standardId = doc.standard_id;
         
         if (category && counts[category] && department && counts[category][department.toUpperCase()] !== undefined) {
             counts[category][department.toUpperCase()]++;
+            
+            // Track standard coverage if standard_id exists
+            if (standardId && standardCoverage[category] && standardCoverage[category][department.toUpperCase()]) {
+                standardCoverage[category][department.toUpperCase()][standardId] = true;
+            }
         }
     });
     
     // Update category overview cards
     updateCategoryOverview(counts);
     
-    // Update each category tab
+    // Update each category tab with standards
     categories.forEach(cat => {
-        updateCategoryTab(cat.id, cat.name, counts[cat.id]);
+        updateCategoryTab(cat.id, cat.name, counts[cat.id], standardCoverage[cat.id]);
     });
     
     // Update mapping summary
-    updateMappingSummary(counts);
+    updateMappingSummary(counts, standardCoverage);
 }
 
 function getCategoryFromId(categoryId) {
@@ -195,7 +311,7 @@ function updateCategoryOverview(counts) {
     
     container.innerHTML = categories.map(cat => {
         const totalDocs = Object.values(counts[cat.id]).reduce((a, b) => a + b, 0);
-        const percentage = (totalDocs / cat.expectedCount * 100).toFixed(1);
+        const percentage = cat.expectedCount > 0 ? (totalDocs / cat.expectedCount * 100).toFixed(1) : 0;
         const color = cat.color;
         
         return `
@@ -217,7 +333,7 @@ function updateCategoryOverview(counts) {
     }).join('');
 }
 
-function updateCategoryTab(categoryId, categoryName, counts) {
+function updateCategoryTab(categoryId, categoryName, counts, standardCoverage) {
     const container = document.getElementById(`${categoryId}Departments`);
     const totalCountSpan = document.getElementById(`${categoryId}TotalCount`);
     
@@ -226,16 +342,38 @@ function updateCategoryTab(categoryId, categoryName, counts) {
     const totalDocs = Object.values(counts).reduce((a, b) => a + b, 0);
     if (totalCountSpan) totalCountSpan.textContent = totalDocs;
     
+    const standards = standardsByCategory[categoryId] || [];
+    const activeStandards = standards.filter(s => s.is_active !== false);
+    
     container.innerHTML = departments.map(dept => {
         const docCount = counts[dept] || 0;
         const expected = departmentExpected[dept]?.[categoryId] || 25;
-        const percentage = (docCount / expected * 100).toFixed(1);
+        const percentage = expected > 0 ? (docCount / expected * 100).toFixed(1) : 0;
         const status = docCount >= expected ? 'complete' : 'partial';
         const statusText = docCount >= expected ? 'Complete' : 'Partial';
         const statusClass = docCount >= expected ? 'badge-status-complete' : 'badge-status-partial';
         
+        // Calculate standards completion for this department
+        const deptStandardCoverage = standardCoverage[dept] || {};
+        let standardsCompleted = 0;
+        const standardsStatus = activeStandards.map(standard => {
+            const isCovered = deptStandardCoverage[standard.id] === true;
+            if (isCovered) standardsCompleted++;
+            return {
+                ...standard,
+                isCovered: isCovered
+            };
+        });
+        
+        const standardsPercentage = activeStandards.length > 0 ? (standardsCompleted / activeStandards.length * 100).toFixed(0) : 0;
+        const isExpanded = expandedDepartments[`${categoryId}_${dept}`] || false;
+        
+        // Generate unique IDs for this department's standards section
+        const standardsSectionId = `standards-${categoryId}-${dept.replace(/\s/g, '')}`;
+        const expandBtnId = `expand-btn-${categoryId}-${dept.replace(/\s/g, '')}`;
+        
         return `
-            <div class="border rounded-lg p-4 clause-item" data-status="${status}">
+            <div class="border rounded-lg p-4 department-card" data-status="${status}" data-dept="${dept}" data-category="${categoryId}" id="dept-card-${categoryId}-${dept}">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-2">
@@ -254,6 +392,14 @@ function updateCategoryTab(categoryId, categoryName, counts) {
                                 data-category="${categoryId}" data-department="${dept}">
                             View Documents
                         </button>
+                        <button class="expand-btn text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 px-2 py-1 rounded text-xs transition" 
+                                id="${expandBtnId}"
+                                data-category="${categoryId}" data-department="${dept}" data-target="${standardsSectionId}">
+                            <svg class="w-4 h-4 inline-block transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                            Standards
+                        </button>
                     </div>
                 </div>
                 <div class="mt-3">
@@ -261,18 +407,89 @@ function updateCategoryTab(categoryId, categoryName, counts) {
                         <div class="bg-teal-600 h-1.5 rounded-full progress-bar" style="width:${Math.min(percentage, 100)}%"></div>
                     </div>
                 </div>
+                
+                <!-- Standards Section - Expandable -->
+                <div class="standards-section mt-3 pt-3 ${isExpanded ? '' : 'hidden'}" id="${standardsSectionId}">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold text-gray-600">Accreditation Standards</span>
+                        <span class="text-xs text-gray-500">${standardsCompleted}/${activeStandards.length} standards met (${standardsPercentage}%)</span>
+                    </div>
+                    <div class="standards-grid">
+                        ${standardsStatus.map(standard => `
+                            <div class="standard-item">
+                                <span class="standard-name" title="${standard.code}">${escapeHtml(standard.name)}</span>
+                                <span class="standard-status ${standard.isCovered ? 'standard-complete' : 'standard-missing'} px-2 py-0.5 rounded-full text-xs">
+                                    ${standard.isCovered ? '✓ Covered' : 'Missing'}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button class="text-xs text-teal-600 hover:text-teal-700 view-standards-btn" 
+                                data-category="${categoryId}" data-department="${dept}" data-category-name="${categoryName}">
+                            View all standards details →
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
     }).join('');
     
-    // Add event listeners to view buttons
+    // Refresh event listeners for the newly created buttons
+    refreshEventListeners();
+}
+
+function refreshEventListeners() {
+    // View document buttons
     document.querySelectorAll('.view-clause-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.dataset.category;
-            const department = this.dataset.department;
-            showDocumentsForCategoryAndDepartment(category, department);
-        });
+        btn.removeEventListener('click', handleViewDocuments);
+        btn.addEventListener('click', handleViewDocuments);
     });
+    
+    // Expand/Collapse buttons
+    document.querySelectorAll('.expand-btn').forEach(btn => {
+        btn.removeEventListener('click', handleExpandCollapse);
+        btn.addEventListener('click', handleExpandCollapse);
+    });
+    
+    // View standards details buttons
+    document.querySelectorAll('.view-standards-btn').forEach(btn => {
+        btn.removeEventListener('click', handleViewStandards);
+        btn.addEventListener('click', handleViewStandards);
+    });
+}
+
+function handleViewDocuments(e) {
+    const btn = e.currentTarget;
+    const category = btn.dataset.category;
+    const department = btn.dataset.department;
+    showDocumentsForCategoryAndDepartment(category, department);
+}
+
+function handleExpandCollapse(e) {
+    const btn = e.currentTarget;
+    const targetId = btn.dataset.target;
+    const standardsDiv = document.getElementById(targetId);
+    const svg = btn.querySelector('svg');
+    
+    if (standardsDiv) {
+        standardsDiv.classList.toggle('hidden');
+        if (svg) {
+            svg.classList.toggle('rotate-180');
+        }
+        // Store expanded state
+        const category = btn.dataset.category;
+        const department = btn.dataset.department;
+        expandedDepartments[`${category}_${department}`] = !standardsDiv.classList.contains('hidden');
+    }
+}
+
+function handleViewStandards(e) {
+    const btn = e.currentTarget;
+    const category = btn.dataset.category;
+    const department = btn.dataset.department;
+    const categoryName = btn.dataset.categoryName;
+    showStandardsDetails(category, department, categoryName);
 }
 
 function getDepartmentFullName(deptCode) {
@@ -286,7 +503,7 @@ function getDepartmentFullName(deptCode) {
     return deptNames[deptCode] || deptCode;
 }
 
-function updateMappingSummary(counts) {
+function updateMappingSummary(counts, standardCoverage) {
     const container = document.getElementById('mappingSummary');
     if (!container) return;
     
@@ -299,7 +516,7 @@ function updateMappingSummary(counts) {
         totalExpected += cat.expectedCount;
     });
     
-    const overallPercentage = (totalDocs / totalExpected * 100).toFixed(1);
+    const overallPercentage = totalExpected > 0 ? (totalDocs / totalExpected * 100).toFixed(1) : 0;
     
     // Calculate fully vs partially mapped departments
     let fullyMapped = 0;
@@ -321,20 +538,191 @@ function updateMappingSummary(counts) {
         }
     });
     
+    // Calculate overall standards completion
+    let totalStandards = 0;
+    let completedStandards = 0;
+    
+    categories.forEach(cat => {
+        const standards = standardsByCategory[cat.id] || [];
+        const activeStandards = standards.filter(s => s.is_active !== false);
+        totalStandards += activeStandards.length * departments.length;
+        
+        departments.forEach(dept => {
+            const deptCoverage = standardCoverage?.[cat.id]?.[dept] || {};
+            activeStandards.forEach(standard => {
+                if (deptCoverage[standard.id] === true) {
+                    completedStandards++;
+                }
+            });
+        });
+    });
+    
+    const standardsPercentage = totalStandards > 0 ? (completedStandards / totalStandards * 100).toFixed(1) : 0;
+    
     container.innerHTML = `
         <div class="space-y-3">
             <div class="flex justify-between"><span class="text-sm">Total Categories:</span><span class="font-medium">${categories.length}</span></div>
             <div class="flex justify-between"><span class="text-sm">Total Departments:</span><span class="font-medium">${departments.length}</span></div>
             <div class="flex justify-between"><span class="text-sm">Fully Mapped:</span><span class="font-medium text-green-700">${fullyMapped} (${Math.round(fullyMapped/departments.length*100)}%)</span></div>
             <div class="flex justify-between"><span class="text-sm">Partially Mapped:</span><span class="font-medium text-yellow-700">${partiallyMapped} (${Math.round(partiallyMapped/departments.length*100)}%)</span></div>
-            <div class="pt-2 mt-2 border-t">
+            <div class="pt-2 border-t">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Documents Progress:</span>
+                    <span class="font-medium">${overallPercentage}%</span>
+                </div>
                 <div class="w-full bg-gray-200 h-2 rounded-full">
                     <div class="bg-teal-600 h-2 rounded-full progress-bar" style="width:${overallPercentage}%"></div>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Overall mapping completion: <span class="font-medium">${overallPercentage}%</span></p>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Standards Compliance:</span>
+                    <span class="font-medium">${standardsPercentage}%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2 rounded-full">
+                    <div class="bg-indigo-600 h-2 rounded-full progress-bar" style="width:${standardsPercentage}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">${completedStandards} of ${totalStandards} standards met across all departments</p>
             </div>
         </div>
     `;
+}
+
+function showStandardsDetails(category, department, categoryName) {
+    const standards = standardsByCategory[category] || [];
+    const activeStandards = standards.filter(s => s.is_active !== false);
+    
+    // Get documents for this category and department to check standard coverage
+    const docsForDept = allDocuments.filter(doc => {
+        const docCategory = doc.category || getCategoryFromId(doc.category_id);
+        const docDepartment = doc.department_code || doc.area;
+        return docCategory === category && docDepartment?.toUpperCase() === department.toUpperCase();
+    });
+    
+    // Determine which standards are covered
+    const standardsWithStatus = activeStandards.map(standard => {
+        // Check if any document in this department has this standard_id
+        const isCovered = docsForDept.some(doc => doc.standard_id === standard.id);
+        
+        // Find documents that cover this standard
+        const coveringDocs = docsForDept.filter(doc => doc.standard_id === standard.id);
+        
+        return {
+            ...standard,
+            isCovered: isCovered,
+            coveringDocs: coveringDocs
+        };
+    });
+    
+    const completedCount = standardsWithStatus.filter(s => s.isCovered).length;
+    const percentage = activeStandards.length > 0 ? (completedCount / activeStandards.length * 100).toFixed(0) : 0;
+    
+    const modal = document.getElementById('standardsModal');
+    const modalTitle = document.getElementById('standardsModalTitle');
+    const modalSubtitle = document.getElementById('standardsModalSubtitle');
+    const modalContent = document.getElementById('standardsModalContent');
+    
+    if (!modal || !modalContent) return;
+    
+    modalTitle.textContent = `${categoryName} Standards`;
+    modalSubtitle.textContent = `${department} - ${getDepartmentFullName(department)}`;
+    
+    modalContent.innerHTML = `
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-gray-700">Overall Compliance</span>
+                <span class="text-lg font-bold text-indigo-600">${percentage}%</span>
+            </div>
+            <div class="w-full bg-gray-200 h-2 rounded-full">
+                <div class="bg-indigo-600 h-2 rounded-full" style="width:${percentage}%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">${completedCount} of ${activeStandards.length} standards met</p>
+        </div>
+        
+        <div class="space-y-3">
+            <h4 class="font-semibold text-gray-800 text-sm">Accreditation Standards Checklist</h4>
+            ${standardsWithStatus.map(standard => `
+                <div class="border rounded-lg p-3 ${standard.isCovered ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                ${standard.isCovered ? 
+                                    '<span class="text-green-600 text-lg">✓</span>' : 
+                                    '<span class="text-red-500 text-lg">✗</span>'
+                                }
+                                <div>
+                                    <p class="font-medium text-gray-800 text-sm">${escapeHtml(standard.name)}</p>
+                                    <p class="text-xs text-gray-500">${escapeHtml(standard.code)}</p>
+                                </div>
+                            </div>
+                            ${standard.isCovered && standard.coveringDocs.length > 0 ? `
+                                <div class="mt-2 ml-6">
+                                    <p class="text-xs text-gray-600 mb-1">Supporting Documents:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${standard.coveringDocs.slice(0, 3).map(doc => `
+                                            <button class="text-xs text-teal-600 hover:text-teal-800 underline view-doc-btn" data-doc-id="${doc.id}">
+                                                ${escapeHtml(doc.title || 'Untitled')}
+                                            </button>
+                                        `).join('')}
+                                        ${standard.coveringDocs.length > 3 ? 
+                                            `<span class="text-xs text-gray-500">+${standard.coveringDocs.length - 3} more</span>` : ''
+                                        }
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="mt-2 ml-6">
+                                    <p class="text-xs text-amber-600">No documents found for this standard</p>
+                                    <button class="text-xs text-teal-600 hover:text-teal-800 mt-1 upload-missing" 
+                                            data-category="${category}" data-department="${department}" data-standard="${standard.name}">
+                                        + Upload missing document
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Add event listeners to view document buttons in modal
+    document.querySelectorAll('.view-doc-btn').forEach(btn => {
+        btn.removeEventListener('click', handleViewDocFromModal);
+        btn.addEventListener('click', handleViewDocFromModal);
+    });
+    
+    // Add event listeners to upload missing buttons in modal
+    document.querySelectorAll('.upload-missing').forEach(btn => {
+        btn.removeEventListener('click', handleUploadMissing);
+        btn.addEventListener('click', handleUploadMissing);
+    });
+}
+
+function handleViewDocFromModal(e) {
+    const docId = e.currentTarget.dataset.docId;
+    const doc = allDocuments.find(d => d.id == docId);
+    if (doc) {
+        closeStandardsModal();
+        openDetailsModal(doc);
+    }
+}
+
+function handleUploadMissing(e) {
+    const category = e.currentTarget.dataset.category;
+    const department = e.currentTarget.dataset.department;
+    const standard = e.currentTarget.dataset.standard;
+    
+    // Store in localStorage and redirect to upload page with pre-filled info
+    localStorage.setItem('uploadPreFill', JSON.stringify({
+        category: category,
+        department: department,
+        standard: standard,
+        message: `Upload document for: ${standard} (${category} - ${department})`
+    }));
+    window.location.href = 'upload.html';
 }
 
 function showDocumentsForCategoryAndDepartment(category, department) {
@@ -349,138 +737,14 @@ function showDocumentsForCategoryAndDepartment(category, department) {
         return;
     }
     
-    // Create a modal or redirect to documents page with filters
-    const categoryName = categories.find(c => c.id === category)?.name || category;
-    const deptName = getDepartmentFullName(department);
-    
     // Store filter in localStorage and redirect to documents page
     localStorage.setItem('evidenceMapFilters', JSON.stringify({
         category: category,
         department: department.toLowerCase(),
-        message: `Showing ${filteredDocs.length} documents for ${categoryName} - ${deptName}`
+        message: `Showing ${filteredDocs.length} documents for ${category} - ${getDepartmentFullName(department)}`
     }));
     
     window.location.href = `documents.html?category=${category}&department=${department.toLowerCase()}`;
-}
-
-function showError(message) {
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-function setupEventListeners() {
-    // Tab switching
-    const tabLinks = document.querySelectorAll('#mapTabs a');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const tabId = this.dataset.tab;
-            
-            tabLinks.forEach(l => {
-                l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
-                l.classList.add('border-transparent', 'text-gray-500');
-            });
-            this.classList.remove('border-transparent', 'text-gray-500');
-            this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
-            
-            tabContents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('block');
-            });
-            
-            const activeTab = document.getElementById(tabId + 'Tab');
-            if (activeTab) {
-                activeTab.classList.remove('hidden');
-                activeTab.classList.add('block');
-            }
-            
-            // Update filter dropdown to match tab
-            const categoryFilter = document.getElementById('categoryFilter');
-            if (categoryFilter) categoryFilter.value = tabId;
-        });
-    });
-    
-    // Category filter dropdown
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', function() {
-            const value = this.value;
-            if (value === 'all') return;
-            
-            const tabLink = document.querySelector(`#mapTabs a[data-tab="${value}"]`);
-            if (tabLink) tabLink.click();
-        });
-    }
-    
-    // Status filter
-    const statusFilter = document.getElementById('statusFilter');
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            const status = this.value;
-            const items = document.querySelectorAll('.clause-item');
-            
-            items.forEach(item => {
-                if (status === 'all') {
-                    item.classList.remove('hidden');
-                } else if (status === 'complete') {
-                    item.classList.toggle('hidden', item.dataset.status !== 'complete');
-                } else if (status === 'partial') {
-                    item.classList.toggle('hidden', item.dataset.status !== 'partial');
-                }
-            });
-        });
-    }
-    
-    // Search input
-    const searchInput = document.getElementById('searchMap');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = document.querySelectorAll('.clause-item');
-            
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                if (searchTerm === '' || text.includes(searchTerm)) {
-                    item.classList.remove('hidden');
-                } else {
-                    item.classList.add('hidden');
-                }
-            });
-        });
-    }
-    
-    // Refresh button
-    const refreshBtn = document.getElementById('refreshMap');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            loadDocuments();
-        });
-    }
-    
-    // Document details modal
-    setupDetailsModal();
-    
-    // Mobile sidebar
-    setupMobileSidebar();
-}
-
-function setupDetailsModal() {
-    const modal = document.getElementById('docDetailsModal');
-    const closeBtn = document.getElementById('docDetailsCloseBtn');
-    const closeBtn2 = document.getElementById('docDetailsCloseBtn2');
-    
-    if (closeBtn) closeBtn.addEventListener('click', closeDetailsModal);
-    if (closeBtn2) closeBtn2.addEventListener('click', closeDetailsModal);
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeDetailsModal();
-        });
-    }
 }
 
 function openDetailsModal(doc) {
@@ -492,7 +756,6 @@ function openDetailsModal(doc) {
     
     if (title) title.textContent = `Document Details: ${doc.title || 'Untitled'}`;
     
-    // Format keywords as badges
     let keywordsHtml = '';
     if (doc.keywords) {
         const keywords = doc.keywords.split(',').map(k => k.trim());
@@ -509,6 +772,15 @@ function openDetailsModal(doc) {
     const uploader = doc.author_name || (doc.uploader_firstName && doc.uploader_lastName 
         ? `${doc.uploader_firstName} ${doc.uploader_lastName}` 
         : 'Unknown');
+    
+    // Find standard name if standard_id exists
+    let standardName = 'Not specified';
+    if (doc.standard_id) {
+        const foundStandard = allStandards.find(s => s.id == doc.standard_id);
+        if (foundStandard) {
+            standardName = foundStandard.name;
+        }
+    }
     
     content.innerHTML = `
         <div class="border-b pb-4">
@@ -529,6 +801,10 @@ function openDetailsModal(doc) {
                 <div>
                     <span class="text-gray-500">Department:</span>
                     <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.department_code || doc.area || 'N/A')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Standard:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(standardName)}</p>
                 </div>
                 <div>
                     <span class="text-gray-500">Status:</span>
@@ -560,6 +836,14 @@ function openDetailsModal(doc) {
     
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+}
+
+function closeStandardsModal() {
+    const modal = document.getElementById('standardsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 
 function closeDetailsModal() {
@@ -605,6 +889,146 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+function showError(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function showSuccess(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function setupEventListeners() {
+    // Tab switching
+    const tabLinks = document.querySelectorAll('#mapTabs a');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.dataset.tab;
+            
+            tabLinks.forEach(l => {
+                l.classList.remove('active-tab', 'border-teal-600', 'text-teal-700');
+                l.classList.add('border-transparent', 'text-gray-500');
+            });
+            this.classList.remove('border-transparent', 'text-gray-500');
+            this.classList.add('active-tab', 'border-teal-600', 'text-teal-700');
+            
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+            
+            const activeTab = document.getElementById(tabId + 'Tab');
+            if (activeTab) {
+                activeTab.classList.remove('hidden');
+                activeTab.classList.add('block');
+            }
+            
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter) categoryFilter.value = tabId;
+        });
+    });
+    
+    // Category filter dropdown
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            const value = this.value;
+            if (value === 'all') return;
+            
+            const tabLink = document.querySelector(`#mapTabs a[data-tab="${value}"]`);
+            if (tabLink) tabLink.click();
+        });
+    }
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const status = this.value;
+            const items = document.querySelectorAll('.department-card');
+            
+            items.forEach(item => {
+                if (status === 'all') {
+                    item.classList.remove('hidden');
+                } else if (status === 'complete') {
+                    item.classList.toggle('hidden', item.dataset.status !== 'complete');
+                } else if (status === 'partial') {
+                    item.classList.toggle('hidden', item.dataset.status !== 'partial');
+                }
+            });
+        });
+    }
+    
+    // Search input
+    const searchInput = document.getElementById('searchMap');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const items = document.querySelectorAll('.department-card');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (searchTerm === '' || text.includes(searchTerm)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshMap');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            loadStandards().then(() => {
+                return loadRequirements();
+            }).then(() => {
+                return loadDocuments();
+            });
+        });
+    }
+    
+    // Standards Modal close buttons
+    const standardsModalCloseBtn = document.getElementById('standardsModalCloseBtn');
+    const standardsModalCloseBtn2 = document.getElementById('standardsModalCloseBtn2');
+    const standardsModal = document.getElementById('standardsModal');
+    
+    if (standardsModalCloseBtn) standardsModalCloseBtn.addEventListener('click', closeStandardsModal);
+    if (standardsModalCloseBtn2) standardsModalCloseBtn2.addEventListener('click', closeStandardsModal);
+    if (standardsModal) {
+        standardsModal.addEventListener('click', (e) => {
+            if (e.target === standardsModal) closeStandardsModal();
+        });
+    }
+    
+    // Document Details Modal close buttons
+    const docDetailsCloseBtn = document.getElementById('docDetailsCloseBtn');
+    const docDetailsCloseBtn2 = document.getElementById('docDetailsCloseBtn2');
+    const docDetailsModal = document.getElementById('docDetailsModal');
+    
+    if (docDetailsCloseBtn) docDetailsCloseBtn.addEventListener('click', closeDetailsModal);
+    if (docDetailsCloseBtn2) docDetailsCloseBtn2.addEventListener('click', closeDetailsModal);
+    if (docDetailsModal) {
+        docDetailsModal.addEventListener('click', (e) => {
+            if (e.target === docDetailsModal) closeDetailsModal();
+        });
+    }
+    
+    // Mobile sidebar
+    setupMobileSidebar();
 }
 
 function setupMobileSidebar() {
