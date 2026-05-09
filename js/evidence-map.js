@@ -271,14 +271,21 @@ function processEvidenceMap() {
     allDocuments.forEach(doc => {
         const category = doc.category || getCategoryFromId(doc.category_id);
         const department = doc.department_code || doc.area;
-        const standardId = doc.standard_id;
         
-        if (category && counts[category] && department && counts[category][department.toUpperCase()] !== undefined) {
+        // ONLY count approved or locked documents
+        const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
+        
+        if (isApproved && category && counts[category] && department && counts[category][department.toUpperCase()] !== undefined) {
             counts[category][department.toUpperCase()]++;
             
-            // Track standard coverage if standard_id exists
-            if (standardId && standardCoverage[category] && standardCoverage[category][department.toUpperCase()]) {
-                standardCoverage[category][department.toUpperCase()][standardId] = true;
+            // Check if document has standards array (from document_standards join)
+            if (isApproved && Array.isArray(doc.standards) && doc.standards.length > 0) {
+                doc.standards.forEach(standard => {
+                    const standardId = standard.id || standard.standard_id;
+                    if (standardId && standardCoverage[category] && standardCoverage[category][department.toUpperCase()]) {
+                        standardCoverage[category][department.toUpperCase()][standardId] = true;
+                    }
+                });
             }
         }
     });
@@ -419,7 +426,7 @@ function updateCategoryTab(categoryId, categoryName, counts, standardCoverage) {
                             <div class="standard-item">
                                 <span class="standard-name" title="${standard.code}">${escapeHtml(standard.name)}</span>
                                 <span class="standard-status ${standard.isCovered ? 'standard-complete' : 'standard-missing'} px-2 py-0.5 rounded-full text-xs">
-                                    ${standard.isCovered ? '✓ Covered' : 'Missing'}
+                                    ${standard.isCovered ? 'Covered' : 'Missing'}
                                 </span>
                             </div>
                         `).join('')}
@@ -592,20 +599,33 @@ function showStandardsDetails(category, department, categoryName) {
     const standards = standardsByCategory[category] || [];
     const activeStandards = standards.filter(s => s.is_active !== false);
     
-    // Get documents for this category and department to check standard coverage
-    const docsForDept = allDocuments.filter(doc => {
+    // Filter for approved/locked documents only
+    const approvedDocsForDept = allDocuments.filter(doc => {
         const docCategory = doc.category || getCategoryFromId(doc.category_id);
         const docDepartment = doc.department_code || doc.area;
-        return docCategory === category && docDepartment?.toUpperCase() === department.toUpperCase();
+        const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
+        return docCategory === category && 
+               docDepartment?.toUpperCase() === department.toUpperCase() && 
+               isApproved;
     });
     
-    // Determine which standards are covered
+    // Check if document has this standard in its standards array
     const standardsWithStatus = activeStandards.map(standard => {
-        // Check if any document in this department has this standard_id
-        const isCovered = docsForDept.some(doc => doc.standard_id === standard.id);
+        // Check if any approved document has this standard
+        const isCovered = approvedDocsForDept.some(doc => {
+            if (Array.isArray(doc.standards)) {
+                return doc.standards.some(s => s.id === standard.id || s.standard_id === standard.id);
+            }
+            return false;
+        });
         
-        // Find documents that cover this standard
-        const coveringDocs = docsForDept.filter(doc => doc.standard_id === standard.id);
+        // Find all approved documents that cover this standard
+        const coveringDocs = approvedDocsForDept.filter(doc => {
+            if (Array.isArray(doc.standards)) {
+                return doc.standards.some(s => s.id === standard.id || s.standard_id === standard.id);
+            }
+            return false;
+        });
         
         return {
             ...standard,

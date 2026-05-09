@@ -121,7 +121,7 @@ router.post('/generate', auth, async (req, res) => {
           cr.expected_documents as required,
           COUNT(d.id) as uploaded,
           SUM(CASE WHEN d.workflow_status = 'approved' OR d.workflow_status = 'locked' THEN 1 ELSE 0 END) as verified,
-          ROUND((COUNT(d.id) / cr.expected_documents) * 100, 2) as completeness_percentage
+          ROUND((SUM(CASE WHEN d.workflow_status = 'approved' OR d.workflow_status = 'locked' THEN 1 ELSE 0 END) / cr.expected_documents) * 100, 2) as completeness_percentage
         FROM category_requirements cr
         INNER JOIN categories c ON cr.category_id = c.id
         INNER JOIN departments dept ON cr.department_id = dept.id
@@ -176,21 +176,28 @@ router.get('/history', auth, async (req, res) => {
 
     const { limit = 10 } = req.query;
 
-    const [reports] = await db.query(`
-      SELECT 
-        rh.id,
-        rh.report_type,
-        rh.period,
-        rh.format,
-        rh.generated_at,
-        CONCAT(u.firstName, ' ', u.lastName) as generated_by
-      FROM report_history rh
-      LEFT JOIN users u ON rh.generated_by = u.id
-      ORDER BY rh.generated_at DESC
-      LIMIT ?
-    `, [parseInt(limit)]);
+    // Check if report_history table exists, if not return empty array
+    try {
+      const [reports] = await db.query(`
+        SELECT 
+          rh.id,
+          rh.report_type,
+          rh.period,
+          rh.format,
+          rh.generated_at,
+          CONCAT(u.firstName, ' ', u.lastName) as generated_by
+        FROM report_history rh
+        LEFT JOIN users u ON rh.generated_by = u.id
+        ORDER BY rh.generated_at DESC
+        LIMIT ?
+      `, [parseInt(limit)]);
 
-    res.json(reports);
+      res.json(reports);
+    } catch (tableError) {
+      // If table doesn't exist, return empty array
+      console.log('Report history table not found, returning empty array');
+      res.json([]);
+    }
 
   } catch (err) {
     console.error('Report history error:', err);

@@ -242,8 +242,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             const matchesCategory = category === 'all' || doc.category === category || doc.category_name === category;
             const matchesDepartment = department === 'all' || doc.department_code === department;
             
-            // Fix standards matching - check if document's standards array includes the selected standard name
-            const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => s === standard || s.includes(standard)));
+            // Fix standards matching - handle both string arrays and object arrays
+            const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => {
+                if (typeof s === 'string') return s === standard || s.includes(standard);
+                if (typeof s === 'object' && s !== null) {
+                    const name = s.name || s.standard_name || s.code || '';
+                    return name === standard || name.includes(standard);
+                }
+                return false;
+            }));
 
             return matchesSearch && matchesStatus && matchesCategory && matchesDepartment && matchesStandard;
         });
@@ -328,9 +335,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     function renderStandardsBadges(standards) {
         if (!standards || standards.length === 0) return '<span class="text-gray-400 text-xs">—</span>';
-        const items = standards.slice(0, 2);
-        const badges = items.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ');
-        const more = standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${standards.length - 2}</span>` : '';
+        
+        // Handle both string arrays and object arrays
+        const standardNames = standards.map(s => {
+            if (typeof s === 'string') return s;
+            if (typeof s === 'object' && s !== null) {
+                return s.name || s.standard_name || s.code || String(s);
+            }
+            return String(s);
+        });
+        
+        const items = standardNames.slice(0, 2);
+        const badges = items.map(name => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${name}</span>`).join(' ');
+        const more = standardNames.length > 2 ? ` <span class="text-gray-400 text-xs">+${standardNames.length - 2}</span>` : '';
         return `<div class="flex flex-wrap gap-1">${badges}${more}</div>`;
     }
 

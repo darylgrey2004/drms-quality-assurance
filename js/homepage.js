@@ -459,7 +459,10 @@ function renderDocuments(documents, tableBody, mobileContainer) {
         tableBody.innerHTML = '';
         documents.forEach(doc => {
             const stds = Array.isArray(doc.standards) && doc.standards.length
-                ? doc.standards.slice(0, 2).map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ')
+                ? doc.standards.slice(0, 2).map(s => {
+                    const name = typeof s === 'string' ? s : (s.name || s.standard_name || 'Unknown');
+                    return `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${name}</span>`;
+                  }).join(' ')
                     + (doc.standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${doc.standards.length - 2}</span>` : '')
                 : '<span class="text-gray-400 text-xs">—</span>';
             const row = document.createElement('tr');
@@ -500,7 +503,10 @@ function renderDocuments(documents, tableBody, mobileContainer) {
         mobileContainer.innerHTML = '';
         documents.forEach(doc => {
             const stds = Array.isArray(doc.standards) && doc.standards.length
-                ? doc.standards.slice(0, 2).map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${s}</span>`).join(' ')
+                ? doc.standards.slice(0, 2).map(s => {
+                    const name = typeof s === 'string' ? s : (s.name || s.standard_name || 'Unknown');
+                    return `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${name}</span>`;
+                  }).join(' ')
                     + (doc.standards.length > 2 ? ` <span class="text-gray-400 text-xs">+${doc.standards.length - 2}</span>` : '')
                 : '<span class="text-gray-400 text-xs">—</span>';
             const card = document.createElement('div');

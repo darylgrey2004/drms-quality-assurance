@@ -574,7 +574,10 @@ function renderStandardsBadges(standards) {
     }
     const visible = standards.slice(0, 2);
     const remaining = standards.length - 2;
-    let html = visible.map(s => `<span class="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs mr-1 mb-1">${s}</span>`).join('');
+    let html = visible.map(s => {
+        const name = typeof s === 'string' ? s : (s.name || s.standard_name || 'Unknown');
+        return `<span class="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs mr-1 mb-1">${name}</span>`;
+    }).join('');
     if (remaining > 0) {
         html += `<span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">+${remaining}</span>`;
     }

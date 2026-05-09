@@ -16,13 +16,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load departments from API
     async function loadDepartments() {
         try {
-            const response = await fetch(`${API_BASE}/api/departments`);
+            const response = await fetch(`${API_BASE}/api/departments`, {
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
             if (!response.ok) throw new Error('Failed to load departments');
             
             const departments = await response.json();
             console.log('Departments loaded:', departments);
             
             departmentSelect.innerHTML = '<option value="" disabled selected>Select department</option>';
+            
+            if (departments.length === 0) {
+                departmentSelect.innerHTML = '<option value="" disabled selected>No departments available</option>';
+                return;
+            }
+            
             departments.forEach(dept => {
                 const option = document.createElement('option');
                 option.value = dept.code; // Store CODE only (e.g., "BEED")

@@ -620,7 +620,11 @@ function createMobileCard(doc) {
 function renderStandardsBadges(standards, limit) {
     if (!standards || standards.length === 0) return '<span class="text-gray-400 text-xs">—</span>';
     const items = limit ? standards.slice(0, limit) : standards;
-    const badges = items.map(s => `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${escapeHtml(s)}</span>`).join(' ');
+    // Handle both string arrays (old format) and object arrays (new format)
+    const badges = items.map(s => {
+        const name = typeof s === 'string' ? s : (s.name || s.standard_name || 'Unknown');
+        return `<span class="bg-teal-50 text-teal-700 border border-teal-200 text-xs px-1.5 py-0.5 rounded">${escapeHtml(name)}</span>`;
+    }).join(' ');
     const more = limit && standards.length > limit ? `<span class="text-gray-400 text-xs">+${standards.length - limit}</span>` : '';
     return `<div class="flex flex-wrap gap-1">${badges}${more}</div>`;
 }
@@ -975,7 +979,10 @@ function applyFilters() {
         const matchesCategory = category === 'all' || doc.category === category;
         const matchesDepartment = department === 'all' || doc.department_code?.toLowerCase() === department.toLowerCase();
         const matchesStatus = status === 'all' || doc.workflow_status === status;
-        const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => s === standard || s.includes(standard)));
+        const matchesStandard = standard === 'all' || (doc.standards && doc.standards.length > 0 && doc.standards.some(s => {
+            const name = typeof s === 'string' ? s : (s.name || s.standard_name || '');
+            return name === standard || name.includes(standard);
+        }));
 
         return matchesSearch && matchesCategory && matchesDepartment && matchesStatus && matchesStandard;
     });

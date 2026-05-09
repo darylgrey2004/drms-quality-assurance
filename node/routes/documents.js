@@ -686,7 +686,7 @@ router.get('/', auth, async (req, res) => {
     if (rows.length > 0) {
       const docIds = rows.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT ds.document_id, s.name
+        `SELECT ds.document_id, s.id, s.name, s.code, s.category_id
          FROM document_standards ds
          JOIN standards s ON ds.standard_id = s.id
          WHERE ds.document_id IN (?) AND s.is_active = 1
@@ -696,7 +696,13 @@ router.get('/', auth, async (req, res) => {
       const stdMap = {};
       stdRows.forEach(s => {
         if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
-        stdMap[s.document_id].push(s.name);
+        stdMap[s.document_id].push({
+          id: s.id,
+          standard_id: s.id,
+          name: s.name,
+          code: s.code,
+          category_id: s.category_id
+        });
       });
       rows.forEach(r => { r.standards = stdMap[r.id] || []; });
     }
@@ -822,7 +828,7 @@ router.get('/approvals', auth, async (req, res) => {
     if (rows.length > 0) {
       const docIds = rows.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT ds.document_id, s.name
+        `SELECT ds.document_id, s.id, s.name, s.code, s.category_id
          FROM document_standards ds
          JOIN standards s ON ds.standard_id = s.id
          WHERE ds.document_id IN (?) AND s.is_active = 1
@@ -832,7 +838,13 @@ router.get('/approvals', auth, async (req, res) => {
       const stdMap = {};
       stdRows.forEach(s => {
         if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
-        stdMap[s.document_id].push(s.name);
+        stdMap[s.document_id].push({
+          id: s.id,
+          standard_id: s.id,
+          name: s.name,
+          code: s.code,
+          category_id: s.category_id
+        });
       });
       rows.forEach(r => { r.standards = stdMap[r.id] || []; });
     }
@@ -952,7 +964,7 @@ router.get('/stats/evaluator', auth, async (req, res) => {
     if (recentDocs.length > 0) {
       const docIds = recentDocs.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT ds.document_id, s.name, s.code
+        `SELECT ds.document_id, s.id, s.name, s.code, s.category_id
          FROM document_standards ds
          JOIN standards s ON ds.standard_id = s.id
          WHERE ds.document_id IN (?) AND s.is_active = 1
@@ -962,7 +974,13 @@ router.get('/stats/evaluator', auth, async (req, res) => {
       const stdMap = {};
       stdRows.forEach(s => {
         if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
-        stdMap[s.document_id].push(s.name);
+        stdMap[s.document_id].push({
+          id: s.id,
+          standard_id: s.id,
+          name: s.name,
+          code: s.code,
+          category_id: s.category_id
+        });
       });
       recentDocs.forEach(r => { r.standards = stdMap[r.id] || []; });
     }
@@ -1376,9 +1394,11 @@ router.get('/evidence-map', auth, async (req, res) => {
 // @access  Private
 router.get('/search', auth, async (req, res) => {
   try {
-    const { q, category, department, status, sort } = req.query;
+    const { q, category, department, status, sort, author, version, dateFrom, dateTo, scope } = req.query;
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
+    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const viewAll = canViewAll(req.user.role);
     
     const where = [];
     const params = [];
@@ -1387,7 +1407,39 @@ router.get('/search', auth, async (req, res) => {
     if (isEvaluator) {
       where.push('d.workflow_status = ?');
       params.push('locked');
-    } else if (status) {
+    } else if (isDeptHead) {
+      // Dept. Head can see their own documents + documents from their department faculty
+      const [deptHeadProfile] = await db.query(
+        'SELECT department FROM faculty_profiles WHERE user_id = ?',
+        [req.user.id]
+      );
+      
+      if (deptHeadProfile.length > 0 && deptHeadProfile[0].department) {
+        const deptName = deptHeadProfile[0].department;
+        const [deptInfo] = await db.query(
+          'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+          [deptName, deptName]
+        );
+        
+        if (deptInfo.length > 0) {
+          where.push('(d.uploader_id = ? OR d.department_id = ?)');
+          params.push(req.user.id, deptInfo[0].id);
+        } else {
+          where.push('d.uploader_id = ?');
+          params.push(req.user.id);
+        }
+      } else {
+        where.push('d.uploader_id = ?');
+        params.push(req.user.id);
+      }
+    } else if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
+      // Regular users see only their own documents unless they have viewAll permission
+      where.push('d.uploader_id = ?');
+      params.push(req.user.id);
+    }
+    
+    // Status filter
+    if (status && status !== 'all') {
       where.push('d.workflow_status = ?');
       params.push(status);
     }
@@ -1397,6 +1449,29 @@ router.get('/search', auth, async (req, res) => {
       where.push('(d.title LIKE ? OR d.author_name LIKE ? OR d.description LIKE ? OR d.keywords LIKE ?)');
       const searchTerm = `%${q}%`;
       params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+    
+    // Author filter
+    if (author) {
+      where.push('(d.author_name LIKE ? OR u.firstName LIKE ? OR u.lastName LIKE ?)');
+      const authorTerm = `%${author}%`;
+      params.push(authorTerm, authorTerm, authorTerm);
+    }
+    
+    // Version filter
+    if (version) {
+      where.push('d.version LIKE ?');
+      params.push(`%${version}%`);
+    }
+    
+    // Date range filter
+    if (dateFrom) {
+      where.push('DATE(d.created_at) >= ?');
+      params.push(dateFrom);
+    }
+    if (dateTo) {
+      where.push('DATE(d.created_at) <= ?');
+      params.push(dateTo);
     }
     
     // Category filter
@@ -1418,20 +1493,25 @@ router.get('/search', auth, async (req, res) => {
     if (sort === 'date_asc') orderBy = 'ORDER BY d.created_at ASC';
     else if (sort === 'title_asc') orderBy = 'ORDER BY d.title ASC';
     else if (sort === 'title_desc') orderBy = 'ORDER BY d.title DESC';
+    else if (sort === 'date_desc') orderBy = 'ORDER BY d.created_at DESC';
     
     const [documents] = await db.query(
       `SELECT 
         d.*,
+        u.firstName AS uploader_firstName,
+        u.lastName AS uploader_lastName,
         c.display_name as category_display_name,
         dept.name as department_name,
         dept.code as department_code,
+        (SELECT COUNT(*) FROM document_files df WHERE df.document_id = d.id) AS files_count,
         (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
        FROM documents d
+       LEFT JOIN users u ON d.uploader_id = u.id
        LEFT JOIN categories c ON d.category_id = c.id
        LEFT JOIN departments dept ON d.department_id = dept.id
        ${whereSql}
        ${orderBy}
-       LIMIT 100`,
+       LIMIT 500`,
       params
     );
     
@@ -1439,7 +1519,7 @@ router.get('/search', auth, async (req, res) => {
     if (documents.length > 0) {
       const docIds = documents.map(r => r.id);
       const [stdRows] = await db.query(
-        `SELECT ds.document_id, s.name
+        `SELECT ds.document_id, s.id, s.name, s.code, s.category_id
          FROM document_standards ds
          JOIN standards s ON ds.standard_id = s.id
          WHERE ds.document_id IN (?) AND s.is_active = 1
@@ -1449,7 +1529,13 @@ router.get('/search', auth, async (req, res) => {
       const stdMap = {};
       stdRows.forEach(s => {
         if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
-        stdMap[s.document_id].push(s.name);
+        stdMap[s.document_id].push({
+          id: s.id,
+          standard_id: s.id,
+          name: s.name,
+          code: s.code,
+          category_id: s.category_id
+        });
       });
       documents.forEach(r => { r.standards = stdMap[r.id] || []; });
     }

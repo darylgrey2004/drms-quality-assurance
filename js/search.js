@@ -183,88 +183,64 @@ async function loadDocuments() {
     }
 }
 
-function performSearch(e) {
+async function performSearch(e) {
     if (e) e.preventDefault();
     
-    const searchTerm = document.getElementById('mainSearch')?.value.toLowerCase() || '';
+    const searchTerm = document.getElementById('mainSearch')?.value || '';
     const category = document.getElementById('filterCategory')?.value || 'all';
     const status = document.getElementById('filterStatus')?.value || 'all';
     const department = document.getElementById('filterDepartment')?.value || 'all';
-    const author = document.getElementById('filterAuthor')?.value.toLowerCase() || '';
-    const version = document.getElementById('filterVersion')?.value.toLowerCase() || '';
+    const author = document.getElementById('filterAuthor')?.value || '';
+    const version = document.getElementById('filterVersion')?.value || '';
     const dateFrom = document.getElementById('filterDateFrom')?.value || '';
     const dateTo = document.getElementById('filterDateTo')?.value || '';
-    const keyword = document.getElementById('filterKeyword')?.value.toLowerCase() || '';
+    const keyword = document.getElementById('filterKeyword')?.value || '';
+    const sortBy = document.getElementById('sortResults')?.value || 'relevance';
     
-    filteredDocuments = allDocuments.filter(doc => {
-        // Search term
-        let matchesSearch = true;
+    const loadingResults = document.getElementById('loadingResults');
+    const listView = document.getElementById('listView');
+    
+    if (loadingResults) loadingResults.classList.remove('hidden');
+    if (listView) listView.innerHTML = '';
+    
+    try {
+        // Build query params
+        const params = new URLSearchParams();
+        params.append('scope', 'all');
+        if (searchTerm) params.append('q', searchTerm);
+        if (category !== 'all') params.append('category', category);
+        if (status !== 'all') params.append('status', status);
+        if (department !== 'all') params.append('department', department);
+        if (author) params.append('author', author);
+        if (version) params.append('version', version);
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        if (sortBy !== 'relevance') params.append('sort', sortBy);
+        
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/api/documents/search?${params.toString()}`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Search failed');
+        }
+        
+        filteredDocuments = await response.json();
+        currentPage = 1;
+        renderSearchResults();
+        
+        // Save to recent searches
         if (searchTerm) {
-            matchesSearch = (doc.title || '').toLowerCase().includes(searchTerm) ||
-                (doc.author_name || '').toLowerCase().includes(searchTerm) ||
-                (doc.description || '').toLowerCase().includes(searchTerm) ||
-                (doc.keywords || '').toLowerCase().includes(searchTerm);
+            addToRecentSearches(searchTerm);
         }
-        
-        // Category
-        let matchesCategory = true;
-        if (category !== 'all') {
-            matchesCategory = (doc.category || '').toLowerCase() === category.toLowerCase();
+    } catch (error) {
+        console.error('Search error:', error);
+        if (listView) {
+            listView.innerHTML = '<div class="text-center py-8 text-red-500">Search failed. Please try again.</div>';
         }
-        
-        // Status
-        let matchesStatus = true;
-        if (status !== 'all') {
-            matchesStatus = (doc.workflow_status || '').toLowerCase() === status.toLowerCase();
-        }
-        
-        // Department
-        let matchesDepartment = true;
-        if (department !== 'all') {
-            matchesDepartment = (doc.department_code || '').toLowerCase() === department.toLowerCase();
-        }
-        
-        // Author
-        let matchesAuthor = true;
-        if (author) {
-            matchesAuthor = (doc.author_name || '').toLowerCase().includes(author) ||
-                (doc.uploader_firstName || '').toLowerCase().includes(author) ||
-                (doc.uploader_lastName || '').toLowerCase().includes(author);
-        }
-        
-        // Version
-        let matchesVersion = true;
-        if (version) {
-            matchesVersion = (doc.version || '').toLowerCase().includes(version);
-        }
-        
-        // Date range
-        let matchesDate = true;
-        if (dateFrom) {
-            const docDate = (doc.created_at || '').split('T')[0];
-            matchesDate = docDate >= dateFrom;
-        }
-        if (dateTo && matchesDate) {
-            const docDate = (doc.created_at || '').split('T')[0];
-            matchesDate = docDate <= dateTo;
-        }
-        
-        // Keywords
-        let matchesKeyword = true;
-        if (keyword) {
-            matchesKeyword = (doc.keywords || '').toLowerCase().includes(keyword);
-        }
-        
-        return matchesSearch && matchesCategory && matchesStatus && matchesDepartment && 
-               matchesAuthor && matchesVersion && matchesDate && matchesKeyword;
-    });
-    
-    currentPage = 1;
-    renderSearchResults();
-    
-    // Save to recent searches
-    if (searchTerm) {
-        addToRecentSearches(searchTerm);
+    } finally {
+        if (loadingResults) loadingResults.classList.add('hidden');
     }
 }
 
@@ -618,26 +594,8 @@ function nextPage() {
 }
 
 function sortResults() {
-    const sortBy = document.getElementById('sortResults')?.value || 'relevance';
-    
-    switch(sortBy) {
-        case 'date_desc':
-            filteredDocuments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            break;
-        case 'date_asc':
-            filteredDocuments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            break;
-        case 'title_asc':
-            filteredDocuments.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-            break;
-        case 'title_desc':
-            filteredDocuments.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
-            break;
-        default:
-            break;
-    }
-    currentPage = 1;
-    renderSearchResults();
+    // Sorting is now handled by backend via query param
+    performSearch();
 }
 
 function clearAllFilters() {

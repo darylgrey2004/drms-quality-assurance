@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     async function loadDocuments() {
         try {
-            const response = await fetch(`${API_BASE}/api/documents?scope=mine`, {
+            const response = await fetch(`${API_BASE}/api/documents/search?scope=mine`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -57,29 +57,43 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Search function
-    function performSearch() {
-        const searchTerm = searchInput?.value.toLowerCase() || '';
+    async function performSearch() {
+        const searchTerm = searchInput?.value || '';
         const category = filterCategory?.value || 'all';
         const status = filterStatus?.value || 'all';
+        const department = document.getElementById('filterDepartment')?.value || 'all';
+        const author = document.getElementById('filterAuthor')?.value || '';
+        const dateFrom = document.getElementById('filterDateFrom')?.value || '';
+        const dateTo = document.getElementById('filterDateTo')?.value || '';
+        const sortBy = sortSelect?.value || 'relevance';
         
-        filteredDocuments = allDocuments.filter(doc => {
-            const matchesSearch = !searchTerm || 
-                doc.title.toLowerCase().includes(searchTerm) ||
-                (doc.description || '').toLowerCase().includes(searchTerm) ||
-                (doc.keywords || '').toLowerCase().includes(searchTerm) ||
-                (doc.author_name || '').toLowerCase().includes(searchTerm);
-            
-            const matchesCategory = category === 'all' || 
-                doc.category === category || 
-                doc.category_name === category;
-            
-            const matchesStatus = status === 'all' || 
-                doc.workflow_status === status;
-            
-            return matchesSearch && matchesCategory && matchesStatus;
-        });
+        // Build query params
+        const params = new URLSearchParams();
+        params.append('scope', 'mine');
+        if (searchTerm) params.append('q', searchTerm);
+        if (category !== 'all') params.append('category', category);
+        if (status !== 'all') params.append('status', status);
+        if (department !== 'all') params.append('department', department);
+        if (author) params.append('author', author);
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        if (sortBy !== 'relevance') params.append('sort', sortBy);
         
-        renderResults();
+        try {
+            const response = await fetch(`${API_BASE}/api/documents/search?${params.toString()}`, {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (!response.ok) throw new Error('Search failed');
+            
+            filteredDocuments = await response.json();
+            renderResults();
+        } catch (error) {
+            console.error('Search error:', error);
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<div class="text-center text-gray-500 py-8">Error searching documents. Please try again.</div>';
+            }
+        }
     }
     
     function renderResults() {
@@ -111,14 +125,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <span>${doc.department_code || doc.area} · ${doc.version || 'v1.0'}</span>
                     </div>
                     <div class="mt-3 flex gap-2">
-                        <button onclick="viewDocument(${doc.id}, '${doc.title.replace(/'/g, "\\'")}')"
-                                class="view-result px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-sm">
+                        <button class="view-doc-btn px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-sm" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">
                             View Document
                         </button>
                     </div>
                 </div>
             `;
         }).join('');
+        
+        attachViewHandlers();
     }
     
     function getCategoryBadge(category) {
@@ -170,30 +185,112 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Filter changes
     if (filterCategory) filterCategory.addEventListener('change', performSearch);
     if (filterStatus) filterStatus.addEventListener('change', performSearch);
-    if (filterDate) filterDate.addEventListener('change', performSearch);
+    const filterDepartment = document.getElementById('filterDepartment');
+    const filterAuthor = document.getElementById('filterAuthor');
+    const filterDateFrom = document.getElementById('filterDateFrom');
+    const filterDateTo = document.getElementById('filterDateTo');
+    if (filterDepartment) filterDepartment.addEventListener('change', performSearch);
+    if (filterAuthor) {
+        let timeout;
+        filterAuthor.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(performSearch, 300);
+        });
+    }
+    if (filterDateFrom) filterDateFrom.addEventListener('change', performSearch);
+    if (filterDateTo) filterDateTo.addEventListener('change', performSearch);
+
+    // Clear filters button
+    const clearSearch = document.getElementById('clearSearch');
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (filterCategory) filterCategory.value = 'all';
+            if (filterStatus) filterStatus.value = 'all';
+            if (filterDepartment) filterDepartment.value = 'all';
+            if (filterAuthor) filterAuthor.value = '';
+            if (filterDateFrom) filterDateFrom.value = '';
+            if (filterDateTo) filterDateTo.value = '';
+            if (sortSelect) sortSelect.value = 'relevance';
+            performSearch();
+        });
+    }
 
     // Sort results
     if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
-            const sortBy = this.value;
-            
-            if (sortBy === 'date-desc') {
-                filteredDocuments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            } else if (sortBy === 'date-asc') {
-                filteredDocuments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            } else if (sortBy === 'title-asc') {
-                filteredDocuments.sort((a, b) => a.title.localeCompare(b.title));
-            } else if (sortBy === 'title-desc') {
-                filteredDocuments.sort((a, b) => b.title.localeCompare(a.title));
-            }
-            
-            renderResults();
+        sortSelect.addEventListener('change', performSearch);
+    }
+    
+    // Setup preview modal
+    setupPreviewModal();
+    
+    function setupPreviewModal() {
+        const docPreviewModal = document.getElementById('docPreviewModal');
+        const docPreviewCloseBtn = document.getElementById('docPreviewCloseBtn');
+        
+        if (docPreviewCloseBtn) {
+            docPreviewCloseBtn.addEventListener('click', closePreviewModal);
+        }
+        
+        if (docPreviewModal) {
+            docPreviewModal.addEventListener('click', (e) => {
+                if (e.target === docPreviewModal) closePreviewModal();
+            });
+        }
+    }
+    
+    function closePreviewModal() {
+        const docPreviewModal = document.getElementById('docPreviewModal');
+        const docPreviewFrame = document.getElementById('docPreviewFrame');
+        
+        if (!docPreviewModal) return;
+        
+        docPreviewModal.classList.add('hidden');
+        docPreviewModal.classList.remove('flex');
+        if (docPreviewFrame) docPreviewFrame.src = 'about:blank';
+    }
+    
+    function openPreviewModal(url, title) {
+        const docPreviewModal = document.getElementById('docPreviewModal');
+        const docPreviewFrame = document.getElementById('docPreviewFrame');
+        const docPreviewTitle = document.getElementById('docPreviewTitle');
+        
+        if (!docPreviewModal || !docPreviewFrame) {
+            window.open(url, '_blank');
+            return;
+        }
+        
+        if (docPreviewTitle) docPreviewTitle.textContent = title || 'Document Preview';
+        docPreviewFrame.src = url;
+        docPreviewModal.classList.remove('hidden');
+        docPreviewModal.classList.add('flex');
+    }
+    
+    function attachViewHandlers() {
+        document.querySelectorAll('.view-doc-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const docId = this.getAttribute('data-id');
+                const title = this.getAttribute('data-title');
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/documents/${docId}/download`, {
+                        method: 'GET',
+                        headers: { 'x-auth-token': token }
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.msg || 'Failed to view document');
+                    }
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    openPreviewModal(url, title);
+                } catch (error) {
+                    console.error('View error:', error);
+                    alert('Failed to view document: ' + error.message);
+                }
+            });
         });
     }
 });
-
-// Global function for viewing documents
-function viewDocument(docId, title) {
-    console.log('View document:', docId, title);
-    window.location.href = `view-document.html?id=${docId}`;
-}

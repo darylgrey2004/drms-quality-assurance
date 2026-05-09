@@ -141,10 +141,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         allStandards.forEach(std => {
             const categoryName = (std.category_name || '').toLowerCase();
             if (categories[categoryName]) {
-                // Count documents mapped to this standard
-                const mappedDocs = allDocuments.filter(doc => 
-                    Array.isArray(doc.standards) && doc.standards.includes(std.name)
-                );
+                // Count ONLY approved/locked documents mapped to this standard
+                const mappedDocs = allDocuments.filter(doc => {
+                    // Only count approved or locked documents
+                    const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
+                    if (!isApproved) return false;
+                    
+                    if (!Array.isArray(doc.standards)) return false;
+                    
+                    return doc.standards.some(s => {
+                        // Handle string format
+                        if (typeof s === 'string') {
+                            return s === std.name || s === std.code;
+                        }
+                        // Handle object format
+                        if (typeof s === 'object' && s !== null) {
+                            return s.id === std.id || s.name === std.name || s.standard_id === std.id;
+                        }
+                        return false;
+                    });
+                });
                 
                 categories[categoryName].push({
                     ...std,
@@ -248,7 +264,176 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // Global function for viewing standard details
-function viewStandardDetails(standardId, standardName) {
+async function viewStandardDetails(standardId, standardName) {
     console.log('View standard details:', standardId, standardName);
-    alert(`Viewing details for: ${standardName}\n\nThis shows which documents are mapped to this standard.`);
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        // Fetch standard details
+        const stdResponse = await fetch(`${API_BASE}/api/documents/standards`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!stdResponse.ok) throw new Error('Failed to load standard details');
+        
+        const allStandards = await stdResponse.json();
+        const standard = allStandards.find(s => s.id === standardId);
+        
+        if (!standard) {
+            alert('Standard not found');
+            return;
+        }
+        
+        // Fetch documents for this standard
+        const docsResponse = await fetch(`${API_BASE}/api/documents?scope=all`, {
+            headers: { 'x-auth-token': token }
+        });
+        
+        if (!docsResponse.ok) throw new Error('Failed to load documents');
+        
+        const allDocuments = await docsResponse.json();
+        
+        // Filter documents that have this standard - ONLY approved/locked documents
+        const mappedDocs = allDocuments.filter(doc => {
+            // Only include approved or locked documents
+            const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
+            if (!isApproved) return false;
+            
+            if (!Array.isArray(doc.standards)) return false;
+            
+            return doc.standards.some(s => {
+                // Handle string format
+                if (typeof s === 'string') {
+                    return s === standard.name || s === standard.code;
+                }
+                // Handle object format
+                if (typeof s === 'object' && s !== null) {
+                    return s.id === standardId || s.name === standardName || s.standard_id === standardId;
+                }
+                return false;
+            });
+        });
+        
+        console.log('Mapped documents found:', mappedDocs.length);
+        console.log('Sample document standards:', mappedDocs.length > 0 ? mappedDocs[0].standards : 'none');
+        
+        // Show modal with standard details
+        showStandardModal(standard, mappedDocs);
+        
+    } catch (error) {
+        console.error('Error loading standard details:', error);
+        alert('Failed to load standard details. Please try again.');
+    }
+}
+
+function showStandardModal(standard, documents) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('standardDetailsModal');
+    
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'standardDetailsModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
+                    <h3 class="text-lg font-semibold text-gray-800" id="standardModalTitle">Standard Details</h3>
+                    <button id="closeStandardModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div class="p-6" id="standardModalContent"></div>
+                <div class="flex justify-end gap-3 p-4 border-t bg-gray-50">
+                    <button id="closeStandardModal2" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        document.getElementById('closeStandardModal').addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+        document.getElementById('closeStandardModal2').addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        });
+    }
+    
+    const title = document.getElementById('standardModalTitle');
+    const content = document.getElementById('standardModalContent');
+    
+    title.textContent = standard.name;
+    
+    content.innerHTML = `
+        <div class="space-y-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span class="text-gray-500">Code:</span>
+                        <p class="font-medium text-gray-800 mt-1">${escapeHtml(standard.code)}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Category:</span>
+                        <p class="font-medium text-gray-800 mt-1">${escapeHtml(standard.category_name || 'N/A')}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-gray-500">Description:</span>
+                        <p class="text-gray-700 mt-1">${escapeHtml(standard.description || 'No description available')}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-semibold text-gray-800 mb-3">Mapped Documents (${documents.length})</h4>
+                ${documents.length > 0 ? `
+                    <div class="space-y-2">
+                        ${documents.map(doc => `
+                            <div class="border rounded-lg p-3 hover:bg-gray-50">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800 text-sm">${escapeHtml(doc.title || 'Untitled')}</p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            ${escapeHtml(doc.department_code || doc.area || 'N/A')} · 
+                                            ${escapeHtml(doc.category_name || doc.category || 'N/A')}
+                                        </p>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 rounded-full ${
+                                        doc.workflow_status === 'approved' || doc.workflow_status === 'locked' 
+                                            ? 'bg-green-100 text-green-700' 
+                                            : 'bg-yellow-100 text-yellow-700'
+                                    }">
+                                        ${escapeHtml(doc.workflow_status || 'pending')}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>No documents mapped to this standard yet.</p>
+                        <button class="mt-3 text-teal-600 hover:text-teal-700 text-sm" onclick="window.location.href='user-upload.html'">
+                            + Upload a document for this standard
+                        </button>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }

@@ -223,7 +223,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadDepartments() {
         fetch(`${API_BASE}/api/documents/departments`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'x-auth-token': token },
+            cache: 'no-cache'
         })
         .then(r => r.json())
         .then(departments => {

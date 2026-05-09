@@ -102,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const isAdmin = role === 'admin';
     const isDean = role === 'dean';
 
+    // Initialize Bulk Action Modal
+    const bulkActionModalManager = new BulkActionModalManager();
+
     // Update user info
     updateUserInfo();
 
@@ -932,11 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (action === 'reject') {
-            openBulkRejectionModal(selectedIds);
-            return;
-        }
-        
+        // Role-based permission checks
         if (action === 'validate' && !isAdmin) {
             showToast('Only Administrators can perform bulk validation.', true);
             return;
@@ -947,34 +946,79 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (action === 'validate') {
-            showToast('Please use the individual Validate buttons for each document.', true);
+        if (action === 'unlock' && !isAdmin) {
+            showToast('Only Administrators can unlock documents.', true);
             return;
         }
         
-        if (action === 'approve') {
-            showToast('Please use the individual Approve buttons for each document.', true);
-            return;
-        }
+        // Get selected documents with full details
+        const selectedDocuments = allDocuments.filter(doc => selectedIds.includes(doc.id));
         
-        const actionNames = {
-            'lock': 'lock',
-            'unlock': 'unlock'
-        };
-        
-        if (!confirm(`Are you sure you want to ${actionNames[action]} ${selectedIds.length} document(s)?`)) return;
+        // Open comprehensive modal
+        bulkActionModalManager.open({
+            action: action,
+            documents: selectedDocuments,
+            requiresComment: action === 'reject',
+            commentLabel: action === 'reject' ? 'Reason for Rejection' : 'Comments (Optional)',
+            commentPlaceholder: action === 'reject' 
+                ? 'Please provide a detailed reason for rejecting these documents...'
+                : 'Add any comments for this action...',
+            commentHint: action === 'reject' ? 'This reason will be sent to all document authors.' : '',
+            onConfirm: async (comment) => {
+                await executeBulkAction(action, selectedIds, comment);
+            }
+        });
+    }
+    
+    async function executeBulkAction(action, selectedIds, comment) {
+        // Show progress
+        showToast(`Processing ${selectedIds.length} documents...`, false);
         
         let successCount = 0;
         let failCount = 0;
+        const errors = [];
         
+        // Process each document
         for (const docId of selectedIds) {
             try {
                 let response;
-                if (action === 'unlock') {
+                let newStatus;
+                const body = comment ? { comments: comment, reason: comment } : {};
+                
+                if (action === 'validate') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    newStatus = 'validated';
+                } else if (action === 'approve') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/approve`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    newStatus = 'approved';
+                } else if (action === 'reject') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/reject`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason: comment })
+                    });
+                    newStatus = 'rejected';
+                } else if (action === 'lock') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/lock`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    newStatus = 'locked';
+                } else if (action === 'unlock') {
                     response = await fetch(`${API_BASE}/api/approvals/${docId}/unlock`, {
                         method: 'POST',
                         headers: { 'x-auth-token': token, 'Content-Type': 'application/json' }
                     });
+                    newStatus = 'approved';
                 } else {
                     continue;
                 }
@@ -982,22 +1026,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 if (response.ok) {
                     successCount++;
-                    updateDocumentStatus(docId, action === 'unlock' ? 'approved' : doc.workflow_status);
+                    updateDocumentStatus(docId, newStatus);
                 } else {
                     failCount++;
+                    errors.push(`Doc ${docId}: ${data.msg || 'Failed'}`);
                 }
             } catch (err) {
                 failCount++;
+                errors.push(`Doc ${docId}: ${err.message}`);
             }
         }
         
+        // Show results
+        const actionNames = {
+            'validate': 'validated',
+            'approve': 'approved',
+            'reject': 'rejected',
+            'lock': 'locked',
+            'unlock': 'unlocked'
+        };
+        
         if (failCount === 0) {
-            showToast(`Successfully ${actionNames[action]}ed ${successCount} document(s).`);
+            showToast(`Successfully ${actionNames[action]} ${successCount} document(s).`);
         } else {
-            showToast(`${actionNames[action]}ed ${successCount} documents, ${failCount} failed.`, true);
+            showToast(`${actionNames[action]} ${successCount} documents, ${failCount} failed.`, true);
+            if (errors.length > 0) {
+                console.error('Bulk action errors:', errors);
+            }
         }
         
+        // Clear selections and refresh
         clearAllSelections();
+        bulkActionSelect.value = '';
         loadStats();
         loadDocuments();
     }

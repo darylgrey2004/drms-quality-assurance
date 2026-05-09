@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(sendHeartbeat, 2 * 60 * 1000);
     }
     
+    // Initialize modal handlers FIRST
+    initializeModalHandlers();
+    
     // Use a small delay to ensure DOM is fully ready
     setTimeout(() => {
         console.log('Loading analytics data...');
@@ -242,9 +245,12 @@ function updateCompletenessDisplay(documents) {
             { name: 'Employment', required: categoryTotals.Employment, color: 'bg-purple-600' }
         ];
         
-        // Count documents by category
+        // Count only approved/locked documents by category
         const counts = { Instruction: 0, Research: 0, Extension: 0, Employment: 0 };
         documents.forEach(doc => {
+            // Only count approved or locked documents
+            if (doc.workflow_status !== 'approved' && doc.workflow_status !== 'locked') return;
+            
             const cat = (doc.category || doc.category_name || '');
             if (cat === 'Instruction' || cat === 'instruction') counts.Instruction++;
             else if (cat === 'Research' || cat === 'research') counts.Research++;
@@ -292,24 +298,48 @@ function updateCompletenessDisplay(documents) {
                 };
             });
             
-            // Count uploaded and verified documents
+            // Count uploaded (all documents) and verified (only approved/locked)
+            let matchedCount = 0;
+            let unmatchedCount = 0;
             documents.forEach(doc => {
                 const dept = doc.department_code;
-                const cat = doc.category_display_name || doc.category;
-                if (deptMap[dept] && deptMap[dept][cat]) {
-                    deptMap[dept][cat].uploaded++;
-                    if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
-                        deptMap[dept][cat].verified++;
+                // Normalize category name to lowercase for matching
+                const docCat = (doc.category_display_name || doc.category || '').toLowerCase();
+                
+                // Find matching category in deptMap (case-insensitive)
+                if (deptMap[dept]) {
+                    let matched = false;
+                    for (const cat in deptMap[dept]) {
+                        if (cat.toLowerCase() === docCat) {
+                            // Count ALL documents as uploaded
+                            deptMap[dept][cat].uploaded++;
+                            // Only count approved or locked documents as verified
+                            if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                                deptMap[dept][cat].verified++;
+                            }
+                            matched = true;
+                            matchedCount++;
+                            break;
+                        }
                     }
+                    if (!matched) {
+                        unmatchedCount++;
+                        console.log('Unmatched document:', { dept, docCat, availableCategories: Object.keys(deptMap[dept]) });
+                    }
+                } else {
+                    unmatchedCount++;
+                    console.log('Department not found:', dept, 'Available:', Object.keys(deptMap));
                 }
             });
+            console.log(`Department breakdown: ${matchedCount} matched, ${unmatchedCount} unmatched documents`);
             
             let tableHtml = '';
             for (const dept in deptMap) {
                 for (const cat in deptMap[dept]) {
                     const data = deptMap[dept][cat];
-                    const percentage = data.req > 0 ? ((data.uploaded / data.req) * 100).toFixed(0) : 0;
-                    const status = data.uploaded >= data.req ? 'Complete' : 'Partial';
+                    // Calculate percentage based on VERIFIED (approved/locked) documents
+                    const percentage = data.req > 0 ? ((data.verified / data.req) * 100).toFixed(0) : 0;
+                    const status = data.verified >= data.req ? 'Complete' : 'Partial';
                     const statusClass = status === 'Complete' ? 'badge-approved' : 'badge-pending';
                     const progressColor = parseInt(percentage) >= 80 ? 'bg-green-600' : (parseInt(percentage) >= 50 ? 'bg-amber-600' : 'bg-red-600');
                     
@@ -495,73 +525,389 @@ function updateCategoryChart(data) {
 
 // DOM elements and event handlers
 function initializeReportsPage() {
-    const reportPeriod = document.getElementById('reportPeriod');
-    const reportFormat = document.getElementById('reportFormat');
+    console.log('=== INITIALIZING REPORTS PAGE ===');
     const generateBtn = document.getElementById('generateReport');
     const exportBtn = document.getElementById('exportReport');
-    const generateGapReport = document.getElementById('generateGapReport');
+    
+    console.log('Generate button found:', !!generateBtn);
+    console.log('Export button found:', !!exportBtn);
     
     // Generate report button
     if (generateBtn) {
-        generateBtn.addEventListener('click', async function() {
-            const period = reportPeriod ? reportPeriod.value : 'this-month';
-            const format = reportFormat ? reportFormat.value : 'pdf';
-            
-            // Find active tab
-            let activeTab = 'overview';
-            document.querySelectorAll('#reportTabs a').forEach(link => {
-                if (link.classList.contains('active-tab')) {
-                    activeTab = link.getAttribute('data-tab');
-                }
-            });
-            
-            console.log(`Generating ${format} report for ${activeTab} (${period})`);
-            
-            const originalText = this.innerHTML;
-            this.innerHTML = '<span class="mr-2">⏳</span> Generating...';
-            this.disabled = true;
-            
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}/api/reports/generate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify({
-                        report_type: activeTab,
-                        period: period,
-                        format: format
-                    })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    alert(`Report generated successfully!\n\nType: ${activeTab} report\nPeriod: ${period}\nFormat: ${format}\nReport ID: ${result.report_id}`);
-                    loadReportHistory();
-                } else {
-                    alert('Failed to generate report');
-                }
-            } catch (error) {
-                console.error('Report generation error:', error);
-                alert('Failed to generate report');
-            } finally {
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
+        console.log('Adding click listener to Generate Report button');
+        generateBtn.addEventListener('click', function(e) {
+            console.log('Generate Report button clicked!');
+            e.preventDefault();
+            showReportTypeModal('generate');
         });
     }
     
     // Export button
     if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
-            const format = reportFormat ? reportFormat.value : 'pdf';
-            alert(`Exporting current view as ${format.toUpperCase()}\n\nThis would download the visible data in ${format.toUpperCase()} format.`);
+        console.log('Adding click listener to Export button');
+        exportBtn.addEventListener('click', function(e) {
+            console.log('Export button clicked!');
+            e.preventDefault();
+            showReportTypeModal('export');
         });
     }
     
-    // Generate Gap Report button
+    // Initialize all other handlers
+    initializeAllReportHandlers();
+    console.log('=== REPORTS PAGE INITIALIZED ===');
+}
+
+// Execute generate report after type selection
+async function executeGenerateReport() {
+    const reportPeriod = document.getElementById('reportPeriod');
+    const reportFormat = document.getElementById('reportFormat');
+    
+    const period = reportPeriod ? reportPeriod.value : 'this-month';
+    const format = reportFormat ? reportFormat.value : 'pdf';
+    const reportType = selectedReportType;
+    
+    console.log(`Generating ${format} report (${period}) - Type: ${reportType}`);
+    
+    showLoadingModal('Generating Report...', `Creating ${format.toUpperCase()} ${reportType} report`);
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+        // Build request body with period filtering
+        const requestBody = {
+            report_type: reportType,
+            period: period,
+            format: format
+        };
+        
+        // Add custom date range if selected
+        if (period === 'custom' && customDateRange.startDate && customDateRange.endDate) {
+            requestBody.date_from = customDateRange.startDate;
+            requestBody.date_to = customDateRange.endDate;
+        }
+        
+        // Fetch all data for both overview and completeness
+        const [docsResponse, reqResponse] = await Promise.all([
+            fetch(`${API_BASE}/api/documents?scope=all`, {
+                headers: { 'x-auth-token': token }
+            }),
+            fetch(`${API_BASE}/api/documents/category-requirements`, {
+                headers: { 'x-auth-token': token }
+            })
+        ]);
+        
+        if (!docsResponse.ok || !reqResponse.ok) {
+            throw new Error('Failed to fetch data');
+        }
+        
+        let documents = await docsResponse.json();
+        const requirements = await reqResponse.json();
+        
+        // Apply period filter to documents
+        documents = filterDocumentsByPeriod(documents, period, customDateRange);
+        
+        // === OVERVIEW DATA ===
+                const totalDocs = documents.length;
+                const approvedDocs = documents.filter(d => d.workflow_status === 'approved' || d.workflow_status === 'locked').length;
+                const pendingDocs = documents.filter(d => d.workflow_status === 'pending' || d.workflow_status === 'validated').length;
+                const rejectedDocs = documents.filter(d => d.workflow_status === 'rejected').length;
+                
+                // Category breakdown
+                const categoryBreakdown = [
+                    { category_name: 'Instruction', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Research', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Extension', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Employment', total: 0, approved: 0, pending: 0 }
+                ];
+                
+                documents.forEach(doc => {
+                    const cat = (doc.category || doc.category_name || '').toLowerCase();
+                    const idx = { 'instruction': 0, 'research': 1, 'extension': 2, 'employment': 3 }[cat];
+                    if (idx !== undefined) {
+                        categoryBreakdown[idx].total++;
+                        if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                            categoryBreakdown[idx].approved++;
+                        } else if (doc.workflow_status === 'pending' || doc.workflow_status === 'validated') {
+                            categoryBreakdown[idx].pending++;
+                        }
+                    }
+                });
+                
+                // Department breakdown
+                const deptMap = new Map();
+                documents.forEach(doc => {
+                    const dept = doc.department_code || 'Other';
+                    if (!deptMap.has(dept)) {
+                        deptMap.set(dept, { total: 0, approved: 0 });
+                    }
+                    const data = deptMap.get(dept);
+                    data.total++;
+                    if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                        data.approved++;
+                    }
+                });
+                
+                const departmentBreakdown = Array.from(deptMap.entries()).map(([code, data]) => ({
+                    department_code: code,
+                    total: data.total,
+                    approved: data.approved
+                }));
+                
+                // === COMPLETENESS DATA ===
+                const completenessData = [];
+                
+                requirements.forEach(req => {
+                    const dept = req.department_code;
+                    const cat = req.category_name;
+                    
+                    // Count documents for this dept/category
+                    let uploaded = 0;
+                    let verified = 0;
+                    
+                    documents.forEach(doc => {
+                        const docDept = doc.department_code;
+                        const docCat = (doc.category_display_name || doc.category || '').toLowerCase();
+                        
+                        if (docDept === dept && cat.toLowerCase() === docCat) {
+                            uploaded++;
+                            if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                                verified++;
+                            }
+                        }
+                    });
+                    
+                    const percentage = req.expected_documents > 0 
+                        ? ((verified / req.expected_documents) * 100).toFixed(2) 
+                        : 0;
+                    
+                    completenessData.push({
+                        department_code: dept,
+                        category_name: cat,
+                        required: req.expected_documents,
+                        uploaded: uploaded,
+                        verified: verified,
+                        completeness_percentage: percentage
+                    });
+                });
+                
+                // === COMBINED REPORT DATA ===
+                const reportData = {
+                    report_type: reportType,
+                    period: period,
+                    data: {}
+                };
+                
+                // Add overview data if needed
+                if (reportType === 'overview' || reportType === 'combined') {
+                    reportData.data.overview = {
+                        statistics: {
+                            total_documents: totalDocs,
+                            approved: approvedDocs,
+                            pending: pendingDocs,
+                            rejected: rejectedDocs
+                        },
+                        category_breakdown: categoryBreakdown,
+                        department_breakdown: departmentBreakdown
+                    };
+                }
+                
+                // Add completeness data if needed
+                if (reportType === 'completeness' || reportType === 'combined') {
+                    reportData.data.completeness = completenessData;
+                }
+                
+                hideLoadingModal();
+                
+                // Generate and download the file
+                await downloadReport(reportData, format, reportType);
+                
+                // Save to backend for history
+                try {
+                    await fetch(`${API_BASE}/api/reports/generate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify({
+                            report_type: reportType,
+                            period: period,
+                            format: format
+                        })
+                    });
+                    
+                    // Reload report history
+                    loadReportHistory();
+                } catch (historyError) {
+                    console.log('Failed to save report history:', historyError);
+                }
+            } catch (error) {
+                hideLoadingModal();
+                console.error('Report generation error:', error);
+                alert('Failed to generate report: ' + error.message);
+            }
+}
+
+// Execute export report after type selection
+async function executeExportReport() {
+    const reportFormat = document.getElementById('reportFormat');
+    const reportPeriod = document.getElementById('reportPeriod');
+    
+    const format = reportFormat ? reportFormat.value : 'pdf';
+    const period = reportPeriod ? reportPeriod.value : 'this-month';
+    const reportType = selectedReportType;
+    
+    showLoadingModal('Exporting Data...', `Preparing ${format.toUpperCase()} ${reportType} export`);
+            
+            try {
+                const token = localStorage.getItem('token');
+                
+                // Fetch all data for both overview and completeness
+                const [docsResponse, reqResponse] = await Promise.all([
+                    fetch(`${API_BASE}/api/documents?scope=all`, {
+                        headers: { 'x-auth-token': token }
+                    }),
+                    fetch(`${API_BASE}/api/documents/category-requirements`, {
+                        headers: { 'x-auth-token': token }
+                    })
+                ]);
+                
+                if (!docsResponse.ok || !reqResponse.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                let documents = await docsResponse.json();
+                const requirements = await reqResponse.json();
+                
+                // Apply period filter to documents
+                documents = filterDocumentsByPeriod(documents, period, customDateRange);
+                
+                // === OVERVIEW DATA ===
+                const totalDocs = documents.length;
+                const approvedDocs = documents.filter(d => d.workflow_status === 'approved' || d.workflow_status === 'locked').length;
+                const pendingDocs = documents.filter(d => d.workflow_status === 'pending' || d.workflow_status === 'validated').length;
+                const rejectedDocs = documents.filter(d => d.workflow_status === 'rejected').length;
+                
+                const categoryBreakdown = [
+                    { category_name: 'Instruction', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Research', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Extension', total: 0, approved: 0, pending: 0 },
+                    { category_name: 'Employment', total: 0, approved: 0, pending: 0 }
+                ];
+                
+                documents.forEach(doc => {
+                    const cat = (doc.category || doc.category_name || '').toLowerCase();
+                    const idx = { 'instruction': 0, 'research': 1, 'extension': 2, 'employment': 3 }[cat];
+                    if (idx !== undefined) {
+                        categoryBreakdown[idx].total++;
+                        if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                            categoryBreakdown[idx].approved++;
+                        } else if (doc.workflow_status === 'pending' || doc.workflow_status === 'validated') {
+                            categoryBreakdown[idx].pending++;
+                        }
+                    }
+                });
+                
+                const deptMap = new Map();
+                documents.forEach(doc => {
+                    const dept = doc.department_code || 'Other';
+                    if (!deptMap.has(dept)) {
+                        deptMap.set(dept, { total: 0, approved: 0 });
+                    }
+                    const data = deptMap.get(dept);
+                    data.total++;
+                    if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                        data.approved++;
+                    }
+                });
+                
+                const departmentBreakdown = Array.from(deptMap.entries()).map(([code, data]) => ({
+                    department_code: code,
+                    total: data.total,
+                    approved: data.approved
+                }));
+                
+                // === COMPLETENESS DATA ===
+                const completenessData = [];
+                
+                requirements.forEach(req => {
+                    const dept = req.department_code;
+                    const cat = req.category_name;
+                    
+                    let uploaded = 0;
+                    let verified = 0;
+                    
+                    documents.forEach(doc => {
+                        const docDept = doc.department_code;
+                        const docCat = (doc.category_display_name || doc.category || '').toLowerCase();
+                        
+                        if (docDept === dept && cat.toLowerCase() === docCat) {
+                            uploaded++;
+                            if (doc.workflow_status === 'approved' || doc.workflow_status === 'locked') {
+                                verified++;
+                            }
+                        }
+                    });
+                    
+                    const percentage = req.expected_documents > 0 
+                        ? ((verified / req.expected_documents) * 100).toFixed(2) 
+                        : 0;
+                    
+                    completenessData.push({
+                        department_code: dept,
+                        category_name: cat,
+                        required: req.expected_documents,
+                        uploaded: uploaded,
+                        verified: verified,
+                        completeness_percentage: percentage
+                    });
+                });
+                
+                // === COMBINED EXPORT DATA ===
+                const exportData = {
+                    report_type: reportType,
+                    data: {}
+                };
+                
+                // Add overview data if needed
+                if (reportType === 'overview' || reportType === 'combined') {
+                    exportData.data.overview = {
+                        statistics: {
+                            total_documents: totalDocs,
+                            approved: approvedDocs,
+                            pending: pendingDocs,
+                            rejected: rejectedDocs
+                        },
+                        category_breakdown: categoryBreakdown,
+                        department_breakdown: departmentBreakdown
+                    };
+                }
+                
+                // Add completeness data if needed
+                if (reportType === 'completeness' || reportType === 'combined') {
+                    exportData.data.completeness = completenessData;
+                }
+                
+                hideLoadingModal();
+                
+                // Download based on format
+                if (format === 'pdf') {
+                    await downloadPDF(exportData, `DRMS-QA-Export-${new Date().toISOString().split('T')[0]}`, reportType);
+                } else if (format === 'excel') {
+                    await downloadExcel(exportData, `DRMS-QA-Export-${new Date().toISOString().split('T')[0]}`);
+                } else if (format === 'csv') {
+                    await downloadCSV(exportData, `DRMS-QA-Export-${new Date().toISOString().split('T')[0]}`);
+                }
+            } catch (error) {
+                hideLoadingModal();
+                console.error('Export error:', error);
+                alert('Failed to export data: ' + error.message);
+            }
+}
+    
+// Generate Gap Report button handler
+function initializeGapReportButton() {
+    const generateGapReport = document.getElementById('generateGapReport');
     if (generateGapReport) {
         generateGapReport.addEventListener('click', async function(e) {
             e.preventDefault();
@@ -583,19 +929,17 @@ function initializeReportsPage() {
             }
         });
     }
+}
+
+// Initialize all report page handlers
+function initializeAllReportHandlers() {
+    const reportPeriod = document.getElementById('reportPeriod');
     
     // Custom period handling
     if (reportPeriod) {
         reportPeriod.addEventListener('change', function() {
             if (this.value === 'custom') {
-                const startDate = prompt('Enter start date (YYYY-MM-DD):', '2026-01-01');
-                const endDate = prompt('Enter end date (YYYY-MM-DD):', '2026-12-31');
-                
-                if (startDate && endDate) {
-                    alert(`Custom range: ${startDate} to ${endDate}`);
-                } else {
-                    this.value = 'this-month';
-                }
+                showCustomDateModal();
             }
         });
     }
@@ -611,6 +955,9 @@ function initializeReportsPage() {
     
     // Load report history on page load
     loadReportHistory();
+    
+    // Initialize gap report button
+    initializeGapReportButton();
     
     // Active navigation state
     const currentPath = window.location.pathname.split('/').pop() || 'reports.html';
@@ -679,12 +1026,58 @@ function renderReportHistory(reports) {
                             <td class="py-3"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${report.format.toUpperCase()}</span></td>
                             <td class="py-3">${report.generated_by}</td>
                             <td class="py-3 text-gray-500">${new Date(report.generated_at).toLocaleDateString()}</td>
-                            <td class="py-3"><button class="text-teal-600 hover:text-teal-800 text-sm">Download</button></td>
+                            <td class="py-3">
+                                <button class="download-report-btn text-teal-600 hover:text-teal-800 text-sm" 
+                                        data-id="${report.id}" 
+                                        data-type="${report.report_type}" 
+                                        data-format="${report.format}">
+                                    Download
+                                </button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
+        
+        // Attach download handlers
+        document.querySelectorAll('.download-report-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const reportId = this.getAttribute('data-id');
+                const reportType = this.getAttribute('data-type');
+                const format = this.getAttribute('data-format');
+                
+                showLoadingModal('Downloading Report...', 'Preparing your report file');
+                
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`${API_BASE}/api/reports/generate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify({
+                            report_type: reportType,
+                            period: 'this-month',
+                            format: format
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        await downloadReport(result, format, reportType);
+                    } else {
+                        alert('Failed to download report');
+                    }
+                } catch (error) {
+                    console.error('Download error:', error);
+                    alert('Failed to download report: ' + error.message);
+                } finally {
+                    hideLoadingModal();
+                }
+            });
+        });
     }
 
     // Mobile cards
@@ -700,8 +1093,540 @@ function renderReportHistory(reports) {
                     <div>By: ${report.generated_by}</div>
                     <div>${new Date(report.generated_at).toLocaleDateString()}</div>
                 </div>
-                <button class="mt-3 text-teal-600 hover:text-teal-800 text-sm">Download</button>
+                <button class="download-report-btn-mobile mt-3 text-teal-600 hover:text-teal-800 text-sm" 
+                        data-id="${report.id}" 
+                        data-type="${report.report_type}" 
+                        data-format="${report.format}">
+                    Download
+                </button>
             </div>
         `).join('');
+        
+        // Attach mobile download handlers
+        document.querySelectorAll('.download-report-btn-mobile').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const reportId = this.getAttribute('data-id');
+                const reportType = this.getAttribute('data-type');
+                const format = this.getAttribute('data-format');
+                
+                showLoadingModal('Downloading Report...', 'Preparing your report file');
+                
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`${API_BASE}/api/reports/generate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify({
+                            report_type: reportType,
+                            period: 'this-month',
+                            format: format
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        await downloadReport(result, format, reportType);
+                    } else {
+                        alert('Failed to download report');
+                    }
+                } catch (error) {
+                    console.error('Download error:', error);
+                    alert('Failed to download report: ' + error.message);
+                } finally {
+                    hideLoadingModal();
+                }
+            });
+        });
     }
+}
+
+// Show loading modal
+function showLoadingModal(title, message) {
+    const modal = document.getElementById('loadingModal');
+    const titleEl = document.getElementById('loadingTitle');
+    const messageEl = document.getElementById('loadingMessage');
+    
+    if (modal) {
+        if (titleEl) titleEl.textContent = title;
+        if (messageEl) messageEl.textContent = message;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+// Hide loading modal
+function hideLoadingModal() {
+    const modal = document.getElementById('loadingModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Custom date range modal functions
+let customDateRange = { startDate: null, endDate: null };
+let selectedReportType = 'combined';
+let pendingAction = null; // 'generate' or 'export'
+
+// Report type modal functions
+function showReportTypeModal(action) {
+    console.log('=== SHOW REPORT TYPE MODAL ===');
+    console.log('Action:', action);
+    pendingAction = action;
+    const modal = document.getElementById('reportTypeModal');
+    console.log('Modal element found:', !!modal);
+    if (modal) {
+        console.log('Showing modal...');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        console.log('Modal classes:', modal.className);
+    } else {
+        console.error('Report type modal not found!');
+    }
+}
+
+function hideReportTypeModal() {
+    console.log('=== HIDE REPORT TYPE MODAL ===');
+    const modal = document.getElementById('reportTypeModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    pendingAction = null;
+}
+
+// Filter documents by period
+function filterDocumentsByPeriod(documents, period, customRange) {
+    if (period === 'custom' && customRange.startDate && customRange.endDate) {
+        const start = new Date(customRange.startDate);
+        const end = new Date(customRange.endDate);
+        end.setHours(23, 59, 59, 999); // Include entire end date
+        
+        return documents.filter(doc => {
+            const docDate = new Date(doc.created_at);
+            return docDate >= start && docDate <= end;
+        });
+    }
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch(period) {
+        case 'today':
+            return documents.filter(doc => {
+                const docDate = new Date(doc.created_at);
+                return docDate >= today;
+            });
+        
+        case 'this-week':
+            const weekAgo = new Date(now);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return documents.filter(doc => new Date(doc.created_at) >= weekAgo);
+        
+        case 'this-month':
+            return documents.filter(doc => {
+                const docDate = new Date(doc.created_at);
+                return docDate.getMonth() === now.getMonth() && docDate.getFullYear() === now.getFullYear();
+            });
+        
+        case 'last-month':
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            return documents.filter(doc => {
+                const docDate = new Date(doc.created_at);
+                return docDate >= lastMonth && docDate <= lastMonthEnd;
+            });
+        
+        case 'this-quarter':
+            const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+            return documents.filter(doc => new Date(doc.created_at) >= quarterStart);
+        
+        case 'last-quarter':
+            const lastQuarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3 - 3, 1);
+            const lastQuarterEnd = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 0);
+            return documents.filter(doc => {
+                const docDate = new Date(doc.created_at);
+                return docDate >= lastQuarterStart && docDate <= lastQuarterEnd;
+            });
+        
+        case 'this-year':
+            return documents.filter(doc => {
+                const docDate = new Date(doc.created_at);
+                return docDate.getFullYear() === now.getFullYear();
+            });
+        
+        default:
+            return documents; // Return all if no filter
+    }
+}
+
+function showCustomDateModal() {
+    const modal = document.getElementById('customDateModal');
+    const startInput = document.getElementById('customStartDate');
+    const endInput = document.getElementById('customEndDate');
+    
+    // Set default dates
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    if (startInput) startInput.value = firstDay.toISOString().split('T')[0];
+    if (endInput) endInput.value = today.toISOString().split('T')[0];
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function hideCustomDateModal() {
+    const modal = document.getElementById('customDateModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Initialize custom date modal handlers
+function initializeModalHandlers() {
+    console.log('=== INITIALIZING MODAL HANDLERS ===');
+    const cancelBtn = document.getElementById('cancelCustomDate');
+    const applyBtn = document.getElementById('applyCustomDate');
+    const reportPeriodSelect = document.getElementById('reportPeriod');
+    const cancelReportType = document.getElementById('cancelReportType');
+    const confirmReportType = document.getElementById('confirmReportType');
+    
+    console.log('Custom date cancel button:', !!cancelBtn);
+    console.log('Custom date apply button:', !!applyBtn);
+    console.log('Report type cancel button:', !!cancelReportType);
+    console.log('Report type confirm button:', !!confirmReportType);
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            console.log('Custom date cancel clicked');
+            hideCustomDateModal();
+            if (reportPeriodSelect) reportPeriodSelect.value = 'this-month';
+        });
+    }
+    
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+            console.log('Custom date apply clicked');
+            const startDate = document.getElementById('customStartDate').value;
+            const endDate = document.getElementById('customEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            customDateRange = { startDate, endDate };
+            hideCustomDateModal();
+            console.log('Custom date range set:', customDateRange);
+        });
+    }
+    
+    // Report type modal handlers
+    if (cancelReportType) {
+        cancelReportType.addEventListener('click', function() {
+            console.log('Report type cancel clicked');
+            hideReportTypeModal();
+        });
+    }
+    
+    if (confirmReportType) {
+        confirmReportType.addEventListener('click', function() {
+            console.log('=== REPORT TYPE CONFIRM CLICKED ===');
+            const selectedRadio = document.querySelector('input[name="reportType"]:checked');
+            console.log('Selected radio:', selectedRadio);
+            console.log('Selected value:', selectedRadio ? selectedRadio.value : 'none');
+            console.log('Pending action:', pendingAction);
+            
+            if (selectedRadio) {
+                selectedReportType = selectedRadio.value;
+                console.log('Report type selected:', selectedReportType);
+                
+                // Store action before hiding modal (which resets pendingAction)
+                const actionToExecute = pendingAction;
+                hideReportTypeModal();
+                
+                // Execute the stored action
+                if (actionToExecute === 'generate') {
+                    console.log('Executing generate report...');
+                    executeGenerateReport();
+                } else if (actionToExecute === 'export') {
+                    console.log('Executing export report...');
+                    executeExportReport();
+                } else {
+                    console.error('No pending action found!');
+                }
+            } else {
+                console.error('No radio button selected!');
+            }
+        });
+    }
+    
+    console.log('=== MODAL HANDLERS INITIALIZED ===');
+}
+
+// Download report based on format
+async function downloadReport(reportData, format, reportType) {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `DRMS-QA-${reportType}-${timestamp}`;
+    
+    if (format === 'csv') {
+        downloadCSV(reportData, filename);
+    } else if (format === 'excel') {
+        downloadExcel(reportData, filename);
+    } else if (format === 'pdf') {
+        downloadPDF(reportData, filename, reportType);
+    }
+}
+
+// Download CSV
+function downloadCSV(reportData, filename) {
+    let csv = '';
+    
+    // === OVERVIEW SECTION ===
+    if (reportData.data.overview) {
+        csv += '=== OVERVIEW - SUMMARY STATISTICS ===\n';
+        csv += 'Metric,Value\n';
+        csv += `Total Documents,${reportData.data.overview.statistics.total_documents}\n`;
+        csv += `Approved,${reportData.data.overview.statistics.approved}\n`;
+        csv += `Pending,${reportData.data.overview.statistics.pending}\n`;
+        csv += `Rejected,${reportData.data.overview.statistics.rejected}\n\n`;
+        
+        if (reportData.data.overview.category_breakdown) {
+            csv += '=== CATEGORY BREAKDOWN ===\n';
+            csv += 'Category,Total,Approved,Pending,Approval Rate\n';
+            reportData.data.overview.category_breakdown.forEach(cat => {
+                const rate = cat.total > 0 ? ((cat.approved / cat.total) * 100).toFixed(1) : 0;
+                csv += `${cat.category_name},${cat.total},${cat.approved},${cat.pending},${rate}%\n`;
+            });
+            csv += '\n';
+        }
+        
+        if (reportData.data.overview.department_breakdown) {
+            csv += '=== DEPARTMENT BREAKDOWN ===\n';
+            csv += 'Department,Total,Approved,Approval Rate\n';
+            reportData.data.overview.department_breakdown.forEach(dept => {
+                const rate = dept.total > 0 ? ((dept.approved / dept.total) * 100).toFixed(1) : 0;
+                csv += `${dept.department_code},${dept.total},${dept.approved},${rate}%\n`;
+            });
+            csv += '\n';
+        }
+    }
+    
+    // === COMPLETENESS SECTION ===
+    if (reportData.data.completeness) {
+        csv += '=== COMPLETENESS - DEPARTMENT BREAKDOWN ===\n';
+        csv += 'Department,Category,Required,Uploaded,Verified,Completeness %,Status\n';
+        reportData.data.completeness.forEach(item => {
+            const status = parseFloat(item.completeness_percentage) >= 100 ? 'Complete' : 'Partial';
+            csv += `${item.department_code},${item.category_name},${item.required},${item.uploaded},${item.verified},${item.completeness_percentage}%,${status}\n`;
+        });
+    }
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+
+// Download Excel (using CSV format for simplicity)
+function downloadExcel(reportData, filename) {
+    // For now, use CSV format with .xls extension
+    // In production, use a library like SheetJS/xlsx
+    downloadCSV(reportData, filename);
+}
+
+// Download PDF
+function downloadPDF(reportData, filename, reportType) {
+    // Create a simple HTML report and print to PDF
+    const printWindow = window.open('', '_blank');
+    
+    let htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${filename}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #0d9488; border-bottom: 3px solid #0d9488; padding-bottom: 10px; margin-bottom: 20px; }
+                h2 { color: #374151; margin-top: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                th { background-color: #0d9488; color: white; font-weight: bold; }
+                tr:nth-child(even) { background-color: #f9fafb; }
+                .stat-box { display: inline-block; padding: 15px 20px; margin: 10px; border: 2px solid #0d9488; border-radius: 8px; min-width: 120px; }
+                .stat-label { font-size: 11px; color: #6b7280; text-transform: uppercase; }
+                .stat-value { font-size: 28px; font-weight: bold; color: #0d9488; margin-top: 5px; }
+                .section { page-break-inside: avoid; }
+                .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #6b7280; font-size: 11px; }
+                @media print { .no-print { display: none; } }
+            </style>
+        </head>
+        <body>
+            <h1>DRMS-QA ${reportType === 'overview' ? 'Overview' : reportType === 'completeness' ? 'Completeness' : 'Comprehensive'} Report</h1>
+            <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Period:</strong> ${reportData.period || 'Current'}</p>
+    `;
+    
+    // === OVERVIEW SECTION ===
+    if (reportData.data.overview) {
+        const overview = reportData.data.overview;
+        
+        htmlContent += `
+            <div class="section">
+                <h2>Overview - Summary Statistics</h2>
+                <div style="margin: 20px 0;">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Documents</div>
+                        <div class="stat-value">${overview.statistics.total_documents}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Approved</div>
+                        <div class="stat-value" style="color: #10b981;">${overview.statistics.approved}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" style="color: #f59e0b;">${overview.statistics.pending}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Rejected</div>
+                        <div class="stat-value" style="color: #ef4444;">${overview.statistics.rejected}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (overview.category_breakdown && overview.category_breakdown.length > 0) {
+            htmlContent += `
+                <div class="section">
+                    <h2>Category Breakdown</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total</th>
+                                <th>Approved</th>
+                                <th>Pending</th>
+                                <th>Approval Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            overview.category_breakdown.forEach(cat => {
+                const rate = cat.total > 0 ? ((cat.approved / cat.total) * 100).toFixed(1) : 0;
+                htmlContent += `
+                    <tr>
+                        <td><strong>${cat.category_name}</strong></td>
+                        <td>${cat.total}</td>
+                        <td>${cat.approved}</td>
+                        <td>${cat.pending}</td>
+                        <td>${rate}%</td>
+                    </tr>
+                `;
+            });
+            htmlContent += '</tbody></table></div>';
+        }
+        
+        if (overview.department_breakdown && overview.department_breakdown.length > 0) {
+            htmlContent += `
+                <div class="section">
+                    <h2>Department Breakdown</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Total Documents</th>
+                                <th>Approved</th>
+                                <th>Approval Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            overview.department_breakdown.forEach(dept => {
+                const rate = dept.total > 0 ? ((dept.approved / dept.total) * 100).toFixed(1) : 0;
+                htmlContent += `
+                    <tr>
+                        <td><strong>${dept.department_code}</strong></td>
+                        <td>${dept.total}</td>
+                        <td>${dept.approved}</td>
+                        <td>${rate}%</td>
+                    </tr>
+                `;
+            });
+            htmlContent += '</tbody></table></div>';
+        }
+    }
+    
+    // === COMPLETENESS SECTION ===
+    if (reportData.data.completeness && reportData.data.completeness.length > 0) {
+        htmlContent += `
+            <div class="section" style="page-break-before: always;">
+                <h2>Completeness - Department Breakdown</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Category</th>
+                            <th>Required</th>
+                            <th>Uploaded</th>
+                            <th>Verified</th>
+                            <th>Completeness</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        reportData.data.completeness.forEach(item => {
+            const status = parseFloat(item.completeness_percentage) >= 100 ? 'Complete' : 'Partial';
+            const statusColor = status === 'Complete' ? '#10b981' : '#f59e0b';
+            htmlContent += `
+                <tr>
+                    <td><strong>${item.department_code}</strong></td>
+                    <td>${item.category_name}</td>
+                    <td>${item.required}</td>
+                    <td>${item.uploaded}</td>
+                    <td>${item.verified}</td>
+                    <td><strong>${item.completeness_percentage}%</strong></td>
+                    <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
+                </tr>
+            `;
+        });
+        htmlContent += '</tbody></table></div>';
+    }
+    
+    htmlContent += `
+            <div class="footer">
+                <p><strong>College of Teacher Education</strong> - Digital Records Management System (DRMS-QA)</p>
+                <p>© ${new Date().getFullYear()} CTE · Quality Assurance Records</p>
+                <p style="margin-top: 10px; font-size: 10px; color: #9ca3af;">This report contains ${reportData.data.overview ? reportData.data.overview.statistics.total_documents : 0} documents across ${reportData.data.completeness ? reportData.data.completeness.length : 0} department-category combinations.</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    };
 }

@@ -64,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     let pendingRejectDocId = null, currentLockDocId = null;
     let toastTimer;
 
+    // Initialize Bulk Action Modal
+    const bulkActionModalManager = new BulkActionModalManager();
+
     // ── Helpers ───────────────────────────────────────────────────────────────
     function showToast(msg, isError = false) {
         if (!actionToast) return;
@@ -207,6 +210,157 @@ document.addEventListener('DOMContentLoaded', async function() {
                 showErrorModal(err.message);
             }
         });
+    }
+
+    // ── Bulk Actions ──────────────────────────────────────────────────────────
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const bulkActionSelect = document.getElementById('bulkAction');
+    const applyBulkBtn = document.getElementById('applyBulk');
+    
+    function getSelectedDocumentIds() {
+        const checkboxes = document.querySelectorAll('.doc-checkbox:checked');
+        return Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+    }
+    
+    function updateSelectedCount() {
+        const selectedIds = getSelectedDocumentIds();
+        if (selectedCountSpan) selectedCountSpan.textContent = `${selectedIds.length} selected`;
+        
+        if (selectAllCheckbox) {
+            const allCheckboxes = document.querySelectorAll('.doc-checkbox');
+            if (allCheckboxes.length > 0) {
+                const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = !allChecked && selectedIds.length > 0;
+            }
+        }
+    }
+    
+    function clearAllSelections() {
+        const checkboxes = document.querySelectorAll('.doc-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        updateSelectedCount();
+    }
+    
+    async function performBulkAction() {
+        const action = bulkActionSelect?.value;
+        if (!action) {
+            showToast('Please select an action to perform', true);
+            return;
+        }
+        
+        const selectedIds = getSelectedDocumentIds();
+        if (selectedIds.length === 0) {
+            showToast('Please select at least one document', true);
+            return;
+        }
+        
+        // Role-based permission checks
+        const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+        const isDeanOrAdmin = normalizedRole === 'dean' || normalizedRole === 'admin';
+        const isAdmin = normalizedRole === 'admin';
+        
+        if (action === 'approve' && !isDeanOrAdmin) {
+            showToast('Only Dean and Admin can approve documents.', true);
+            return;
+        }
+        
+        // Get selected documents with full details
+        const selectedDocuments = allDocuments.filter(doc => selectedIds.includes(doc.id));
+        
+        // Open comprehensive modal
+        bulkActionModalManager.open({
+            action: action,
+            documents: selectedDocuments,
+            requiresComment: action === 'reject',
+            commentLabel: action === 'reject' ? 'Reason for Rejection' : 'Comments (Optional)',
+            commentPlaceholder: action === 'reject' 
+                ? 'Please provide a detailed reason for rejecting these documents...'
+                : 'Add any comments for this action...',
+            commentHint: action === 'reject' ? 'This reason will be sent to all document authors.' : '',
+            onConfirm: async (comment) => {
+                await executeBulkAction(action, selectedIds, comment);
+            }
+        });
+    }
+    
+    async function executeBulkAction(action, selectedIds, comment) {
+        // Show progress
+        showToast(`Processing ${selectedIds.length} documents...`, false);
+        
+        let successCount = 0;
+        let failCount = 0;
+        const errors = [];
+        
+        // Process each document
+        for (const docId of selectedIds) {
+            try {
+                let response;
+                let newStatus;
+                const body = comment ? { comments: comment, reason: comment } : {};
+                
+                if (action === 'validate') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    newStatus = 'validated';
+                } else if (action === 'approve') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/approve`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    newStatus = 'approved';
+                } else if (action === 'reject') {
+                    response = await fetch(`${API_BASE}/api/approvals/${docId}/reject`, {
+                        method: 'POST',
+                        headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason: comment })
+                    });
+                    newStatus = 'rejected';
+                } else {
+                    continue;
+                }
+                
+                const data = await response.json();
+                if (response.ok) {
+                    successCount++;
+                    updateDocumentStatus(docId, newStatus);
+                } else {
+                    failCount++;
+                    errors.push(`Doc ${docId}: ${data.msg || 'Failed'}`);
+                }
+            } catch (err) {
+                failCount++;
+                errors.push(`Doc ${docId}: ${err.message}`);
+            }
+        }
+        
+        // Show results
+        const actionNames = {
+            'validate': 'validated',
+            'approve': 'approved',
+            'reject': 'rejected'
+        };
+        
+        if (failCount === 0) {
+            showToast(`Successfully ${actionNames[action]} ${successCount} document(s).`);
+        } else {
+            showToast(`${actionNames[action]} ${successCount} documents, ${failCount} failed.`, true);
+            if (errors.length > 0) {
+                console.error('Bulk action errors:', errors);
+            }
+        }
+        
+        // Clear selections and refresh
+        clearAllSelections();
+        if (bulkActionSelect) bulkActionSelect.value = '';
+        loadStats();
+        loadDocuments();
     }
 
     // ── Data loading ──────────────────────────────────────────────────────────
@@ -410,6 +564,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             </div>`).join('');
 
         attachActionHandlers();
+        
+        // Attach checkbox listeners for bulk actions
+        document.querySelectorAll('.doc-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateSelectedCount);
+        });
     }
 
     function renderStandardsBadges(standards) {
@@ -634,6 +793,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (workflowStage)  workflowStage.addEventListener('change', applyFilters);
     if (approvalStatus) approvalStatus.addEventListener('change', applyFilters);
     if (refreshBtn)     refreshBtn.addEventListener('click', () => { loadStats(); loadDocuments(); });
+    
+    // Bulk action listeners
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.doc-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSelectedCount();
+        });
+    }
+    if (applyBulkBtn) applyBulkBtn.addEventListener('click', performBulkAction);
 
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {

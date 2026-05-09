@@ -124,21 +124,32 @@ document.addEventListener('DOMContentLoaded', async function() {
             })
             .then(profile => {
                 if (profile.department) {
-                    // Map department codes to full names
-                    const deptMap = {
-                        'beed': 'BEED (Bachelor of Elementary Education)',
-                        'bsed': 'BSED (Bachelor of Secondary Education)',
-                        'bsned': 'BSNED (Bachelor of Special Needs Education)',
-                        'bcaed': 'BCAED (Bachelor of Culture and Arts Education)',
-                        'bped': 'BPED (Bachelor of Physical Education)'
-                    };
-                    
-                    const deptLower = profile.department.toLowerCase();
-                    const displayName = deptMap[deptLower] || profile.department;
-                    
-                    departmentInput.value = displayName;
-                    departmentInput.setAttribute('data-department-code', deptLower);
-                    departmentInput.setAttribute('data-department-name', profile.department);
+                    // Fetch departments list to get full name
+                    return fetch(`${API_BASE}/api/documents/departments`, {
+                        headers: { 'x-auth-token': token },
+                        cache: 'no-cache'
+                    })
+                    .then(r => r.json())
+                    .then(departments => {
+                        // Find matching department by code or name
+                        const deptLower = profile.department.toLowerCase();
+                        const matchedDept = departments.find(d => 
+                            d.code.toLowerCase() === deptLower || 
+                            d.name.toLowerCase() === deptLower
+                        );
+                        
+                        if (matchedDept) {
+                            const displayName = `${matchedDept.code} (${matchedDept.name})`;
+                            departmentInput.value = displayName;
+                            departmentInput.setAttribute('data-department-code', matchedDept.code.toLowerCase());
+                            departmentInput.setAttribute('data-department-name', matchedDept.name);
+                        } else {
+                            // Fallback to profile department value
+                            departmentInput.value = profile.department;
+                            departmentInput.setAttribute('data-department-code', deptLower);
+                            departmentInput.setAttribute('data-department-name', profile.department);
+                        }
+                    });
                 } else {
                     departmentInput.value = 'No department assigned';
                     console.warn('User has no department assigned in profile');
