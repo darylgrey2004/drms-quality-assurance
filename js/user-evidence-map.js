@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.log('User department:', userDepartment);
             }
             
-            // Load all documents (approved only for stats)
-            const docsResponse = await fetch(`${API_BASE}/api/documents?scope=all`, {
+            // Load documents from user's department for statistics (approved/locked only)
+            const docsResponse = await fetch(`${API_BASE}/api/documents/department-stats`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -90,11 +90,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         ];
         
         summaryContainer.innerHTML = categories.map(cat => {
-            // Filter approved documents for this category and user's department
+            // Filter documents for user's department and approved/locked status
             const approvedDocs = allDocuments.filter(doc => {
                 const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
                 const matchesCategory = (doc.category_name || doc.category || '').toLowerCase() === cat.name;
-                const matchesDept = !userDepartment || doc.department_code === userDepartment;
+                const matchesDept = !userDepartment || doc.department_code === userDepartment || doc.department_code === userDepartment.toUpperCase();
                 return isApproved && matchesCategory && matchesDept;
             });
             
@@ -141,11 +141,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         allStandards.forEach(std => {
             const categoryName = (std.category_name || '').toLowerCase();
             if (categories[categoryName]) {
-                // Count ONLY approved/locked documents mapped to this standard
+                // Count ONLY approved/locked documents from user's department mapped to this standard
                 const mappedDocs = allDocuments.filter(doc => {
                     // Only count approved or locked documents
                     const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';
                     if (!isApproved) return false;
+                    
+                    // Filter by user's department
+                    const matchesDept = !userDepartment || doc.department_code === userDepartment || doc.department_code === userDepartment.toUpperCase();
+                    if (!matchesDept) return false;
                     
                     if (!Array.isArray(doc.standards)) return false;
                     
@@ -285,8 +289,8 @@ async function viewStandardDetails(standardId, standardName) {
             return;
         }
         
-        // Fetch documents for this standard
-        const docsResponse = await fetch(`${API_BASE}/api/documents?scope=all`, {
+        // Fetch documents for this standard from user's department
+        const docsResponse = await fetch(`${API_BASE}/api/documents/department-stats`, {
             headers: { 'x-auth-token': token }
         });
         
@@ -294,7 +298,7 @@ async function viewStandardDetails(standardId, standardName) {
         
         const allDocuments = await docsResponse.json();
         
-        // Filter documents that have this standard - ONLY approved/locked documents
+        // Filter documents that have this standard - ONLY approved/locked documents from user's department
         const mappedDocs = allDocuments.filter(doc => {
             // Only include approved or locked documents
             const isApproved = doc.workflow_status === 'approved' || doc.workflow_status === 'locked';

@@ -641,7 +641,7 @@ router.get('/', auth, async (req, res) => {
         params.push(req.user.id);
       }
     } else if (!viewAll || String(scope || '').toLowerCase() === 'mine') {
-      // Regular users see only their own documents unless they have viewAll permission
+      // Regular users (including Faculty) see only their own documents unless they have viewAll permission
       where.push('d.uploader_id = ?');
       params.push(req.user.id);
     }
@@ -749,47 +749,131 @@ router.get('/departments', auth, async (req, res) => {
 // @access  Private
 router.get('/user/department', auth, async (req, res) => {
   try {
-    // First try joining faculty_profiles to departments
+    // Get user's department from faculty_profiles
     const [profile] = await db.query(
-      `SELECT fp.department AS raw_department,
-              d.id AS department_id, d.name AS department_name, d.code AS department_code
-       FROM faculty_profiles fp
-       LEFT JOIN departments d ON (
-         d.name = fp.department OR
-         d.code = fp.department OR
-         d.name LIKE CONCAT('%', fp.department, '%') OR
-         fp.department LIKE CONCAT('%', d.code, '%')
-       )
-       WHERE fp.user_id = ?
-       ORDER BY d.id IS NOT NULL DESC
-       LIMIT 1`,
+      'SELECT department FROM faculty_profiles WHERE user_id = ? LIMIT 1',
       [req.user.id]
     );
 
-    if (profile.length > 0) {
-      // If join resolved a real department row, return it
-      if (profile[0].department_id) {
-        return res.json(profile[0]);
-      }
-      // Join didn't resolve — try a direct lookup using the raw stored value
-      const raw = (profile[0].raw_department || '').trim();
-      if (raw) {
-        // STANDARDIZED: Exact match only on name or code
-        const [dept] = await db.query(
-          'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
-          [raw, raw]
-        );
-        if (dept.length) return res.json(dept[0]);
-        
-        console.warn(`Department not found for user ${req.user.id}: "${raw}"`);
-      }
-      // Return raw value so the upload form at least shows something
-      return res.json({ department_id: null, department_name: profile[0].raw_department, department_code: null });
+    if (profile.length === 0 || !profile[0].department) {
+      return res.json({ department_id: null, department_name: null, department_code: null });
     }
 
-    res.json({ department_id: null, department_name: null, department_code: null });
+    const rawDepartment = profile[0].department.trim();
+    
+    // Try exact match on code first (most reliable)
+    const [deptByCode] = await db.query(
+      'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE UPPER(code) = UPPER(?) LIMIT 1',
+      [rawDepartment]
+    );
+    
+    if (deptByCode.length > 0) {
+      return res.json(deptByCode[0]);
+    }
+    
+    // Try exact match on name
+    const [deptByName] = await db.query(
+      'SELECT id AS department_id, name AS department_name, code AS department_code FROM departments WHERE LOWER(name) = LOWER(?) LIMIT 1',
+      [rawDepartment]
+    );
+    
+    if (deptByName.length > 0) {
+      return res.json(deptByName[0]);
+    }
+    
+    console.warn(`Department not found for user ${req.user.id}: "${rawDepartment}"`);
+    // Return raw value so frontend can still display something
+    res.json({ department_id: null, department_name: rawDepartment, department_code: rawDepartment });
   } catch (err) {
     console.error('User department error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/department-stats
+// @desc    Get approved/locked documents from user's department for statistics
+// @access  Private (Faculty, Dept Head)
+router.get('/department-stats', auth, async (req, res) => {
+  try {
+    const normalizedRole = normalizeRole(req.user.role);
+    const isFaculty = normalizedRole === 'faculty';
+    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    
+    if (!isFaculty && !isDeptHead) {
+      return res.status(403).json({ msg: 'This endpoint is for Faculty and Department Heads only' });
+    }
+    
+    // Get user's department
+    const [profile] = await db.query(
+      'SELECT department FROM faculty_profiles WHERE user_id = ?',
+      [req.user.id]
+    );
+    
+    if (profile.length === 0 || !profile[0].department) {
+      return res.json([]);
+    }
+    
+    const deptName = profile[0].department;
+    const [deptInfo] = await db.query(
+      'SELECT id FROM departments WHERE LOWER(name) = LOWER(?) OR UPPER(code) = UPPER(?) LIMIT 1',
+      [deptName, deptName]
+    );
+    
+    if (deptInfo.length === 0) {
+      console.warn(`Department not found for user ${req.user.id}: "${deptName}"`);
+      return res.json([]);
+    }
+    
+    const departmentId = deptInfo[0].id;
+    
+    // Fetch all approved/locked documents from this department
+    const [rows] = await db.query(
+      `SELECT 
+        d.*,
+        u.firstName AS uploader_firstName,
+        u.lastName AS uploader_lastName,
+        c.display_name AS category_display_name,
+        dept.name AS department_name,
+        (SELECT COUNT(*) FROM document_files df WHERE df.document_id = d.id) AS files_count,
+        (SELECT url_path FROM document_files df WHERE df.document_id = d.id ORDER BY df.id ASC LIMIT 1) AS file_url
+      FROM documents d
+      LEFT JOIN users u ON d.uploader_id = u.id
+      LEFT JOIN categories c ON d.category_id = c.id
+      LEFT JOIN departments dept ON d.department_id = dept.id
+      WHERE d.department_id = ? AND d.workflow_status IN ('approved', 'locked')
+      ORDER BY d.created_at DESC
+      LIMIT 500`,
+      [departmentId]
+    );
+    
+    // Attach standards
+    if (rows.length > 0) {
+      const docIds = rows.map(r => r.id);
+      const [stdRows] = await db.query(
+        `SELECT ds.document_id, s.id, s.name, s.code, s.category_id
+         FROM document_standards ds
+         JOIN standards s ON ds.standard_id = s.id
+         WHERE ds.document_id IN (?) AND s.is_active = 1
+         ORDER BY s.sort_order ASC`,
+        [docIds]
+      );
+      const stdMap = {};
+      stdRows.forEach(s => {
+        if (!stdMap[s.document_id]) stdMap[s.document_id] = [];
+        stdMap[s.document_id].push({
+          id: s.id,
+          standard_id: s.id,
+          name: s.name,
+          code: s.code,
+          category_id: s.category_id
+        });
+      });
+      rows.forEach(r => { r.standards = stdMap[r.id] || []; });
+    }
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Department stats error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -1616,6 +1700,32 @@ router.get('/reports/compliance', auth, async (req, res) => {
     res.json(compliance);
   } catch (err) {
     console.error('Compliance report error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/documents/reports/monthly-progress
+// @desc    Get monthly progress statistics for all months including current
+// @access  Private (Evaluator)
+router.get('/reports/monthly-progress', auth, async (req, res) => {
+  try {
+    // Get monthly statistics for all months including current month
+    const [monthlyStats] = await db.query(
+      `SELECT 
+        DATE_FORMAT(created_at, '%Y-%m') as month,
+        DATE_FORMAT(created_at, '%M %Y') as month_display,
+        COUNT(*) as total_uploaded,
+        SUM(CASE WHEN workflow_status IN ('approved', 'locked') THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN workflow_status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN workflow_status = 'rejected' THEN 1 ELSE 0 END) as rejected
+       FROM documents
+       GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+       ORDER BY month DESC`
+    );
+    
+    res.json({ monthly_reports: monthlyStats });
+  } catch (err) {
+    console.error('Monthly progress report error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

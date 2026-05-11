@@ -152,8 +152,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             'locked': '<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">Locked</span>',
             'validated': '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">Validated</span>',
             'pending': '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>',
-            'rejected': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>',
-            'draft': '<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">Draft</span>'
+            'rejected': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>'
         };
         return badges[status?.toLowerCase()] || '<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">Unknown</span>';
     }

@@ -415,4 +415,36 @@ router.patch('/standards/:id', adminAuth, async (req, res) => {
   }
 });
 
+// @route   GET api/evaluator/access-expiry/:userId
+// @desc    Get evaluator access expiry date
+// @access  Private (Evaluator can view their own)
+router.get('/evaluator/access-expiry/:userId', auth, async (req, res) => {
+  const { userId } = req.params;
+  
+  // Evaluators can only view their own expiry, admins can view any
+  const requestingUserRole = (req.user?.role || '').toString().toLowerCase().trim();
+  const isAdmin = requestingUserRole === 'admin';
+  const isRequestingOwnData = req.user.id === parseInt(userId);
+  
+  if (!isAdmin && !isRequestingOwnData) {
+    return res.status(403).json({ msg: 'Access denied' });
+  }
+  
+  try {
+    const [results] = await db.query(
+      'SELECT expiresAt, createdAt FROM evaluator_access_limits WHERE user_id = ? LIMIT 1',
+      [userId]
+    );
+    
+    if (results.length === 0) {
+      return res.status(404).json({ msg: 'No evaluator access record found' });
+    }
+    
+    res.json(results[0]);
+  } catch (err) {
+    console.error('Get evaluator expiry error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

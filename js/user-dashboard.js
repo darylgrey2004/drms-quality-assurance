@@ -255,9 +255,6 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
         documents.forEach(doc => {
             const row = document.createElement('tr');
             
-            const editButton = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
-                `<button class="btn-edit" data-id="${doc.id}">Edit</button>` : '';
-            
             row.innerHTML = `
                 <td class="py-3">
                     <div class="font-medium text-gray-800">${doc.title}</div>
@@ -272,7 +269,6 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
                 <td class="py-3">
                     <div class="flex gap-2">
                         <button class="btn-view" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
-                        ${editButton}
                     </div>
                 </td>
             `;
@@ -287,9 +283,6 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
             const card = document.createElement('div');
             card.className = 'border rounded-lg p-4 bg-white';
             
-            const editButton = (doc.workflow_status === 'draft' || doc.workflow_status === 'rejected') ? 
-                `<button class="btn-edit-sm" data-id="${doc.id}">Edit</button>` : '';
-            
             card.innerHTML = `
                 <div class="font-medium text-gray-800">${doc.title}</div>
                 <div class="text-xs text-gray-400 mb-2">By ${doc.author_name || 'You'} · ${formatDate(doc.created_at)}</div>
@@ -300,7 +293,6 @@ function renderUserDocuments(documents, tableBody, mobileContainer) {
                 <div class="text-sm text-gray-600 mb-3">${doc.department_code || doc.area} · ${doc.version || 'v1.0'}</div>
                 <div class="flex gap-2">
                     <button class="btn-view-sm" data-id="${doc.id}" data-title="${doc.title.replace(/"/g, '&quot;')}">View</button>
-                    ${editButton}
                 </div>
             `;
             mobileContainer.appendChild(card);
@@ -422,15 +414,15 @@ function getCategoryBadgeClass(category) {
 
 function getStatusBadgeClass(status) {
     const statusMap = {
-        'approved': 'badge-approved',
-        'locked': 'badge-approved',
-        'validated': 'badge-approved',
-        'pending_review': 'badge-pending',
-        'pending': 'badge-pending',
-        'rejected': 'badge-rejected',
-        'draft': 'badge-draft'
+        'approved': 'bg-green-100 text-green-700',
+        'locked': 'bg-purple-100 text-purple-700',
+        'validated': 'bg-blue-100 text-blue-700',
+        'pending_review': 'bg-amber-100 text-amber-700',
+        'pending': 'bg-amber-100 text-amber-700',
+        'rejected': 'bg-red-100 text-red-700',
+        'draft': 'bg-gray-100 text-gray-700'
     };
-    return statusMap[status?.toLowerCase()] || 'badge-pending';
+    return statusMap[status?.toLowerCase()] || 'bg-gray-100 text-gray-700';
 }
 
 function formatStatus(status) {
@@ -598,13 +590,6 @@ function attachButtonListeners() {
             const docId = this.dataset.id;
             const title = this.dataset.title;
             viewDocument(docId, title);
-        });
-    });
-    
-    document.querySelectorAll('.btn-edit, .btn-edit-sm').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const docId = this.dataset.id;
-            editDocument(docId);
         });
     });
 }

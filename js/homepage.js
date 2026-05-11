@@ -543,15 +543,15 @@ function renderDocuments(documents, tableBody, mobileContainer) {
 
 function getStatusBadgeClass(status) {
     const statusMap = {
-        'approved': 'badge-approved',
-        'locked': 'badge-approved',
-        'validated': 'badge-approved',
-        'pending_review': 'badge-pending',
-        'pending': 'badge-pending',
-        'rejected': 'badge-rejected',
-        'draft': 'badge-draft'
+        'approved': 'bg-green-100 text-green-700',
+        'locked': 'bg-purple-100 text-purple-700',
+        'validated': 'bg-blue-100 text-blue-700',
+        'pending_review': 'bg-amber-100 text-amber-700',
+        'pending': 'bg-amber-100 text-amber-700',
+        'rejected': 'bg-red-100 text-red-700',
+        'draft': 'bg-gray-100 text-gray-700'
     };
-    return statusMap[status?.toLowerCase()] || 'badge-pending';
+    return statusMap[status?.toLowerCase()] || 'bg-gray-100 text-gray-700';
 }
 
 function getCategoryBadgeClass(category) {

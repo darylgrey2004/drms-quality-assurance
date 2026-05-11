@@ -29,16 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(sendHeartbeat, 2 * 60 * 1000);
 
     // ── Document Modal Functions ──
-    const modal = document.getElementById('documentModal');
-    const closeModal = document.getElementById('closeModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modal = document.getElementById('docPreviewModal');
+    const closeModal = document.getElementById('docPreviewCloseBtn');
 
     function closeDocumentModal() {
-        if (modal) modal.classList.add('hidden');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            const frame = document.getElementById('docPreviewFrame');
+            if (frame) frame.src = 'about:blank';
+        }
     }
 
     if (closeModal) closeModal.addEventListener('click', closeDocumentModal);
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeDocumentModal);
     
     if (modal) {
         modal.addEventListener('click', function(e) {
@@ -56,71 +59,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update modal header
-        const docViewerTitle = document.getElementById('docViewerTitle');
-        const docViewerMeta = document.getElementById('docViewerMeta');
-        if (docViewerTitle) docViewerTitle.textContent = doc.title || 'Untitled Document';
-        if (docViewerMeta) {
-            const deptDisplay = doc.department_code || doc.department_name || doc.area || 'N/A';
-            docViewerMeta.textContent = 
-                `${doc.category || 'N/A'} · ${deptDisplay} · ${doc.version || 'v1.0'} · ${doc.author_name || 'Unknown'}`;
-        }
-
-        // Load document content
-        const content = document.getElementById('docViewerContent');
+        const docViewerTitle = document.getElementById('docPreviewTitle');
+        const frame = document.getElementById('docPreviewFrame');
         
-        if (doc.file_url) {
-            const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://127.0.0.1:3000${doc.file_url}`;
-            const isPDF = fileUrl.toLowerCase().endsWith('.pdf');
-            
-            if (isPDF && content) {
-                content.innerHTML = `
-                    <iframe src="${fileUrl}" class="w-full h-96 border-0 rounded" title="${escapeHtml(doc.title)}"></iframe>
-                    <p class="text-sm text-gray-600 mt-4">📄 PDF Document - ${escapeHtml(doc.title)}</p>
-                `;
-            } else if (content) {
-                content.innerHTML = `
-                    <div class="text-center py-12">
-                        <div class="text-4xl mb-4">📄</div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${escapeHtml(doc.title)}</h3>
-                        <p class="text-gray-600 mb-4">File Type: ${doc.file_url.split('.').pop().toUpperCase()}</p>
-                        <p class="text-gray-500 text-sm mb-6">This document can be viewed or downloaded using the button below.</p>
-                        <a href="${fileUrl}" download class="inline-block px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
-                            📥 Download Document
-                        </a>
-                    </div>
-                `;
-            }
-        } else if (content) {
-            content.innerHTML = `
-                <div class="text-center py-12">
-                    <div class="text-4xl mb-4">⚠️</div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">No File Available</h3>
-                    <p class="text-gray-600">This document does not have an associated file.</p>
-                </div>
-            `;
-        }
-
-        // Setup download button
-        const downloadBtn = document.getElementById('downloadDoc');
-        if (downloadBtn) {
+        if (docViewerTitle) docViewerTitle.textContent = doc.title || 'Document Preview';
+        
+        if (frame) {
             if (doc.file_url) {
-                const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://127.0.0.1:3000${doc.file_url}`;
-                downloadBtn.onclick = function() {
-                    const link = document.createElement('a');
-                    link.href = fileUrl;
-                    link.download = doc.title || 'document';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                };
-                downloadBtn.style.display = 'block';
+                const fileUrl = doc.file_url.startsWith('http') ? doc.file_url : `http://localhost:3000${doc.file_url}`;
+                frame.src = fileUrl;
             } else {
-                downloadBtn.style.display = 'none';
+                frame.src = 'about:blank';
             }
         }
 
         // Show modal
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
 
     // Helper function to get category badge class
@@ -168,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Fetching locked documents for evaluator...');
             // Evaluators can only see LOCKED documents (final approved documents)
-            const response = await fetch('http://127.0.0.1:3000/api/documents?status=locked', {
+            const response = await fetch('http://localhost:3000/api/documents?status=locked', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -217,9 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 let standardsHtml = '';
                 if (standards.length > 0) {
                     const displayStandards = standards.slice(0, 2);
-                    standardsHtml = displayStandards.map(s => 
-                        `<span class="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs mr-1">${escapeHtml(s)}</span>`
-                    ).join('');
+                    standardsHtml = displayStandards.map(s => {
+                        const standardName = typeof s === 'string' ? s : (s.name || s.code || String(s));
+                        return `<span class="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs mr-1">${escapeHtml(standardName)}</span>`;
+                    }).join('');
                     if (standards.length > 2) {
                         standardsHtml += `<span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">+${standards.length - 2}</span>`;
                     }

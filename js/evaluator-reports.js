@@ -157,14 +157,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (heading.textContent.includes('Extension Department Status')) {
                     const container = heading.closest('.stat-card').querySelector('.space-y-3');
                     if (container) {
-                        const totalCurrent = data.departments.extension.reduce((sum, d) => sum + d.current, 0);
-                        const totalExpected = data.departments.extension.reduce((sum, d) => sum + d.expected, 0);
-                        container.innerHTML = `
-                            <div class="dept-status-item flex justify-between items-center py-2">
-                                <span class="text-sm">All Departments</span>
-                                <span class="text-sm font-medium text-amber-600">Partial (${totalCurrent}/${totalExpected})</span>
-                            </div>
-                        `;
+                        container.innerHTML = data.departments.extension.map((dept, index) => {
+                            const statusColor = dept.status === 'complete' ? 'text-green-600' : 
+                                              dept.status === 'partial' ? 'text-amber-600' : 'text-red-600';
+                            const statusText = dept.status === 'complete' ? 'Complete' : 
+                                             dept.status === 'partial' ? 'Partial' : 'Missing';
+                            const borderClass = index < data.departments.extension.length - 1 ? 'border-b border-gray-100' : '';
+                            return `
+                                <div class="dept-status-item flex justify-between items-center py-2 ${borderClass}">
+                                    <span class="text-sm">${dept.department_code}</span>
+                                    <span class="text-sm font-medium ${statusColor}">${statusText} (${dept.current}/${dept.expected})</span>
+                                </div>
+                            `;
+                        }).join('');
                     }
                 }
             });
@@ -177,14 +182,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (heading.textContent.includes('Employment Department Status')) {
                     const container = heading.closest('.stat-card').querySelector('.space-y-3');
                     if (container) {
-                        const totalCurrent = data.departments.employment.reduce((sum, d) => sum + d.current, 0);
-                        const totalExpected = data.departments.employment.reduce((sum, d) => sum + d.expected, 0);
-                        container.innerHTML = `
-                            <div class="dept-status-item flex justify-between items-center py-2">
-                                <span class="text-sm">All Departments</span>
-                                <span class="text-sm font-medium text-amber-600">Partial (${totalCurrent}/${totalExpected})</span>
-                            </div>
-                        `;
+                        container.innerHTML = data.departments.employment.map((dept, index) => {
+                            const statusColor = dept.status === 'complete' ? 'text-green-600' : 
+                                              dept.status === 'partial' ? 'text-amber-600' : 'text-red-600';
+                            const statusText = dept.status === 'complete' ? 'Complete' : 
+                                             dept.status === 'partial' ? 'Partial' : 'Missing';
+                            const borderClass = index < data.departments.employment.length - 1 ? 'border-b border-gray-100' : '';
+                            return `
+                                <div class="dept-status-item flex justify-between items-center py-2 ${borderClass}">
+                                    <span class="text-sm">${dept.department_code}</span>
+                                    <span class="text-sm font-medium ${statusColor}">${statusText} (${dept.current}/${dept.expected})</span>
+                                </div>
+                            `;
+                        }).join('');
                     }
                 }
             });
@@ -260,8 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load progress reports (monthly/quarterly data)
     async function loadProgressReports() {
         try {
-            // Get monthly trends from analytics endpoint
-            const response = await fetch('http://127.0.0.1:3000/api/documents/analytics/overview', {
+            const response = await fetch('http://127.0.0.1:3000/api/documents/reports/monthly-progress', {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -273,11 +282,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(`API error: ${response.status}`);
             }
 
-            const analyticsData = await response.json();
-            console.log('Analytics data:', analyticsData);
+            const data = await response.json();
+            console.log('Monthly progress data:', data);
 
-            // Update progress reports tab
-            updateProgressReports(analyticsData);
+            updateProgressReports(data);
 
         } catch (error) {
             console.error('Error loading progress reports:', error);
@@ -285,46 +293,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateProgressReports(data) {
-        const progressContainer = document.querySelector('#progressTab .space-y-4');
-        if (!progressContainer || !data.monthly_trends) return;
+        const progressContainer = document.querySelector('#progressTab .grid');
+        if (!progressContainer || !data.monthly_reports) return;
 
         progressContainer.innerHTML = '';
 
-        // Get last 3 months
-        const recentMonths = data.monthly_trends.slice(-3).reverse();
+        if (data.monthly_reports.length === 0) {
+            progressContainer.innerHTML = '<div class="col-span-full"><p class="text-center text-gray-500 py-8">No monthly reports available yet</p></div>';
+            return;
+        }
 
-        recentMonths.forEach((monthData, index) => {
-            const date = new Date(monthData.month + '-01');
-            const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            const badgeColor = index === 0 ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-gray-800';
+        // Get current month in YYYY-MM format
+        const currentDate = new Date();
+        const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+
+        data.monthly_reports.forEach((monthData, index) => {
+            const monthDisplay = monthData.month_display;
+            const totalUploaded = monthData.total_uploaded || 0;
+            const approved = monthData.approved || 0;
+            const pending = monthData.pending || 0;
+            const rejected = monthData.rejected || 0;
+            const isCurrentMonth = monthData.month === currentMonth;
             
-            const totalDocs = monthData.documents_uploaded || 0;
-            const approvedDocs = monthData.approved || 0;
-            const pendingDocs = monthData.pending || 0;
+            // Calculate approval rate
+            const approvalRate = totalUploaded > 0 ? Math.round((approved / totalUploaded) * 100) : 0;
             
-            const reportItem = document.createElement('div');
-            reportItem.className = 'report-item border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer';
-            reportItem.innerHTML = `
-                <div class="flex justify-between items-center">
+            // Badge color - current month is teal with pulse animation, others are gray
+            const badgeColor = isCurrentMonth ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-gray-800';
+            const cardBorder = isCurrentMonth ? 'border-teal-300 shadow-md' : 'border-gray-200';
+            
+            // Create stat card for each month
+            const monthCard = document.createElement('div');
+            monthCard.className = `bg-white rounded-xl p-5 border-2 ${cardBorder} hover:shadow-md transition`;
+            monthCard.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
                     <div>
-                        <span class="${badgeColor} text-xs px-2 py-1 rounded-full">${monthName}</span>
-                        <h4 class="font-medium mt-2">Monthly Progress Report - ${monthName}</h4>
+                        <div class="flex items-center gap-2">
+                            <span class="${badgeColor} text-xs px-2 py-1 rounded-full font-medium">${monthDisplay}</span>
+                            ${isCurrentMonth ? '<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span></span>' : ''}
+                        </div>
+                        <h4 class="font-semibold text-gray-800 mt-2">Monthly Progress Report</h4>
+                        ${isCurrentMonth ? '<p class="text-xs text-teal-600 font-medium mt-1">In Progress</p>' : ''}
                     </div>
-                    <span class="text-sm text-teal-600">View →</span>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-teal-700">${approvalRate}%</div>
+                        <div class="text-xs text-gray-500">Approval Rate</div>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">${totalDocs} documents · ${approvedDocs} approved · ${pendingDocs} pending</p>
+                
+                <div class="grid grid-cols-3 gap-3 mt-4">
+                    <div class="text-center p-3 bg-blue-50 rounded-lg">
+                        <div class="text-xl font-bold text-blue-700">${totalUploaded}</div>
+                        <div class="text-xs text-gray-600 mt-1">Total Uploaded</div>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                        <div class="text-xl font-bold text-green-700">${approved}</div>
+                        <div class="text-xs text-gray-600 mt-1">Approved</div>
+                    </div>
+                    <div class="text-center p-3 bg-amber-50 rounded-lg">
+                        <div class="text-xl font-bold text-amber-700">${pending}</div>
+                        <div class="text-xs text-gray-600 mt-1">Pending</div>
+                    </div>
+                </div>
+                
+                ${rejected > 0 ? `
+                <div class="mt-3 p-2 bg-red-50 rounded-lg text-center">
+                    <span class="text-sm font-medium text-red-700">${rejected} Rejected</span>
+                </div>
+                ` : ''}
             `;
             
-            reportItem.addEventListener('click', () => {
-                alert(`${monthName} Progress Report\n\nTotal Documents: ${totalDocs}\nApproved: ${approvedDocs}\nPending: ${pendingDocs}\nRejected: ${monthData.rejected || 0}`);
-            });
-            
-            progressContainer.appendChild(reportItem);
+            progressContainer.appendChild(monthCard);
         });
-
-        if (recentMonths.length === 0) {
-            progressContainer.innerHTML = '<p class="text-center text-gray-500 py-8">No progress data available</p>';
-        }
     }
 
     // Load historical data

@@ -586,4 +586,137 @@ router.post('/change-password', auth, async (req, res) => {
   }
 });
 
+// @route   POST api/auth/change-email/send-otp
+// @desc    Send OTP to new email for email change
+// @access  Private
+router.post('/change-email/send-otp', auth, async (req, res) => {
+  const { newEmail } = req.body;
+
+  if (!newEmail) {
+    return res.status(400).json({ msg: 'Please provide a new email address' });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(newEmail)) {
+    return res.status(400).json({ msg: 'Please provide a valid email address' });
+  }
+
+  try {
+    // Get current user
+    const [users] = await db.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    const user = users[0];
+
+    // Check if new email is same as current
+    if (newEmail.toLowerCase() === user.email.toLowerCase()) {
+      return res.status(400).json({ msg: 'New email must be different from current email' });
+    }
+
+    // Check if new email already exists
+    const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ? AND id != ?', [newEmail, req.user.id]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ msg: 'This email is already registered to another account' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Store OTP in database
+    await db.query('DELETE FROM otps WHERE email = ?', [newEmail]);
+    await db.query('INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)', [newEmail, otp, expiresAt]);
+
+    // Send email
+    try {
+      const mailOptions = {
+        from: `"DRMS-QA" <${process.env.EMAIL_USER}>`,
+        to: newEmail,
+        subject: 'Email Change Verification Code',
+        text: `Your email change verification code is ${otp}. It will expire in 10 minutes.`,
+        html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Email Change Request</h2>
+          <p>You requested to change your email address. Your verification code is:</p>
+          <h1 style="color: #0d9488; letter-spacing: 5px;">${otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you didn't request this, please ignore this email and secure your account.</p>
+        </div>`,
+      };
+      await transporter.sendMail(mailOptions);
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr);
+      return res.status(500).json({ msg: 'Failed to send verification email' });
+    }
+
+    res.json({ msg: 'Verification code sent to your new email address' });
+
+  } catch (err) {
+    console.error('Send OTP error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   POST api/auth/change-email/verify-otp
+// @desc    Verify OTP and change email
+// @access  Private
+router.post('/change-email/verify-otp', auth, async (req, res) => {
+  const { newEmail, otp } = req.body;
+
+  if (!newEmail || !otp) {
+    return res.status(400).json({ msg: 'Please provide email and OTP' });
+  }
+
+  try {
+    // Find OTP in database
+    const [otps] = await db.query(
+      'SELECT * FROM otps WHERE email = ? AND otp = ?',
+      [newEmail, otp]
+    );
+
+    if (otps.length === 0) {
+      return res.status(400).json({ msg: 'Invalid verification code' });
+    }
+
+    const otpRecord = otps[0];
+
+    // Check if OTP expired
+    if (new Date() > new Date(otpRecord.expiresAt)) {
+      return res.status(400).json({ msg: 'Verification code has expired. Please request a new one.' });
+    }
+
+    // Check if new email already exists (double check)
+    const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ? AND id != ?', [newEmail, req.user.id]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ msg: 'This email is already registered to another account' });
+    }
+
+    // Update user email
+    await db.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, req.user.id]);
+
+    // Delete OTP
+    await db.query('DELETE FROM otps WHERE id = ?', [otpRecord.id]);
+
+    // Log the email change in audit logs
+    try {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
+      await db.query(
+        `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent)
+         VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?)`,
+        [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown']
+      );
+    } catch (auditErr) {
+      console.log('Audit log skipped:', auditErr.message);
+    }
+
+    res.json({ msg: 'Email changed successfully' });
+
+  } catch (err) {
+    console.error('Verify OTP error:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -243,9 +243,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
         
         if (departmentWrap && createDepartment) {
-            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head';
+            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head' || selectedRole === 'dean';
             departmentWrap.classList.toggle('hidden', !showDepartment);
             createDepartment.required = showDepartment;
+            if (!showDepartment) createDepartment.value = '';
         }
     }
 
@@ -302,10 +303,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const normalizedRole = role.toLowerCase().trim();
             const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
-            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head' || normalizedRole === 'dean';
             
             if (requiresDepartment && !department) {
-                showAlert('Please select a department for Faculty or Dept. Head role.', 'Department Required', 'warning');
+                showAlert('Please select a department for this role.', 'Department Required', 'warning');
                 return;
             }
             
@@ -383,6 +384,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Show loading state
+        if (usersTableBody) {
+            usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-500"><div class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading users...</div></td></tr>`;
+        }
+
         try {
             const response = await fetch('http://localhost:3000/api/admin/users', {
                 method: 'GET',
@@ -400,12 +406,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 if (response.status === 403) {
                     if (viewerRole === 'dean') {
-                        alert('Dean access to Users requires updated server permissions.');
-                        window.location.href = 'homepage.html';
+                        showAlert('Dean access to Users requires updated server permissions.', 'Access Denied', 'error');
+                        setTimeout(() => window.location.href = 'homepage.html', 2000);
                         return;
                     }
-                    alert('You are not authorized to view this page.');
-                    window.location.href = 'homepage.html';
+                    showAlert('You are not authorized to view this page.', 'Access Denied', 'error');
+                    setTimeout(() => window.location.href = 'homepage.html', 2000);
                     return;
                 }
 
@@ -413,6 +419,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const users = await response.json();
+            
+            if (!Array.isArray(users)) {
+                throw new Error('Invalid response format from server');
+            }
+            
             allUsers = users;
             renderUsers(users);
             updateStats(users);
@@ -420,15 +431,24 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error fetching users:', error);
             if (usersTableBody) {
-                usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading users. Please refresh the page or login again.</td></tr>`;
+                usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8"><div class="text-red-500"><svg class="h-8 w-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><p class="font-medium">Error loading users</p><p class="text-sm text-gray-500 mt-1">${error.message}</p><button onclick="location.reload()" class="mt-3 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700">Retry</button></div></td></tr>`;
             }
         }
     }
 
     function updateStats(users) {
         const totalUsers = users.length;
-        const approvedUsers = users.filter(u => u.status === 'approved').length;
+        const approvedUsers = users.filter(u => {
+            // Check if evaluator is expired
+            const isEvaluator = u.role && u.role.toLowerCase() === 'evaluator';
+            const isExpired = isEvaluator && u.evaluatorExpiresAt && new Date(u.evaluatorExpiresAt) < new Date();
+            return u.status === 'approved' && !isExpired;
+        }).length;
         const pendingUsers = users.filter(u => u.status === 'pending').length;
+        const expiredEvaluators = users.filter(u => {
+            const isEvaluator = u.role && u.role.toLowerCase() === 'evaluator';
+            return isEvaluator && u.evaluatorExpiresAt && new Date(u.evaluatorExpiresAt) < new Date();
+        }).length;
         const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
 
         const totalEl = document.querySelector('.stat-card:nth-child(1) .text-3xl');
@@ -444,46 +464,65 @@ document.addEventListener('DOMContentLoaded', function() {
         const activeRate = totalUsers > 0 ? Math.round((approvedUsers / totalUsers) * 100) : 0;
         const approvedRateEl = document.querySelector('.stat-card:nth-child(2) .text-xs');
         const totalLabelEl = document.querySelector('.stat-card:nth-child(1) .text-xs');
+        const pendingLabelEl = document.querySelector('.stat-card:nth-child(3) .text-xs');
         
         if (approvedRateEl) approvedRateEl.textContent = `${activeRate}% approved rate`;
-        if (totalLabelEl) totalLabelEl.textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+        if (totalLabelEl) {
+            if (expiredEvaluators > 0) {
+                totalLabelEl.textContent = `${totalUsers} total (${expiredEvaluators} expired)`;
+                totalLabelEl.className = 'text-xs text-red-600 mt-2';
+            } else {
+                totalLabelEl.textContent = totalUsers > 0 ? `${totalUsers} total` : 'No users yet';
+                totalLabelEl.className = 'text-xs text-green-600 mt-2';
+            }
+        }
+        if (pendingLabelEl) pendingLabelEl.textContent = pendingUsers > 0 ? 'Awaiting approval' : 'No pending users';
     }
 
     function renderUsers(users) {
         if (!usersTableBody) return;
         usersTableBody.innerHTML = '';
 
-        if (users.length === 0) {
+        if (!Array.isArray(users) || users.length === 0) {
             usersTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-500">No users found matching your criteria.</td></tr>`;
             return;
         }
 
         function isCurrentlyActive(lastActive) {
             if (!lastActive) return false;
-            const lastActiveDate = new Date(lastActive);
-            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-            return lastActiveDate > fiveMinutesAgo;
+            try {
+                const lastActiveDate = new Date(lastActive);
+                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+                return lastActiveDate > fiveMinutesAgo;
+            } catch (e) {
+                return false;
+            }
         }
 
         function formatLastActive(lastActive, role) {
             if (!lastActive) return 'Never';
-            if (role && role.toLowerCase() === 'evaluator') return 'Never';
-            if (isCurrentlyActive(lastActive)) {
-                return '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">🟢 active now</span>';
+            if (role && role.toLowerCase() === 'evaluator') return 'View-Only Access';
+            
+            try {
+                if (isCurrentlyActive(lastActive)) {
+                    return '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1"><span class="heartbeat-dot"></span>active now</span>';
+                }
+                
+                const lastActiveDate = new Date(lastActive);
+                const now = new Date();
+                const diffMs = now - lastActiveDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) return 'just now';
+                if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                return lastActiveDate.toLocaleDateString();
+            } catch (e) {
+                return 'Unknown';
             }
-            
-            const lastActiveDate = new Date(lastActive);
-            const now = new Date();
-            const diffMs = now - lastActiveDate;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-            
-            if (diffMins < 1) return 'just now';
-            if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-            return lastActiveDate.toLocaleDateString();
         }
 
         function formatRoleName(role) {
@@ -500,50 +539,77 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         users.forEach(user => {
-            const row = document.createElement('tr');
-            row.className = 'user-row hover:bg-gray-50 transition-colors';
+            try {
+                const row = document.createElement('tr');
+                row.className = 'user-row hover:bg-gray-50 transition-colors';
 
-            const statusBadge = user.status === 'approved' 
-                ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Approved</span>`
-                : user.status === 'rejected'
-                ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
-                : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
+                // Check if evaluator is expired
+                const isEvaluator = user.role && user.role.toLowerCase() === 'evaluator';
+                const isExpired = isEvaluator && user.evaluatorExpiresAt && new Date(user.evaluatorExpiresAt) < new Date();
 
-            const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
-            const userId = user.id || user._id;
-            const displayRole = formatRoleName(user.role);
-            
-            const actionButtons = userId
-                ? `
-                    <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View Profile</a>
-                    ${canDeleteUsers ? `<button class="action-pill action-pill-delete delete-user" data-id="${userId}" title="Delete User">Delete</button>` : ''}
-                `
-                : '<span class="text-gray-400">N/A</span>';
+                const statusBadge = isExpired
+                    ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">⏰ Expired</span>`
+                    : user.status === 'approved' 
+                    ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Approved</span>`
+                    : user.status === 'rejected'
+                    ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Rejected</span>`
+                    : `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">Pending</span>`;
 
-            row.innerHTML = `
-                <td class="py-3 px-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-sm">
-                            ${(user.firstName?.charAt(0) || '')}${(user.lastName?.charAt(0) || '')}
+                const lastActiveDisplay = formatLastActive(user.lastActive, user.role);
+                const userId = user.id || user._id;
+                const displayRole = formatRoleName(user.role);
+                const firstName = (user.firstName || '').trim();
+                const lastName = (user.lastName || '').trim();
+                const email = (user.email || '').trim();
+                
+                // Show expiry date for evaluators in department column
+                let department = (user.department || 'N/A').trim();
+                if (isEvaluator && user.evaluatorExpiresAt) {
+                    const expiryDate = new Date(user.evaluatorExpiresAt);
+                    const formattedExpiry = expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    if (isExpired) {
+                        department = `<span class="text-red-600 font-medium">Expired: ${formattedExpiry}</span>`;
+                    } else {
+                        department = `<span class="text-amber-600">Expires: ${formattedExpiry}</span>`;
+                    }
+                }
+                
+                const initials = `${firstName.charAt(0) || ''}${lastName.charAt(0) || ''}`;
+                
+                const actionButtons = userId
+                    ? `
+                        <a href="view-faculty-profile.html?userId=${encodeURIComponent(userId)}" class="action-pill action-pill-view" title="View Profile">View Profile</a>
+                        ${canDeleteUsers ? `<button class="action-pill action-pill-delete delete-user" data-id="${userId}" title="Delete User">Delete</button>` : ''}
+                    `
+                    : '<span class="text-gray-400">N/A</span>';
+
+                row.innerHTML = `
+                    <td class="py-3 px-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-sm">
+                                ${initials}
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-800">${firstName} ${lastName}</div>
+                                <div class="text-xs text-gray-400">${displayRole}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-medium text-gray-800">${user.firstName || ''} ${user.lastName || ''}</div>
-                            <div class="text-xs text-gray-400">${displayRole}</div>
+                    </td>
+                    <td class="py-3 px-2 text-gray-600 text-sm">${email}</td>
+                    <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${displayRole}</span></td>
+                    <td class="py-3 px-2 text-gray-600 text-sm">${department}</td>
+                    <td class="py-3 px-2">${statusBadge}</td>
+                    <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
+                    <td class="py-3 px-2">
+                        <div class="flex items-center gap-2">
+                            ${actionButtons}
                         </div>
-                    </div>
-                </td>
-                <td class="py-3 px-2 text-gray-600 text-sm">${user.email || ''}</td>
-                <td class="py-3 px-2"><span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${displayRole}</span></td>
-                <td class="py-3 px-2 text-gray-600 text-sm">${user.department || 'N/A'}</td>
-                <td class="py-3 px-2">${statusBadge}</td>
-                <td class="py-3 px-2 text-gray-400 text-xs">${lastActiveDisplay}</td>
-                <td class="py-3 px-2">
-                    <div class="flex items-center gap-2">
-                        ${actionButtons}
-                    </div>
-                </td>
-            `;
-            usersTableBody.appendChild(row);
+                    </td>
+                `;
+                usersTableBody.appendChild(row);
+            } catch (error) {
+                console.error('Error rendering user row:', error, user);
+            }
         });
     }
 

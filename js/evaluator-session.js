@@ -115,10 +115,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             console.log('Fetching profile from API for user:', user.id);
-            const response = await fetch(`http://127.0.0.1:3000/api/user/profile/${user.id}`, {
+            const response = await fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'x-auth-token': token,
                     'Content-Type': 'application/json'
                 }
             });

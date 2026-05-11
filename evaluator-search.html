@@ -141,13 +141,7 @@
                                     <option value="bped">BPED</option>
                                 </select>
                                 <select id="filterStatus" class="px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                    <option value="all">All Statuses</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="pending">Pending Review</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="rejected">Rejected</option>
                                     <option value="locked">Locked</option>
-                                    <option value="validated">Validated</option>
                                 </select>
                                 <button id="clearFilters" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm">
                                     Clear Filters
@@ -196,358 +190,37 @@
         </main>
     </div>
 
+    <!-- DOCUMENT PREVIEW MODAL -->
+    <div id="docPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docPreviewTitle" class="text-lg font-semibold text-gray-800">Document Preview</h3>
+                <button id="docPreviewCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <iframe id="docPreviewFrame" class="w-full h-full border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT DETAILS MODAL -->
+    <div id="docDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 id="docDetailsTitle" class="text-lg font-semibold text-gray-800">Document Details</h3>
+                <button id="docDetailsCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-4" id="docDetailsContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="flex justify-end gap-3 p-4 border-t">
+                <button id="docDetailsCloseBtn2" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Include scripts -->
     <script src="js/evaluator-session.js"></script>
     <script src="js/evaluator-search.js"></script>
-    
-    <script>
-        // Mobile Sidebar Toggle - Fixed version
-        (function() {
-            const menuToggle = document.getElementById('mobileMenuToggle');
-            const sidebar = document.getElementById('mainSidebar');
-            
-            if (menuToggle && sidebar) {
-                // Create overlay if it doesn't exist
-                let overlay = document.querySelector('.sidebar-overlay');
-                if (!overlay) {
-                    overlay = document.createElement('div');
-                    overlay.className = 'sidebar-overlay';
-                    document.body.appendChild(overlay);
-                }
-                
-                function closeSidebar() {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('active');
-                    document.body.classList.remove('sidebar-open');
-                    document.body.style.overflow = '';
-                }
-                
-                function openSidebar() {
-                    sidebar.classList.add('open');
-                    overlay.classList.add('active');
-                    document.body.classList.add('sidebar-open');
-                    document.body.style.overflow = 'hidden';
-                }
-                
-                // Ensure button is visible on mobile
-                function checkMobile() {
-                    if (window.innerWidth <= 768) {
-                        menuToggle.style.display = 'flex';
-                    } else {
-                        menuToggle.style.display = 'none';
-                        closeSidebar();
-                    }
-                }
-                
-                // Initial check
-                checkMobile();
-                
-                // Toggle click
-                menuToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (sidebar.classList.contains('open')) {
-                        closeSidebar();
-                    } else {
-                        openSidebar();
-                    }
-                });
-                
-                // Overlay click
-                overlay.addEventListener('click', closeSidebar);
-                
-                // Close when clicking on nav links
-                document.querySelectorAll('nav a').forEach(link => {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth <= 768) {
-                            closeSidebar();
-                        }
-                    });
-                });
-                
-                // Handle window resize
-                window.addEventListener('resize', function() {
-                    checkMobile();
-                    if (window.innerWidth > 768) {
-                        closeSidebar();
-                    }
-                });
-            }
-        })();
-
-        // Update sidebar user info
-        function updateSidebarUser() {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const userInitialsElem = document.getElementById('sidebarInitials');
-            const userNameElem = document.getElementById('sidebarName');
-            const userRoleElem = document.getElementById('sidebarRole');
-            const sidebarPortalElem = document.getElementById('sidebarPortal');
-            const sidebarAccessElem = document.getElementById('sidebarAccess');
-            
-            if (user.firstName && user.lastName) {
-                const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
-                if (userInitialsElem) userInitialsElem.textContent = initials;
-                if (userNameElem) userNameElem.textContent = `${user.firstName} ${user.lastName}`;
-            }
-            if (user.role && userRoleElem) {
-                const roleMap = {
-                    'admin': 'Administrator',
-                    'dean': 'Dean',
-                    'faculty': 'Faculty Member',
-                    'area-chair': 'Dept. Head',
-                    'department-head': 'Dept. Head',
-                    'evaluator': 'External Evaluator'
-                };
-                userRoleElem.textContent = roleMap[user.role] || user.role;
-            }
-            if (user.role === 'evaluator' && sidebarPortalElem) {
-                sidebarPortalElem.textContent = 'Evaluator Portal';
-                if (sidebarAccessElem) sidebarAccessElem.textContent = 'View-Only Access · Read Only';
-            }
-        }
-        updateSidebarUser();
-
-        // Sample document data
-        const documents = [
-            { id: 1, title: "Syllabus - Elementary Education", author: "Dr. Santos", date: "2026-04-20", category: "Instruction", categoryClass: "instruction", department: "BEED", status: "Approved", statusClass: "approved", version: "v3.2", description: "Comprehensive syllabus for elementary education covering all learning competencies." },
-            { id: 2, title: "Research Publication 2025", author: "Dr. Reyes", date: "2026-04-25", category: "Research", categoryClass: "research", department: "BSED", status: "Pending", statusClass: "pending", version: "v0.3", description: "Research publication on innovative teaching strategies in secondary education." },
-            { id: 3, title: "Community Extension Program", author: "Prof. Mendoza", date: "2026-04-22", category: "Extension", categoryClass: "extension", department: "BPED", status: "Approved", statusClass: "approved", version: "v1.1", description: "Community outreach program documentation and impact assessment." },
-            { id: 4, title: "Faculty Employment Contract", author: "Dean Cruz", date: "2026-04-18", category: "Employment", categoryClass: "employment", department: "BEED", status: "Approved", statusClass: "approved", version: "v2.1", description: "Faculty employment contract and personnel documents." },
-            { id: 5, title: "Inclusive Education Module", author: "Prof. Garcia", date: "2026-04-15", category: "Instruction", categoryClass: "instruction", department: "BSNED", status: "Approved", statusClass: "approved", version: "v1.0", description: "Learning module for inclusive education and special needs." },
-            { id: 6, title: "Cultural Heritage Documentation", author: "Dr. Torres", date: "2026-04-10", category: "Extension", categoryClass: "extension", department: "BCAED", status: "Draft", statusClass: "draft", version: "v0.5", description: "Documentation of cultural heritage and arts programs." },
-            { id: 7, title: "Physical Education Curriculum", author: "Prof. Ramos", date: "2026-04-08", category: "Instruction", categoryClass: "instruction", department: "BPED", status: "Approved", statusClass: "approved", version: "v2.0", description: "Updated physical education curriculum guide." },
-            { id: 8, title: "Research Ethics Clearance", author: "Dr. Villanueva", date: "2026-04-05", category: "Research", categoryClass: "research", department: "BSNED", status: "Approved", statusClass: "approved", version: "v1.0", description: "Ethics clearance for special education research." }
-        ];
-
-        let currentPage = 1;
-        const itemsPerPage = 5;
-        let filteredDocuments = [...documents];
-
-        function getCategoryBadge(categoryClass) {
-            const badges = {
-                'instruction': 'badge-instruction',
-                'research': 'badge-research',
-                'extension': 'badge-extension',
-                'employment': 'badge-employment'
-            };
-            return badges[categoryClass] || 'badge-instruction';
-        }
-
-        function getStatusBadge(statusClass) {
-            const badges = {
-                'approved': 'status-approved',
-                'pending': 'status-pending',
-                'draft': 'status-draft',
-                'rejected': 'status-pending',
-                'locked': 'status-approved',
-                'validated': 'status-pending'
-            };
-            return badges[statusClass] || 'status-pending';
-        }
-
-        function getStatusText(status) {
-            const texts = {
-                'approved': 'Approved',
-                'pending': 'Pending Review',
-                'draft': 'Draft',
-                'rejected': 'Rejected',
-                'locked': 'Locked',
-                'validated': 'Validated'
-            };
-            return texts[status.toLowerCase()] || status;
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        function renderResults() {
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageDocuments = filteredDocuments.slice(start, end);
-            const container = document.getElementById('searchResults');
-            const resultCountSpan = document.getElementById('resultCount');
-            const noResultsDiv = document.getElementById('noResults');
-            const paginationInfo = document.getElementById('paginationInfo');
-            
-            if (filteredDocuments.length === 0) {
-                if (container) container.classList.add('hidden');
-                if (noResultsDiv) noResultsDiv.classList.remove('hidden');
-                if (resultCountSpan) resultCountSpan.textContent = '0';
-                if (paginationInfo) paginationInfo.textContent = 'Showing 0 to 0 of 0 documents';
-                renderPagination();
-                return;
-            }
-            
-            if (container) {
-                container.classList.remove('hidden');
-                container.innerHTML = pageDocuments.map(doc => `
-                    <div class="search-result">
-                        <div class="flex flex-col md:flex-row justify-between gap-3">
-                            <div class="flex-1">
-                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                    <span class="${getCategoryBadge(doc.categoryClass)} px-2 py-1 rounded-full text-xs">${doc.category}</span>
-                                    <span class="${getStatusBadge(doc.statusClass)} px-2 py-1 rounded-full text-xs">${getStatusText(doc.status)}</span>
-                                </div>
-                                <h3 class="font-medium text-gray-800">${escapeHtml(doc.title)}</h3>
-                                <p class="text-xs text-gray-500 mt-1">by ${escapeHtml(doc.author)} · ${formatDate(doc.date)} · ${escapeHtml(doc.version)}</p>
-                                <p class="text-sm text-gray-600 mt-2 line-clamp-2">${escapeHtml(doc.description)}</p>
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    <span class="badge-department px-2 py-1 rounded-full text-xs">${escapeHtml(doc.department)}</span>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="view-btn px-3 py-1.5 border border-gray-300 rounded text-xs hover:bg-gray-50 transition" data-doc-id="${doc.id}">View</button>
-                                <button class="btn-details px-3 py-1.5 rounded text-xs" data-doc-id="${doc.id}">Details</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            if (noResultsDiv) noResultsDiv.classList.add('hidden');
-            if (resultCountSpan) resultCountSpan.textContent = filteredDocuments.length;
-            
-            const startNum = filteredDocuments.length > 0 ? start + 1 : 0;
-            const endNum = Math.min(end, filteredDocuments.length);
-            if (paginationInfo) paginationInfo.textContent = `Showing ${startNum} to ${endNum} of ${filteredDocuments.length} documents`;
-            
-            renderPagination();
-            attachViewHandlers();
-        }
-
-        function attachViewHandlers() {
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const docId = this.dataset.docId;
-                    const doc = documents.find(d => d.id == docId);
-                    alert(`View-Only Mode\n\nOpening: ${doc?.title}\n\nThis would display the document content in a preview modal.`);
-                });
-            });
-            
-            document.querySelectorAll('.btn-details').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const docId = this.dataset.docId;
-                    const doc = documents.find(d => d.id == docId);
-                    alert(`Document Details\n\nTitle: ${doc?.title}\nAuthor: ${doc?.author}\nCategory: ${doc?.category}\nDepartment: ${doc?.department}\nStatus: ${doc?.status}\nVersion: ${doc?.version}\nDescription: ${doc?.description}`);
-                });
-            });
-        }
-
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
-            const paginationContainer = document.getElementById('pagination');
-            if (!paginationContainer) return;
-            
-            if (totalPages <= 1) {
-                paginationContainer.innerHTML = '';
-                return;
-            }
-            
-            let html = '';
-            html += `<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" data-page="prev" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-            
-            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
-                const active = i === currentPage ? 'bg-teal-700 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50';
-                html += `<button class="px-3 py-1.5 ${active} rounded-lg text-sm" data-page="${i}">${i}</button>`;
-            }
-            
-            html += `<button class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}" data-page="next" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-            
-            paginationContainer.innerHTML = html;
-            
-            paginationContainer.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const page = btn.dataset.page;
-                    if (page === 'prev' && currentPage > 1) {
-                        currentPage--;
-                        renderResults();
-                    } else if (page === 'next' && currentPage < totalPages) {
-                        currentPage++;
-                        renderResults();
-                    } else if (!isNaN(page)) {
-                        currentPage = parseInt(page);
-                        renderResults();
-                    }
-                });
-            });
-        }
-
-        function performSearch() {
-            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
-            const category = document.getElementById('filterCategory')?.value || 'all';
-            const department = document.getElementById('filterDepartment')?.value || 'all';
-            const status = document.getElementById('filterStatus')?.value || 'all';
-            
-            filteredDocuments = documents.filter(doc => {
-                const matchesSearch = !searchTerm || 
-                    doc.title.toLowerCase().includes(searchTerm) ||
-                    doc.author.toLowerCase().includes(searchTerm) ||
-                    doc.description.toLowerCase().includes(searchTerm);
-                
-                const matchesCategory = category === 'all' || doc.categoryClass === category;
-                const matchesDepartment = department === 'all' || doc.department === department.toUpperCase();
-                const matchesStatus = status === 'all' || doc.statusClass === status;
-                
-                return matchesSearch && matchesCategory && matchesDepartment && matchesStatus;
-            });
-            
-            const sortBy = document.getElementById('sortResults')?.value || 'relevance';
-            if (sortBy === 'date_desc') {
-                filteredDocuments.sort((a, b) => new Date(b.date) - new Date(a.date));
-            } else if (sortBy === 'date_asc') {
-                filteredDocuments.sort((a, b) => new Date(a.date) - new Date(b.date));
-            } else if (sortBy === 'title_asc') {
-                filteredDocuments.sort((a, b) => a.title.localeCompare(b.title));
-            } else if (sortBy === 'title_desc') {
-                filteredDocuments.sort((a, b) => b.title.localeCompare(a.title));
-            }
-            
-            currentPage = 1;
-            renderResults();
-        }
-
-        // Event listeners
-        document.getElementById('searchBtn')?.addEventListener('click', performSearch);
-        document.getElementById('searchInput')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
-        document.getElementById('filterCategory')?.addEventListener('change', performSearch);
-        document.getElementById('filterDepartment')?.addEventListener('change', performSearch);
-        document.getElementById('filterStatus')?.addEventListener('change', performSearch);
-        document.getElementById('sortResults')?.addEventListener('change', performSearch);
-        
-        document.getElementById('clearFilters')?.addEventListener('click', () => {
-            if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
-            if (document.getElementById('filterCategory')) document.getElementById('filterCategory').value = 'all';
-            if (document.getElementById('filterDepartment')) document.getElementById('filterDepartment').value = 'all';
-            if (document.getElementById('filterStatus')) document.getElementById('filterStatus').value = 'all';
-            if (document.getElementById('sortResults')) document.getElementById('sortResults').value = 'relevance';
-            performSearch();
-        });
-
-        // Initial render
-        performSearch();
-
-        // Heartbeat
-        const token = localStorage.getItem('token');
-        function sendHeartbeat() {
-            if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-                }).catch(() => {});
-            }
-        }
-        if (token) {
-            sendHeartbeat();
-            setInterval(sendHeartbeat, 2 * 60 * 1000);
-        }
-    </script>
 </body>
 </html>

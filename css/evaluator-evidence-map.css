@@ -268,6 +268,95 @@ body {
     .badge-department { font-size: 0.65rem; }
 }
 
+/* Standards grid */
+.standards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+/* Standard item */
+.standard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.standard-item:hover {
+    background-color: #f3f4f6;
+}
+
+.standard-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.standard-status {
+    font-size: 0.7rem;
+}
+
+.standard-complete {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+}
+
+.standard-missing {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Standards section */
+.standards-section {
+    background-color: #fafafa;
+}
+
+/* Department badge */
+.badge-department {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+
+/* Status badges */
+.badge-status-complete {
+    background-color: #e3f7ec;
+    color: #0f7b4b;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.badge-status-partial {
+    background-color: #fef9e7;
+    color: #b78103;
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+/* Expand button */
+.expand-btn {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.expand-btn:hover {
+    background-color: #f3f4f6;
+}
+
+/* Rotate animation */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
 /* Touch-friendly */
 @media (max-width: 768px) {
     button, a, .evidence-item { min-height: 44px; min-width: 44px; }

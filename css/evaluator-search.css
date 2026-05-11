@@ -132,43 +132,34 @@ body {
     font-weight: 500;
 }
 
-/* Details button */
-.btn-details {
-    background-color: #e0f2fe;
-    border: 1px solid #bae6fd;
+/* Action buttons - matching search.css exactly */
+.btn-view, .btn-details {
     padding: 0.3rem 0.85rem;
     border-radius: 0.375rem;
     font-size: 0.7rem;
     font-weight: 500;
-    color: #0369a1;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+.btn-view {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+}
+.btn-view:hover {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+}
+.btn-details {
+    background-color: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
 }
 .btn-details:hover {
     background-color: #bae6fd;
     border-color: #7dd3fc;
 }
-.btn-details:active {
-    transform: scale(0.97);
-}
-
-/* View button */
-.view-btn {
-    background-color: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    padding: 0.3rem 0.85rem;
-    border-radius: 0.375rem;
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.view-btn:hover {
-    background-color: #e5e7eb;
-    border-color: #d1d5db;
-}
-.view-btn:active {
+.btn-view:active, .btn-details:active {
     transform: scale(0.97);
 }
 
@@ -249,6 +240,25 @@ input:focus, select:focus {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #0f766e;
+}
+
+/* Document Details Modal */
+#docDetailsModal {
+    backdrop-filter: blur(2px);
+}
+#docDetailsContent {
+    scrollbar-width: thin;
+}
+#docDetailsContent::-webkit-scrollbar {
+    width: 6px;
+}
+#docDetailsContent::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+#docDetailsContent::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
 }
 
 /* ============================================ */
