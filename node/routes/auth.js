@@ -39,6 +39,17 @@ async function createSession(userId, req) {
   }
 }
 
+// @route   GET api/auth/check-email-config
+// @desc    Check email configuration (admin only)
+// @access  Public (for debugging)
+router.get('/check-email-config', async (req, res) => {
+  res.json({
+    emailUser: process.env.EMAIL_USER || 'NOT SET',
+    hasEmailPassword: !!process.env.EMAIL_PASSWORD,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
 // @route   GET api/departments
 // @desc    Get all active departments (public endpoint for registration)
 // @access  Public
@@ -648,9 +659,11 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
         </div>`,
       };
       await transporter.sendMail(mailOptions);
+      console.log('Email change OTP sent successfully to:', newEmail);
     } catch (emailErr) {
       console.error('Email sending failed:', emailErr);
-      return res.status(500).json({ msg: 'Failed to send verification email' });
+      console.error('Email config:', { user: process.env.EMAIL_USER, hasPassword: !!process.env.EMAIL_PASSWORD });
+      return res.status(500).json({ msg: 'Failed to send verification email. Please check your email configuration.' });
     }
 
     res.json({ msg: 'Verification code sent to your new email address' });
