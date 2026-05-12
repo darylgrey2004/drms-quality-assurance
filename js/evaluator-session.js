@@ -224,22 +224,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    function handleLogout() {
-        const logoutBtn = el('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to logout?')) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = 'landing.html';
-                }
-            });
-        }
-    }
-
-    // Apply user identity to page - fetch profile first if user ID exists
-    fetchAndApplyProfile();
-    handleLogout();
+    // Logout handled by logout-modal.js
+    // No need to attach handler here to prevent duplicates
 
     // Log current evaluator info
     console.log('Evaluator Session:', {

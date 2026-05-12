@@ -274,17 +274,7 @@
             window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
         }
 
-        // Logout functionality
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to logout from your evaluator session?')) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = 'landing.html';
-                }
-            });
-        }
+        // Logout functionality - handled by logout-modal.js
 
         // Heartbeat to keep session alive
         const token = localStorage.getItem('token');
@@ -302,6 +292,7 @@
         }
     </script>
 </body>
+<script src="js/logout-modal.js"></script>
 <script src="js/evaluator-session.js"></script>
 <script src="js/evaluator-profile.js"></script>
 </html>

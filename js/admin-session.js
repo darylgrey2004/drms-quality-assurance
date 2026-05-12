@@ -193,12 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'landing.html';
-            }
-        });
+        // Logout handled by logout-modal.js
+        // No need to attach handler here to prevent duplicates
     }
 });
