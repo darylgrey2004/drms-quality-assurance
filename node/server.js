@@ -3,7 +3,9 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 // Load environment variables first - MUST be before other requires
-dotenv.config({ path: path.join(__dirname, '.env') });
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '.env') });
+}
 
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
