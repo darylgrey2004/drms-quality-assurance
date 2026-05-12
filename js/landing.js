@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('opacity-70');
 
             try {
-                const response = await fetch('http://127.0.0.1:3000/api/auth/login', {
+                const response = await fetch(API_CONFIG.getApiUrl('/api/auth/login'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = true;
             
             try {
-                const response = await fetch('http://127.0.0.1:3000/api/auth/verify-otp', {
+                const response = await fetch(API_CONFIG.getApiUrl('/api/auth/verify-otp'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
