@@ -4,7 +4,9 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
-function auth(req, res, next) {
+const db = require('../database');
+
+async function auth(req, res, next) {
   // Get token from header
   const token = req.header('x-auth-token');
 
@@ -25,6 +27,32 @@ function auth(req, res, next) {
     // Add user from payload
     req.user = decoded.user;
     console.log('User set in request:', req.user);
+    
+    // Check if user is external evaluator and if access has expired
+    const userRole = (req.user?.role || '').toString().toLowerCase().trim();
+    const isEvaluator = userRole === 'evaluator' || userRole === 'external evaluator';
+    
+    if (isEvaluator) {
+      try {
+        const [limits] = await db.query(
+          'SELECT expiresAt FROM evaluator_access_limits WHERE user_id = ? LIMIT 1',
+          [req.user.id]
+        );
+        
+        if (limits.length > 0) {
+          const expiresAt = new Date(limits[0].expiresAt);
+          if (!Number.isNaN(expiresAt.getTime()) && expiresAt <= new Date()) {
+            console.log('Auth failed: Evaluator access expired');
+            return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.', expired: true });
+          }
+        }
+      } catch (limitError) {
+        if (limitError?.code !== 'ER_NO_SUCH_TABLE') {
+          console.error('Error checking evaluator limits:', limitError);
+        }
+      }
+    }
+    
     next();
   } catch (e) {
     console.log('Auth failed: Token verification error:', e.message);
