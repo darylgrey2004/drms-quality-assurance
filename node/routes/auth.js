@@ -756,11 +756,26 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
     // Log the email change in audit logs
     try {
       const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
-      await db.query(
-        `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent, details)
-         VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?, ?)`,
-        [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown', JSON.stringify({ oldEmail: currentEmail, newEmail: newEmail })]
-      );
+      
+      // Try with details column first
+      try {
+        await db.query(
+          `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent, details)
+           VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?, ?)`,
+          [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown', JSON.stringify({ oldEmail: currentEmail, newEmail: newEmail })]
+        );
+      } catch (detailsErr) {
+        // If details column doesn't exist, insert without it
+        if (detailsErr.message && detailsErr.message.includes('Unknown column')) {
+          await db.query(
+            `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent)
+             VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?)`,
+            [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown']
+          );
+        } else {
+          throw detailsErr;
+        }
+      }
     } catch (auditErr) {
       console.log('Audit log skipped:', auditErr.message);
     }
