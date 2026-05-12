@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             
             if (response.ok) {
                 const data = await response.json();
-                if (data.expired || (data.expiresAt && new Date(data.expiresAt) <= new Date())) {
+                const expiresAt = data.expiresAt ? new Date(data.expiresAt) : null;
+                const now = new Date();
+                if (data.expired || (expiresAt && now >= expiresAt)) {
                     alert('Your External Evaluator access has expired. Please contact the administrator.');
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');

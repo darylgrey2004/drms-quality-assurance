@@ -436,18 +436,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function updateStats(users) {
+        function updateStats(users) {
         const totalUsers = users.length;
+        const now = new Date();
         const approvedUsers = users.filter(u => {
             // Check if evaluator is expired
             const isEvaluator = u.role && u.role.toLowerCase() === 'evaluator';
-            const isExpired = isEvaluator && u.evaluatorExpiresAt && new Date(u.evaluatorExpiresAt) < new Date();
-            return u.status === 'approved' && !isExpired;
+            if (isEvaluator && u.evaluatorExpiresAt) {
+                const expiresAt = new Date(u.evaluatorExpiresAt);
+                const isExpired = now >= expiresAt;
+                return u.status === 'approved' && !isExpired;
+            }
+            return u.status === 'approved';
         }).length;
         const pendingUsers = users.filter(u => u.status === 'pending').length;
         const expiredEvaluators = users.filter(u => {
             const isEvaluator = u.role && u.role.toLowerCase() === 'evaluator';
-            return isEvaluator && u.evaluatorExpiresAt && new Date(u.evaluatorExpiresAt) < new Date();
+            if (isEvaluator && u.evaluatorExpiresAt) {
+                const expiresAt = new Date(u.evaluatorExpiresAt);
+                return now >= expiresAt;
+            }
+            return false;
         }).length;
         const uniqueRoles = new Set(users.map(u => u.role).filter(r => r)).size;
 
@@ -545,7 +554,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Check if evaluator is expired
                 const isEvaluator = user.role && user.role.toLowerCase() === 'evaluator';
-                const isExpired = isEvaluator && user.evaluatorExpiresAt && new Date(user.evaluatorExpiresAt) < new Date();
+                let isExpired = false;
+                if (isEvaluator && user.evaluatorExpiresAt) {
+                    const expiresAt = new Date(user.evaluatorExpiresAt);
+                    const now = new Date();
+                    isExpired = now >= expiresAt;
+                }
 
                 const statusBadge = isExpired
                     ? `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">⏰ Expired</span>`
@@ -565,8 +579,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Show expiry date for evaluators in department column
                 let department = (user.department || 'N/A').trim();
                 if (isEvaluator && user.evaluatorExpiresAt) {
-                    const expiryDate = new Date(user.evaluatorExpiresAt);
-                    const formattedExpiry = expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    // Database stores UTC, convert to Philippines time (UTC+8) for display
+                    const expiryUTC = new Date(user.evaluatorExpiresAt);
+                    const phOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+                    const expiryPH = new Date(expiryUTC.getTime() + phOffset);
+                    const formattedExpiry = expiryPH.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                     if (isExpired) {
                         department = `<span class="text-red-600 font-medium">Expired: ${formattedExpiry}</span>`;
                     } else {

@@ -226,21 +226,30 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const result = await response.json().catch(() => ({}));
             
-            // Update localStorage with new department info
+            // Update localStorage with new user data
             if (result.user) {
                 const existingUser = JSON.parse(localStorage.getItem('user') || '{}');
-                localStorage.setItem('user', JSON.stringify({
+                const updatedUser = {
                     ...existingUser,
                     ...result.user,
                     department: profileData.department || existingUser.department
-                }));
+                };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                
+                // Update sidebar display without reloading
+                const sidebarName = document.getElementById('sidebarName');
+                const sidebarRole = document.getElementById('sidebarRole');
+                if (sidebarName) {
+                    sidebarName.textContent = `${updatedUser.firstName || ''} ${updatedUser.lastName || ''}`.trim();
+                }
+                if (sidebarRole && updatedUser.department) {
+                    const roleDisplay = updatedUser.role || 'Faculty Member';
+                    sidebarRole.textContent = `${roleDisplay} · ${updatedUser.department}`;
+                }
             }
 
             alert(result.msg || 'Profile updated successfully!');
             await loadUserProfile(userId);
-
-            // Reload page to refresh sidebar with updated user data
-            location.reload();
         } catch (error) {
             console.error('Error saving profile:', error);
             alert(`Failed to save profile: ${error.message}`);

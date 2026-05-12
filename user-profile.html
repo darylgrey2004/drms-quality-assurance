@@ -412,6 +412,12 @@
         const saveBtn = document.getElementById('saveProfileBtn');
         const cancelBtn = document.getElementById('cancelEditBtn');
         const formInputs = document.querySelectorAll('#lastName, #firstName, #middleInitial, #dob, #age, #gender, #civilStatus, #nationality, #phone, #address, #employeeId, #position, #department, #employmentStatus, #dateOfHire, #yearsInService, #previousPositions, #highestDegree, #specialization, #institution, #gradYear, #license, #continuingEd, #subjectsTaught, #yearLevel, #loadUnits, #advising, #committeeRoles, #researchInterests, #publications');
+        // Email field should always remain locked
+        const emailField = document.getElementById('email');
+        if (emailField) {
+            emailField.setAttribute('readonly', 'readonly');
+            emailField.classList.add('bg-gray-50');
+        }
         const selects = document.querySelectorAll('#gender, #civilStatus, #highestDegree');
         
         function enableEditing() {
