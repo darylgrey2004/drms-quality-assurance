@@ -2,8 +2,10 @@ const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Load environment variables
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Load environment variables (optional for production)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '.env') });
+}
 
 const cors = require('cors');
 const authRoutes = require('./node/routes/auth');
