@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
         
         if (departmentWrap && createDepartment) {
-            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head' || selectedRole === 'dean';
+            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head';
             departmentWrap.classList.toggle('hidden', !showDepartment);
             createDepartment.required = showDepartment;
             if (!showDepartment) createDepartment.value = '';
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const normalizedRole = role.toLowerCase().trim();
             const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
-            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head' || normalizedRole === 'dean';
+            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
             
             if (requiresDepartment && !department) {
                 showAlert('Please select a department for this role.', 'Department Required', 'warning');
