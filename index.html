@@ -337,14 +337,16 @@
         }
         
         // Auto-refresh recent documents every 30 seconds
-        setInterval(() => {
-            loadRecentDocuments();
-            loadRecentActivities();
-        }, 30000);
+        if (typeof loadRecentDocuments === 'function' && typeof loadRecentActivities === 'function') {
+            setInterval(() => {
+                loadRecentDocuments();
+                loadRecentActivities();
+            }, 30000);
+        }
         
         // Listen for visibility changes to refresh when page becomes active
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
+            if (!document.hidden && typeof loadRecentDocuments === 'function' && typeof loadRecentActivities === 'function') {
                 loadRecentDocuments();
                 loadRecentActivities();
             }
@@ -352,8 +354,10 @@
 
         // Listen for window focus to refresh data
         window.addEventListener('focus', function() {
-            loadRecentDocuments();
-            loadRecentActivities();
+            if (typeof loadRecentDocuments === 'function' && typeof loadRecentActivities === 'function') {
+                loadRecentDocuments();
+                loadRecentActivities();
+            }
         });
 
         // Heartbeat to keep session alive
