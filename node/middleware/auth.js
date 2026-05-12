@@ -41,7 +41,10 @@ async function auth(req, res, next) {
         
         if (limits.length > 0) {
           const expiresAt = new Date(limits[0].expiresAt);
-          if (!Number.isNaN(expiresAt.getTime()) && expiresAt <= new Date()) {
+          const now = new Date();
+          // Set expiry to end of day for fair comparison
+          expiresAt.setHours(23, 59, 59, 999);
+          if (!Number.isNaN(expiresAt.getTime()) && expiresAt < now) {
             console.log('Auth failed: Evaluator access expired');
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.', expired: true });
           }
