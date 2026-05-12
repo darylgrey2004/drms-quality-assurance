@@ -7,6 +7,15 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: path.join(__dirname, '.env') });
 }
 
+console.log('=== DRMS-QA Starting ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_NAME:', process.env.DB_NAME);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+
 const cors = require('cors');
 const authRoutes = require('./node/routes/auth');
 const adminRoutes = require('./node/routes/admin');
@@ -69,7 +78,10 @@ app.get('*.html', (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`DRMS-QA Server running on port ${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+}).on('error', (err) => {
+  console.error('Server failed to start:', err);
+  process.exit(1);
 });
