@@ -51,11 +51,14 @@ async function auth(req, res, next) {
           console.log('>>> Current Date:', now);
           console.log('>>> Expiry ISO:', expiresAt.toISOString());
           console.log('>>> Now ISO:', now.toISOString());
+          console.log('>>> Token issued at (iat):', decoded.iat);
+          console.log('>>> Token issued date:', new Date(decoded.iat * 1000).toISOString());
           console.log('>>> Is Expired (now >= expiresAt):', now >= expiresAt);
           console.log('>>> Time diff (ms):', now.getTime() - expiresAt.getTime());
           
+          // Block if current time is past expiry OR if token was issued before expiry but we're now past it
           if (!Number.isNaN(expiresAt.getTime()) && now >= expiresAt) {
-            console.log('Auth failed: Evaluator access expired');
+            console.log('>>> BLOCKING: Evaluator access expired');
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.', expired: true });
           }
           console.log('>>> Evaluator access still valid');
