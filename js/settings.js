@@ -145,8 +145,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let isEditing = false;
     const editProfileBtn = document.getElementById('editProfileBtn');
-    const profileInputs = ['lastName', 'firstName', 'middleInitial', 'personalEmail', 'dob', 'age', 'nationality', 'phone', 'address'];
+    const profileInputs = ['lastName', 'firstName', 'middleInitial', 'dob', 'age', 'nationality', 'phone', 'address'];
     const profileSelects = ['gender', 'civilStatus'];
+    // Email field should always remain locked
+    const emailField = document.getElementById('personalEmail');
+    if (emailField) {
+        emailField.setAttribute('readonly', 'readonly');
+        emailField.classList.add('bg-gray-50');
+    }
     const employmentInputs = ['employeeId', 'position', 'dateOfHire', 'yearsInService'];
     const employmentSelects = ['departmentAssignment', 'employmentStatus'];
     const employmentTextareas = ['previousPositions'];
