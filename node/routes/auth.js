@@ -670,7 +670,8 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
 
   } catch (err) {
     console.error('Send OTP error:', err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Full error:', err);
+    res.status(500).json({ msg: err.message || 'Server error' });
   }
 });
 
