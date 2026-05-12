@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+node/node_modules/
+
+# Environment variables
+.env
+node/.env
+
+# Uploads (user-generated content)
+node/uploads/*
+!node/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build files
+dist/
+build/
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp

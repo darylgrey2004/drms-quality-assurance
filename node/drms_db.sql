@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 03, 2026 at 11:31 PM
+-- Generation Time: May 12, 2026 at 06:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -37,6 +37,19 @@ CREATE TABLE `approval_workflow` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `completed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `approval_workflow`
+--
+
+INSERT INTO `approval_workflow` (`id`, `document_id`, `stage`, `status`, `action_by`, `comments`, `created_at`, `completed_at`) VALUES
+(40, 50, 'validation', 'completed', 1, NULL, '2026-05-09 15:46:30', '2026-05-09 15:46:30'),
+(41, 50, 'approval', 'completed', 1, NULL, '2026-05-09 15:46:34', '2026-05-09 15:46:34'),
+(42, 49, 'validation', 'completed', 1, NULL, '2026-05-09 16:24:37', '2026-05-09 16:24:37'),
+(43, 48, 'validation', 'completed', 1, NULL, '2026-05-09 16:36:53', '2026-05-09 16:36:53'),
+(44, 46, 'validation', 'completed', 1, NULL, '2026-05-09 16:36:53', '2026-05-09 16:36:53'),
+(45, 50, 'lock', 'completed', 1, NULL, '2026-05-11 18:42:08', '2026-05-11 18:42:08'),
+(46, 51, 'rejection', 'completed', 70, 'Pangit', '2026-05-11 20:35:53', '2026-05-11 20:35:53');
 
 -- --------------------------------------------------------
 
@@ -108,31 +121,31 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity_type`, `entity_id`,
 (44, 1, 'DOCUMENT_UPLOAD', 'document', 29, NULL, '{\"title\":\"Capstone Vitae\",\"category\":\"research\",\"department\":\"beed\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 20:31:30'),
 (45, NULL, 'DOCUMENT_VALIDATED', 'document', 29, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 20:32:49'),
 (46, 1, 'DOCUMENT_APPROVED', 'document', 29, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 20:33:02'),
-(47, 53, 'DOCUMENT_UPLOAD', 'document', 30, NULL, '{\"title\":\"Faculty File\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:02:02'),
+(47, NULL, 'DOCUMENT_UPLOAD', 'document', 30, NULL, '{\"title\":\"Faculty File\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:02:02'),
 (48, NULL, 'DOCUMENT_UPLOAD', 'document', 31, NULL, '{\"title\":\"Faculty File Create by Admin\",\"category\":\"instruction\",\"department\":\"No department assigned\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:03:35'),
 (49, NULL, 'DOCUMENT_UPLOAD', 'document', 32, NULL, '{\"title\":\"Faculty File Created by Admin\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:09:44'),
 (50, NULL, 'DOCUMENT_VALIDATED', 'document', 32, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:16'),
 (51, 1, 'DOCUMENT_REJECTED', 'document', 31, NULL, '{\"workflow_status\":\"rejected\",\"reason\":\"Delete this trash\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:32'),
 (52, 1, 'DOCUMENT_APPROVED', 'document', 32, NULL, '{\"workflow_status\":\"approved\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:37'),
 (53, 1, 'DOCUMENT_DELETE', 'document', 31, '{\"id\":31,\"title\":\"Faculty File Create by Admin\",\"category\":\"instruction\",\"category_id\":1,\"area\":\"No department assigned\",\"department_id\":null,\"version\":\"v1.0\",\"description\":\"dad\",\"keywords\":\"dada\",\"workflow_status\":\"rejected\",\"uploader_id\":null,\"author_name\":\"Jelmar Kemba\",\"created_at\":\"2026-04-30T21:03:35.000Z\",\"updated_at\":\"2026-04-30T21:10:32.000Z\",\"category_name\":\"instruction\",\"department_code\":\"NO DEPARTM\"}', NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-04-30 21:10:49'),
-(54, 64, 'DOCUMENT_UPLOAD', 'document', 33, NULL, '{\"title\":\"CRIMSON\",\"category\":\"extension\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 16:32:17'),
+(54, NULL, 'DOCUMENT_UPLOAD', 'document', 33, NULL, '{\"title\":\"CRIMSON\",\"category\":\"extension\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 16:32:17'),
 (55, 1, 'DOCUMENT_VALIDATED', 'document', 33, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 16:32:45'),
 (56, 1, 'DOCUMENT_APPROVED', 'document', 33, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 16:33:03'),
 (57, 1, 'DOCUMENT_LOCKED', 'document', 33, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 16:33:14'),
-(58, 64, 'DOCUMENT_UPLOAD', 'document', 34, NULL, '{\"title\":\"helloworld\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 17:03:28'),
+(58, NULL, 'DOCUMENT_UPLOAD', 'document', 34, NULL, '{\"title\":\"helloworld\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 17:03:28'),
 (59, NULL, 'DOCUMENT_UPLOAD', 'document', 35, NULL, '{\"title\":\"fordept\",\"category\":\"research\",\"department\":\"BPED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 18:25:03'),
 (60, NULL, 'DOCUMENT_VALIDATED', 'document', 35, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-01 18:25:17'),
 (61, 1, 'DOCUMENT_UPLOAD', 'document', 36, NULL, '{\"title\":\"SOURCE CODE\",\"category\":\"research\",\"department\":\"BSED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 03:33:24'),
-(62, 64, 'DOCUMENT_UPLOAD', 'document', 37, NULL, '{\"title\":\"SOURCE CODES 2025\",\"category\":\"extension\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 03:37:12'),
+(62, NULL, 'DOCUMENT_UPLOAD', 'document', 37, NULL, '{\"title\":\"SOURCE CODES 2025\",\"category\":\"extension\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 03:37:12'),
 (63, 1, 'DOCUMENT_VALIDATED', 'document', 37, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 03:40:55'),
 (64, 1, 'DOCUMENT_APPROVED', 'document', 37, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"yes\\n\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 03:55:26'),
 (65, NULL, 'DOCUMENT_UPLOAD', 'document', 38, NULL, '{\"title\":\"CRIMSON\",\"category\":\"instruction\",\"department\":\"BPED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 06:55:26'),
-(66, 64, 'DOCUMENT_UPLOAD', 'document', 39, NULL, '{\"title\":\"helloworld121323\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 07:54:12'),
-(67, 64, 'DOCUMENT_UPLOAD', 'document', 40, NULL, '{\"title\":\"helloworld121323\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 08:04:59'),
-(68, 68, 'DOCUMENT_VALIDATED', 'document', 40, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:27'),
-(69, 68, 'DOCUMENT_APPROVED', 'document', 40, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:31'),
-(70, 68, 'DOCUMENT_LOCKED', 'document', 40, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:37'),
-(71, 68, 'DOCUMENT_APPROVED', 'document', 35, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"yes\\n\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:19:04'),
+(66, NULL, 'DOCUMENT_UPLOAD', 'document', 39, NULL, '{\"title\":\"helloworld121323\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 07:54:12'),
+(67, NULL, 'DOCUMENT_UPLOAD', 'document', 40, NULL, '{\"title\":\"helloworld121323\",\"category\":\"employment\",\"department\":\"BCAED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 08:04:59'),
+(68, NULL, 'DOCUMENT_VALIDATED', 'document', 40, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:27'),
+(69, NULL, 'DOCUMENT_APPROVED', 'document', 40, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:31'),
+(70, NULL, 'DOCUMENT_LOCKED', 'document', 40, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:05:37'),
+(71, NULL, 'DOCUMENT_APPROVED', 'document', 35, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"yes\\n\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:19:04'),
 (72, 1, 'DOCUMENT_UPLOAD', 'document', 41, NULL, '{\"title\":\"fishycakes\",\"category\":\"research\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:19:57'),
 (73, 1, 'DOCUMENT_LOCKED', 'document', 37, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:24:59'),
 (74, 1, 'DOCUMENT_LOCKED', 'document', 35, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', '2026-05-02 11:25:02'),
@@ -169,7 +182,16 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `entity_type`, `entity_id`,
 (105, 1, 'DOCUMENT_DELETE', 'document', 47, '{\"id\":47,\"title\":\"Testing 2\",\"category\":\"instruction\",\"category_id\":1,\"area\":\"BEED\",\"department_id\":1,\"version\":\"v1.0\",\"description\":\"Sstandard test\",\"keywords\":\"ss\",\"workflow_status\":\"pending\",\"uploader_id\":1,\"author_name\":\"Admin User\",\"created_at\":\"2026-05-03T20:38:43.000Z\",\"updated_at\":\"2026-05-03T20:38:43.000Z\",\"category_name\":\"instruction\",\"department_code\":\"BEED\"}', NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-03 20:42:55'),
 (106, 1, 'DOCUMENT_UPLOAD', 'document', 48, NULL, '{\"title\":\"Relevant Source Code\",\"category\":\"research\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-03 20:43:28'),
 (107, 1, 'DOCUMENT_UPLOAD', 'document', 49, NULL, '{\"title\":\"Relevant Source Code\",\"category\":\"extension\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-03 21:21:18'),
-(108, 1, 'DOCUMENT_UPLOAD', 'document', 50, NULL, '{\"title\":\"Relevant Source Code\",\"category\":\"employment\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-03 21:22:32');
+(108, 1, 'DOCUMENT_UPLOAD', 'document', 50, NULL, '{\"title\":\"Relevant Source Code\",\"category\":\"employment\",\"department\":\"BEED\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-03 21:22:32'),
+(109, 1, 'DOCUMENT_VALIDATED', 'document', 50, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-09 15:46:30'),
+(110, 1, 'DOCUMENT_APPROVED', 'document', 50, NULL, '{\"workflow_status\":\"approved\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-09 15:46:34'),
+(111, 1, 'DOCUMENT_VALIDATED', 'document', 49, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-09 16:24:37'),
+(112, 1, 'DOCUMENT_VALIDATED', 'document', 48, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-09 16:36:53'),
+(113, 1, 'DOCUMENT_VALIDATED', 'document', 46, NULL, '{\"workflow_status\":\"validated\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-09 16:36:53'),
+(114, 1, 'DOCUMENT_LOCKED', 'document', 50, NULL, '{\"workflow_status\":\"locked\",\"comments\":\"\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-11 18:42:08'),
+(115, 72, 'DOCUMENT_UPLOAD', 'document', 51, NULL, '{\"title\":\"Try nga\",\"category\":\"instruction\",\"department\":\"beed\",\"status\":\"pending\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-11 20:35:32'),
+(116, 70, 'DOCUMENT_REJECTED', 'document', 51, NULL, '{\"workflow_status\":\"rejected\",\"reason\":\"Pangit\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-11 20:35:53'),
+(117, 1, 'DOCUMENT_UPLOAD', 'document', 52, NULL, '{\"title\":\"User Manual\",\"category\":\"instruction\",\"department\":\"BEED\",\"status\":\"pending\"}', '::ffff:127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36', '2026-05-12 16:02:19');
 
 -- --------------------------------------------------------
 
@@ -310,10 +332,12 @@ CREATE TABLE `documents` (
 --
 
 INSERT INTO `documents` (`id`, `title`, `category`, `category_id`, `area`, `department_id`, `version`, `description`, `keywords`, `workflow_status`, `uploader_id`, `author_name`, `created_at`, `updated_at`, `category_name`, `department_code`) VALUES
-(46, 'Relevant Source Code', 'instruction', 1, 'BEED', 1, 'v1.0', 'Testing 1', 'Testing', 'pending', 1, 'Admin User', '2026-05-03 20:30:18', '2026-05-03 20:30:18', 'instruction', 'BEED'),
-(48, 'Relevant Source Code', 'research', 2, 'BEED', 1, 'v1.0', 'Testing Standard', NULL, 'pending', 1, 'Admin User', '2026-05-03 20:43:28', '2026-05-03 20:43:28', 'research', 'BEED'),
-(49, 'Relevant Source Code', 'extension', 3, 'BEED', 1, 'v1.0', 'Testing', NULL, 'pending', 1, 'Admin User', '2026-05-03 21:21:18', '2026-05-03 21:21:18', 'extension', 'BEED'),
-(50, 'Relevant Source Code', 'employment', 4, 'BEED', 1, 'v1.0', 'Testing', NULL, 'pending', 1, 'Admin User', '2026-05-03 21:22:32', '2026-05-03 21:22:32', 'employment', 'BEED');
+(46, 'Relevant Source Code', 'instruction', 1, 'BEED', 1, 'v1.0', 'Testing 1', 'Testing', 'validated', 1, 'Admin User', '2026-05-03 20:30:18', '2026-05-09 16:36:53', 'instruction', 'BEED'),
+(48, 'Relevant Source Code', 'research', 2, 'BEED', 1, 'v1.0', 'Testing Standard', NULL, 'validated', 1, 'Admin User', '2026-05-03 20:43:28', '2026-05-09 16:36:53', 'research', 'BEED'),
+(49, 'Relevant Source Code', 'extension', 3, 'BEED', 1, 'v1.0', 'Testing', NULL, 'validated', 1, 'Admin User', '2026-05-03 21:21:18', '2026-05-09 16:24:37', 'extension', 'BEED'),
+(50, 'Relevant Source Code', 'employment', 4, 'BEED', 1, 'v1.0', 'Testing', NULL, 'locked', 1, 'Admin User', '2026-05-03 21:22:32', '2026-05-11 18:42:08', 'employment', 'BEED'),
+(51, 'Try nga', 'instruction', 1, 'beed', 1, 'v1.0', 'ss', 'ss', 'rejected', 72, 'Jelmarara Kembarara', '2026-05-11 20:35:32', '2026-05-11 20:35:53', 'instruction', 'BEED'),
+(52, 'User Manual', 'instruction', 1, 'BEED', 1, 'v1.0', 'Testing 2', 'Testing', 'pending', 1, 'Admin Quimba', '2026-05-12 16:02:19', '2026-05-12 16:02:19', 'instruction', 'BEED');
 
 -- --------------------------------------------------------
 
@@ -354,7 +378,9 @@ INSERT INTO `document_files` (`id`, `document_id`, `original_name`, `stored_name
 (46, 46, 'RELEVANT-SOURCE-CODE.pdf', '1777840218270-851396344-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777840218270-851396344-RELEVANT-SOURCE-CODE.pdf', '2026-05-03 20:30:18'),
 (48, 48, 'RELEVANT-SOURCE-CODE.pdf', '1777841008117-89817441-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777841008117-89817441-RELEVANT-SOURCE-CODE.pdf', '2026-05-03 20:43:28'),
 (49, 49, 'RELEVANT-SOURCE-CODE.pdf', '1777843278602-150295857-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777843278602-150295857-RELEVANT-SOURCE-CODE.pdf', '2026-05-03 21:21:18'),
-(50, 50, 'RELEVANT-SOURCE-CODE.pdf', '1777843352521-503314220-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777843352521-503314220-RELEVANT-SOURCE-CODE.pdf', '2026-05-03 21:22:32');
+(50, 50, 'RELEVANT-SOURCE-CODE.pdf', '1777843352521-503314220-RELEVANT-SOURCE-CODE.pdf', 'application/pdf', 217487, '/uploads/1777843352521-503314220-RELEVANT-SOURCE-CODE.pdf', '2026-05-03 21:22:32'),
+(51, 51, 'k.pdf', '1778531732204-251729076-k.pdf', 'application/pdf', 109045, '/uploads/1778531732204-251729076-k.pdf', '2026-05-11 20:35:32'),
+(52, 52, 'PresentAndReady_UserManual.pdf', '1778601739518-64007016-PresentAndReady_UserManual.pdf', 'application/pdf', 4142278, '/uploads/1778601739518-64007016-PresentAndReady_UserManual.pdf', '2026-05-12 16:02:19');
 
 -- --------------------------------------------------------
 
@@ -377,7 +403,9 @@ INSERT INTO `document_standards` (`id`, `document_id`, `standard_id`, `created_a
 (1, 46, 1, '2026-05-03 20:40:19'),
 (3, 48, 7, '2026-05-03 20:43:28'),
 (4, 49, 13, '2026-05-03 21:21:18'),
-(5, 50, 18, '2026-05-03 21:22:32');
+(5, 50, 18, '2026-05-03 21:22:32'),
+(6, 51, 1, '2026-05-11 20:35:32'),
+(7, 52, 1, '2026-05-12 16:02:19');
 
 -- --------------------------------------------------------
 
@@ -414,7 +442,7 @@ CREATE TABLE `evaluator_access_limits` (
 --
 
 INSERT INTO `evaluator_access_limits` (`id`, `user_id`, `expiresAt`, `createdAt`, `updatedAt`) VALUES
-(9, 67, '2027-01-01 09:00:00', '2026-05-01 18:12:43', '2026-05-01 18:12:43');
+(10, 71, '2026-05-13 00:05:00', '2026-05-11 18:40:55', '2026-05-11 18:40:55');
 
 -- --------------------------------------------------------
 
@@ -458,12 +486,9 @@ CREATE TABLE `faculty_profiles` (
 --
 
 INSERT INTO `faculty_profiles` (`id`, `user_id`, `dateOfBirth`, `age`, `gender`, `civilStatus`, `nationality`, `phone`, `address`, `employeeId`, `position`, `department`, `employmentStatus`, `highestDegree`, `specialization`, `institution`, `gradYear`, `license`, `continuingEd`, `subjectsTaught`, `yearLevel`, `loadUnits`, `advising`, `committeeRoles`, `researchInterests`, `publications`, `createdAt`, `updatedAt`) VALUES
-(21, 23, '2004-03-06', 22, 'Male', 'Married', 'filipino', '09095397120', 'Tumaga zone 213', '213123', 'Instructor II', 'Bachelor of Elementary Education (BEED)', 'Regular / Permanent', 'Doctor of Education (EdD)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-20 05:20:37', '2026-04-22 03:34:17'),
-(22, 24, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '213122', 'Associate Professor I', 'Bachelor of Physical Education (BPED)', 'Probationary', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-20 11:32:28', '2026-04-20 11:32:28'),
-(32, 53, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '123456', 'Instructor I', 'Bachelor of Elementary Education (BEED)', 'Regular / Permanent', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-30 21:01:14', '2026-04-30 21:01:14'),
-(40, 63, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '243544', 'Instructor I', 'Bachelor of Elementary Education (BEED)', 'Regular / Permanent', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-01 07:42:09', '2026-05-01 07:42:09'),
-(41, 64, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BCAED', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-01 16:30:55', '2026-05-01 16:30:55'),
-(43, 69, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BCAED', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-02 07:52:48', '2026-05-02 07:52:48');
+(44, 70, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BEED', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-09 16:41:32', '2026-05-09 16:41:32'),
+(45, 72, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BEED', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-11 20:25:55', '2026-05-11 20:25:55'),
+(46, 1, NULL, NULL, NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-11 20:53:19', '2026-05-11 20:53:19');
 
 -- --------------------------------------------------------
 
@@ -500,6 +525,44 @@ CREATE TABLE `otps` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `report_history`
+--
+
+CREATE TABLE `report_history` (
+  `id` int(11) NOT NULL,
+  `report_type` varchar(50) NOT NULL,
+  `period` varchar(50) NOT NULL,
+  `date_from` date DEFAULT NULL,
+  `date_to` date DEFAULT NULL,
+  `format` varchar(20) NOT NULL,
+  `filters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`filters`)),
+  `generated_by` int(11) NOT NULL,
+  `generated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `file_path` varchar(500) DEFAULT NULL,
+  `file_size` int(11) DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'completed',
+  `error_message` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `report_history`
+--
+
+INSERT INTO `report_history` (`id`, `report_type`, `period`, `date_from`, `date_to`, `format`, `filters`, `generated_by`, `generated_at`, `file_path`, `file_size`, `status`, `error_message`) VALUES
+(9, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 17:43:47', NULL, NULL, 'completed', NULL),
+(10, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 17:46:14', NULL, NULL, 'completed', NULL),
+(11, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 17:46:52', NULL, NULL, 'completed', NULL),
+(12, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 17:49:20', NULL, NULL, 'completed', NULL),
+(13, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 17:49:46', NULL, NULL, 'completed', NULL),
+(14, 'overview', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 18:07:47', NULL, NULL, 'completed', NULL),
+(15, 'completeness', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 18:07:58', NULL, NULL, 'completed', NULL),
+(16, 'combined', 'this-month', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 18:08:15', NULL, NULL, 'completed', NULL),
+(17, 'combined', 'custom', NULL, NULL, 'pdf', '{}', 1, '2026-05-09 18:08:38', NULL, NULL, 'completed', NULL),
+(18, 'combined', 'custom', NULL, NULL, 'excel', '{}', 1, '2026-05-09 18:08:53', NULL, NULL, 'completed', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `standards`
 --
 
@@ -522,11 +585,11 @@ CREATE TABLE `standards` (
 
 INSERT INTO `standards` (`id`, `category_id`, `name`, `code`, `description`, `sort_order`, `is_required`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Curriculum Development', 'INST-CURDEV', 'Curriculum development documents and plans', 1, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(2, 1, 'Teaching Materials', 'INST-TEACHMAT', 'Teaching materials and instructional resources', 2, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(3, 1, 'Assessment Tools', 'INST-ASSESS', 'Assessment tools and evaluation instruments', 3, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(4, 1, 'Learning Modules', 'INST-LEARNMOD', 'Learning modules and self-instructional materials', 4, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(5, 1, 'Syllabi', 'INST-SYLLABI', 'Course syllabi and outlines', 5, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(6, 1, 'Lesson Plans', 'INST-LESSON', 'Daily lesson plans and preparation', 6, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
+(2, 1, 'Teaching Materials', 'INST-TEACHMAT', 'Teaching materials and instructional resources', 2, 1, 0, '2026-05-03 09:51:22', '2026-05-09 15:37:59'),
+(3, 1, 'Assessment Tools', 'INST-ASSESS', 'Assessment tools and evaluation instruments', 3, 1, 0, '2026-05-03 09:51:22', '2026-05-09 15:37:59'),
+(4, 1, 'Learning Modules', 'INST-LEARNMOD', 'Learning modules and self-instructional materials', 4, 1, 0, '2026-05-03 09:51:22', '2026-05-09 15:37:59'),
+(5, 1, 'Syllabi', 'INST-SYLLABI', 'Course syllabi and outlines', 5, 1, 0, '2026-05-03 09:51:22', '2026-05-09 15:37:59'),
+(6, 1, 'Lesson Plans', 'INST-LESSON', 'Daily lesson plans and preparation', 6, 1, 0, '2026-05-03 09:51:22', '2026-05-09 15:37:59'),
 (7, 2, 'Publications', 'RES-PUB', 'Research publications in journals and conferences', 1, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
 (8, 2, 'Research Proposals', 'RES-PROP', 'Research proposals and concept papers', 2, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
 (9, 2, 'Ethics Clearance', 'RES-ETHICS', 'Ethics clearance and approval documents', 3, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
@@ -542,10 +605,10 @@ INSERT INTO `standards` (`id`, `category_id`, `name`, `code`, `description`, `so
 (19, 4, 'Personnel Records', 'EMP-RECORDS', 'Personnel records and 201 files', 2, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
 (20, 4, 'Benefits Documentation', 'EMP-BENEFITS', 'Benefits documentation and claims', 3, 1, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
 (21, 4, 'Performance Reviews', 'EMP-PERFORM', 'Performance reviews and evaluations', 4, 0, 1, '2026-05-03 09:51:22', '2026-05-03 09:51:22'),
-(22, 1, 'Course Outlines', 'INST-OUTLINE', 'Detailed course outlines and schedules', 7, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
-(23, 1, 'Instructional Videos', 'INST-VIDEO', 'Video lectures and instructional media', 8, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
-(24, 1, 'Student Workbooks', 'INST-WORKBOOK', 'Student workbooks and activity sheets', 9, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
-(25, 1, 'Teaching Guides', 'INST-GUIDE', 'Teacher guides and manuals', 10, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
+(22, 1, 'Course Outlines', 'INST-OUTLINE', 'Detailed course outlines and schedules', 7, 0, 0, '2026-05-03 20:54:08', '2026-05-09 15:37:59'),
+(23, 1, 'Instructional Videos', 'INST-VIDEO', 'Video lectures and instructional media', 8, 0, 0, '2026-05-03 20:54:08', '2026-05-09 15:37:59'),
+(24, 1, 'Student Workbooks', 'INST-WORKBOOK', 'Student workbooks and activity sheets', 9, 0, 0, '2026-05-03 20:54:08', '2026-05-09 15:37:59'),
+(25, 1, 'Teaching Guides', 'INST-GUIDE', 'Teacher guides and manuals', 10, 0, 0, '2026-05-03 20:54:08', '2026-05-09 15:37:59'),
 (26, 2, 'Research Data', 'RES-DATA', 'Research data sets and analysis', 7, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
 (27, 2, 'Literature Reviews', 'RES-LITREV', 'Comprehensive literature reviews', 8, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
 (28, 2, 'Research Instruments', 'RES-INSTR', 'Survey instruments and questionnaires', 9, 0, 1, '2026-05-03 20:54:08', '2026-05-03 20:54:08'),
@@ -586,7 +649,10 @@ INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`, `setting_ty
 (2, 'sla_approval_hours', '72', 'integer', 'Hours allowed for approval stage', '2026-04-29 11:23:47'),
 (3, 'max_upload_size_mb', '25', 'integer', 'Maximum file upload size in MB', '2026-04-29 11:23:47'),
 (4, 'allowed_file_types', 'pdf,docx,xlsx,jpg,jpeg,png', 'string', 'Allowed file extensions', '2026-04-29 11:23:47'),
-(5, 'maintenance_mode', 'false', 'boolean', 'System maintenance mode flag', '2026-04-29 11:23:47');
+(5, 'maintenance_mode', 'false', 'boolean', 'System maintenance mode flag', '2026-04-29 11:23:47'),
+(37, 'system_name', 'DRMS-QA', 'string', 'System system_name', '2026-05-11 20:53:37'),
+(38, 'institution_name', 'College of Teacher Education', 'string', 'System institution_name', '2026-05-11 20:53:32'),
+(39, 'system_email', NULL, 'string', 'System system_email', '2026-05-11 20:53:32');
 
 -- --------------------------------------------------------
 
@@ -614,15 +680,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `firstName`, `lastName`, `middleInitial`, `role`, `status`, `isVerified`, `lastActive`, `createdAt`, `last_seen`) VALUES
-(1, 'admin@wmsu.edu.ph', '$2b$10$dRzwA7Flcu3EGiNMi977meHQbO6i.pmrXL1lN/Wpmadi2mhtB1Uka', 'Admin', 'User', NULL, 'admin', 'approved', 1, '2026-05-04 05:30:48', '2026-03-24 17:39:26', '2026-04-15 08:14:19'),
-(23, 'qb202102102@wmsu.edu.ph', '$2b$10$8bt36e4jy2k9kDvCmAmtNeCwDawPAzdbtPvRnLz3bNB9WiDb.TpSa', 'karlos', 'valero', 'B', 'dean', 'approved', 1, '2026-04-26 14:36:00', '2026-04-20 05:20:37', NULL),
-(24, 'valerocarlos030@gmail.com', '$2b$10$eVmALQHbe5XeCFDAnojZVO1RyvwIN4bSjMPERw.rpvA.ndXaG/NBC', 'karlos', 'bongcasan', 'S', 'admin', 'approved', 1, '2026-04-26 14:39:22', '2026-04-20 11:32:28', NULL),
-(53, 'gwaposiguilmar@gmail.com', '$2b$10$.8wjPyy4V91/r/tt2ILnPu8U/moM1lLi.4xs6FQvxN3jh.0NaG5t2', 'Guilmars', 'Quimbas', 'a', 'faculty', 'approved', 1, '2026-05-01 05:01:42', '2026-04-30 21:01:14', NULL),
-(63, 'qguilmar@gmail.com', '$2b$10$9CPc7KOEsmQv2ATyPxOnP.wGAo6mDSNKIGYjhCG2FfV70S41psbiu', 'Guilmarr', 'Quimbaa', 'A', 'department-head', 'approved', 1, '2026-05-01 15:42:29', '2026-05-01 07:42:09', NULL),
-(64, 'eh202200781@wmsu.edu.ph', '$2b$10$Jun4Q2JgSc4rc6oYX0an/uzGuTleH8EHsqAFLQ1HIVljER/P.vs6S', 'Daryl', 'Gregorio', NULL, 'faculty', 'approved', 1, '2026-05-02 19:44:27', '2026-05-01 16:30:55', NULL),
-(67, 'banana@gmail.com', '$2b$10$hvwy5OLrRWtPxDu7Bv/Ul.DwxctMVjcwGhHtb9AGL.ac2CgBliXpm', 'Daryl', 'Gregorio', NULL, 'evaluator', 'approved', 1, '2026-05-02 13:44:52', '2026-05-01 18:12:43', NULL),
-(68, 'banana1@gmail.com', '$2b$10$UpeeeTCzlPDvXQB2wgYxYOqDeTIVkSZMd3M4iywdRl0XBWFlF4VwS', 'memaw', 'hello', NULL, 'dean', 'approved', 1, '2026-05-02 19:12:26', '2026-05-02 04:58:02', NULL),
-(69, 'eh202200782@wmsu.edu.ph', '$2b$10$M4AM7NB5Iniv4MMG2snQ4.M2ZU1wbsgt4OtaCwYD2uyR8KrLHXN.m', 'Daryl', 'Gregorio', NULL, 'department-head', 'approved', 1, '2026-05-02 14:55:28', '2026-05-02 07:52:48', NULL);
+(1, 'admin@wmsu.edu.ph', '$2b$10$dRzwA7Flcu3EGiNMi977meHQbO6i.pmrXL1lN/Wpmadi2mhtB1Uka', 'Admin', 'Quimba', '', 'admin', 'approved', 1, '2026-05-13 00:22:51', '2026-03-24 17:39:26', '2026-04-15 08:14:19'),
+(70, 'qguilmar@gmail.com', '$2b$10$qSjoAY2PyLTmpBoFmveNFekflt.yzDunVY/ml/YRdOrpXE4kyrHyq', 'Quimba', 'Guilmar', 'A', 'department-head', 'approved', 1, '2026-05-13 00:22:51', '2026-05-09 16:41:32', NULL),
+(71, 'q1guilmar@gmail.com', '$2b$10$3q6wMjPArEkeZ3WHoZPfd.woeqy1qlYobpSF.hjW822KxmFsvNwVK', 'Jelmar', 'Kemba', 'A', 'evaluator', 'approved', 1, '2026-05-13 00:10:06', '2026-05-11 18:40:55', NULL),
+(72, 'gwaposiguilmar@gmail.com', '$2b$10$3OXmPlXEGim.5oN7xep5vOR1mOwiciu9zf4E98HpaEVNxrBJVR7mO', 'Jelmarara', 'Kembarara', 'A', 'faculty', 'approved', 1, '2026-05-12 05:14:19', '2026-05-11 20:25:55', NULL);
 
 -- --------------------------------------------------------
 
@@ -764,6 +825,15 @@ ALTER TABLE `otps`
   ADD KEY `email` (`email`);
 
 --
+-- Indexes for table `report_history`
+--
+ALTER TABLE `report_history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_generated_at` (`generated_at`),
+  ADD KEY `idx_generated_by` (`generated_by`),
+  ADD KEY `idx_report_type` (`report_type`);
+
+--
 -- Indexes for table `standards`
 --
 ALTER TABLE `standards`
@@ -801,13 +871,13 @@ ALTER TABLE `user_sessions`
 -- AUTO_INCREMENT for table `approval_workflow`
 --
 ALTER TABLE `approval_workflow`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -837,7 +907,7 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `documents`
 --
 ALTER TABLE `documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `document_comments`
@@ -849,13 +919,13 @@ ALTER TABLE `document_comments`
 -- AUTO_INCREMENT for table `document_files`
 --
 ALTER TABLE `document_files`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `document_standards`
 --
 ALTER TABLE `document_standards`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `document_versions`
@@ -867,13 +937,13 @@ ALTER TABLE `document_versions`
 -- AUTO_INCREMENT for table `evaluator_access_limits`
 --
 ALTER TABLE `evaluator_access_limits`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `faculty_profiles`
 --
 ALTER TABLE `faculty_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -888,6 +958,12 @@ ALTER TABLE `otps`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
+-- AUTO_INCREMENT for table `report_history`
+--
+ALTER TABLE `report_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
 -- AUTO_INCREMENT for table `standards`
 --
 ALTER TABLE `standards`
@@ -897,13 +973,13 @@ ALTER TABLE `standards`
 -- AUTO_INCREMENT for table `system_settings`
 --
 ALTER TABLE `system_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
@@ -993,6 +1069,12 @@ ALTER TABLE `notifications`
 --
 ALTER TABLE `otps`
   ADD CONSTRAINT `otps_ibfk_1` FOREIGN KEY (`email`) REFERENCES `users` (`email`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `report_history`
+--
+ALTER TABLE `report_history`
+  ADD CONSTRAINT `report_history_ibfk_1` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `standards`

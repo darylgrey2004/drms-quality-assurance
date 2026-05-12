@@ -1,21 +1,34 @@
 {
   "name": "drms-quality-assurance",
   "version": "1.0.0",
-  "description": "",
+  "description": "Document Records Management System - Quality Assurance",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/darylgrey2004/drms-quality-assurance.git"
+  "engines": {
+    "node": "22.x"
   },
-  "keywords": [],
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.2",
+    "nodemailer": "^8.0.3",
+    "ua-parser-js": "^1.0.41"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "keywords": [
+    "document-management",
+    "quality-assurance",
+    "education"
+  ],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/darylgrey2004/drms-quality-assurance/issues"
-  },
-  "homepage": "https://github.com/darylgrey2004/drms-quality-assurance#readme"
+  "license": "ISC"
 }
