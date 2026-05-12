@@ -78,8 +78,9 @@ try {
     res.sendFile(path.join(__dirname, 'landing.html'));
   });
 
-  app.get('*.html', (req, res) => {
-    res.sendFile(path.join(__dirname, req.path));
+  // Catch-all for HTML files
+  app.get('/:page.html', (req, res) => {
+    res.sendFile(path.join(__dirname, req.params.page + '.html'));
   });
 
   // Start server
