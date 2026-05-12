@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load compliance report
     async function loadComplianceReport() {
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/documents/reports/compliance', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/reports/compliance`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load gap analysis
     async function loadGapAnalysis() {
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/documents/reports/gap-analysis', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/reports/gap-analysis`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load progress reports (monthly/quarterly data)
     async function loadProgressReports() {
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/documents/reports/monthly-progress', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/reports/monthly-progress`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load historical data
     async function loadHistoricalData() {
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/documents/reports/compliance', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/reports/compliance`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,

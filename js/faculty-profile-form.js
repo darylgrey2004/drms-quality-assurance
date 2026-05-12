@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Send to backend
             try {
                 console.log('Sending faculty profile data to backend:', finalPayload);
-                const response = await fetch('http://127.0.0.1:3000/api/profile/faculty', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/profile/faculty`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
