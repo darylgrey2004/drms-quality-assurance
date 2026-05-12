@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const role = (user.role || 'Evaluator').toString();
@@ -8,6 +8,55 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = 'landing.html';
         return;
     }
+
+    // Check evaluator access expiry on page load
+    async function checkEvaluatorAccess() {
+        const userRole = (user.role || '').toString().toLowerCase().trim();
+        const isEvaluator = userRole === 'evaluator' || userRole === 'external evaluator';
+        
+        if (!isEvaluator) return true;
+        
+        try {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/evaluator/access-expiry/${user.id}`, {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.status === 403) {
+                const data = await response.json();
+                if (data.expired) {
+                    alert('Your External Evaluator access has expired. Please contact the administrator.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'landing.html';
+                    return false;
+                }
+            }
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.expired || (data.expiresAt && new Date(data.expiresAt) <= new Date())) {
+                    alert('Your External Evaluator access has expired. Please contact the administrator.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'landing.html';
+                    return false;
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error checking evaluator access:', error);
+            return true;
+        }
+    }
+
+    // Check access first
+    const hasAccess = await checkEvaluatorAccess();
+    if (!hasAccess) return;
 
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
