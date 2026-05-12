@@ -94,10 +94,19 @@ router.post('/users', adminAuth, async (req, res) => {
   }
 
   if (isEvaluatorRole) {
+    // Parse the datetime-local input (which is in Philippines timezone)
     parsedEvaluatorExpiration = new Date(evaluatorExpiresAt);
     if (Number.isNaN(parsedEvaluatorExpiration.getTime())) {
       return res.status(400).json({ msg: 'Invalid evaluator expiration date/time.' });
     }
+    
+    // Convert Philippines time (UTC+8) to UTC for storage
+    // The datetime-local input gives us local time, but we need to store UTC
+    // Subtract 8 hours to convert Philippines time to UTC
+    const phOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+    parsedEvaluatorExpiration = new Date(parsedEvaluatorExpiration.getTime() - phOffset);
+    
+    // Check if expiry is in the future (in UTC)
     if (parsedEvaluatorExpiration <= new Date()) {
       return res.status(400).json({ msg: 'Evaluator expiration must be set to a future date/time.' });
     }

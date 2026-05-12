@@ -199,24 +199,27 @@ router.post('/login', async (req, res) => {
           [user.id]
         );
         if (limits.length > 0) {
-          const expiresAt = new Date(limits[0].expiresAt);
-          const now = new Date();
+          // Database stores time in UTC, but we need to compare in Philippines timezone (UTC+8)
+          const expiresAtUTC = new Date(limits[0].expiresAt);
+          const nowUTC = new Date();
           
-          // DEBUG LOGGING
+          // Convert to Philippines time for logging
+          const phOffset = 8 * 60; // Philippines is UTC+8
+          const expiresAtPH = new Date(expiresAtUTC.getTime() + (phOffset * 60 * 1000));
+          const nowPH = new Date(nowUTC.getTime() + (phOffset * 60 * 1000));
+          
           console.log('=== EVALUATOR EXPIRY CHECK ===');
           console.log('User ID:', user.id);
-          console.log('Expiry from DB:', limits[0].expiresAt);
-          console.log('Expiry Date Object:', expiresAt);
-          console.log('Current Date Object:', now);
-          console.log('Expiry ISO:', expiresAt.toISOString());
-          console.log('Now ISO:', now.toISOString());
-          console.log('Expiry Time:', expiresAt.getTime());
-          console.log('Now Time:', now.getTime());
-          console.log('Is Expired (now >= expiresAt):', now >= expiresAt);
-          console.log('Time difference (ms):', now.getTime() - expiresAt.getTime());
+          console.log('Expiry from DB (UTC):', limits[0].expiresAt);
+          console.log('Expiry UTC:', expiresAtUTC.toISOString());
+          console.log('Expiry PH Time:', expiresAtPH.toISOString().replace('Z', '+08:00'));
+          console.log('Current UTC:', nowUTC.toISOString());
+          console.log('Current PH Time:', nowPH.toISOString().replace('Z', '+08:00'));
+          console.log('Is Expired (nowUTC >= expiresAtUTC):', nowUTC >= expiresAtUTC);
+          console.log('Time until expiry (seconds):', Math.floor((expiresAtUTC.getTime() - nowUTC.getTime()) / 1000));
           console.log('==============================');
           
-          if (!Number.isNaN(expiresAt.getTime()) && now >= expiresAt) {
+          if (!Number.isNaN(expiresAtUTC.getTime()) && nowUTC >= expiresAtUTC) {
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.' });
           }
         }
