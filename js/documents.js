@@ -1,6 +1,6 @@
 // js/documents.js - Real backend integration
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 let allDocuments = [];
 let filteredDocuments = [];
 let currentPage = 1;

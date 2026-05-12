@@ -1,6 +1,6 @@
 // js/search.js
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 let allDocuments = [];
 let filteredDocuments = [];
 let currentPage = 1;
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});

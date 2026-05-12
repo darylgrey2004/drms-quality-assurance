@@ -1,6 +1,6 @@
 // js/evaluator-search.js
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
 // Helper functions (defined globally for use in modals)
 function getCategoryBadge(categoryClass) {

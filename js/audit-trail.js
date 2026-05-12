@@ -1,6 +1,6 @@
 // js/audit-trail.js
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Audit Trail page loaded');
@@ -180,7 +180,7 @@ function renderAuditLogs(logs) {
         const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 
         // Version column - show version or dash
-        const version = log.version || '—';
+        const version = log.document_version || '—';
 
         return `
             <tr class="audit-row hover:bg-gray-50">
@@ -560,8 +560,29 @@ function showToastMessage(message, type = 'success') {
 }
 
 // View log details
-window.viewLogDetails = function(logId) {
-    alert(`Viewing details for log ID: ${logId}\n\nThis would show a modal with full log details including old/new values.`);
+window.viewLogDetails = async function(logId) {
+    const log = window.currentAuditLogs?.find(l => l.id === logId);
+    if (!log || !log.entity_id || log.entity_type !== 'document') {
+        alert('No document details available for this log entry.');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/api/audit/document/${log.entity_id}`, {
+            headers: { 'x-auth-token': token }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch document details');
+        }
+
+        const data = await response.json();
+        openDocumentDetailsModal(data.document, data.versions);
+    } catch (error) {
+        console.error('Error fetching document details:', error);
+        showToastMessage('Failed to load document details', 'error');
+    }
 };
 
 // Debounce helper
@@ -575,4 +596,165 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// Open document details modal
+function openDocumentDetailsModal(doc, versions) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('auditDocDetailsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'auditDocDetailsModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg w-full max-w-3xl max-h-[85vh] flex flex-col">
+                <div class="flex items-center justify-between p-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">Document Details</h3>
+                    <button id="auditDocDetailsCloseBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-5 space-y-4" id="auditDocDetailsContent"></div>
+                <div class="flex justify-end gap-3 p-4 border-t">
+                    <button id="auditDocDetailsCloseBtn2" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Setup close handlers
+        document.getElementById('auditDocDetailsCloseBtn').addEventListener('click', closeDocumentDetailsModal);
+        document.getElementById('auditDocDetailsCloseBtn2').addEventListener('click', closeDocumentDetailsModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeDocumentDetailsModal();
+        });
+    }
+
+    const content = document.getElementById('auditDocDetailsContent');
+    if (!content) return;
+
+    // Format keywords
+    let keywordsHtml = '';
+    if (doc.keywords) {
+        const keywords = doc.keywords.split(',').map(k => k.trim());
+        keywordsHtml = `
+            <div class="flex flex-wrap gap-2 mt-2">
+                ${keywords.map(k => `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${escapeHtml(k)}</span>`).join('')}
+            </div>
+        `;
+    } else {
+        keywordsHtml = '<p class="text-gray-400 text-sm italic">No keywords provided</p>';
+    }
+
+    // Format versions
+    let versionsHtml = '';
+    if (versions && versions.length > 0) {
+        versionsHtml = `
+            <div class="space-y-2">
+                ${versions.map(v => `
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-medium text-gray-800">${escapeHtml(v.version_number)}</span>
+                                <p class="text-xs text-gray-500 mt-1">Created by ${escapeHtml(v.created_by_name || 'Unknown')} on ${formatDateTime(v.created_at)}</p>
+                            </div>
+                        </div>
+                        ${v.changes_description ? `<p class="text-sm text-gray-600 mt-2">${escapeHtml(v.changes_description)}</p>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        versionsHtml = '<p class="text-gray-400 text-sm italic">No version history available</p>';
+    }
+
+    content.innerHTML = `
+        <div class="border-b pb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Document Information</h4>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <span class="text-gray-500">Title:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.title || 'Untitled')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Current Version:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.version || 'v1.0')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Category:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.category_name || 'N/A')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Department:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.department_code || 'N/A')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Status:</span>
+                    <p class="font-medium mt-1">${getStatusBadge(doc.workflow_status)}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Author:</span>
+                    <p class="font-medium text-gray-800 mt-1">${escapeHtml(doc.author_name || doc.uploader_name || 'Unknown')}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Created:</span>
+                    <p class="font-medium text-gray-800 mt-1">${formatDateTime(doc.created_at)}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Last Updated:</span>
+                    <p class="font-medium text-gray-800 mt-1">${formatDateTime(doc.updated_at)}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="border-b pb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Description</h4>
+            <div class="bg-gray-50 rounded-lg p-4">
+                ${doc.description ? `<p class="text-gray-700 text-sm leading-relaxed">${escapeHtml(doc.description)}</p>` : '<p class="text-gray-400 text-sm italic">No description provided</p>'}
+            </div>
+        </div>
+        
+        <div class="border-b pb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Keywords</h4>
+            ${keywordsHtml}
+        </div>
+
+        <div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Version History</h4>
+            ${versionsHtml}
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDocumentDetailsModal() {
+    const modal = document.getElementById('auditDocDetailsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function getStatusBadge(status) {
+    const statusMap = {
+        'approved': '<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Approved</span>',
+        'pending': '<span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">Pending</span>',
+        'validated': '<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Validated</span>',
+        'rejected': '<span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Rejected</span>',
+        'locked': '<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">Locked</span>',
+        'draft': '<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">Draft</span>'
+    };
+    return statusMap[status] || `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">${status || 'Unknown'}</span>`;
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});

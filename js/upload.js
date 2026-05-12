@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalDocumentTitle = document.getElementById('modalDocumentTitle');
 
     let selectedFiles = [];
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
     // Load categories and departments dynamically
     loadCategories();
@@ -243,11 +243,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadRecentUploads() {
-        fetch(`${API_BASE}/api/documents?scope=mine`, {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userRole = (user.role || '').toLowerCase();
+        const isAdminOrDean = userRole === 'admin' || userRole === 'dean';
+        
+        // Admin/Dean see all uploads, others see only their own
+        const scope = isAdminOrDean ? 'all' : 'mine';
+        
+        fetch(`${API_BASE}/api/documents?scope=${scope}`, {
             headers: { 'x-auth-token': token }
         })
         .then(r => r.json())
         .then(documents => {
+            // Sort by created_at descending (most recent first)
+            documents.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             renderRecentUploads(documents.slice(0, 5));
         })
         .catch(err => console.error('Load recent uploads error:', err));
@@ -266,9 +275,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (desktopContainer) {
             desktopContainer.innerHTML = documents.map(doc => {
                 const uploadDate = new Date(doc.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                const uploaderName = doc.author_name || `${doc.uploader_firstName || ''} ${doc.uploader_lastName || ''}`.trim() || 'Unknown';
+                
                 return `
                     <div class="grid grid-cols-12 py-2 text-sm items-center">
-                        <div class="col-span-5 text-gray-700 truncate" title="${doc.title || 'Untitled'}">${doc.title || 'Untitled'}</div>
+                        <div class="col-span-5">
+                            <div class="text-gray-700 truncate font-medium" title="${doc.title || 'Untitled'}">${doc.title || 'Untitled'}</div>
+                            <div class="text-xs text-gray-400">by ${uploaderName}</div>
+                        </div>
                         <div class="col-span-2 text-gray-600">${doc.category_display_name || doc.category || '-'}</div>
                         <div class="col-span-2 text-gray-600">${doc.department_code || doc.area || '-'}</div>
                         <div class="col-span-3 text-gray-400 text-xs">${uploadDate}</div>
@@ -280,10 +294,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mobileContainer) {
             mobileContainer.innerHTML = documents.map(doc => {
                 const uploadDate = new Date(doc.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                const uploaderName = doc.author_name || `${doc.uploader_firstName || ''} ${doc.uploader_lastName || ''}`.trim() || 'Unknown';
+                
                 return `
                     <div class="border-b pb-2">
                         <div class="font-medium text-gray-800 text-sm">${doc.title || 'Untitled'}</div>
-                        <div class="text-xs text-gray-500">${doc.category_display_name || doc.category || '-'} · ${doc.department_code || doc.area || '-'} · ${uploadDate}</div>
+                        <div class="text-xs text-gray-500">by ${uploaderName}</div>
+                        <div class="text-xs text-gray-500 mt-1">${doc.category_display_name || doc.category || '-'} · ${doc.department_code || doc.area || '-'} · ${uploadDate}</div>
                     </div>
                 `;
             }).join('');

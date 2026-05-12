@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             submitPasswordBtn.textContent = 'Changing...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/change-password', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-password`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

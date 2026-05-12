@@ -114,10 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Normalize role for comparison
         const normalizedRole = role?.toLowerCase().trim();
         
-        // Admin access - goes to admin dashboard (homepage.html)
+        // Admin access - goes to admin dashboard (index.html)
         if (normalizedRole === 'admin') {
-            console.log('Redirecting to admin dashboard (homepage.html)');
-            window.location.href = 'homepage.html';
+            console.log('Redirecting to admin dashboard (index.html)');
+            window.location.href = 'index.html';
             return;
         }
         
@@ -137,8 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Dean - use admin-style sidebar/dashboard
         if (normalizedRole === 'dean') {
-            console.log('Redirecting to dean/admin dashboard (homepage.html)');
-            window.location.href = 'homepage.html';
+            console.log('Redirecting to dean/admin dashboard (index.html)');
+            window.location.href = 'index.html';
             return;
         }
         

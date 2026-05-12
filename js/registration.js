@@ -307,6 +307,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert('Invalid Email', 'Please enter a valid email address', 'error');
                 return;
             }
+            
+            // Validate @wmsu.edu.ph domain
+            if (!email.endsWith('@wmsu.edu.ph')) {
+                showAlert('Invalid Email Domain', 'Only @wmsu.edu.ph email addresses are allowed for registration', 'error');
+                return;
+            }
 
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;

@@ -1,6 +1,6 @@
 // js/user-evidence-map.js
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('User Evidence Map JS loaded');

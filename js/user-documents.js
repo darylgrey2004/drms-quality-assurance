@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!session) return;
     
     const { token, user, role } = session;
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
     // Toast helper
     const actionToast = document.getElementById('actionToast');

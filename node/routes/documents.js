@@ -991,21 +991,19 @@ router.get('/stats/evaluator', auth, async (req, res) => {
     );
     const pendingDocuments = pendingResult[0]?.total || 0;
     
-    // Get counts by category (only locked documents) with requirements from category_requirements
+    // Get counts by category (approved + locked documents) with requirements from category_requirements
     const [categoryStats] = await db.query(
       `SELECT 
         c.name,
         c.display_name,
-        COUNT(d.id) as count,
-        ROUND((COUNT(d.id) * 100.0 / ?), 1) as percentage,
+        COUNT(DISTINCT CASE WHEN d.workflow_status IN ('approved', 'locked') THEN d.id END) as count,
         SUM(cr.expected_documents) as total_required
        FROM categories c
-       LEFT JOIN documents d ON c.id = d.category_id AND d.workflow_status = 'locked'
        LEFT JOIN category_requirements cr ON c.id = cr.category_id
+       LEFT JOIN documents d ON c.id = d.category_id
        WHERE c.is_active = 1
        GROUP BY c.id, c.name, c.display_name
-       ORDER BY c.sort_order ASC`,
-      [totalDocuments || 1]
+       ORDER BY c.sort_order ASC`
     );
     
     // Get counts by department (only locked documents)

@@ -58,13 +58,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Admin should always use admin-style pages/sidebar.
     if (normalizedRole === 'admin') {
-        window.location.href = 'homepage.html';
+        window.location.href = 'index.html';
         return;
     }
 
     // Dean can access the shared profile page, but keeps admin-style pages elsewhere.
     if (normalizedRole === 'dean' && currentPage !== 'user-profile.html') {
-        window.location.href = 'homepage.html';
+        window.location.href = 'index.html';
         return;
     }
 
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // For Dean on profile page, use admin sidebar
         if (normalizedRole === 'dean' && currentPage === 'user-profile.html') {
             nav.innerHTML = `
-                <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+                <a href="index.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                     <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
                 </a>
                 <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!nav) return;
 
         nav.innerHTML = `
-            <a href="homepage.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
+            <a href="index.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">
                 <span class="mr-3 text-teal-300/70 w-5">Dashboard</span>
             </a>
             <a href="documents.html" class="flex items-center px-3 py-2.5 rounded-md text-gray-300 hover-nav">

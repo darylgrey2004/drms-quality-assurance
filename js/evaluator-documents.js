@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Fetching locked documents for evaluator...');
             // Evaluators can only see LOCKED documents (final approved documents)
-            const response = await fetch('http://localhost:3000/api/documents?status=locked', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents?status=locked`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,

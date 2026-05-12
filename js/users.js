@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function sendHeartbeat() {
         if (isTokenExpired(token)) return;
         
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/admin/users', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/users`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/admin/users', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/users`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -407,11 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.status === 403) {
                     if (viewerRole === 'dean') {
                         showAlert('Dean access to Users requires updated server permissions.', 'Access Denied', 'error');
-                        setTimeout(() => window.location.href = 'homepage.html', 2000);
+                        setTimeout(() => window.location.href = 'index.html', 2000);
                         return;
                     }
                     showAlert('You are not authorized to view this page.', 'Access Denied', 'error');
-                    setTimeout(() => window.location.href = 'homepage.html', 2000);
+                    setTimeout(() => window.location.href = 'index.html', 2000);
                     return;
                 }
 

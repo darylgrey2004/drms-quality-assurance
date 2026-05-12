@@ -93,7 +93,8 @@ router.get('/logs', auth, async (req, res) => {
         u.role as user_role,
         d.title as document_title,
         d.category_name,
-        d.department_code
+        d.department_code,
+        d.version as document_version
       FROM audit_logs al
       LEFT JOIN users u ON al.user_id = u.id
       LEFT JOIN documents d ON al.entity_type = 'document' AND al.entity_id = d.id
@@ -324,6 +325,71 @@ router.get('/export', auth, async (req, res) => {
 
   } catch (err) {
     console.error('Audit export error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/audit/document/:id
+// @desc    Get document details for audit trail modal
+// @access  Private (Admin, Dean)
+router.get('/document/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin' && req.user.role !== 'dean') {
+      return res.status(403).json({ msg: 'Access denied' });
+    }
+
+    const documentId = req.params.id;
+
+    // Get document details
+    const [documents] = await db.query(`
+      SELECT 
+        d.id,
+        d.title,
+        d.version,
+        d.description,
+        d.keywords,
+        d.workflow_status,
+        d.created_at,
+        d.updated_at,
+        d.category_name,
+        d.department_code,
+        d.author_name,
+        CONCAT(u.firstName, ' ', u.lastName) as uploader_name,
+        df.url_path as file_url
+      FROM documents d
+      LEFT JOIN users u ON d.uploader_id = u.id
+      LEFT JOIN document_files df ON d.id = df.document_id
+      WHERE d.id = ?
+    `, [documentId]);
+
+    if (documents.length === 0) {
+      return res.status(404).json({ msg: 'Document not found' });
+    }
+
+    const document = documents[0];
+
+    // Get document versions
+    const [versions] = await db.query(`
+      SELECT 
+        dv.id,
+        dv.version_number,
+        dv.file_url,
+        dv.changes_description,
+        dv.created_at,
+        CONCAT(u.firstName, ' ', u.lastName) as created_by_name
+      FROM document_versions dv
+      LEFT JOIN users u ON dv.created_by = u.id
+      WHERE dv.document_id = ?
+      ORDER BY dv.created_at DESC
+    `, [documentId]);
+
+    res.json({
+      document,
+      versions
+    });
+
+  } catch (err) {
+    console.error('Audit document details error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

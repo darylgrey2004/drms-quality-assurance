@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadDashboardStats() {
         try {
             console.log('Fetching evaluator dashboard statistics (locked documents only)...');
-            const response = await fetch('http://localhost:3000/api/documents/stats/evaluator', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/stats/evaluator`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -155,6 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+
+            // Update Accreditation Progress section
+            updateAccreditationProgress(stats.categories || []);
 
             // Update Approved card - shows ALL approved documents (approved + locked)
             const approvedElement = document.getElementById('statApproved');
@@ -215,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Fetching recent locked documents (evaluator view - all departments)...');
             // Evaluators can only see LOCKED documents from ALL departments
-            const response = await fetch('http://localhost:3000/api/documents?status=locked', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents?status=locked`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
@@ -318,6 +321,50 @@ document.addEventListener('DOMContentLoaded', function() {
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
+        });
+    }
+
+    // Update Accreditation Progress section
+    function updateAccreditationProgress(categories) {
+        console.log('Updating Accreditation Progress with categories:', categories);
+        
+        // Map category names to their IDs
+        const categoryMap = {
+            'instruction': { percent: 'progressInstruction', bar: 'progressInstructionBar', detail: 'instructionDetail' },
+            'research': { percent: 'progressResearch', bar: 'progressResearchBar', detail: 'researchDetail' },
+            'extension': { percent: 'progressExtension', bar: 'progressExtensionBar', detail: 'extensionDetail' },
+            'employment': { percent: 'progressEmployment', bar: 'progressEmploymentBar', detail: 'employmentDetail' }
+        };
+        
+        categories.forEach(cat => {
+            const categoryName = (cat.name || '').toLowerCase();
+            const ids = categoryMap[categoryName];
+            
+            if (!ids) return;
+            
+            const currentCount = cat.count || 0;
+            const requiredCount = cat.total_required || 0;
+            const percentage = requiredCount > 0 ? Math.round((currentCount / requiredCount) * 100) : 0;
+            
+            // Update percentage text
+            const percentElement = document.getElementById(ids.percent);
+            if (percentElement) {
+                percentElement.textContent = `${percentage}%`;
+            }
+            
+            // Update progress bar width
+            const barElement = document.getElementById(ids.bar);
+            if (barElement) {
+                barElement.style.width = `${percentage}%`;
+            }
+            
+            // Update detail text
+            const detailElement = document.getElementById(ids.detail);
+            if (detailElement) {
+                detailElement.textContent = `${currentCount} of ${requiredCount} documents`;
+            }
+            
+            console.log(`Updated ${categoryName}: ${currentCount}/${requiredCount} (${percentage}%)`);
         });
     }
 

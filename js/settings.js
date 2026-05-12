@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const isDean = userRole === 'dean';
     
     if (!isAdmin && !isDean) {
-        window.location.href = 'homepage.html';
+        window.location.href = 'index.html';
         return;
     }
 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function loadUserProfile() {
         try {
-            const response = await fetch('http://localhost:3000/api/profile/me', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/profile/me`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         try {
-            const response = await fetch('http://localhost:3000/api/profile/update', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/profile/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/change-password', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-password`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -646,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sendOtpBtn.textContent = 'Sending...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/change-email/send-otp', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/send-otp`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -694,7 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resendOtpBtn.textContent = 'Sending...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/change-email/send-otp', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/send-otp`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded', function() {
             verifyOtpBtn.textContent = 'Verifying...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/change-email/verify-otp', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/verify-otp`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
         resetRequirementsBtn.addEventListener('click', async () => {
             if (confirm('Reset all document requirements to default values?')) {
                 try {
-                    const response = await fetch('http://localhost:3000/api/settings/requirements/reset', {
+                    const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/settings/requirements/reset`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             try {
-                const response = await fetch('http://localhost:3000/api/settings/requirements', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/settings/requirements`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -907,7 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function loadSavedRequirements() {
         try {
-            const response = await fetch('http://localhost:3000/api/settings/requirements', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/settings/requirements`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -938,7 +938,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function loadRequirementsFromDatabase() {
         try {
-            const response = await fetch('http://localhost:3000/api/documents/category-requirements', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/documents/category-requirements`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -989,7 +989,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             try {
-                const response = await fetch('http://localhost:3000/api/settings/general', {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/settings/general`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1022,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     
     function loadStandardsSettings() {
-        fetch('http://localhost:3000/api/admin/standards/all', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/standards/all`, {
             headers: { 'x-auth-token': token }
         })
         .then(r => {
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function loadSavedGeneralSettings() {
         try {
-            const response = await fetch('http://localhost:3000/api/settings/general', {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/settings/general`, {
                 headers: { 'x-auth-token': token }
             });
             

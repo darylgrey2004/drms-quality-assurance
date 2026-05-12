@@ -5,7 +5,7 @@ class SessionManager {
   constructor() {
     this.sessionToken = localStorage.getItem('sessionToken');
     this.token = localStorage.getItem('token');
-    this.API_BASE = 'http://localhost:3000';
+    this.API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
     this.heartbeatInterval = null;
   }
 

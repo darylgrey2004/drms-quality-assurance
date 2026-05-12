@@ -1,6 +1,6 @@
-// js/homepage.js
+// js/index.js
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ── Heartbeat: Update lastActive status ──
     function sendHeartbeat() {
-        fetch('http://localhost:3000/api/user/heartbeat', {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         }).catch(() => {});
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Optional: Add active state tracking for sidebar navigation
-    const currentPath = window.location.pathname.split('/').pop() || 'homepage.html';
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('nav a');
     
     navLinks.forEach(link => {
@@ -148,7 +148,9 @@ async function loadDashboardData() {
     const token = localStorage.getItem('token');
     
     try {
-        console.log('Loading dashboard data from backend...');
+        console.log('=== LOADING DASHBOARD DATA ===');
+        console.log('API_BASE:', API_BASE);
+        console.log('Token exists:', !!token);
         
         // Fetch documents and requirements
         const [docsResponse, reqResponse] = await Promise.all([
@@ -160,31 +162,42 @@ async function loadDashboardData() {
             })
         ]);
         
-        console.log('Documents response:', docsResponse.status);
-        console.log('Requirements response:', reqResponse.status);
+        console.log('Documents response:', docsResponse.status, docsResponse.statusText);
+        console.log('Requirements response:', reqResponse.status, reqResponse.statusText);
         
         if (!docsResponse.ok || !reqResponse.ok) {
+            const docsError = !docsResponse.ok ? await docsResponse.text() : '';
+            const reqError = !reqResponse.ok ? await reqResponse.text() : '';
+            console.error('API Error - Docs:', docsError);
+            console.error('API Error - Reqs:', reqError);
             throw new Error('Failed to fetch data');
         }
         
         const documents = await docsResponse.json();
         const requirements = await reqResponse.json();
         
-        console.log('Documents loaded:', documents.length);
-        console.log('Requirements loaded:', requirements.length);
+        console.log('✓ Documents loaded:', documents.length);
+        console.log('✓ Requirements loaded:', requirements.length);
+        console.log('Sample document:', documents[0]);
+        console.log('Sample requirement:', requirements[0]);
         
         // Calculate statistics
+        console.log('Calling updateDashboardStats...');
         updateDashboardStats(documents, requirements);
+        console.log('✓ Dashboard stats updated');
         
     } catch (error) {
-        console.error('Error loading dashboard data:', error);
+        console.error('❌ Error loading dashboard data:', error);
+        console.error('Error stack:', error.stack);
         // Use fallback data
         useFallbackData();
     }
 }
 
 function updateDashboardStats(documents, requirements) {
-    console.log('Updating dashboard stats...');
+    console.log('=== UPDATING DASHBOARD STATS ===');
+    console.log('Documents:', documents.length);
+    console.log('Requirements:', requirements.length);
     
     // Calculate total requirements per category (sum across all departments)
     const categoryRequirements = {
@@ -232,9 +245,20 @@ function updateDashboardStats(documents, requirements) {
     
     console.log('KPI totals:', { totalDocs, totalApproved, totalPending, totalRejected, totalRequired });
     
-    document.getElementById('totalDocs').textContent = totalDocs;
-    document.getElementById('approvedDocs').textContent = totalApproved;
-    document.getElementById('pendingDocs').textContent = totalPending;
+    console.log('Updating DOM elements...');
+    const totalDocsEl = document.getElementById('totalDocs');
+    const approvedDocsEl = document.getElementById('approvedDocs');
+    const pendingDocsEl = document.getElementById('pendingDocs');
+    
+    console.log('Elements found:', {
+        totalDocs: !!totalDocsEl,
+        approvedDocs: !!approvedDocsEl,
+        pendingDocs: !!pendingDocsEl
+    });
+    
+    if (totalDocsEl) totalDocsEl.textContent = totalDocs;
+    if (approvedDocsEl) approvedDocsEl.textContent = totalApproved;
+    if (pendingDocsEl) pendingDocsEl.textContent = totalPending;
     
     const approvalRate = totalRequired > 0 ? ((totalApproved / totalRequired) * 100).toFixed(1) : 0;
     document.getElementById('approvalRate').textContent = `${approvalRate}% of required`;

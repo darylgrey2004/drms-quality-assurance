@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const role = (user.role || '').toLowerCase();
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
 
     // Access guard
     if (!token) {
