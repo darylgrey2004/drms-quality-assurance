@@ -201,9 +201,7 @@ router.post('/login', async (req, res) => {
         if (limits.length > 0) {
           const expiresAt = new Date(limits[0].expiresAt);
           const now = new Date();
-          // Set both dates to start of day for fair comparison
-          expiresAt.setHours(23, 59, 59, 999);
-          if (!Number.isNaN(expiresAt.getTime()) && expiresAt < now) {
+          if (!Number.isNaN(expiresAt.getTime()) && now >= expiresAt) {
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.' });
           }
         }
