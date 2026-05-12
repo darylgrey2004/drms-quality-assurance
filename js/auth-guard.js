@@ -69,22 +69,14 @@
             return;
         }
         
-        // Check 1: Prevent direct file access
-        if (isFileProtocol()) {
-            console.error('[AUTH-GUARD] Direct file access detected - redirecting to login');
-            alert('Security Warning: Please access this application through a web server.\n\nDirect file access is not allowed for security reasons.');
-            redirectToLogin('Direct file access not allowed');
-            return;
-        }
-        
-        // Check 2: Verify authentication
+        // Check: Verify authentication
         if (!isAuthenticated()) {
             console.error('[AUTH-GUARD] No valid authentication - redirecting to login');
             redirectToLogin('Not authenticated');
             return;
         }
         
-        // Check 3: Verify user object is valid
+        // Check: Verify user object is valid
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user || !user.id || !user.role) {
