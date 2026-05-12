@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 newEmailDisplay.textContent = newEmail;
                 emailStep1.classList.add('hidden');
                 emailStep2.classList.remove('hidden');
-                showOtpSuccess(data.msg || 'Verification code sent to your current email');
+                showOtpSuccess(data.msg || 'Verification code sent to your new email');
                 setTimeout(() => otpSuccess.classList.add('hidden'), 5000);
                 
             } catch (error) {
