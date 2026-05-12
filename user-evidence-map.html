@@ -256,7 +256,7 @@
                 }
                 
                 // Fetch real documents from backend
-                const response = await fetch('http://localhost:3000/api/documents?scope=all', {
+                const response = await fetch(API_CONFIG.getApiUrl('/api/documents?scope=all'), {
                     method: 'GET',
                     headers: headers
                 });
@@ -525,7 +525,7 @@
         const token = localStorage.getItem('token');
         function sendHeartbeat() {
             if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
+                fetch(API_CONFIG.getApiUrl('/api/user/heartbeat'), {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                 }).catch(() => {});

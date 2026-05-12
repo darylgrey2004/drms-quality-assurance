@@ -380,7 +380,7 @@
         const token = localStorage.getItem('token');
         function sendHeartbeat() {
             if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
+                fetch(API_CONFIG.getApiUrl('/api/user/heartbeat'), {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                 }).catch(() => {});

@@ -541,7 +541,7 @@
         const token = localStorage.getItem('token');
         function sendHeartbeat() {
             if (token) {
-                fetch('http://localhost:3000/api/user/heartbeat', {
+                fetch(API_CONFIG.getApiUrl('/api/user/heartbeat'), {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                 }).catch(() => {});
@@ -603,7 +603,7 @@
                 }
                 
                 try {
-                    const response = await fetch('http://localhost:3000/api/auth/change-password', {
+                    const response = await fetch(API_CONFIG.getApiUrl('/api/auth/change-password'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -728,7 +728,7 @@
                 sendOtpBtn.textContent = 'Sending...';
                 
                 try {
-                    const response = await fetch('http://localhost:3000/api/auth/change-email/send-otp', {
+                    const response = await fetch(API_CONFIG.getApiUrl('/api/auth/change-email/send-otp'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -776,7 +776,7 @@
                 resendOtpBtn.textContent = 'Sending...';
                 
                 try {
-                    const response = await fetch('http://localhost:3000/api/auth/change-email/send-otp', {
+                    const response = await fetch(API_CONFIG.getApiUrl('/api/auth/change-email/send-otp'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -819,7 +819,7 @@
                 verifyOtpBtn.textContent = 'Verifying...';
                 
                 try {
-                    const response = await fetch('http://localhost:3000/api/auth/change-email/verify-otp', {
+                    const response = await fetch(API_CONFIG.getApiUrl('/api/auth/change-email/verify-otp'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
