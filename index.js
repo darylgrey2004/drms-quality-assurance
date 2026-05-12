@@ -60,7 +60,7 @@ try {
     }
   });
 
-  // API Routes
+  // API Routes (must come before HTML routes)
   app.use('/api/auth', authRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/user', userRoutes);
@@ -78,9 +78,14 @@ try {
     res.sendFile(path.join(__dirname, 'landing.html'));
   });
 
-  // Catch-all for HTML files
+  // Catch-all for HTML files with error handling
   app.get('/:page.html', (req, res) => {
-    res.sendFile(path.join(__dirname, req.params.page + '.html'));
+    const filePath = path.join(__dirname, req.params.page + '.html');
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        res.status(404).send('Page not found');
+      }
+    });
   });
 
   // Start server
