@@ -659,38 +659,43 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Store OTP with new email to verify ownership
-    await db.query('DELETE FROM otps WHERE email = ?', [newEmail]);
+    // Store OTP with CURRENT email (since foreign key references users.email)
+    // We'll store the new email in a separate column or use metadata
+    await db.query('DELETE FROM otps WHERE email = ?', [currentEmail]);
     await db.query(
       'INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)',
-      [newEmail, otp, expiresAt]
+      [currentEmail, otp, expiresAt]
     );
 
-    // Send OTP to NEW email to verify ownership
+    // Store the pending new email in session/temp storage
+    // For now, we'll pass it back and forth in the request
+    // In production, you might want to store this in a separate table
+
+    // Send OTP to CURRENT email to verify it's really the user
     try {
       const mailOptions = {
         from: `"DRMS-QA" <${process.env.EMAIL_USER}>`,
-        to: newEmail,
-        subject: 'Email Verification Code - DRMS-QA',
-        text: `You are receiving this email because someone requested to change their DRMS-QA account email to this address. Your verification code is ${otp}. It will expire in 10 minutes. If you didn't request this, please ignore this email.`,
+        to: currentEmail,
+        subject: 'Email Change Verification Code - DRMS-QA',
+        text: `You requested to change your email address to ${newEmail}. Your verification code is ${otp}. It will expire in 10 minutes. If you didn't request this, please ignore this email and change your password immediately.`,
         html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Email Verification Request</h2>
-          <p>You are receiving this email because someone requested to change their DRMS-QA account email to this address.</p>
+          <h2>Email Change Request</h2>
+          <p>You requested to change your email address from <strong>${currentEmail}</strong> to <strong>${newEmail}</strong>.</p>
           <p>Your verification code is:</p>
           <h1 style="color: #0d9488; letter-spacing: 5px;">${otp}</h1>
           <p>This code will expire in 10 minutes.</p>
-          <p>If you didn't request this, please ignore this email.</p>
+          <p><strong>If you didn't request this change, please ignore this email and change your password immediately for security.</strong></p>
         </div>`,
       };
       await transporter.sendMail(mailOptions);
-      console.log('Email change OTP sent successfully to new email:', newEmail);
+      console.log('Email change OTP sent successfully to current email:', currentEmail);
     } catch (emailErr) {
       console.error('Email sending failed:', emailErr);
       console.error('Email config:', { user: process.env.EMAIL_USER, hasPassword: !!process.env.EMAIL_PASSWORD });
       return res.status(500).json({ msg: 'Failed to send verification email. Please check your email configuration.' });
     }
 
-    res.json({ msg: `Verification code sent to your new email address (${newEmail})` });
+    res.json({ msg: `Verification code sent to your current email address (${currentEmail})` });
 
   } catch (err) {
     console.error('Send OTP error:', err.message);
@@ -719,10 +724,10 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
     const user = users[0];
     const currentEmail = user.email;
 
-    // Find OTP in database using NEW email (to verify ownership)
+    // Find OTP in database using CURRENT email (since we sent it to current email)
     const [otps] = await db.query(
       'SELECT * FROM otps WHERE email = ? AND otp = ?',
-      [newEmail, otp]
+      [currentEmail, otp]
     );
 
     if (otps.length === 0) {
@@ -745,16 +750,16 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
     // Update user email
     await db.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, req.user.id]);
 
-    // Delete OTP
-    await db.query('DELETE FROM otps WHERE id = ?', [otpRecord.id]);
+    // Delete OTP (using current email since that's what we stored)
+    await db.query('DELETE FROM otps WHERE email = ?', [currentEmail]);
 
     // Log the email change in audit logs
     try {
       const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       await db.query(
-        `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent)
-         VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?)`,
-        [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown']
+        `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent, details)
+         VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?, ?)`,
+        [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown', JSON.stringify({ oldEmail: currentEmail, newEmail: newEmail })]
       );
     } catch (auditErr) {
       console.log('Audit log skipped:', auditErr.message);

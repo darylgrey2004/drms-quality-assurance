@@ -243,11 +243,14 @@ router.delete('/users/:userId', adminAuth, async (req, res) => {
     // Delete rows that cascade or have no further use
     await db.query('DELETE FROM notifications WHERE user_id = ?', [userId]).catch(() => {});
     await db.query('DELETE FROM user_sessions WHERE user_id = ?', [userId]).catch(() => {});
+    
+    // Invalidate all active sessions for this user (force logout)
+    await db.query('DELETE FROM sessions WHERE user_id = ?', [userId]).catch(() => {});
 
     const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
     if (result.affectedRows === 0) return res.status(404).json({ msg: 'User not found' });
 
-    res.json({ msg: 'User deleted successfully. Their documents have been retained.' });
+    res.json({ msg: 'User deleted successfully. Their documents have been retained and all active sessions have been terminated.' });
   } catch (err) {
     console.error('Delete user error:', err.message);
     res.status(500).json({ msg: err.message || 'Server error' });

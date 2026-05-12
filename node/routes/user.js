@@ -216,6 +216,17 @@ router.post('/heartbeat', auth, async (req, res) => {
   const { sessionToken } = req.body;
   
   try {
+    // Check if user still exists (in case they were deleted)
+    const [users] = await db.query('SELECT id FROM users WHERE id = ?', [req.user.id]);
+    
+    if (users.length === 0) {
+      // User was deleted, return 401 to force logout
+      return res.status(401).json({ 
+        msg: 'Your account has been deleted. You will be logged out.',
+        accountDeleted: true 
+      });
+    }
+    
     // Update both user and session lastActive
     await db.query(
       'UPDATE users SET lastActive = NOW() WHERE id = ?',

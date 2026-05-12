@@ -67,6 +67,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
         })
         .then(response => {
+            if (response.status === 401) {
+                return response.json().then(data => {
+                    if (data.accountDeleted) {
+                        alert('Your account has been deleted by an administrator. You will be logged out.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'landing.html';
+                    }
+                });
+            }
             if (response.status === 403) {
                 return response.json().then(data => {
                     if (data.expired) {
@@ -81,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         .catch(() => {});
     }
     sendHeartbeat();
-    setInterval(sendHeartbeat, 2 * 60 * 1000);
+    setInterval(sendHeartbeat, 30 * 1000);
 
     function getFullName(data) {
         const firstLast = `${data.firstName || ''} ${data.lastName || ''}`.trim();

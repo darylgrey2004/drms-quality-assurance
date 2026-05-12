@@ -356,6 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error('Token validation failed, clearing session');
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
+                    alert('Your session has expired or your account has been deleted. Please login again.');
                     window.location.href = 'landing.html';
                     return null;
                 }
@@ -380,4 +381,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Logout handled by logout-modal.js
     // No need to attach handler here to prevent duplicates
+    
+    // Setup heartbeat to check for account deletion
+    function sendHeartbeat() {
+        if (!token) return;
+        
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (response.status === 401) {
+                return response.json().then(data => {
+                    if (data.accountDeleted) {
+                        // Account was deleted by admin
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        alert('Your account has been deleted by an administrator. You will be logged out.');
+                        window.location.href = 'landing.html';
+                    }
+                });
+            }
+            return response.json();
+        })
+        .catch(err => {
+            console.warn('Heartbeat failed:', err.message);
+        });
+    }
+    
+    // Send heartbeat every 30 seconds to check account status
+    if (token) {
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 30 * 1000);
+    }
 });
