@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (resolvedUserId) {
-        fetch(`http://localhost:3000/api/user/profile/${resolvedUserId}`, {
+        fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/profile/${resolvedUserId}`, {
             headers: { 'x-auth-token': token }
         })
             .then(async (response) => {

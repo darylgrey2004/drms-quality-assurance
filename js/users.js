@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if department head already exists for selected department
             if (normalizedRole === 'department-head' && department) {
                 try {
-                    const checkResponse = await fetch(`http://localhost:3000/api/auth/check-dept-head/${department}`, {
+                    const checkResponse = await fetch(API_CONFIG.getApiUrl(`/api/auth/check-dept-head/${department}`), {
                         headers: { 'x-auth-token': token }
                     });
                     
@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function deleteUser(userId) {
         try {
-            const response = await fetch(`http://localhost:3000/api/admin/users/${encodeURIComponent(userId)}`, {
+            const response = await fetch(API_CONFIG.getApiUrl(`/api/admin/users/${encodeURIComponent(userId)}`), {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
             });

@@ -1100,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const promises = Array.from(checkboxes).map(cb =>
-            fetch(`http://localhost:3000/api/admin/standards/${cb.dataset.id}`, {
+            fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/standards/${cb.dataset.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
                 body: JSON.stringify({ is_active: cb.checked })

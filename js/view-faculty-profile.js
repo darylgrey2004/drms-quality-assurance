@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadProfile() {
-        const response = await fetch(`http://localhost:3000/api/admin/profile/${userId}`, {
+        const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/profile/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveProfileBtn.addEventListener('click', async () => {
             try {
                 const payload = buildProfilePayloadFromPage();
-                const response = await fetch(`http://localhost:3000/api/admin/profile/${userId}`, {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/admin/profile/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

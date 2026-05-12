@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function loadUserProfile(userId) {
         try {
-            const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/profile/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         saveProfileBtn.textContent = 'Saving...';
 
         try {
-            const response = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/profile/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
