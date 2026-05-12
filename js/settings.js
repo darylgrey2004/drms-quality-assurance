@@ -666,6 +666,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailStep1.classList.add('hidden');
                 emailStep2.classList.remove('hidden');
                 
+                // Show success message that OTP was sent to current email
+                showOtpSuccess(data.msg || 'Verification code sent to your current email');
+                setTimeout(() => otpSuccess.classList.add('hidden'), 5000);
+                
             } catch (error) {
                 showEmailError(error.message);
             } finally {

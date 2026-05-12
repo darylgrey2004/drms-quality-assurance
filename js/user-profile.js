@@ -250,6 +250,228 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
     
+    // Change Email Modal
+    const showChangeEmailBtn = document.getElementById('showChangeEmailBtn');
+    const changeEmailModal = document.getElementById('changeEmailModal');
+    const closeEmailModal = document.getElementById('closeEmailModal');
+    const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+    const emailStep1 = document.getElementById('emailStep1');
+    const emailStep2 = document.getElementById('emailStep2');
+    const currentEmailDisplay = document.getElementById('currentEmailDisplay');
+    const newEmailInput = document.getElementById('newEmail');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const emailError = document.getElementById('emailError');
+    const newEmailDisplay = document.getElementById('newEmailDisplay');
+    const otpCodeInput = document.getElementById('otpCode');
+    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+    const resendOtpBtn = document.getElementById('resendOtpBtn');
+    const backToEmailBtn = document.getElementById('backToEmailBtn');
+    const otpError = document.getElementById('otpError');
+    const otpSuccess = document.getElementById('otpSuccess');
+    
+    let pendingNewEmail = '';
+    
+    function openEmailModal() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (currentEmailDisplay) currentEmailDisplay.value = user.email || '';
+        if (newEmailInput) newEmailInput.value = '';
+        if (otpCodeInput) otpCodeInput.value = '';
+        emailStep1.classList.remove('hidden');
+        emailStep2.classList.add('hidden');
+        emailError.classList.add('hidden');
+        otpError.classList.add('hidden');
+        otpSuccess.classList.add('hidden');
+        changeEmailModal.classList.remove('hidden');
+        changeEmailModal.classList.add('flex');
+    }
+    
+    function closeEmailModalFn() {
+        changeEmailModal.classList.add('hidden');
+        changeEmailModal.classList.remove('flex');
+    }
+    
+    function showEmailError(message) {
+        emailError.textContent = message;
+        emailError.classList.remove('hidden');
+    }
+    
+    function showOtpError(message) {
+        otpError.textContent = message;
+        otpError.classList.remove('hidden');
+    }
+    
+    function showOtpSuccess(message) {
+        otpSuccess.textContent = message;
+        otpSuccess.classList.remove('hidden');
+    }
+    
+    if (showChangeEmailBtn) showChangeEmailBtn.addEventListener('click', openEmailModal);
+    if (closeEmailModal) closeEmailModal.addEventListener('click', closeEmailModalFn);
+    if (cancelEmailBtn) cancelEmailBtn.addEventListener('click', closeEmailModalFn);
+    
+    if (sendOtpBtn) {
+        sendOtpBtn.addEventListener('click', async () => {
+            const newEmail = newEmailInput.value.trim();
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            emailError.classList.add('hidden');
+            
+            if (!newEmail) {
+                showEmailError('Please enter a new email address');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                showEmailError('Please enter a valid email address');
+                return;
+            }
+            
+            if (newEmail === user.email) {
+                showEmailError('New email must be different from current email');
+                return;
+            }
+            
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ newEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Failed to send OTP');
+                }
+                
+                pendingNewEmail = newEmail;
+                newEmailDisplay.textContent = newEmail;
+                emailStep1.classList.add('hidden');
+                emailStep2.classList.remove('hidden');
+                showOtpSuccess(data.msg || 'Verification code sent to your current email');
+                setTimeout(() => otpSuccess.classList.add('hidden'), 5000);
+                
+            } catch (error) {
+                showEmailError(error.message);
+            } finally {
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.textContent = 'Send OTP';
+            }
+        });
+    }
+    
+    if (backToEmailBtn) {
+        backToEmailBtn.addEventListener('click', () => {
+            emailStep2.classList.add('hidden');
+            emailStep1.classList.remove('hidden');
+            otpError.classList.add('hidden');
+            otpSuccess.classList.add('hidden');
+        });
+    }
+    
+    if (resendOtpBtn) {
+        resendOtpBtn.addEventListener('click', async () => {
+            if (!pendingNewEmail) return;
+            
+            otpError.classList.add('hidden');
+            otpSuccess.classList.add('hidden');
+            resendOtpBtn.disabled = true;
+            resendOtpBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ newEmail: pendingNewEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Failed to resend OTP');
+                }
+                
+                showOtpSuccess('OTP resent successfully!');
+                setTimeout(() => otpSuccess.classList.add('hidden'), 3000);
+                
+            } catch (error) {
+                showOtpError(error.message);
+            } finally {
+                resendOtpBtn.disabled = false;
+                resendOtpBtn.textContent = 'Resend OTP';
+            }
+        });
+    }
+    
+    if (verifyOtpBtn) {
+        verifyOtpBtn.addEventListener('click', async () => {
+            const otp = otpCodeInput.value.trim();
+            
+            otpError.classList.add('hidden');
+            otpSuccess.classList.add('hidden');
+            
+            if (!otp || otp.length !== 6) {
+                showOtpError('Please enter a valid 6-digit OTP');
+                return;
+            }
+            
+            verifyOtpBtn.disabled = true;
+            verifyOtpBtn.textContent = 'Verifying...';
+            
+            try {
+                const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/auth/change-email/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ newEmail: pendingNewEmail, otp })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Failed to verify OTP');
+                }
+                
+                showOtpSuccess('Email changed successfully!');
+                
+                // Update localStorage
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.email = pendingNewEmail;
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                setTimeout(() => {
+                    closeEmailModalFn();
+                    location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                showOtpError(error.message);
+            } finally {
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.textContent = 'Verify & Change';
+            }
+        });
+    }
+    
+    // Allow only numbers in OTP input
+    if (otpCodeInput) {
+        otpCodeInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    
     // Change Password Modal
     const changePasswordBtn = document.getElementById('changePasswordBtn');
     const changePasswordModal = document.getElementById('changePasswordModal');

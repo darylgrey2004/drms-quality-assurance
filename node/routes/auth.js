@@ -600,7 +600,7 @@ router.post('/change-password', auth, async (req, res) => {
 });
 
 // @route   POST api/auth/change-email/send-otp
-// @desc    Send OTP to new email for email change
+// @desc    Send OTP to current email for email change verification
 // @access  Private
 router.post('/change-email/send-otp', auth, async (req, res) => {
   const { newEmail } = req.body;
@@ -623,9 +623,10 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
     }
 
     const user = users[0];
+    const currentEmail = user.email;
 
     // Check if new email is same as current
-    if (newEmail.toLowerCase() === user.email.toLowerCase()) {
+    if (newEmail.toLowerCase() === currentEmail.toLowerCase()) {
       return res.status(400).json({ msg: 'New email must be different from current email' });
     }
 
@@ -639,34 +640,38 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Store OTP in database
-    await db.query('DELETE FROM otps WHERE email = ?', [newEmail]);
-    await db.query('INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)', [newEmail, otp, expiresAt]);
+    // Store OTP with current email (not new email) and include new email in a separate field
+    await db.query('DELETE FROM otps WHERE email = ?', [currentEmail]);
+    await db.query(
+      'INSERT INTO otps (email, otp, expiresAt) VALUES (?, ?, ?)',
+      [currentEmail, otp, expiresAt]
+    );
 
-    // Send email
+    // Send OTP to CURRENT email for verification
     try {
       const mailOptions = {
         from: `"DRMS-QA" <${process.env.EMAIL_USER}>`,
-        to: newEmail,
+        to: currentEmail,
         subject: 'Email Change Verification Code',
-        text: `Your email change verification code is ${otp}. It will expire in 10 minutes.`,
+        text: `You requested to change your email to ${newEmail}. Your verification code is ${otp}. It will expire in 10 minutes.`,
         html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Email Change Request</h2>
-          <p>You requested to change your email address. Your verification code is:</p>
+          <p>You requested to change your email address to: <strong>${newEmail}</strong></p>
+          <p>Your verification code is:</p>
           <h1 style="color: #0d9488; letter-spacing: 5px;">${otp}</h1>
           <p>This code will expire in 10 minutes.</p>
           <p>If you didn't request this, please ignore this email and secure your account.</p>
         </div>`,
       };
       await transporter.sendMail(mailOptions);
-      console.log('Email change OTP sent successfully to:', newEmail);
+      console.log('Email change OTP sent successfully to current email:', currentEmail);
     } catch (emailErr) {
       console.error('Email sending failed:', emailErr);
       console.error('Email config:', { user: process.env.EMAIL_USER, hasPassword: !!process.env.EMAIL_PASSWORD });
       return res.status(500).json({ msg: 'Failed to send verification email. Please check your email configuration.' });
     }
 
-    res.json({ msg: 'Verification code sent to your new email address' });
+    res.json({ msg: `Verification code sent to your current email address (${currentEmail})` });
 
   } catch (err) {
     console.error('Send OTP error:', err.message);
@@ -676,7 +681,7 @@ router.post('/change-email/send-otp', auth, async (req, res) => {
 });
 
 // @route   POST api/auth/change-email/verify-otp
-// @desc    Verify OTP and change email
+// @desc    Verify OTP from current email and change to new email
 // @access  Private
 router.post('/change-email/verify-otp', auth, async (req, res) => {
   const { newEmail, otp } = req.body;
@@ -686,10 +691,19 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
   }
 
   try {
-    // Find OTP in database
+    // Get current user
+    const [users] = await db.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    const user = users[0];
+    const currentEmail = user.email;
+
+    // Find OTP in database using CURRENT email (not new email)
     const [otps] = await db.query(
       'SELECT * FROM otps WHERE email = ? AND otp = ?',
-      [newEmail, otp]
+      [currentEmail, otp]
     );
 
     if (otps.length === 0) {
