@@ -48,32 +48,6 @@
         }
     }
     
-    // Function to check evaluator expiration via API
-    async function checkEvaluatorExpiration() {
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const userRole = (user.role || '').toLowerCase().trim();
-        
-        if (userRole === 'evaluator' || userRole === 'external evaluator') {
-            try {
-                const response = await fetch(window.API_CONFIG?.getApiUrl('/api/user/profile') || '/api/user/profile', {
-                    headers: { 'x-auth-token': token }
-                });
-                
-                if (response.status === 403) {
-                    const data = await response.json();
-                    if (data.expired) {
-                        console.warn('[AUTH-GUARD] Evaluator access expired');
-                        return false;
-                    }
-                }
-            } catch (e) {
-                console.error('[AUTH-GUARD] Error checking evaluator expiration:', e);
-            }
-        }
-        return true;
-    }
-    
     // Function to clear session and redirect to login
     function redirectToLogin(reason) {
         console.warn('[AUTH-GUARD] Redirecting to login:', reason);
@@ -113,15 +87,6 @@
         } catch (e) {
             console.error('[AUTH-GUARD] Failed to parse user object:', e);
             redirectToLogin('Corrupted user data');
-            return;
-        }
-        
-        // Check: Evaluator expiration
-        const isValid = await checkEvaluatorExpiration();
-        if (!isValid) {
-            console.error('[AUTH-GUARD] Evaluator access expired - redirecting to login');
-            alert('Your External Evaluator access has expired. Please contact the administrator.');
-            redirectToLogin('Evaluator access expired');
             return;
         }
         

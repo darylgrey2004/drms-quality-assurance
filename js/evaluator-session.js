@@ -14,7 +14,20 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/heartbeat`, {
             method: 'POST', 
             headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
-        }).catch(() => {});
+        })
+        .then(response => {
+            if (response.status === 403) {
+                return response.json().then(data => {
+                    if (data.expired) {
+                        alert('Your External Evaluator access has expired. Please contact the administrator.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'landing.html';
+                    }
+                });
+            }
+        })
+        .catch(() => {});
     }
     sendHeartbeat();
     setInterval(sendHeartbeat, 2 * 60 * 1000);
@@ -115,13 +128,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             console.log('Fetching profile from API for user:', user.id);
-            const response = await fetch(`http://localhost:3000/api/user/profile/${user.id}`, {
+            const response = await fetch(`${window.API_CONFIG?.API_BASE || 'http://localhost:3000'}/api/user/profile/${user.id}`, {
                 method: 'GET',
                 headers: {
                     'x-auth-token': token,
                     'Content-Type': 'application/json'
                 }
             });
+
+            if (response.status === 403) {
+                const errorData = await response.json();
+                if (errorData.expired) {
+                    alert('Your External Evaluator access has expired. Please contact the administrator.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'landing.html';
+                    return;
+                }
+            }
 
             if (response.ok) {
                 const profileData = await response.json();
