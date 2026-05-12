@@ -755,15 +755,15 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
       return res.status(400).json({ msg: 'This email is already registered to another account' });
     }
 
-    console.log('Updating user email...');
-    // Update user email
-    await db.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, req.user.id]);
-    console.log('Email updated successfully');
-
-    console.log('Deleting OTP...');
-    // Delete OTP (using current email since that's what we stored)
+    console.log('Deleting OTP BEFORE email update...');
+    // Delete OTP FIRST (before updating email) to avoid foreign key constraint
     await db.query('DELETE FROM otps WHERE email = ?', [currentEmail]);
     console.log('OTP deleted successfully');
+
+    console.log('Updating user email...');
+    // Now update user email
+    await db.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, req.user.id]);
+    console.log('Email updated successfully');
 
     // Log the email change in audit logs
     console.log('Attempting to log audit...');
