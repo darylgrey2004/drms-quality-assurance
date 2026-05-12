@@ -724,11 +724,19 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
     const user = users[0];
     const currentEmail = user.email;
 
+    console.log('=== Email Change Verification ===');
+    console.log('User ID:', req.user.id);
+    console.log('Current Email:', currentEmail);
+    console.log('New Email:', newEmail);
+    console.log('OTP:', otp);
+
     // Find OTP in database using CURRENT email (since we sent it to current email)
     const [otps] = await db.query(
       'SELECT * FROM otps WHERE email = ? AND otp = ?',
       [currentEmail, otp]
     );
+
+    console.log('OTP records found:', otps.length);
 
     if (otps.length === 0) {
       return res.status(400).json({ msg: 'Invalid verification code' });
@@ -747,13 +755,18 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
       return res.status(400).json({ msg: 'This email is already registered to another account' });
     }
 
+    console.log('Updating user email...');
     // Update user email
     await db.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, req.user.id]);
+    console.log('Email updated successfully');
 
+    console.log('Deleting OTP...');
     // Delete OTP (using current email since that's what we stored)
     await db.query('DELETE FROM otps WHERE email = ?', [currentEmail]);
+    console.log('OTP deleted successfully');
 
     // Log the email change in audit logs
+    console.log('Attempting to log audit...');
     try {
       const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || (req.socket && req.socket.remoteAddress) || 'Unknown';
       
@@ -764,7 +777,9 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
            VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?, ?)`,
           [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown', JSON.stringify({ oldEmail: currentEmail, newEmail: newEmail })]
         );
+        console.log('Audit log with details inserted');
       } catch (detailsErr) {
+        console.log('Details column error:', detailsErr.message);
         // If details column doesn't exist, insert without it
         if (detailsErr.message && detailsErr.message.includes('Unknown column')) {
           await db.query(
@@ -772,19 +787,25 @@ router.post('/change-email/verify-otp', auth, async (req, res) => {
              VALUES (?, 'EMAIL_CHANGED', 'user', ?, ?, ?)`,
             [req.user.id, req.user.id, ip, req.headers['user-agent'] || 'Unknown']
           );
+          console.log('Audit log without details inserted');
         } else {
           throw detailsErr;
         }
       }
     } catch (auditErr) {
       console.log('Audit log skipped:', auditErr.message);
+      console.log('Full audit error:', auditErr);
     }
 
+    console.log('Email change completed successfully');
     res.json({ msg: 'Email changed successfully' });
 
   } catch (err) {
-    console.error('Verify OTP error:', err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('=== Verify OTP Error ===');
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    console.error('Full error:', err);
+    res.status(500).json({ msg: 'Server error: ' + err.message });
   }
 });
 
