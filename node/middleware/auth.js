@@ -33,21 +33,37 @@ async function auth(req, res, next) {
     const isEvaluator = userRole === 'evaluator' || userRole === 'external evaluator';
     
     if (isEvaluator) {
+      console.log('>>> Evaluator detected, checking expiry for user:', req.user.id);
       try {
         const [limits] = await db.query(
           'SELECT expiresAt FROM evaluator_access_limits WHERE user_id = ? LIMIT 1',
           [req.user.id]
         );
         
+        console.log('>>> Query result:', limits);
+        
         if (limits.length > 0) {
           const expiresAt = new Date(limits[0].expiresAt);
           const now = new Date();
+          
+          console.log('>>> Expiry from DB:', limits[0].expiresAt);
+          console.log('>>> Expiry Date:', expiresAt);
+          console.log('>>> Current Date:', now);
+          console.log('>>> Expiry ISO:', expiresAt.toISOString());
+          console.log('>>> Now ISO:', now.toISOString());
+          console.log('>>> Is Expired (now >= expiresAt):', now >= expiresAt);
+          console.log('>>> Time diff (ms):', now.getTime() - expiresAt.getTime());
+          
           if (!Number.isNaN(expiresAt.getTime()) && now >= expiresAt) {
             console.log('Auth failed: Evaluator access expired');
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.', expired: true });
           }
+          console.log('>>> Evaluator access still valid');
+        } else {
+          console.log('>>> No expiry limit found for this evaluator');
         }
       } catch (limitError) {
+        console.error('>>> Error checking evaluator limits:', limitError);
         if (limitError?.code !== 'ER_NO_SUCH_TABLE') {
           console.error('Error checking evaluator limits:', limitError);
         }

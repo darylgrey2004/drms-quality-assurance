@@ -201,6 +201,21 @@ router.post('/login', async (req, res) => {
         if (limits.length > 0) {
           const expiresAt = new Date(limits[0].expiresAt);
           const now = new Date();
+          
+          // DEBUG LOGGING
+          console.log('=== EVALUATOR EXPIRY CHECK ===');
+          console.log('User ID:', user.id);
+          console.log('Expiry from DB:', limits[0].expiresAt);
+          console.log('Expiry Date Object:', expiresAt);
+          console.log('Current Date Object:', now);
+          console.log('Expiry ISO:', expiresAt.toISOString());
+          console.log('Now ISO:', now.toISOString());
+          console.log('Expiry Time:', expiresAt.getTime());
+          console.log('Now Time:', now.getTime());
+          console.log('Is Expired (now >= expiresAt):', now >= expiresAt);
+          console.log('Time difference (ms):', now.getTime() - expiresAt.getTime());
+          console.log('==============================');
+          
           if (!Number.isNaN(expiresAt.getTime()) && now >= expiresAt) {
             return res.status(403).json({ msg: 'Your External Evaluator access has expired. Please contact the administrator.' });
           }
