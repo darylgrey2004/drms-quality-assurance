@@ -352,15 +352,17 @@ router.post('/:documentId/reject', auth, async (req, res) => {
 
 // @route   POST /api/approvals/:documentId/validate
 // @desc    Validate a document (move from pending to validated)
-// @access  Private (Admin, Dean, Area-Chair)
+// @access  Private (Admin only - Department Heads use separate endpoint)
 router.post('/:documentId/validate', auth, async (req, res) => {
   try {
-    if (!canApprove(req.user.role)) {
-      return res.status(403).json({ msg: 'Not authorized to validate documents' });
+    // RULE: Only Admin can use this validation endpoint
+    // Department Heads should use their own workflow
+    const role = normalizeRole(req.user.role);
+    if (role !== 'admin') {
+      return res.status(403).json({ msg: 'Only Administrator can validate documents through this endpoint' });
     }
 
     const documentId = parseInt(req.params.documentId);
-    const role = normalizeRole(req.user.role);
 
     const [docs] = await db.query(
       'SELECT id, workflow_status, title, department_id, uploader_id FROM documents WHERE id = ?',
@@ -369,15 +371,6 @@ router.post('/:documentId/validate', auth, async (req, res) => {
 
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
     const doc = docs[0];
-
-    if (role === 'area-chair' || role === 'department-head') {
-      const deptId = await getAreaChairDeptId(req.user.id);
-      const isOwnUpload = String(doc.uploader_id) === String(req.user.id);
-      const isInDept = deptId && String(doc.department_id) === String(deptId);
-      if (!isOwnUpload && !isInDept) {
-        return res.status(403).json({ msg: 'Not authorized to validate documents outside your department' });
-      }
-    }
 
     if (doc.workflow_status !== 'pending' && doc.workflow_status !== 'draft') {
       return res.status(400).json({ msg: 'Only pending or draft documents can be validated', currentStatus: doc.workflow_status });

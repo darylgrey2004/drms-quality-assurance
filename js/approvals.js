@@ -742,9 +742,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Only Admin can validate
             if (isAdmin) {
                 buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded text-blue-700" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+                // Admin can reject at any stage
+                buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
             }
-            // Both Admin and Dean can reject
-            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-100 border border-red-300 rounded text-red-700" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
+            // Dean cannot reject documents that are still pending validation
         } else if (status === 'validated') {
             // Both Admin and Dean can approve
             buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-100 border border-green-300 rounded text-green-700" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
@@ -779,8 +780,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (status === 'pending' || status === 'draft') {
             if (isAdmin) {
                 buttons += ` <button class="btn-validate text-xs px-2 py-1 bg-blue-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Validate</button>`;
+                buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
             }
-            buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
         } else if (status === 'validated') {
             buttons += ` <button class="btn-approve text-xs px-2 py-1 bg-green-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Approve</button>`;
             buttons += ` <button class="btn-reject text-xs px-2 py-1 bg-red-600 text-white rounded" data-id="${doc.id}" data-title="${doc.title}">Reject</button>`;
