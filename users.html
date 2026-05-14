@@ -335,7 +335,7 @@
                 'admin': 'Administrator',
                 'dean': 'Dean',
                 'faculty': 'Faculty Member',
-                'area-chair': 'Dept. Head',
+                
                 'department-head': 'Dept. Head',
                 'evaluator': 'External Evaluator'
             };
@@ -386,7 +386,7 @@
         if (roleSelect) {
             roleSelect.addEventListener('change', function() {
                 const role = this.value.toLowerCase();
-                if (departmentWrap) departmentWrap.classList.toggle('hidden', !(role === 'faculty' || role === 'department-head' || role === 'dean' || role === 'area-chair'));
+                if (departmentWrap) departmentWrap.classList.toggle('hidden', !(role === 'faculty' || role === 'department-head' || role === 'dean'));
                 if (evaluatorExpiryWrap) evaluatorExpiryWrap.classList.toggle('hidden', role !== 'evaluator');
             });
         }

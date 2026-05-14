@@ -481,7 +481,7 @@ function updateSidebarUser() {
             'admin': 'Administrator',
             'dean': 'Dean',
             'faculty': 'Faculty Member',
-            'area-chair': 'Dept. Head',
+            
             'department-head': 'Dept. Head',
             'evaluator': 'External Evaluator'
         };

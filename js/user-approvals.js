@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     const API_BASE = window.API_CONFIG?.API_BASE || 'http://localhost:3000';
     const normalizedRole = (role || '').toLowerCase();
 
-    // Only area-chair, dean, and admin can access
-    if (normalizedRole !== 'area-chair' && normalizedRole !== 'department-head' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
+    // Only department-head, dean, and admin can access
+    if (normalizedRole !== 'department-head' && normalizedRole !== 'dean' && normalizedRole !== 'admin') {
         window.location.href = 'user-dashboard.html';
         return; 
     }
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         // Role-based permission checks
-        const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+        const isAreaChair = normalizedRole === 'department-head';
         const isDeanOrAdmin = normalizedRole === 'dean' || normalizedRole === 'admin';
         const isAdmin = normalizedRole === 'admin';
         
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function getActionButtons(doc, mobile = false) {
         const s = doc.workflow_status;
-        const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+        const isAreaChair = normalizedRole === 'department-head';
         const isDeanOrAdmin = normalizedRole === 'dean' || normalizedRole === 'admin';
         const isAdmin     = normalizedRole === 'admin';
         const fileUrl = doc.file_url ? `${API_BASE}${doc.file_url}` : '#';
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         let btns = `<button class="${cls.view} btn-view-action" data-id="${doc.id}" data-url="${fileUrl}" data-title="${doc.title}">View</button>`;
 
         if (s === 'draft' || s === 'pending') {
-            // Area-chair and above can validate
+            // Department Head and above can validate
             btns += ` <button class="${cls.validate} btn-validate-action" data-id="${doc.id}">Validate</button>`;
             btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
         } else if (s === 'validated') {
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 btns += ` <button class="${cls.approve} btn-approve-action" data-id="${doc.id}">Approve</button>`;
                 btns += ` <button class="${cls.reject} btn-reject-action" data-id="${doc.id}">Reject</button>`;
             } else if (isAreaChair) {
-                // Area-chair/Dept. Head cannot approve — show informational badge
+                // Dept. Head cannot approve — show informational badge
                 btns += ` <span class="${cls.awaiting}" title="Awaiting Dean/Admin approval">Awaiting Approval</span>`;
             }
         } else if (s === 'approved') {

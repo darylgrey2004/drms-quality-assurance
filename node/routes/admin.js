@@ -82,7 +82,7 @@ router.post('/users', adminAuth, async (req, res) => {
 
   const normalizedRole = String(role).toLowerCase().trim();
   const isEvaluatorRole = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
-  const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+  const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'department-head';
   let parsedEvaluatorExpiration = null;
 
   if (isEvaluatorRole && !evaluatorExpiresAt) {

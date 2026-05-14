@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Area Chair - goes to faculty dashboard for now
-        if (normalizedRole === 'area-chair') {
+        if (normalizedRole === 'department-head') {
             console.log('Redirecting to area chair dashboard (user-dashboard.html)');
             window.location.href = 'user-dashboard.html';
             return;

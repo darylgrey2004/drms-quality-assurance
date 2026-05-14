@@ -9,7 +9,7 @@ function normalizeRole(role) {
 
 function canApprove(role) {
   const r = normalizeRole(role);
-  return r === 'admin' || r === 'dean' || r === 'area-chair' || r === 'department-head';
+  return r === 'admin' || r === 'dean' || r === 'department-head';
 }
 
 function canFinalApprove(role) {
@@ -17,7 +17,7 @@ function canFinalApprove(role) {
   return r === 'admin' || r === 'dean';
 }
 
-// Resolves the department_id for an area-chair. Returns null if not found.
+// Resolves the department_id for a department head. Returns null if not found.
 // STANDARDIZED: Uses exact matching only (name or code), no fuzzy matching
 async function getAreaChairDeptId(userId) {
   try {
@@ -65,7 +65,7 @@ async function getAreaChairDeptId(userId) {
 
 // @route   GET /api/approvals/pending
 // @desc    Get all documents for approval management
-// @access  Private (Admin, Dean, Area-Chair)
+// @access  Private (Admin, Dean, Department Head)
 router.get('/pending', auth, async (req, res) => {
   try {
     if (!canApprove(req.user.role)) {
@@ -73,15 +73,15 @@ router.get('/pending', auth, async (req, res) => {
     }
 
     const normalizedRole = normalizeRole(req.user.role);
-    const isAreaChair = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     const isAdmin = normalizedRole === 'admin';
     const isDean = normalizedRole === 'dean';
 
     let whereSql = "WHERE d.workflow_status IN ('draft', 'pending', 'validated', 'approved', 'locked', 'rejected')";
     const params = [];
 
-    // Area-chair/Dept. Head sees documents from their department OR their own uploads
-    if (isAreaChair) {
+    // Department Head sees documents from their department OR their own uploads
+    if (isDeptHead) {
       const deptId = await getAreaChairDeptId(req.user.id);
       if (deptId) {
         // Show all documents from their department (not just own uploads)
@@ -158,8 +158,8 @@ router.get('/pending', auth, async (req, res) => {
 });
 
 // @route   GET /api/approvals/stats
-// @desc    Get approval statistics (scoped to dept for area-chair)
-// @access  Private (Admin, Dean, Area-Chair)
+// @desc    Get approval statistics (scoped to dept for department head)
+// @access  Private (Admin, Dean, Department Head)
 router.get('/stats', auth, async (req, res) => {
   try {
     if (!canApprove(req.user.role)) {
@@ -170,7 +170,7 @@ router.get('/stats', auth, async (req, res) => {
     let whereClause = '';
     const params = [];
 
-    if (normalizedRole === 'area-chair' || normalizedRole === 'department-head') {
+    if (normalizedRole === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       if (deptId) {
         whereClause = 'WHERE (department_id = ? OR uploader_id = ?)';
@@ -286,7 +286,7 @@ router.post('/:documentId/approve', auth, async (req, res) => {
 
 // @route   POST /api/approvals/:documentId/reject
 // @desc    Reject a document
-// @access  Private (Admin, Dean, Area-Chair)
+// @access  Private (Admin, Dean, Department Head)
 router.post('/:documentId/reject', auth, async (req, res) => {
   try {
     if (!canApprove(req.user.role)) {
@@ -307,8 +307,8 @@ router.post('/:documentId/reject', auth, async (req, res) => {
 
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
 
-    // Area-chair/Dept. Head can only reject their department's documents or own uploads
-    if (normalizeRole(req.user.role) === 'area-chair' || normalizeRole(req.user.role) === 'department-head') {
+    // Department Head can only reject their department's documents or own uploads
+    if (normalizeRole(req.user.role) === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       const isOwnUpload = docs[0].uploader_id == req.user.id;
       const isInDept = deptId && docs[0].department_id == deptId;
@@ -352,10 +352,10 @@ router.post('/:documentId/reject', auth, async (req, res) => {
 
 // @route   POST /api/approvals/:documentId/validate
 // @desc    Validate a document (move from pending to validated)
-// @access  Private (Admin, Department Head, Area-Chair)
+// @access  Private (Admin, Department Head)
 router.post('/:documentId/validate', auth, async (req, res) => {
   try {
-    // RULE: Admin, Department Head, and Area-Chair can validate documents
+    // RULE: Admin and Department Head can validate documents
     const role = normalizeRole(req.user.role);
     if (!canApprove(role)) {
       return res.status(403).json({ msg: 'Not authorized to validate documents' });
@@ -371,8 +371,8 @@ router.post('/:documentId/validate', auth, async (req, res) => {
     if (docs.length === 0) return res.status(404).json({ msg: 'Document not found' });
     const doc = docs[0];
 
-    // Area-chair/Dept. Head can only validate their department's documents or own uploads
-    if (role === 'area-chair' || role === 'department-head') {
+    // Department Head can only validate their department's documents or own uploads
+    if (role === 'department-head') {
       const deptId = await getAreaChairDeptId(req.user.id);
       const isOwnUpload = doc.uploader_id == req.user.id;
       const isInDept = deptId && doc.department_id == deptId;

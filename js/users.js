@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isEvaluator) createEvaluatorExpiresAt.value = '';
         
         if (departmentWrap && createDepartment) {
-            const showDepartment = selectedRole === 'faculty' || selectedRole === 'area-chair' || selectedRole === 'department-head';
+            const showDepartment = selectedRole === 'faculty' || selectedRole === 'department-head';
             departmentWrap.classList.toggle('hidden', !showDepartment);
             createDepartment.required = showDepartment;
             if (!showDepartment) createDepartment.value = '';
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const normalizedRole = role.toLowerCase().trim();
             const isEvaluator = normalizedRole === 'evaluator' || normalizedRole === 'external evaluator';
-            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+            const requiresDepartment = normalizedRole === 'faculty' || normalizedRole === 'department-head';
             
             if (requiresDepartment && !department) {
                 showAlert('Please select a department for this role.', 'Department Required', 'warning');
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const roleMap = {
                 'admin': 'Administrator',
                 'dean': 'Dean',
-                'area-chair': 'Dept. Head',
+                
                 'department-head': 'Dept. Head',
                 'faculty': 'Faculty',
                 'evaluator': 'External Evaluator'

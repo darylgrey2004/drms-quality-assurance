@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Determine if user is Department Head (can see My Approvals)
-        const isDeptHead = normalizedRole === 'department-head' || normalizedRole === 'area-chair' || normalizedRole === 'area chair/program head';
+        const isDeptHead = normalizedRole === 'department-head' || normalizedRole === 'area chair/program head';
         
         // For Faculty (no My Approvals) vs Department Head (with My Approvals)
         if (isDeptHead) {
@@ -288,14 +288,14 @@ document.addEventListener('DOMContentLoaded', function () {
             'faculty member': 'Faculty Portal',
             'faculty': 'Faculty Portal',
             'area chair/program head': 'Department Head Portal',
-            'area-chair': 'Department Head Portal',
+            
             'department-head': 'Department Head Portal'
         };
         const accessLabels = {
             'faculty member': 'Faculty Access',
             'faculty': 'Faculty Access',
             'area chair/program head': 'Department Head Access',
-            'area-chair': 'Department Head Access',
+            
             'department-head': 'Department Head Access'
         };
         
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'dean': 'Dean',
             'faculty': 'Faculty',
             'faculty member': 'Faculty',
-            'area-chair': 'Department Head',
+            
             'area chair/program head': 'Department Head',
             'department-head': 'Department Head',
             'evaluator': 'External Evaluator'

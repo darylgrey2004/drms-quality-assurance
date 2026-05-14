@@ -16,7 +16,7 @@ function normalizeRole(role) {
 
 function canUpload(role) {
   const r = normalizeRole(role);
-  return r === 'admin' || r === 'faculty' || r === 'area-chair' || r === 'department-head' || r === 'dean';
+  return r === 'admin' || r === 'faculty' || r === 'department-head' || r === 'dean';
 }
 
 function canViewAll(role) {
@@ -599,7 +599,7 @@ router.get('/', auth, async (req, res) => {
     const { scope, status, category, department } = req.query || {};
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
-    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     const viewAll = canViewAll(req.user.role);
 
     const where = [];
@@ -797,7 +797,7 @@ router.get('/department-stats', auth, async (req, res) => {
   try {
     const normalizedRole = normalizeRole(req.user.role);
     const isFaculty = normalizedRole === 'faculty';
-    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     
     if (!isFaculty && !isDeptHead) {
       return res.status(403).json({ msg: 'This endpoint is for Faculty and Department Heads only' });
@@ -1219,7 +1219,7 @@ router.get('/:id/comments', auth, async (req, res) => {
     console.log('Normalized Role:', normalizedRole);
     
     const viewAll = canViewAll(req.user.role);
-    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     
     console.log('Authorization checks:', { viewAll, isDeptHead, isOwner: docs[0].uploader_id === req.user.id });
     
@@ -1311,7 +1311,7 @@ router.delete('/:id', auth, async (req, res) => {
     
     const isAdmin = normalizedRole === 'admin';
     const isDean = normalizedRole === 'dean';
-    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     const isOwner = document.uploader_id === req.user.id;
     const isDraft = document.workflow_status === 'draft';
     const isRejected = document.workflow_status === 'rejected';
@@ -1479,7 +1479,7 @@ router.get('/search', auth, async (req, res) => {
     const { q, category, department, status, sort, author, version, dateFrom, dateTo, scope } = req.query;
     const normalizedRole = normalizeRole(req.user.role);
     const isEvaluator = normalizedRole === 'evaluator';
-    const isDeptHead = normalizedRole === 'area-chair' || normalizedRole === 'department-head';
+    const isDeptHead = normalizedRole === 'department-head';
     const viewAll = canViewAll(req.user.role);
     
     const where = [];

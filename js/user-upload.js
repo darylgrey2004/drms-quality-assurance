@@ -162,9 +162,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
         
-        // Show "Validate Immediately" option for area-chair/department-head only
+        // Show "Validate Immediately" option for department-head only
         const normalizedRole = (role || '').toLowerCase();
-        if (validateOption && (normalizedRole === 'area-chair' || normalizedRole === 'department-head')) {
+        if (validateOption && (normalizedRole === 'department-head')) {
             validateOption.style.display = 'flex';
         }
     }
