@@ -31,6 +31,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     const docPreviewFrame    = document.getElementById('docPreviewFrame');
     const docPreviewTitle    = document.getElementById('docPreviewTitle');
 
+    // Validate modal
+    const validateModal = document.getElementById('validateModal');
+    const validateModalCloseBtn = document.getElementById('validateModalCloseBtn');
+    const validateModalCancelBtn = document.getElementById('validateModalCancelBtn');
+    const validateModalConfirmBtn = document.getElementById('validateModalConfirmBtn');
+    const validateDocTitle = document.getElementById('validateDocTitle');
+    const validateComment = document.getElementById('validateComment');
+    let pendingValidateDocId = null;
+
     // Rejection modal
     const rejectionModal    = document.getElementById('rejectionModal');
     const closeRejectionBtn = document.getElementById('closeRejectionModal');
@@ -106,6 +115,50 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     if (docPreviewCloseBtn) docPreviewCloseBtn.addEventListener('click', closePreviewModal);
     if (docPreviewModal) docPreviewModal.addEventListener('click', e => { if (e.target === docPreviewModal) closePreviewModal(); });
+
+    // ── Validate modal ────────────────────────────────────────────────────────
+    function openValidateModal(doc) {
+        pendingValidateDocId = doc.id;
+        if (validateDocTitle) validateDocTitle.textContent = doc.title;
+        if (validateComment) validateComment.value = '';
+        if (validateModal) {
+            validateModal.classList.remove('hidden');
+            validateModal.classList.add('flex');
+        }
+    }
+    function closeValidateModal() {
+        pendingValidateDocId = null;
+        if (validateModal) {
+            validateModal.classList.add('hidden');
+            validateModal.classList.remove('flex');
+        }
+    }
+    if (validateModalCloseBtn) validateModalCloseBtn.addEventListener('click', closeValidateModal);
+    if (validateModalCancelBtn) validateModalCancelBtn.addEventListener('click', closeValidateModal);
+    if (validateModal) validateModal.addEventListener('click', e => { if (e.target === validateModal) closeValidateModal(); });
+
+    if (validateModalConfirmBtn) {
+        validateModalConfirmBtn.addEventListener('click', async () => {
+            if (!pendingValidateDocId) return;
+            const comments = validateComment?.value || '';
+            try {
+                const res = await fetch(`${API_BASE}/api/approvals/${pendingValidateDocId}/validate`, {
+                    method: 'POST',
+                    headers: { 'x-auth-token': token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comments })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to validate');
+                closeValidateModal();
+                showToast('Document validated successfully.');
+                updateDocumentStatus(pendingValidateDocId, 'validated');
+                loadStats();
+            } catch (err) {
+                closeValidateModal();
+                showErrorModal(err.message);
+            }
+        });
+    }
 
     // ── Rejection modal ───────────────────────────────────────────────────────
     function openRejectionModal(doc) {
@@ -625,19 +678,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
 
         document.querySelectorAll('.btn-validate-action').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const docId = btn.getAttribute('data-id');
-                if (!confirm('Validate this document? It will move to the approval stage.')) return;
-                try {
-                    const res = await fetch(`${API_BASE}/api/approvals/${docId}/validate`, {
-                        method: 'POST', headers: { 'x-auth-token': token }
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.msg || 'Failed to validate');
-                    showToast('Document validated successfully.');
-                    updateDocumentStatus(parseInt(docId), 'validated');
-                    loadStats();
-                } catch (err) { showErrorModal(err.message); }
+            btn.addEventListener('click', () => {
+                const docId = parseInt(btn.getAttribute('data-id'));
+                const doc = allDocuments.find(d => d.id === docId);
+                if (!doc) {
+                    showErrorModal('Document not found. Please refresh the page and try again.');
+                    return;
+                }
+                openValidateModal(doc);
             });
         });
 
